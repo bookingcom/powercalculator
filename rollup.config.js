@@ -1,5 +1,5 @@
+import replace from 'rollup-plugin-replace';
 import vue from 'rollup-plugin-vue';
-import css from 'rollup-plugin-css-only';
 import resolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
 
@@ -12,12 +12,14 @@ export default {
   banner,
   input: 'src/index.js',
   plugins: [
+    replace({
+      'process.env.NODE_ENV': JSON.stringify( 'development' )
+    }),
     resolve(),
     commonjs({
       include: ['node_modules/**'],
     }),
-    vue({ autoStyles: false, styleToImports: true }),
-    css({ output: 'dist/powercalculator.css' }),
+    vue({ css: 'dist/powercalculator.css' }),
   ],
   output: {
     name: 'powercalculator',

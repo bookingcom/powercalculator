@@ -1,30 +1,66 @@
 <template id="impact-comp">
-    <div>
-        <label class="pc-switch-mode">
-            Switch input mode to
-            <input type="button" class="pc-switch-button" :value="enableedit ? 'Relative Impact' : 'Absolute Impact'" v-on:click="enableInput">
-        </label>
-        <ul class="pc-list">
-            <li>
-                <pc-block-field
-                    fieldprop="impactByMetricValue"
-                    prefix=""
-                    :suffix="` going from ${impactByMetricMinDisplay} to ${impactByMetricMaxDisplay}%`"
-                    v-bind:fieldvalue="impactByMetricDisplay"
-                    v-bind:testtype="testtype"
-                    v-bind:isreadonly="isReadOnly"
-                    v-bind:isblockfocused="isblockfocused"
-                    v-bind:enableedit="enableedit"
+    <div class="pc-block pc-block--impact" :class="{'pc-block-focused': isblockfocused, 'pc-block-to-calculate': calculateprop == 'impact'}">
 
-                    v-on:field:change="updateFields"
-                    v-on:update:focus="updateFocus"
-                    aria-label="visitors with goals"></pc-block-field>
+        <pc-svg-chain v-bind:calculateprop="calculateprop" v-bind:fieldfromblock="fieldfromblock"></pc-svg-chain>
+
+        <label slot="text" class="pc-calc-radio pc-calc-radio--impact" :class="{'pc-calc-radio--active': isCalculated}">
+            <input type="radio" v-model="isCalculated" :value="true" >
+                {{ isCalculated ? 'Calculating' : 'Calculate' }}
+        </label>
+
+        <div class="pc-header">
+            Impact
+        </div>
+
+        <ul class="pc-inputs">
+            <li class="pc-input-item pc-input-left">
+                <label>
+                    <span class="pc-input-title">Relative</span>
+
+                    <pc-block-field
+                        class="pc-input-field"
+                        prefix="±"
+                        suffix="%"
+                        fieldprop="relativeImpact"
+
+                        v-bind:fieldvalue="relativeImpact"
+                        v-bind:testtype="testType"
+                        v-bind:isreadonly="calculateprop == 'impact'"
+                        v-bind:isblockfocused="isblockfocused"
+                        v-bind:enableedit="enableedit"
+
+                        v-on:field:change="updateFields"
+                        v-on:update:focus="updateFocus"
+                        ></pc-block-field>
+                </label>
             </li>
-            <li>
+            <li class="pc-input-item pc-input-right">
+                <label>
+                    <span class="pc-input-title">Absolute</span>
+
+                    <pc-block-field
+                        class="pc-input-field"
+                        fieldprop="impactByMetricValue"
+                        v-bind:fieldvalue="impactByMetricDisplay"
+                        v-bind:testtype="testtype"
+                        v-bind:isreadonly="isReadOnly"
+                        v-bind:isblockfocused="isblockfocused"
+                        v-bind:enableedit="enableedit"
+
+                        v-on:field:change="updateFields"
+                        v-on:update:focus="updateFocus"
+                        aria-label="visitors with goals"></pc-block-field>
+                        <span class="pc-input-details">
+                            going from {{impactByMetricMinDisplay}} to {{impactByMetricMaxDisplay}}%
+                        </span>
+                </label>
+            </li>
+            <li class="pc-input-item pc-input-bottom-left">
+                <label>
+
                 <pc-block-field
+                    class="pc-input-field"
                     fieldprop="impactByVisitors"
-                    prefix=""
-                    :suffix="testtype == 'gTest' ? ' Incremental trials': ' Incremental change in the metric'"
                     v-bind:fieldvalue="impactByVisitorsDisplay"
                     v-bind:testtype="testtype"
                     v-bind:isreadonly="isReadOnly"
@@ -33,13 +69,17 @@
 
                     v-on:field:change="updateFields"
                     v-on:update:focus="updateFocus"
-                    aria-label="testtype == 'gTest' ? ' Incremental trials': ' Incremental change in the metric'"></pc-block-field>
+                    ></pc-block-field>
+                    <span class="pc-input-details">
+                        {{ testtype == 'gTest' ? ' Incremental trials': ' Incremental change in the metric' }}
+                    </span>
+                </label>
             </li>
-            <li>
+            <li class="pc-input-item pc-input-bottom-right">
+                <label>
+
                 <pc-block-field
                     fieldprop="impactByVisitorsPerDay"
-                    prefix=""
-                    :suffix="testtype == 'gTest' ? ' Incremental trials per day': ' Incremental change in the metric per day'"
                     v-bind:fieldvalue="impactByVisitorsPerDayDisplay"
                     v-bind:testtype="testtype"
                     v-bind:isreadonly="isReadOnly"
@@ -48,21 +88,23 @@
 
                     v-on:field:change="updateFields"
                     v-on:update:focus="updateFocus"
-                    aria-label="testtype == 'gTest' ? ' Incremental trials per day': ' Incremental change in the metric per day'"></pc-block-field>
+                    ></pc-block-field>
+                    <span class="pc-input-details">
+                        {{ testtype == 'gTest' ? ' Incremental trials per day': ' Incremental change in the metric per day' }}
+                    </span>
             </li>
         </ul>
     </div>
 </template>
 
 <script>
-import pcBlockField from './pc-block-field.vue'
-import valueTransformationMixin from '../js/value-transformation-mixin.js'
+import pcBlock from './pc-block.vue'
 import statFormulas from '../js/math.js'
 
 export default {
-    mixins: [valueTransformationMixin],
+    extends: pcBlock,
     template: '#impact-comp',
-    props: ['days', 'testtype', 'enableedit', 'impact', 'base', 'sample', 'calculateprop', 'fieldfromblock', 'isblockfocused', 'testtype'],
+    props: ['view', 'testtype', 'enableedit', 'calculateprop', 'fieldfromblock', 'isblockfocused', 'testtype'],
     data () {
         return {
             // impactByMetric: {
@@ -76,10 +118,24 @@ export default {
             impactByVisitors: this.getImpactByVisitor(),
             impactByVisitorsPerDay: this.getImpactByVisitorsPerDay(),
             enableEdit: false,
-            focusedBlock: ''
+            focusedBlock: '',
+            relativeImpact: this.view.impact
         }
     },
     computed: {
+        days () {
+            return this.view.runtime
+        },
+        base () {
+            return this.view.base
+        },
+        sample () {
+            return this.view.sample
+        },
+        impact () {
+            return this.view.impact
+        },
+
         isReadOnly () {
             return this.calculateprop == 'impact'
         },
@@ -107,7 +163,7 @@ export default {
             this.updateData();
         },
         impact () {
-            this.updateData();
+            this.relativeImpact = this.impact;
         },
         sample () {
             this.updateData();
@@ -126,26 +182,26 @@ export default {
             // they should never be changes manually;
             this.impactByMetricMin = impactByMetricObj.min;
             this.impactByMetricMax = impactByMetricObj.max;
-        },
+        }
     },
     methods: {
         getImpactByMetric (prop = 'value') {
             let impactByMetricObj = statFormulas.getAbsoluteImpactInMetricHash({
-                base_rate: this.extractValue('base', this.base),
-                effect_size: this.extractValue('impact', this.impact)
+                base_rate: this.extractValue('base', this.view.base),
+                effect_size: this.extractValue('impact', this.view.impact)
             })
 
             return impactByMetricObj[prop];
         },
         getImpactByVisitor () {
             return statFormulas.getAbsoluteImpactInVisitors({
-                total_sample_size: this.extractValue('sample', this.sample),
-                base_rate: this.extractValue('base', this.base),
-                effect_size: this.extractValue('impact', this.impact)
+                total_sample_size: this.extractValue('sample', this.view.sample),
+                base_rate: this.extractValue('base', this.view.base),
+                effect_size: this.extractValue('impact', this.view.impact)
             })
         },
         getImpactByVisitorsPerDay () {
-            return this.getImpactByVisitor() / this.days
+            return this.getImpactByVisitor() / this.view.runtime
         },
         updateData () {
             this.impactByMetricValue = this.getImpactByMetric();
@@ -181,6 +237,8 @@ export default {
                         base_rate: this.extractValue('base', this.base),
                         visitors: realValue
                 });
+            } else if (prop == 'relativeImpact') {
+                relative = this.extractValue('impact', value);
             }
 
             if (!relative) {
@@ -204,9 +262,15 @@ export default {
                 value: value
             })
         }
-    },
-    components: {
-        'pc-block-field': pcBlockField
     }
 }
 </script>
+
+<style>
+.pc-inputs {
+    grid-template-areas:
+        "pc-input-left pc-input-right"
+    ;
+}
+
+</style>

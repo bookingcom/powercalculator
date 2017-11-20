@@ -1,6 +1,21 @@
 <template id="pc-block-field">
     <span v-if="enableedit" class="pc-value-field-wrapper" :class="fieldWrapperClasses" v-on:click="setFocus()">
-        <span class="pc-value-formatting" style="position: relative;" :class="'pc-value-formatting-' + fieldprop" :data-prefix="prefix" :data-suffix="suffix">
+
+        <span class="pc-value-formatting pc-value--formatted" aria-hidden="true"
+            :class="'pc-value-formatting-' + fieldprop"
+            :data-prefix="prefix"
+            :data-suffix="suffix"
+            :style="fieldFormattedStyle"
+        >
+            <span class="pc-value-display" ref="pc-formatted-value">{{formattedVal}}</span>
+        </span>
+
+        <span class="pc-value-formatting"
+            :class="'pc-value-formatting-' + fieldprop"
+            :data-prefix="prefix"
+            :data-suffix="suffix"
+            :style="fieldEditableStyle"
+        >
             <span class="pc-value-display"
                 :contenteditable="!isreadonly"
 
@@ -11,18 +26,13 @@
 
                 ref="pc-value"></span>
         </span>
-
-        <pc-lock-icon v-if="isLockedFieldSet" v-bind:fieldprop="fieldprop" v-bind:islocked="isLocked" v-on:update:lockfield="triggerUpdateLockField"></pc-lock-icon>
-
     </span>
-    <span v-else class="pc-value-display pc-field-lock-wrapper">
-        {{prefix}} <strong>{{val}}</strong> {{suffix}} <pc-lock-icon v-if="isLockedFieldSet" v-bind:fieldprop="fieldprop" v-bind:islocked="isLocked" v-on:update:lockfield="triggerUpdateLockField"></pc-lock-icon>
+    <span v-else class="pc-value-display pc-field-not-editable">
+        {{prefix}} <strong>{{formattedVal}}</strong> {{suffix}}
     </span>
 </template>
 
 <script>
-
-import pcLockIcon from './pc-lock-icon.vue'
 
 let validateFunctions = {
         '*': {
@@ -72,7 +82,6 @@ export default {
         'fieldvalue',
         'prefix',
         'suffix',
-        'isblockfocused',
         'fieldfromblock'
     ],
     data () {
@@ -83,19 +92,61 @@ export default {
         }
     },
     computed: {
+        isLocked () {
+            return this.lockedfield && this.lockedfield == this.fieldprop
+        },
+        formattedVal () {
+            let result = this.val;
+            let sep = ',';
+
+            if (result / 1000 >= 1) {
+                let [integer, decimal] = (result + '').split('.');
+
+                result = integer.split('').reduceRight((prev, cur, i, arr) => {
+                    let resultStr = cur + prev,
+                        iFromLeft = arr.length - i;
+
+                    if (iFromLeft % 3 == 0 && iFromLeft != 0 && i != 0) {
+                        resultStr = sep + resultStr;
+                    }
+
+                    return resultStr;
+                }, '')
+
+                if (decimal) {
+                    result += sep + decimal;
+
+                }
+
+            }
+
+            return result;
+        },
         fieldWrapperClasses () {
             let obj = {};
 
             obj['pc-field--read-only'] = this.isreadonly;
             obj['pc-field--focused'] = this.isFocused;
             obj['pc-field-' + this.fieldprop] = true;
-            obj['pc-field-lock-wrapper'] = this.isLockedFieldSet;
 
             return obj
         },
-        isLocked () {
-            return this.lockedfield && this.lockedfield == this.fieldprop
-        }
+        fieldFormattedStyle () {
+            let result = {};
+            if (this.isFocused) {
+                result.display = 'none';
+            }
+
+            return result
+        },
+        fieldEditableStyle () {
+            let result = {};
+            if (!this.isFocused) {
+                result.opacity = 0;
+            }
+
+            return result
+        },
     },
     methods: {
         updateVal ({target}) {
@@ -121,6 +172,7 @@ export default {
 
             return result || 0
         },
+
         blur () {
             this.formatDisplay();
             this.setFocusStyle(false);
@@ -129,7 +181,9 @@ export default {
             this.isFocused = bool;
         },
         setFocus () {
-            this.$refs['pc-value'].focus();
+            let el = this.$refs['pc-value'];
+            el.focus();
+            this.placeCaretAtEnd(el);
         },
         validateField (value) {
             let {testtype} = this,
@@ -184,8 +238,21 @@ export default {
 
             return result
         },
-        triggerUpdateLockField ({prop}) {
-            this.$emit('update:lock', prop)
+        placeCaretAtEnd (el) {
+            if (typeof window.getSelection != "undefined"
+                    && typeof document.createRange != "undefined") {
+                var range = document.createRange();
+                range.selectNodeContents(el);
+                range.collapse(false);
+                var sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(range);
+            } else if (typeof document.body.createTextRange != "undefined") {
+                var textRange = document.body.createTextRange();
+                textRange.moveToElementText(el);
+                textRange.collapse(false);
+                textRange.select();
+            }
         }
 
     },
@@ -194,7 +261,7 @@ export default {
             newValue = parseFloat(this.formatNumberFields(newValue));
             oldValue = parseFloat(this.formatNumberFields(oldValue));
 
-            if (this.isreadonly || (newValue == oldValue)) {
+            if (this.isreadonly || !this.isFocused || (newValue == oldValue)) {
                 return;
             }
 
@@ -209,7 +276,6 @@ export default {
             // in case some input field on the same block changes the main math values
             // we need to update the input fiel
             let anotherFieldInBlockIsUpdating = !this.isFocused;
-
             if (!this.isreadonly && !anotherFieldInBlockIsUpdating) {
                 return
             }
@@ -232,9 +298,6 @@ export default {
                 el.innerHTML = vnode.context.val
             }
         }
-    },
-    components: {
-        'pc-lock-icon': pcLockIcon
     }
 }
 
@@ -245,6 +308,7 @@ export default {
     --base-padding: 5px;
 
     display: block;
+    position: relative;
     box-sizing: border-box;
     width: 100%;
     filter: drop-shadow(0 4px 2px rgba(0,0,0,0.1));
@@ -257,6 +321,14 @@ export default {
 
 .pc-field--focused {
     box-shadow: inset 0 0 0 1px var(--dark-blue);
+}
+
+.pc-value--formatted {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
 }
 
 .pc-value-display {
@@ -276,10 +348,10 @@ export default {
 .pc-false-positive-input {
     display: inline-block;
     vertical-align: middle;
-    padding: 0.6em;
+    padding: 4px 8px;
     text-align: center;
     width: 4em;
-    border: 2px solid var(--light-gray);
+    border: 2px solid var(--gray);
     border-radius: 8px;
     font-size: inherit;
 }
@@ -291,13 +363,28 @@ export default {
 /* prefixes and suffixes */
 
 .pc-value-formatting:before {
-    color: var(--light-gray);
+    color: var(--gray);
     content: attr(data-prefix);
 }
 
 .pc-value-formatting:after {
-    color: var(--light-gray);
+    color: var(--gray);
     content: attr(data-suffix);
 }
 
+/* block to calculate override rules*/
+
+.pc-block-to-calculate .pc-value-field-wrapper:not(.pc-value-display) {
+    background: var(--light-yellow);
+    outline: 2px solid var(--dark-yellow);
+}
+
+.pc-block-to-calculate .pc-value .pc-value-formatting:before {
+    content: "=" attr(data-prefix);
+    color: var(--black);
+}
+
+.pc-block-to-calculate .pc-value-formatting:after {
+    color: var(--black);
+}
 </style>

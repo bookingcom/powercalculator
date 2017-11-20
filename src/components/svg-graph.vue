@@ -1,20 +1,20 @@
 <template id="svg-graph">
-    <div>
-        <div class="pc-graph-controls">
-            <label class="pc-graph-radio-label">
+    <div class="pc-block pc-block--graph">
+        <div class="pc-graph-controls" style="graphControlsHighlight">
+            <label class="pc-graph-radio-label" ref="sample-power">
                 <input type="radio" class="pc-graph-radio-input" name="graph-x" value="sample-power" v-model="graphType">
-                <span class="pc-graph-radio-text" :class="{'pc-graph-radio-selected': graphType == 'sample-power'}">{{getMetricDisplayName('sample')}}</span>
+                <span class="pc-graph-radio-text" :class="{'pc-graph-radio-selected': graphType == 'sample-power'}">{{getMetricDisplayName('power')}} / {{getMetricDisplayName('sample')}}</span>
             </label>
-            <label class="pc-graph-radio-label">
+            <label class="pc-graph-radio-label" ref="impact-power">
                 <input type="radio" class="pc-graph-radio-input" name="graph-x" value="impact-power" v-model="graphType">
-                <span class="pc-graph-radio-text" :class="{'pc-graph-radio-selected': graphType == 'impact-power'}">{{getMetricDisplayName('impact')}}</span>
+                <span class="pc-graph-radio-text" :class="{'pc-graph-radio-selected': graphType == 'impact-power'}">{{getMetricDisplayName('power')}} / {{getMetricDisplayName('impact')}}</span>
             </label>
-            <label class="pc-graph-radio-label">
+            <label class="pc-graph-radio-label" ref="sample-impact">
                 <input type="radio" class="pc-graph-radio-input" name="graph-x" value="sample-impact" v-model="graphType">
-                <span class="pc-graph-radio-text" :class="{'pc-graph-radio-selected': graphType == 'sample-impact'}">{{getMetricDisplayName('impact')}} vs {{getMetricDisplayName('sample')}}</span>
+                <span class="pc-graph-radio-text" :class="{'pc-graph-radio-selected': graphType == 'sample-impact'}">{{getMetricDisplayName('impact')}} / {{getMetricDisplayName('sample')}}</span>
             </label>
         </div>
-        <div>
+        <div class="pc-graph" ref="pc-graph-size">
             <div v-bind:style="style" ref="pc-graph-wrapper">
                 <div ref="pc-graph"></div>
             </div>
@@ -37,12 +37,16 @@ let dataDefault = [
 let style = document.createElement('style');
 
 style.innerHTML = `
-    .c3-circles-Sample {
+    .pc-graph .c3-circles-Sample {
         display: none;
     }
 
-    .c3-axis-y-label {
+    .pc-graph .c3-axis-y-label {
         pointer-events: none;
+    }
+
+    .pc-graph .c3-axis {
+        font-size: 16px;
     }
 `;
 
@@ -84,14 +88,19 @@ export default {
             // 'power'
             return this.graphType.split('-')[1]
         },
+        graphControlsHighlight () {
+
+            // graphType
+            return {}
+        }
     },
     methods: {
         resize () {
-            let {width, height} = window.getComputedStyle(this.$el.parentNode);
+            let {width, paddingLeft, paddingRight} = window.getComputedStyle(this.$refs['pc-graph-size']);
 
             // update svg size
-            this.width = window.parseInt(width);
-            this.height = window.parseInt(height);
+            this.width = window.parseInt(width) - window.parseInt(paddingLeft) - window.parseInt(paddingRight);
+            this.height = 220;
         },
         createYList ({ amount, rate = 10,  cur }) { //rate of 10 and amount of 10 will reach from 0 to 100
             let result = [];
@@ -285,7 +294,7 @@ export default {
                     tick: {
                         values (minMax) {
                             let [min, max] = minMax.map((num) => {return window.parseInt(num)}),
-                                amount = 5,
+                                amount = 7,
                                 ratio = (max - min) / amount,
                                 result = new Array(amount + 1);
 
@@ -347,6 +356,7 @@ export default {
                 }
             },
             padding: {
+                top: 20,
                 right: 20
             },
             tooltip: createTooltip(this)
@@ -359,15 +369,21 @@ export default {
 </script>
 
 <style>
+
 /* graph radio styles */
 .pc-graph-controls {
     display: flex;
     flex-direction: row;
+    padding: 30px 0 0 60px;
+    margin-bottom: 5px;
+    border-bottom: 1px solid var(--blue);
 }
 
 .pc-graph-radio-label {
     position: relative;
-    margin-bottom: 5px;
+    font-size: 14px;
+    color: var(--blue);
+    margin-right: 40px;
 }
 
 .pc-graph-radio-input {
@@ -377,14 +393,25 @@ export default {
 
 .pc-graph-radio-text {
     display: block;
-    border: 1px solid var(--dark-gray);
-    border-radius: 3px;
-    padding: 3px;
-    color: var(--black);
+    padding: 0 5px 15px;
+    position: relative;
 }
 
-.pc-graph-radio-selected {
-    border: 1px solid var(--dark-blue);
-    background: var(--light-blue);
+.pc-graph-radio-input:checked + .pc-graph-radio-text::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 4px;
+    background: var(--blue);
+}
+
+/* graph layout */
+
+.pc-graph {
+    padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
 }
 </style>
