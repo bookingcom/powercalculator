@@ -1,0 +1,1401 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* application styles */
+
+/* colors */
+
+.power-calculator {
+    --light-blue: #c0e3ff;
+    --blue: #3d78df;
+    --dark-blue: #3d78df;
+    --light-gray: #e2e6eb;
+    --gray: #8f9194;
+    --dark-gray: #5d5f63;
+    --light-yellow: #fbf2cb;
+    --yellow: #f9e699;
+    --dark-yellow: #e1b735;
+    --white: #FFF;
+    --black: #000;
+    --fade-black: rgba(0, 0, 0, 0.3);
+    --red: #F00;
+}
+
+/* layout */
+
+.pc-main-header {
+    display: grid;
+    grid-template-columns: auto min-content min-content min-content;
+    grid-template-rows: auto;
+    grid-template-areas:
+        "title test-type false-positive power";
+    align-items: center;
+
+    margin: 25px 0 25px 10px;
+}
+
+.pc-title {
+    grid-area: title;
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.pc-test-type,
+.pc-false-positive,
+.pc-power {
+    font-size: 0.8em;
+}
+
+.pc-test-type {
+    grid-area: test-type;
+    white-space: nowrap;
+}
+
+.pc-test-type-tooltip-wrapper {
+    display: inline-block;
+}
+
+.pc-test-type-labels {
+    margin: 0 20px;
+}
+
+.pc-false-positive {
+    grid-area: false-positive;
+    white-space: nowrap;
+}
+
+.pc-power {
+    grid-area: power;
+    margin-left: 10px;
+    white-space: nowrap;
+}
+
+.pc-blocks-wrapper {
+    grid-area: pc-blocks-wrapper;
+    display: grid;
+    grid-template-columns: 25% 25% 25% 25%;
+    grid-template-rows: auto;
+    grid-template-areas:
+        "radio-base radio-impact radio-sample radio-graph"
+        "block-base block-impact block-sample block-graph"
+    ;
+    grid-template-rows: auto;
+    grid-column-gap: 1px;
+}
+
+.pc-calc-radio--sample {
+    grid-area: radio-sample;
+}
+.pc-calc-radio--impact {
+    grid-area: radio-impact;
+}
+.pc-calc-radio--power {
+    grid-area: radio-power;
+}
+
+.pc-block--base {
+    grid-area: block-base;
+}
+
+.pc-block--sample {
+    grid-area: block-sample;
+}
+
+.pc-block--impact {
+    grid-area: block-impact;
+}
+
+.pc-block--graph {
+    grid-area: block-graph;
+}
+
+
+/* blocks */
+
+.pc-block {
+    --border-radius: 15px;
+
+    padding: 5%;
+    background: var(--light-gray);
+}
+
+.pc-block--rounded-left {
+    border-radius: var(--border-radius) 0 0 var(--border-radius);
+}
+
+.pc-block--rounded-right {
+    border-radius: 0 var(--border-radius) var(--border-radius) 0;
+}
+
+.pc-block--graph {
+    background: none;
+}
+
+.pc-block.pc-block-focused {
+    background: var(--light-blue);
+}
+
+.pc-header {
+    font-weight: bold;
+    margin-bottom: 25px;
+}
+
+.pc-desc {
+    font-weight: normal;
+    font-size: 0.8em;
+    display: block;
+    min-height: 1em;
+}
+
+.pc-calculate {
+    display: inline-block;
+    margin-bottom: 25px;
+    font-weight: bold;
+    font-size: 0.8em;
+}
+
+.pc-value {
+    display: block;
+    margin-bottom: 25px;
+}
+
+.pc-switch-mode {
+    display: block;
+    margin-bottom: 10px;
+    color: var(--gray);
+    font-size: 0.7em;
+}
+
+.pc-switch-button {
+    display: block;
+    font-size: inherit;
+    padding: 0;
+    background: none;
+    border: none;
+    -webkit-appearance: none;
+    color: var(--blue);
+    font-size: 1.2em;
+}
+
+.pc-list {
+    display: block;
+    margin: 0;
+}
+
+/* block to calculate override rules*/
+
+.pc-block.pc-block-to-calculate {
+    --gradient-middle: 43%;
+    background: linear-gradient(var(--dark-yellow) var(--gradient-middle), var(--light-yellow) calc(var(--gradient-middle) + 1px));
+}
+
+.pc-block-to-calculate .pc-value-field-wrapper {
+    background: var(--yellow);
+}
+
+.pc-block-to-calculate .pc-value .pc-value-formatting:before {
+    content: "=" attr(data-prefix);
+    color: var(--dark-yellow);
+}
+
+.pc-block-to-calculate .pc-value-formatting:after {
+    color: var(--black);
+}
+
+/* list */
+
+.pc-list {
+    font-size: 0.8em;
+    color: var(--gray);
+    padding: 0;
+    list-style-type: none;
+}
+
+.pc-list strong {
+    color: var(--dark-gray);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* graph radio styles */
+.pc-graph-controls {
+    display: flex;
+    flex-direction: row;
+}
+
+.pc-graph-radio-label {
+    position: relative;
+    margin-bottom: 5px;
+}
+
+.pc-graph-radio-input {
+    position: absolute;
+    visibility: hidden;
+}
+
+.pc-graph-radio-text {
+    display: block;
+    border: 1px solid var(--dark-gray);
+    border-radius: 3px;
+    padding: 3px;
+    color: var(--black);
+}
+
+.pc-graph-radio-selected {
+    border: 1px solid var(--dark-blue);
+    background: var(--light-blue);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.pc-value-field-wrapper {
+    --base-padding: 5px;
+
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    filter: drop-shadow(0 4px 2px rgba(0,0,0,0.1));
+    border-radius: 5px;
+    background: var(--white);
+    padding: var(--base-padding);
+
+    overflow: hidden;
+}
+
+.pc-field--focused {
+    box-shadow: inset 0 0 0 1px var(--dark-blue);
+}
+
+.pc-value-display {
+    box-sizing: border-box;
+    font-size: 1em;
+    line-height: 1.8em;
+    align-self: center;
+    min-height: 1em;
+    display: inline-block;
+}
+
+.pc-value-display:focus {
+    outline: 0;
+}
+
+.pc-power-input,
+.pc-false-positive-input {
+    display: inline-block;
+    vertical-align: middle;
+    padding: 0.6em;
+    text-align: center;
+    width: 4em;
+    border: 2px solid var(--light-gray);
+    border-radius: 8px;
+    font-size: inherit;
+}
+
+.pc-top-fields-error {
+    color: var(--red);
+}
+
+/* prefixes and suffixes */
+
+.pc-value-formatting:before {
+    color: var(--light-gray);
+    content: attr(data-prefix);
+}
+
+.pc-value-formatting:after {
+    color: var(--light-gray);
+    content: attr(data-suffix);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.pc-field-lock-wrapper {
+    position: relative;
+    display: block;
+}
+
+.pc-field-lock {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 20px;
+    height: 100%;
+
+    border: none;
+    background: transparent;
+    -webkit-appearance: none;
+    -webkit-border-radius: 0;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    overflow: hidden;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.pc-tooltip {
+    --tooltip-background-color: var(--black);
+    position: relative;
+}
+
+.tooltip-wrapper {
+    position: absolute;
+    left: 50%;
+    top: calc(100% + 10px);
+    transform: translate(-50%, 0);
+    background: var(--tooltip-background-color);
+    color: var(--light-gray);
+    padding: 5px;
+    border-radius: 4px;
+    z-index: 10;
+    width: 400px;
+    white-space: normal;
+}
+
+.tooltip-wrapper:after {
+    --size: 5px;
+
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% - var(--size));
+    transform: translate(-50%, 0) rotateZ(45deg);
+
+    border: var(--size) solid var(--tooltip-background-color);
+    border-right-color: transparent;
+    border-bottom-color: transparent;
+}

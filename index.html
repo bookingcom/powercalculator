@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Example</title>
+    <style>
+        html, body {
+            margin: 5px;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+    </style>
+    <link rel="stylesheet" href="docs/css/c3.min.css">
+    <link rel="stylesheet" href="dist/powercalculator.css">
+</head>
+<body>
+
+    <div class="power-calculator"></div>
+
+    <script src="docs/js/d3.min.js"></script>
+    <script src="docs/js/c3.min.js"></script>
+    <script src="docs/js/vue.min.js"></script>
+    <script src="docs/js/almond.js"></script>
+    <script src="dist/powercalculator.js"></script>
+    <script>
+        let powercalculator = require('powercalculator');
+
+        new Vue(Object.assign({
+            el: '.power-calculator',
+        }, powercalculator));
+    </script>
+
+</body>
+</html>

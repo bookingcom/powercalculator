@@ -1,0 +1,28 @@
+{
+  "name": "powercalculator",
+  "version": "1.0.0",
+  "description": "Calculator to help define runtime for A/B Experiments",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bookingcom/powercalculator.git"
+  },
+  "author": "Marcelo Oliveira",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bookingcom/powercalculator/issues"
+  },
+  "homepage": "https://github.com/bookingcom/powercalculator#readme",
+  "devDependencies": {
+    "jStat": "^1.7.1",
+    "rollup-plugin-commonjs": "^8.2.6",
+    "rollup-plugin-css-only": "^0.2.0",
+    "rollup-plugin-node-resolve": "^3.0.0",
+    "rollup-plugin-vue": "^2.5.2",
+    "vue": "^2.5.6",
+    "vue-template-compiler": "^2.5.6"
+  }
+}
