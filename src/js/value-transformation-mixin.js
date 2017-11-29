@@ -1,6 +1,6 @@
 export default {
     beforeCreate () {
-        this.validations = {
+        let validations = {
             sample: {type: 'int'},
             base: {
                 gTest: {type: 'percentage'},
@@ -15,6 +15,13 @@ export default {
             metricTotals: {type: 'int'},
             sdRate: {type: 'float'}
         }
+
+        // add validation for component version of main data
+        validations.totalSample = validations.sample;
+        validations.relativeImpact = validations.impact;
+        validations.baseRate = validations.base;
+
+        this.validations = validations;
     },
     methods: {
         displayValue (prop, value) {

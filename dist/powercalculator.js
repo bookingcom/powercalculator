@@ -4841,7 +4841,7 @@ var statFormulas = {
 
 var valueTransformationMixin = {
     beforeCreate () {
-        this.validations = {
+        let validations = {
             sample: {type: 'int'},
             base: {
                 gTest: {type: 'percentage'},
@@ -4856,6 +4856,13 @@ var valueTransformationMixin = {
             metricTotals: {type: 'int'},
             sdRate: {type: 'float'}
         };
+
+        // add validation for component version of main data
+        validations.totalSample = validations.sample;
+        validations.relativeImpact = validations.impact;
+        validations.baseRate = validations.base;
+
+        this.validations = validations;
     },
     methods: {
         displayValue (prop, value) {
@@ -4929,12 +4936,16 @@ let dataDefault = [
 let style = document.createElement('style');
 
 style.innerHTML = `
-    .c3-circles-Sample {
+    .pc-graph .c3-circles-Sample {
         display: none;
     }
 
-    .c3-axis-y-label {
+    .pc-graph .c3-axis-y-label {
         pointer-events: none;
+    }
+
+    .pc-graph .c3-axis {
+        font-size: 16px;
     }
 `;
 
@@ -4942,7 +4953,7 @@ document.querySelector('head').appendChild(style);
 
 
 
-var svgGraph = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_c('div',{staticClass:"pc-graph-controls"},[_c('label',{staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"sample-power"},domProps:{"checked":_vm._q(_vm.graphType,"sample-power")},on:{"change":function($event){_vm.graphType="sample-power";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'sample-power'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('sample')))])]),_vm._v(" "),_c('label',{staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"impact-power"},domProps:{"checked":_vm._q(_vm.graphType,"impact-power")},on:{"change":function($event){_vm.graphType="impact-power";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'impact-power'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('impact')))])]),_vm._v(" "),_c('label',{staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"sample-impact"},domProps:{"checked":_vm._q(_vm.graphType,"sample-impact")},on:{"change":function($event){_vm.graphType="sample-impact";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'sample-impact'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('impact'))+" vs "+_vm._s(_vm.getMetricDisplayName('sample')))])])]),_vm._v(" "),_c('div',[_c('div',{ref:"pc-graph-wrapper",style:(_vm.style)},[_c('div',{ref:"pc-graph"})])])])},staticRenderFns: [],
+var svgGraph = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-block pc-block--graph"},[_c('div',{staticClass:"pc-graph-controls",staticStyle:{}},[_c('label',{ref:"sample-power",staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"sample-power"},domProps:{"checked":_vm._q(_vm.graphType,"sample-power")},on:{"change":function($event){_vm.graphType="sample-power";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'sample-power'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('power'))+" / "+_vm._s(_vm.getMetricDisplayName('sample')))])]),_vm._v(" "),_c('label',{ref:"impact-power",staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"impact-power"},domProps:{"checked":_vm._q(_vm.graphType,"impact-power")},on:{"change":function($event){_vm.graphType="impact-power";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'impact-power'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('power'))+" / "+_vm._s(_vm.getMetricDisplayName('impact')))])]),_vm._v(" "),_c('label',{ref:"sample-impact",staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"sample-impact"},domProps:{"checked":_vm._q(_vm.graphType,"sample-impact")},on:{"change":function($event){_vm.graphType="sample-impact";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'sample-impact'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('impact'))+" / "+_vm._s(_vm.getMetricDisplayName('sample')))])])]),_vm._v(" "),_c('div',{ref:"pc-graph-size",staticClass:"pc-graph"},[_c('div',{ref:"pc-graph-wrapper",style:(_vm.style)},[_c('div',{ref:"pc-graph"})])])])},staticRenderFns: [],
     mixins: [valueTransformationMixin],
     template: '#svg-graph',
     props: ['testtype', 'sample', 'impact', 'power', 'base', 'falseposrate', 'sdrate'],
@@ -4976,14 +4987,19 @@ var svgGraph = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c
             // 'power'
             return this.graphType.split('-')[1]
         },
+        graphControlsHighlight () {
+
+            // graphType
+            return {}
+        }
     },
     methods: {
         resize () {
-            let {width, height} = window.getComputedStyle(this.$el.parentNode);
+            let {width, paddingLeft, paddingRight} = window.getComputedStyle(this.$refs['pc-graph-size']);
 
             // update svg size
-            this.width = window.parseInt(width);
-            this.height = window.parseInt(height);
+            this.width = window.parseInt(width) - window.parseInt(paddingLeft) - window.parseInt(paddingRight);
+            this.height = 220;
         },
         createYList ({ amount, rate = 10,  cur }) { //rate of 10 and amount of 10 will reach from 0 to 100
             let result = [];
@@ -5177,7 +5193,7 @@ var svgGraph = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c
                     tick: {
                         values (minMax) {
                             let [min, max] = minMax.map((num) => {return window.parseInt(num)}),
-                                amount = 5,
+                                amount = 7,
                                 ratio = (max - min) / amount,
                                 result = new Array(amount + 1);
 
@@ -5239,25 +5255,13 @@ var svgGraph = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c
                 }
             },
             padding: {
+                top: 20,
                 right: 20
             },
             tooltip: createTooltip(this)
         });
 
         this.updateGraphData();
-    }
-};
-
-var pcLockIcon = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('button',{staticClass:"pc-field-lock",attrs:{"type":"button"},on:{"click":_vm.changeLock}},[(_vm.islocked)?_c('svg',{staticStyle:{"transform":"scale(0.2)","transform-origin":"left top"},attrs:{"version":"1.1","baseProfile":"full","width":"50","height":"100","xmlns":"http://www.w3.org/2000/svg"}},[_c('desc',[_vm._v("Locked input field")]),_vm._v(" "),_c('rect',{attrs:{"x":"0","y":"50","width":"50","height":"40","rx":"5","ry":"5","fill":"#5d5f63"}}),_vm._v(" "),_c('path',{attrs:{"d":"M10,50 a1,1.2 0 1,1 30,0","stroke-width":"4","stroke":"#5d5f63","fill":"transparent"}})]):_c('svg',{staticStyle:{"transform":"scale(0.2)","transform-origin":"left top"},attrs:{"version":"1.1","baseProfile":"full","width":"50","height":"100","xmlns":"http://www.w3.org/2000/svg"}},[_c('desc',[_vm._v("Unlocked input field")]),_vm._v(" "),_c('rect',{attrs:{"x":"0","y":"50","width":"50","height":"40","rx":"5","ry":"5","fill":"#5d5f63"}}),_vm._v(" "),_c('path',{attrs:{"d":"M10,40 a1,1.2 0 1,1 30,0","stroke-width":"4","stroke":"#5d5f63","fill":"transparent"}}),_vm._v(" "),_c('line',{attrs:{"x1":"40","y1":"40","x2":"40","y2":"50","stroke-width":"4","stroke":"#5d5f63"}})])])},staticRenderFns: [],
-    template: '#lock-icon',
-    props: ['islocked', 'fieldprop'],
-    data () {
-        return {}
-    },
-    methods: {
-        changeLock () {
-            this.$emit('update:lockfield', {prop: this.islocked ? '' : this.fieldprop });
-        }
     }
 };
 
@@ -5298,7 +5302,7 @@ let validateFunctions = {
     };
 let validationCache = {};
 
-var pcBlockField = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return (_vm.enableedit)?_c('span',{staticClass:"pc-value-field-wrapper",class:_vm.fieldWrapperClasses,on:{"click":function($event){_vm.setFocus();}}},[_c('span',{staticClass:"pc-value-formatting",class:'pc-value-formatting-' + _vm.fieldprop,staticStyle:{"position":"relative"},attrs:{"data-prefix":_vm.prefix,"data-suffix":_vm.suffix}},[_c('span',{directives:[{name:"initialvalue",rawName:"v-initialvalue"}],ref:"pc-value",staticClass:"pc-value-display",attrs:{"contenteditable":!_vm.isreadonly},on:{"focus":function($event){_vm.setFocusStyle(true);},"blur":_vm.blur,"input":_vm.updateVal}})]),_vm._v(" "),(_vm.isLockedFieldSet)?_c('pc-lock-icon',{attrs:{"fieldprop":_vm.fieldprop,"islocked":_vm.isLocked},on:{"update:lockfield":_vm.triggerUpdateLockField}}):_vm._e()],1):_c('span',{staticClass:"pc-value-display pc-field-lock-wrapper"},[_vm._v(" "+_vm._s(_vm.prefix)+" "),_c('strong',[_vm._v(_vm._s(_vm.val))]),_vm._v(" "+_vm._s(_vm.suffix)+" "),(_vm.isLockedFieldSet)?_c('pc-lock-icon',{attrs:{"fieldprop":_vm.fieldprop,"islocked":_vm.isLocked},on:{"update:lockfield":_vm.triggerUpdateLockField}}):_vm._e()],1)},staticRenderFns: [],
+var pcBlockField = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return (_vm.enableedit)?_c('span',{staticClass:"pc-value-field-wrapper",class:_vm.fieldWrapperClasses,on:{"click":function($event){_vm.setFocus();}}},[_c('span',{staticClass:"pc-value-formatting pc-value--formatted",class:'pc-value-formatting-' + _vm.fieldprop,style:(_vm.fieldFormattedStyle),attrs:{"aria-hidden":"true","data-prefix":_vm.prefix,"data-suffix":_vm.suffix}},[_c('span',{ref:"pc-formatted-value",staticClass:"pc-value-display"},[_vm._v(_vm._s(_vm.formattedVal))])]),_vm._v(" "),_c('span',{staticClass:"pc-value-formatting",class:'pc-value-formatting-' + _vm.fieldprop,style:(_vm.fieldEditableStyle),attrs:{"data-prefix":_vm.prefix,"data-suffix":_vm.suffix}},[_c('span',{directives:[{name:"initialvalue",rawName:"v-initialvalue"}],ref:"pc-value",staticClass:"pc-value-display",attrs:{"contenteditable":!_vm.isreadonly},on:{"focus":function($event){_vm.setFocusStyle(true);},"blur":_vm.blur,"input":_vm.updateVal}})])]):_c('span',{staticClass:"pc-value-display pc-field-not-editable"},[_vm._v(" "+_vm._s(_vm.prefix)+" "),_c('strong',[_vm._v(_vm._s(_vm.formattedVal))]),_vm._v(" "+_vm._s(_vm.suffix)+" ")])},staticRenderFns: [],
     template: '#pc-block-field',
     props: [
         'lockedfield',
@@ -5309,7 +5313,6 @@ var pcBlockField = {render: function(){var _vm=this;var _h=_vm.$createElement;va
         'fieldvalue',
         'prefix',
         'suffix',
-        'isblockfocused',
         'fieldfromblock'
     ],
     data () {
@@ -5320,19 +5323,61 @@ var pcBlockField = {render: function(){var _vm=this;var _h=_vm.$createElement;va
         }
     },
     computed: {
+        isLocked () {
+            return this.lockedfield && this.lockedfield == this.fieldprop
+        },
+        formattedVal () {
+            let result = this.val;
+            let sep = ',';
+
+            if (result / 1000 >= 1) {
+                let [integer, decimal] = (result + '').split('.');
+
+                result = integer.split('').reduceRight((prev, cur, i, arr) => {
+                    let resultStr = cur + prev,
+                        iFromLeft = arr.length - i;
+
+                    if (iFromLeft % 3 == 0 && iFromLeft != 0 && i != 0) {
+                        resultStr = sep + resultStr;
+                    }
+
+                    return resultStr;
+                }, '');
+
+                if (decimal) {
+                    result += sep + decimal;
+
+                }
+
+            }
+
+            return result;
+        },
         fieldWrapperClasses () {
             let obj = {};
 
             obj['pc-field--read-only'] = this.isreadonly;
             obj['pc-field--focused'] = this.isFocused;
             obj['pc-field-' + this.fieldprop] = true;
-            obj['pc-field-lock-wrapper'] = this.isLockedFieldSet;
 
             return obj
         },
-        isLocked () {
-            return this.lockedfield && this.lockedfield == this.fieldprop
-        }
+        fieldFormattedStyle () {
+            let result = {};
+            if (this.isFocused) {
+                result.display = 'none';
+            }
+
+            return result
+        },
+        fieldEditableStyle () {
+            let result = {};
+            if (!this.isFocused) {
+                result.opacity = 0;
+            }
+
+            return result
+        },
     },
     methods: {
         updateVal ({target}) {
@@ -5358,6 +5403,7 @@ var pcBlockField = {render: function(){var _vm=this;var _h=_vm.$createElement;va
 
             return result || 0
         },
+
         blur () {
             this.formatDisplay();
             this.setFocusStyle(false);
@@ -5366,7 +5412,9 @@ var pcBlockField = {render: function(){var _vm=this;var _h=_vm.$createElement;va
             this.isFocused = bool;
         },
         setFocus () {
-            this.$refs['pc-value'].focus();
+            let el = this.$refs['pc-value'];
+            el.focus();
+            this.placeCaretAtEnd(el);
         },
         validateField (value) {
             let {testtype} = this,
@@ -5421,8 +5469,21 @@ var pcBlockField = {render: function(){var _vm=this;var _h=_vm.$createElement;va
 
             return result
         },
-        triggerUpdateLockField ({prop}) {
-            this.$emit('update:lock', prop);
+        placeCaretAtEnd (el) {
+            if (typeof window.getSelection != "undefined"
+                    && typeof document.createRange != "undefined") {
+                var range = document.createRange();
+                range.selectNodeContents(el);
+                range.collapse(false);
+                var sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(range);
+            } else if (typeof document.body.createTextRange != "undefined") {
+                var textRange = document.body.createTextRange();
+                textRange.moveToElementText(el);
+                textRange.collapse(false);
+                textRange.select();
+            }
         }
 
     },
@@ -5431,7 +5492,7 @@ var pcBlockField = {render: function(){var _vm=this;var _h=_vm.$createElement;va
             newValue = parseFloat(this.formatNumberFields(newValue));
             oldValue = parseFloat(this.formatNumberFields(oldValue));
 
-            if (this.isreadonly || (newValue == oldValue)) {
+            if (this.isreadonly || !this.isFocused || (newValue == oldValue)) {
                 return;
             }
 
@@ -5446,7 +5507,6 @@ var pcBlockField = {render: function(){var _vm=this;var _h=_vm.$createElement;va
             // in case some input field on the same block changes the main math values
             // we need to update the input fiel
             let anotherFieldInBlockIsUpdating = !this.isFocused;
-
             if (!this.isreadonly && !anotherFieldInBlockIsUpdating) {
                 return
             }
@@ -5469,22 +5529,87 @@ var pcBlockField = {render: function(){var _vm=this;var _h=_vm.$createElement;va
                 el.innerHTML = vnode.context.val;
             }
         }
-    },
-    components: {
-        'pc-lock-icon': pcLockIcon
     }
 };
 
-var sampleComp = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_c('label',{staticClass:"pc-switch-mode"},[_vm._v(" Switch input mode to "),_c('input',{staticClass:"pc-switch-button",attrs:{"type":"button","value":_vm.enableedit ? 'Sample Size' : 'Days & Daily Trials'},on:{"click":_vm.enableInput}})]),_vm._v(" "),_c('ul',{staticClass:"pc-list"},[_c('li',[_c('pc-block-field',{attrs:{"fieldprop":"visitorsPerDay","prefix":"","suffix":" visitors / day","fieldvalue":_vm.visitorsPerDay,"testtype":_vm.testtype,"isreadonly":false,"isblockfocused":_vm.isblockfocused,"enableedit":_vm.enableedit,"lockedfield":_vm.lockedField,"lock":_vm.lockedField,"aria-label":"Visitors per Day"},on:{"update:lock":function($event){_vm.lockedField=$event;},"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}})],1),_vm._v(" "),_c('li',[_c('pc-block-field',{attrs:{"fieldprop":"days","prefix":"","suffix":" days","fieldvalue":_vm.days,"testtype":_vm.testtype,"isreadonly":false,"isblockfocused":_vm.isblockfocused,"enableedit":_vm.enableedit,"lockedfield":_vm.lockedField,"lock":_vm.lockedField,"aria-label":"Days"},on:{"update:lock":function($event){_vm.lockedField=$event;},"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}})],1)])])},staticRenderFns: [],
-    props: ['runtime', 'testtype', 'enableedit', 'isblockfocused', 'sample', 'calculateprop', 'fieldfromblock'],
-    template: '#sample-comp',
+var pcSvgChain = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('svg',{staticClass:"pc-svg-chain-icon",style:(_vm.svgBgLine),attrs:{"width":"100%","height":"59px","viewBox":`0 0 ${_vm.svgBoxWidth} 59`,"version":"1.1","xmlns":"http://www.w3.org/2000/svg","xmlns:xlink":"http://www.w3.org/1999/xlink","aria-hidden":"true"}},[_c('g',{attrs:{"id":"Power-Calculator","transform":"translate(-811.000000, -485.000000)"}},[_c('g',{attrs:{"transform":"translate(676.000000, 327.000000)"}},[_c('g',{attrs:{"id":"Chain","transform":"translate(132.000000, 158.000000)"}},[_c('path',{attrs:{"d":"M12.1680332,24.5 L14.5,24.5 C16.709139,24.5 18.5,26.290861 18.5,28.5 L18.5,29.5 C18.5,31.709139 16.709139,33.5 14.5,33.5 L9.5,33.5 C7.290861,33.5 5.5,31.709139 5.5,29.5 L5.5,28.5 C6.20701437,28.5 6.87368104,28.5 7.5,28.5 L7.5,29.5 C7.5,30.6045695 8.3954305,31.5 9.5,31.5 L14.5,31.5 C15.6045695,31.5 16.5,30.6045695 16.5,29.5 L16.5,28.5 C16.5,27.3954305 15.6045695,26.5 14.5,26.5 L13.7237764,26.5 C13.463452,25.7924504 12.944871,25.1257837 12.1680332,24.5 Z","id":"Rectangle-5","fill":_vm.svgFillColor,"fill-rule":"nonzero","transform":"translate(12.000000, 29.000000) scale(-1, -1) translate(-12.000000, -29.000000) "}}),_vm._v(" "),_c('path',{attrs:{"d":"M18.1680332,24.5 L20.5,24.5 C22.709139,24.5 24.5,26.290861 24.5,28.5 L24.5,29.5 C24.5,31.709139 22.709139,33.5 20.5,33.5 L15.5,33.5 C13.290861,33.5 11.5,31.709139 11.5,29.5 L11.5,28.5 C12.2070144,28.5 12.873681,28.5 13.5,28.5 L13.5,29.5 C13.5,30.6045695 14.3954305,31.5 15.5,31.5 L20.5,31.5 C21.6045695,31.5 22.5,30.6045695 22.5,29.5 L22.5,28.5 C22.5,27.3954305 21.6045695,26.5 20.5,26.5 L19.7237764,26.5 C19.463452,25.7924504 18.944871,25.1257837 18.1680332,24.5 Z","id":"Rectangle-5","fill":_vm.svgFillColor,"fill-rule":"nonzero"}})])])])])},staticRenderFns: [],
+    props: ['calculateprop', 'fieldfromblock'],
+    data () {
+        return {
+            svgBoxWidth: 26
+        }
+    },
+    computed: {
+
+        svgFillColor () {
+            return this.calculateprop == this.fieldfromblock ? '#E2B634' : '#C1CFD8'
+        },
+        svgBgColor () {
+            return this.calculateprop == this.fieldfromblock ? '#FEF1CB' : '#F0F0F0'
+        },
+        svgBgLine () {
+            let { svgFillColor, svgBgColor, svgBoxWidth } = this,
+                strokeWidth = 2,
+                stokeStyle = `linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent calc(50% - ${strokeWidth/2}px - 1px),
+                    ${svgFillColor} calc(50% - ${strokeWidth/2}px),
+                    ${svgFillColor} calc(50% + ${strokeWidth/2}px),
+                    transparent calc(50% + ${strokeWidth/2}px + 1px),
+                    transparent 100%
+                )`,
+                strokeMask = `linear-gradient(
+                    90deg,
+                    transparent,
+                    transparent calc(50% - ${svgBoxWidth/2}px - 1px),
+                    ${svgBgColor} calc(50% - ${svgBoxWidth/2}px),
+                    ${svgBgColor} calc(50% + ${svgBoxWidth/2}px),
+                    transparent calc(50% + ${svgBoxWidth/2}px + 1px),
+                    transparent 100%
+                )`;
+
+
+            return `background: ${strokeMask}, ${stokeStyle};`.replace(/\n/g, '');
+        }
+    }
+};
+
+var pcBlock = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div')},staticRenderFns: [],
     mixins: [valueTransformationMixin],
+    props: ['calculateprop', 'fieldfromblock'],
+    data () {
+        return {
+            isCalculated: this.calculateprop == this.fieldfromblock,
+        }
+    },
+    watch: {
+        calculateprop () {
+            this.isCalculated = this.calculateprop == this.fieldfromblock;
+        },
+        isCalculated (newValue) {
+            if (newValue === true) {
+                this.$emit('update:calculateprop', this.fieldfromblock);
+            }
+        }
+    },
+    components: {
+        'pc-block-field': pcBlockField,
+        'pc-svg-chain': pcSvgChain,
+    }
+};
+
+var sampleComp = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-block pc-block--sample",class:{'pc-block-focused': _vm.isblockfocused == 'sample', 'pc-block-to-calculate': _vm.calculateprop == 'sample'}},[_c('pc-svg-chain',{attrs:{"calculateprop":_vm.calculateprop,"fieldfromblock":_vm.fieldfromblock}}),_vm._v(" "),_c('label',{staticClass:"pc-calc-radio pc-calc-radio--sample",class:{'pc-calc-radio--active': _vm.isCalculated},attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.isCalculated),expression:"isCalculated"}],attrs:{"type":"radio"},domProps:{"value":true,"checked":_vm._q(_vm.isCalculated,true)},on:{"change":function($event){_vm.isCalculated=true;}}}),_vm._v(" "+_vm._s(_vm.isCalculated ? 'Calculating' : 'Calculate')+" ")]),_vm._v(" "),_c('div',{staticClass:"pc-header"},[_vm._v(" Sample Size ")]),_vm._v(" "),_c('ul',{staticClass:"pc-inputs"},[_c('li',{staticClass:"pc-input-item pc-input-left"},[_c('label',[_vm._m(0,false,false),_vm._v(" "),_c('pc-block-field',{attrs:{"fieldprop":"totalSample","fieldvalue":_vm.totalSample,"testtype":_vm.testtype,"isreadonly":_vm.calculateprop == 'sample',"enableedit":_vm.enableedit},on:{"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}})],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right pc-value-field--lockable",class:{'pc-value-field--unlocked': _vm.lockedField == 'days'}},[_c('label',[_vm._m(1,false,false),_vm._v(" "),_c('pc-block-field',{attrs:{"fieldprop":"visitorsPerDay","fieldvalue":_vm.visitorsPerDay,"testtype":_vm.testtype,"isreadonly":false,"isblockfocused":_vm.isblockfocused,"enableedit":_vm.enableedit,"lockedfield":_vm.lockedField,"lock":_vm.lockedField},on:{"update:lock":function($event){_vm.lockedField=$event;},"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}})],1),_vm._v(" "),_c('button',{staticClass:"pc-swap-button",attrs:{"type":"button"},on:{"click":_vm.switchLockedField}},[_c('svg',{attrs:{"width":"20px","height":"20px","viewBox":"0 0 20 20","version":"1.1","xmlns":"http://www.w3.org/2000/svg","xmlns:xlink":"http://www.w3.org/1999/xlink"}},[_c('desc',[_vm._v("Lock "+_vm._s(_vm.lockedField == 'days' ? 'number of days' : 'visitors per day'))]),_vm._v(" "),_c('defs',[_c('circle',{attrs:{"id":"path-1","cx":"13","cy":"13","r":"10"}}),_vm._v(" "),_c('filter',{attrs:{"x":"-5.0%","y":"-5.0%","width":"110.0%","height":"110.0%","filterUnits":"objectBoundingBox","id":"filter-2"}},[_c('feGaussianBlur',{attrs:{"stdDeviation":"0.5","in":"SourceAlpha","result":"shadowBlurInner1"}}),_vm._v(" "),_c('feOffset',{attrs:{"dx":"0","dy":"1","in":"shadowBlurInner1","result":"shadowOffsetInner1"}}),_vm._v(" "),_c('feComposite',{attrs:{"in":"shadowOffsetInner1","in2":"SourceAlpha","operator":"arithmetic","k2":"-1","k3":"1","result":"shadowInnerInner1"}}),_vm._v(" "),_c('feColorMatrix',{attrs:{"values":"0 0 0 0 0.489716199   0 0 0 0 0.489716199   0 0 0 0 0.489716199  0 0 0 0.5 0","type":"matrix","in":"shadowInnerInner1"}})],1)]),_vm._v(" "),_c('g',{attrs:{"id":"Page-1","stroke":"none","stroke-width":"1","fill":"none","fill-rule":"evenodd"}},[_c('g',{attrs:{"id":"Power-Calculator","transform":"translate(-550.000000, -522.000000)"}},[_c('g',{attrs:{"id":"Switcher","transform":"translate(547.000000, 519.000000)"}},[_c('g',{attrs:{"id":"Oval-3"}},[_c('use',{attrs:{"fill":"#EFEFEF","fill-rule":"evenodd","xlink:href":"#path-1"}}),_vm._v(" "),_c('use',{attrs:{"fill":"black","fill-opacity":"1","filter":"url(#filter-2)","xlink:href":"#path-1"}})]),_vm._v(" "),_c('g',{attrs:{"id":"Group","stroke-width":"1","fill-rule":"evenodd","transform":"translate(7.000000, 7.000000)","fill":"#155EAB"}},[_c('path',{attrs:{"d":"M4.5,4.20404051 L4.5,9.9127641 L2.5,9.9127641 L2.5,4.20404051 L0.5,4.20404051 L3.5,0.70872359 L6.5,4.20404051 L4.5,4.20404051 Z","id":"Combined-Shape"}}),_vm._v(" "),_c('path',{attrs:{"d":"M9.5,5.49531692 L9.5,11.2040405 L7.5,11.2040405 L7.5,5.49531692 L5.5,5.49531692 L8.5,2 L11.5,5.49531692 L9.5,5.49531692 Z","id":"Combined-Shape","transform":"translate(8.500000, 6.602020) scale(1, -1) translate(-8.500000, -6.602020) "}})])])])])])])]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right-swap pc-value-field--lockable",class:{'pc-value-field--unlocked': _vm.lockedField != 'days'}},[_c('label',[_c('pc-block-field',{attrs:{"fieldprop":"days","prefix":"","suffix":" days","fieldvalue":_vm.days,"testtype":_vm.testtype,"isreadonly":false,"isblockfocused":_vm.isblockfocused,"enableedit":_vm.enableedit,"lockedfield":_vm.lockedField,"lock":_vm.lockedField,"aria-label":"Days"},on:{"update:lock":function($event){_vm.lockedField=$event;},"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}})],1)])])],1)},staticRenderFns: [function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('span',{staticClass:"pc-input-title"},[_vm._v("Total # "),_c('small',{staticClass:"pc-input-sub-title"},[_vm._v("of visitors")])])},function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('span',{staticClass:"pc-input-title"},[_vm._v("Daily # "),_c('small',{staticClass:"pc-input-sub-title"},[_vm._v("of visitors")])])}],_scopeId: 'data-v-297fe272',
+    props: ['runtime', 'testtype', 'calculateprop', 'enableedit', 'isblockfocused', 'sample', 'calculateprop', 'fieldfromblock'],
+    template: '#sample-comp',
+    extends: pcBlock,
     data () {
         let initialDaysValue = 14;
         return {
             days: initialDaysValue,
             visitorsPerDay: this.calculateVisitorsPerDay(this.sample, initialDaysValue),
             variants: 2,
+            totalSample: this.sample,
             enableEdit: false,
             focusedBlock: '',
             lockedField: 'days'
@@ -5503,7 +5628,17 @@ var sampleComp = {render: function(){var _vm=this;var _h=_vm.$createElement;var 
             this.$emit('edit:update', {prop: 'sample'});
         },
         updateFields ({prop, value}) {
-            this[prop] = window.parseInt(value || 0);
+            let totalSample = 0;
+
+            if (prop == 'totalSample') {
+                totalSample = value;
+            } else if (prop == 'visitorsPerDay') {
+                totalSample = value * this.days;
+            } else if (prop == 'days') {
+                totalSample = this.visitorsPerDay * value;
+            }
+
+            this.totalSample = window.parseInt(totalSample || 0);
         },
         updateFocus ({fieldProp, value}) {
 
@@ -5521,52 +5656,33 @@ var sampleComp = {render: function(){var _vm=this;var _h=_vm.$createElement;var 
         updateSampleMainField () {
             this.$emit('field:change', {
                 prop: 'sample',
-                value: this.displayValue('sample', this.visitorsPerDay * this.days)
+                value: this.totalSample
             });
+        },
+        switchLockedField () {
+            this.lockedField = this.lockedField == 'days' ? 'visitorsPerDay' : 'days';
         }
     },
     watch: {
         sample (newValue) {
+            this.totalSample = newValue;
+        },
+        totalSample (newValue) {
             if (this.lockedField == 'days') {
                 this.visitorsPerDay = this.calculateVisitorsPerDay(newValue, this.days);
             } else {
                 this.days = this.calculateDays(newValue, this.visitorsPerDay);
             }
-        },
-        days (newValue) {
-            if (this.focusedBlock == 'days') {
-                if (this.calculateprop != 'sample') {
-                    this.updateSampleMainField();
-                } else {
-                    this.visitorsPerDay = this.calculateVisitorsPerDay(this.sample, newValue);
-                }
-            }
-            this.$emit('update:runtime', newValue);
-        },
-        visitorsPerDay (newValue) {
-            if (this.focusedBlock == 'visitorsPerDay') {
-                if (this.calculateprop != 'sample') {
-                    this.updateSampleMainField();
-                } else {
-                    this.days = this.calculateDays(this.sample, newValue);
-                }
-            }
-        },
-        variants (newValue) {
-            if (this.focusedBlock == 'variants') {
 
-            }
+            this.updateSampleMainField();
         }
-    },
-    components: {
-        'pc-block-field': pcBlockField
     }
 };
 
-var impactComp = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_c('label',{staticClass:"pc-switch-mode"},[_vm._v(" Switch input mode to "),_c('input',{staticClass:"pc-switch-button",attrs:{"type":"button","value":_vm.enableedit ? 'Relative Impact' : 'Absolute Impact'},on:{"click":_vm.enableInput}})]),_vm._v(" "),_c('ul',{staticClass:"pc-list"},[_c('li',[_c('pc-block-field',{attrs:{"fieldprop":"impactByMetricValue","prefix":"","suffix":` going from ${_vm.impactByMetricMinDisplay} to ${_vm.impactByMetricMaxDisplay}%`,"fieldvalue":_vm.impactByMetricDisplay,"testtype":_vm.testtype,"isreadonly":_vm.isReadOnly,"isblockfocused":_vm.isblockfocused,"enableedit":_vm.enableedit,"aria-label":"visitors with goals"},on:{"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}})],1),_vm._v(" "),_c('li',[_c('pc-block-field',{attrs:{"fieldprop":"impactByVisitors","prefix":"","suffix":_vm.testtype == 'gTest' ? ' Incremental trials': ' Incremental change in the metric',"fieldvalue":_vm.impactByVisitorsDisplay,"testtype":_vm.testtype,"isreadonly":_vm.isReadOnly,"isblockfocused":_vm.isblockfocused,"enableedit":_vm.enableedit && _vm.calculateprop != 'sample',"aria-label":"testtype == 'gTest' ? ' Incremental trials': ' Incremental change in the metric'"},on:{"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}})],1),_vm._v(" "),_c('li',[_c('pc-block-field',{attrs:{"fieldprop":"impactByVisitorsPerDay","prefix":"","suffix":_vm.testtype == 'gTest' ? ' Incremental trials per day': ' Incremental change in the metric per day',"fieldvalue":_vm.impactByVisitorsPerDayDisplay,"testtype":_vm.testtype,"isreadonly":_vm.isReadOnly,"isblockfocused":_vm.isblockfocused,"enableedit":_vm.enableedit && _vm.calculateprop != 'sample',"aria-label":"testtype == 'gTest' ? ' Incremental trials per day': ' Incremental change in the metric per day'"},on:{"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}})],1)])])},staticRenderFns: [],
-    mixins: [valueTransformationMixin],
+var impactComp = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-block pc-block--impact",class:{'pc-block-focused': _vm.isblockfocused, 'pc-block-to-calculate': _vm.calculateprop == 'impact'}},[_c('pc-svg-chain',{attrs:{"calculateprop":_vm.calculateprop,"fieldfromblock":_vm.fieldfromblock}}),_vm._v(" "),_c('label',{staticClass:"pc-calc-radio pc-calc-radio--impact",class:{'pc-calc-radio--active': _vm.isCalculated},attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.isCalculated),expression:"isCalculated"}],attrs:{"type":"radio"},domProps:{"value":true,"checked":_vm._q(_vm.isCalculated,true)},on:{"change":function($event){_vm.isCalculated=true;}}}),_vm._v(" "+_vm._s(_vm.isCalculated ? 'Calculating' : 'Calculate')+" ")]),_vm._v(" "),_c('div',{staticClass:"pc-header"},[_vm._v(" Impact ")]),_vm._v(" "),_c('ul',{staticClass:"pc-inputs"},[_c('li',{staticClass:"pc-input-item pc-input-left"},[_c('label',[_c('span',{staticClass:"pc-input-title"},[_vm._v("Relative")]),_vm._v(" "),_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"prefix":"±","suffix":"%","fieldprop":"relativeImpact","fieldvalue":_vm.relativeImpact,"testtype":_vm.testType,"isreadonly":_vm.calculateprop == 'impact',"isblockfocused":_vm.isblockfocused,"enableedit":_vm.enableedit},on:{"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}})],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right"},[_c('label',[_c('span',{staticClass:"pc-input-title"},[_vm._v("Absolute")]),_vm._v(" "),_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"fieldprop":"impactByMetricValue","fieldvalue":_vm.impactByMetricDisplay,"testtype":_vm.testtype,"isreadonly":_vm.isReadOnly,"isblockfocused":_vm.isblockfocused,"enableedit":_vm.enableedit,"aria-label":"visitors with goals"},on:{"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v(" going from "+_vm._s(_vm.impactByMetricMinDisplay)+" to "+_vm._s(_vm.impactByMetricMaxDisplay)+"% ")])],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-bottom-left"},[_c('label',[_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"fieldprop":"impactByVisitors","fieldvalue":_vm.impactByVisitorsDisplay,"testtype":_vm.testtype,"isreadonly":_vm.isReadOnly,"isblockfocused":_vm.isblockfocused,"enableedit":_vm.enableedit && _vm.calculateprop != 'sample'},on:{"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v(" "+_vm._s(_vm.testtype == 'gTest' ? ' Incremental trials': ' Incremental change in the metric')+" ")])],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-bottom-right"},[_c('label',[_c('pc-block-field',{attrs:{"fieldprop":"impactByVisitorsPerDay","fieldvalue":_vm.impactByVisitorsPerDayDisplay,"testtype":_vm.testtype,"isreadonly":_vm.isReadOnly,"isblockfocused":_vm.isblockfocused,"enableedit":_vm.enableedit && _vm.calculateprop != 'sample'},on:{"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v(" "+_vm._s(_vm.testtype == 'gTest' ? ' Incremental trials per day': ' Incremental change in the metric per day')+" ")])],1)])])],1)},staticRenderFns: [],
+    extends: pcBlock,
     template: '#impact-comp',
-    props: ['days', 'testtype', 'enableedit', 'impact', 'base', 'sample', 'calculateprop', 'fieldfromblock', 'isblockfocused', 'testtype'],
+    props: ['view', 'testtype', 'enableedit', 'calculateprop', 'fieldfromblock', 'isblockfocused', 'testtype'],
     data () {
         return {
             // impactByMetric: {
@@ -5580,10 +5696,24 @@ var impactComp = {render: function(){var _vm=this;var _h=_vm.$createElement;var 
             impactByVisitors: this.getImpactByVisitor(),
             impactByVisitorsPerDay: this.getImpactByVisitorsPerDay(),
             enableEdit: false,
-            focusedBlock: ''
+            focusedBlock: '',
+            relativeImpact: this.view.impact
         }
     },
     computed: {
+        days () {
+            return this.view.runtime
+        },
+        base () {
+            return this.view.base
+        },
+        sample () {
+            return this.view.sample
+        },
+        impact () {
+            return this.view.impact
+        },
+
         isReadOnly () {
             return this.calculateprop == 'impact'
         },
@@ -5611,7 +5741,7 @@ var impactComp = {render: function(){var _vm=this;var _h=_vm.$createElement;var 
             this.updateData();
         },
         impact () {
-            this.updateData();
+            this.relativeImpact = this.impact;
         },
         sample () {
             this.updateData();
@@ -5630,26 +5760,26 @@ var impactComp = {render: function(){var _vm=this;var _h=_vm.$createElement;var 
             // they should never be changes manually;
             this.impactByMetricMin = impactByMetricObj.min;
             this.impactByMetricMax = impactByMetricObj.max;
-        },
+        }
     },
     methods: {
         getImpactByMetric (prop = 'value') {
             let impactByMetricObj = statFormulas.getAbsoluteImpactInMetricHash({
-                base_rate: this.extractValue('base', this.base),
-                effect_size: this.extractValue('impact', this.impact)
+                base_rate: this.extractValue('base', this.view.base),
+                effect_size: this.extractValue('impact', this.view.impact)
             });
 
             return impactByMetricObj[prop];
         },
         getImpactByVisitor () {
             return statFormulas.getAbsoluteImpactInVisitors({
-                total_sample_size: this.extractValue('sample', this.sample),
-                base_rate: this.extractValue('base', this.base),
-                effect_size: this.extractValue('impact', this.impact)
+                total_sample_size: this.extractValue('sample', this.view.sample),
+                base_rate: this.extractValue('base', this.view.base),
+                effect_size: this.extractValue('impact', this.view.impact)
             })
         },
         getImpactByVisitorsPerDay () {
-            return this.getImpactByVisitor() / this.days
+            return this.getImpactByVisitor() / this.view.runtime
         },
         updateData () {
             this.impactByMetricValue = this.getImpactByMetric();
@@ -5685,6 +5815,8 @@ var impactComp = {render: function(){var _vm=this;var _h=_vm.$createElement;var 
                         base_rate: this.extractValue('base', this.base),
                         visitors: realValue
                 });
+            } else if (prop == 'relativeImpact') {
+                relative = this.extractValue('impact', value);
             }
 
             if (!relative) {
@@ -5708,55 +5840,52 @@ var impactComp = {render: function(){var _vm=this;var _h=_vm.$createElement;var 
                 value: value
             });
         }
-    },
-    components: {
-        'pc-block-field': pcBlockField
     }
 };
 
-var baseComp = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_c('label',{staticClass:"pc-switch-mode"},[_vm._v(" Switch input mode to "),_c('input',{staticClass:"pc-switch-button",attrs:{"type":"button","value":_vm.enableedit ? 'Base rate' : 'Metric totals'},on:{"click":_vm.enableInput}})]),_vm._v(" "),_c('ul',{staticClass:"pc-list"},[_c('li',[_c('pc-block-field',{attrs:{"fieldprop":"visitorsWithGoals","prefix":"","suffix":" Metric total","fieldvalue":_vm.visitorsWithGoals,"testtype":_vm.testtype,"fieldfromblock":_vm.fieldfromblock,"isblockfocused":_vm.isblockfocused,"isreadonly":_vm.isReadOnly,"enableedit":_vm.enableedit,"aria-label":"visitors with goals"},on:{"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}})],1)])])},staticRenderFns: [],
-    props: ['testtype', 'enableedit', 'base', 'sample', 'calculateprop', 'fieldfromblock', 'isblockfocused', 'apptesttype'],
-    mixins: [valueTransformationMixin],
+var baseComp = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-block pc-block--base",class:{'pc-block-focused': _vm.focusedblock == 'base'}},[_c('pc-svg-chain',{attrs:{"calculateprop":_vm.calculateprop,"fieldfromblock":_vm.fieldfromblock}}),_vm._v(" "),(_vm.testtype == 'gTest')?_c('div',{staticClass:"pc-header"},[_vm._v(" Base Rate ")]):_c('div',{staticClass:"pc-header"},[_vm._v(" Base Average ")]),_vm._v(" "),_c('ul',{staticClass:"pc-inputs"},[_c('li',{staticClass:"pc-input-item pc-input-left"},[_c('label',[_c('span',{staticClass:"pc-input-title"},[_vm._v(_vm._s(_vm.testtype == 'gTest' ? 'Base Rate' : 'Base Average')+" "),_c('small',{staticClass:"pc-input-sub-title"},[_vm._v("conversion")])]),_vm._v(" "),_c('pc-block-field',{attrs:{"fieldprop":"baseRate","suffix":_vm.testtype == 'gTest' ? '%' : '',"fieldvalue":_vm.baseRate,"testtype":_vm.testtype,"isreadonly":_vm.isReadOnly,"isblockfocused":_vm.isblockfocused,"enableedit":_vm.enableedit},on:{"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}})],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right"},[_c('label',[_vm._m(0,false,false),_vm._v(" "),_c('pc-block-field',{attrs:{"fieldprop":"visitorsWithGoals","fieldvalue":_vm.visitorsWithGoals,"testtype":_vm.testtype,"fieldfromblock":_vm.fieldfromblock,"isblockfocused":_vm.isblockfocused,"isreadonly":_vm.isReadOnly,"enableedit":_vm.enableedit && this.calculateprop != 'sample'},on:{"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}})],1)]),_vm._v(" "),(_vm.testtype == 'tTest')?_c('li',{staticClass:"pc-input-item pc-input-sd-rate"},[_c('label',[_c('pc-block-field',{attrs:{"prefix":"±","fieldprop":"sdRate","fieldfromblock":"base","fieldvalue":_vm.view.sdRate,"testtype":_vm.testtype,"isreadonly":_vm.isReadOnly,"isblockfocused":_vm.isblockfocused,"enableedit":_vm.enableedit},on:{"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v("Base Standard deviation")])],1)]):_vm._e()])],1)},staticRenderFns: [function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('span',{staticClass:"pc-input-title"},[_vm._v("Metric Totals"),_c('small',{staticClass:"pc-input-sub-title"},[_vm._v("visitors reached goal")])])}],_scopeId: 'data-v-0d0bef2b',
+    props: ['testtype', 'enableedit', 'view', 'calculateprop', 'fieldfromblock', 'isblockfocused'],
+    extends: pcBlock,
     template: '#base-comp',
     data () {
         return {
-            visitorsWithGoals: this.computeVisitors(),
+            visitorsWithGoals: this.computeVisitors({init: true}),
             enableEdit: false,
             focusedBlock: '',
-            testType: this.apptesttype
+            baseRate: this.view.base
         }
     },
     computed: {
         isReadOnly () {
             return this.calculateprop == 'base'
         },
-        baseRealValue () {
-            return this.extractValue('base', this.base)
+        base () {
+            return this.view.base
         },
-        sampleRealValue () {
-            return this.extractValue('sample', this.sample)
+        sample () {
+            return this.view.sample
         }
     },
     watch: {
-        baseRealValue () {
+        base (newValue) {
+            this.baseRate = newValue;
+        },
+        sample () {
             if (this.focusedBlock != this.fieldfromblock) {
                 this.visitorsWithGoals = this.computeVisitors();
             }
         },
-        sampleRealValue () {
+        baseRate () {
             if (this.focusedBlock != this.fieldfromblock) {
                 this.visitorsWithGoals = this.computeVisitors();
             }
         },
-        apptesttype (newValue) {
-            this.testType = newValue;
-        }
     },
     methods: {
-        computeVisitors () {
+        computeVisitors (config) {
             let result = statFormulas.getVisitorsWithGoals({
-                    total_sample_size: this.extractValue('sample', this.sample),
-                    base_rate: this.extractValue('base', this.base)
+                    total_sample_size: this.extractValue('sample', this.view.sample),
+                    base_rate: this.extractValue('base', config && config.init ? this.view.base : this.baseRate)
                 });
 
             return this.displayValue('metricTotals', result)
@@ -5765,9 +5894,35 @@ var baseComp = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c
             this.$emit('edit:update', {prop: 'base'});
         },
         updateFields ({prop, value}) {
-            this[prop] = window.parseInt(value || 0);
 
-            this.updateBaseRateMainField();
+            let result = 0;
+            let shouldUpdateBaseRate = prop == 'baseRate' || prop == 'visitorsWithGoals';
+
+            if (prop == 'baseRate') {
+                result = value;
+            } else if (prop == 'visitorsWithGoals') {
+                result = this.displayValue(
+                    'base',
+                    statFormulas.getBaseRate({
+                        total_sample_size: this.extractValue('sample', this.sample),
+                        visitors_with_goals: value
+                    })
+                );
+            } else if (prop == 'sdRate') {
+                this.$emit('field:change', {
+                    prop: 'sdRate',
+                    value: value
+                });
+            }
+
+            if (shouldUpdateBaseRate) {
+                this.baseRate = window.parseInt(result || 0);
+
+                this.$emit('field:change', {
+                    prop: 'base',
+                    value: result
+                });
+            }
         },
         updateFocus ({fieldProp, value}) {
             if (this.focusedBlock == fieldProp && value === false) {
@@ -5780,28 +5935,8 @@ var baseComp = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c
                 fieldProp: this.fieldfromblock,
                 value: value
             });
-        },
-        updateBaseRateMainField () {
-            if (this.calculateprop != 'base') {
-                return
-            }
-            let baseToDisplay = this.displayValue(
-                    'base',
-                    statFormulas.getBaseRate({
-                        total_sample_size: this.sampleRealValue,
-                        visitors_with_goals: this.visitorsWithGoals
-                    })
-                );
-
-            this.$emit('field:change', {
-                prop: 'base',
-                value: baseToDisplay
-            });
         }
 
-    },
-    components: {
-        'pc-block-field': pcBlockField
     }
 };
 
@@ -5820,7 +5955,7 @@ var pcTooltip = {render: function(){var _vm=this;var _h=_vm.$createElement;var _
 
 };
 
-var powerCalculator$1 = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"power-calculator"},[_c('form',{staticClass:"pc-form",attrs:{"action":"."}},[_c('div',{staticClass:"pc-main-header"},[_vm._m(0,false,false),_vm._v(" "),_c('div',{staticClass:"pc-test-type"},[_c('pc-tooltip',{staticClass:"pc-test-type-tooltip-wrapper"},[_c('label',{staticClass:"pc-test-type-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.testType),expression:"testType"}],attrs:{"type":"radio","name":"test-mode","value":"gTest","checked":"checked"},domProps:{"checked":_vm._q(_vm.testType,"gTest")},on:{"change":function($event){_vm.testType="gTest";}}}),_vm._v(" Binary Metric ")]),_vm._v(" "),_c('span',{attrs:{"slot":"tooltip"},slot:"tooltip"},[_vm._v(" A binary metric is one that can be only two values like 0 or 1, yes or no, converted or not converted ")])]),_vm._v(" "),_c('pc-tooltip',{staticClass:"pc-test-type-tooltip-wrapper"},[_c('label',{staticClass:"pc-test-type-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.testType),expression:"testType"}],attrs:{"type":"radio","name":"test-mode","value":"tTest"},domProps:{"checked":_vm._q(_vm.testType,"tTest")},on:{"change":function($event){_vm.testType="tTest";}}}),_vm._v(" Continuous Metric ")]),_vm._v(" "),_c('span',{attrs:{"slot":"tooltip"},slot:"tooltip"},[_vm._v(" A continuous metric is one that can be any number like time on site or the number of rooms sold ")])])],1),_vm._v(" "),_c('label',{staticClass:"pc-false-positive"},[_c('pc-block-field',{staticClass:"pc-false-positive-input",class:{ 'pc-top-fields-error': _vm.view.falsePosRate > 10 },attrs:{"suffix":"%","fieldprop":"falsePosRate","fieldvalue":_vm.view.falsePosRate,"testtype":_vm.testType,"enableedit":true},on:{"field:change":_vm.updateFields}}),_vm._v(" False Positive Rate ")],1),_vm._v(" "),_c('label',{staticClass:"pc-power"},[_c('pc-block-field',{staticClass:"pc-power-input",class:{ 'pc-top-fields-error': _vm.view.power < 80 },attrs:{"suffix":"%","fieldprop":"power","fieldvalue":_vm.view.power,"testtype":_vm.testType,"enableedit":true},on:{"field:change":_vm.updateFields}}),_vm._v(" Power ")],1)]),_vm._v(" "),_c('div',{staticClass:"pc-blocks-wrapper",class:{'pc-blocks-wrapper-ttest': _vm.testType == 'tTest'}},[_c('label',{staticClass:"pc-calc-radio--sample",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.calculateProp),expression:"calculateProp"}],attrs:{"type":"radio","value":"sample"},domProps:{"checked":_vm._q(_vm.calculateProp,"sample")},on:{"change":function($event){_vm.calculateProp="sample";}}}),_vm._v(" Calculate sample size ")]),_vm._v(" "),_c('label',{staticClass:"pc-calc-radio--impact",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.calculateProp),expression:"calculateProp"}],attrs:{"type":"radio","value":"impact"},domProps:{"checked":_vm._q(_vm.calculateProp,"impact")},on:{"change":function($event){_vm.calculateProp="impact";}}}),_vm._v(" Calculate impact ")]),_vm._v(" "),_c('div',{staticClass:"pc-block pc-block--base pc-block--rounded-left",class:{'pc-block-focused': _vm.focusedBlock == 'base'}},[(_vm.testType == 'gTest')?_c('div',{staticClass:"pc-header"},[_vm._v(" Base Rate "),_c('span',{staticClass:"pc-desc"},[_vm._v(" e.g. Goal Conversion ")])]):_c('div',{staticClass:"pc-header"},[_vm._v(" Base Average "),_c('span',{staticClass:"pc-desc"},[_vm._v(" e.g. average number of bookings ")])]),_vm._v(" "),_c('label',{staticClass:"pc-value"},[_c('pc-block-field',{attrs:{"fieldprop":"base","suffix":_vm.testType == 'gTest' ? '%' : '',"fieldvalue":_vm.view.base,"testtype":_vm.testType,"isreadonly":_vm.calculateProp == 'base',"isblockfocused":_vm.focusedBlock == 'base',"enableedit":_vm.enabledMainInputs.base,"aria-label":"Base rate value"},on:{"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}})],1),_vm._v(" "),(_vm.testType == 'tTest')?_c('label',{staticClass:"pc-value"},[_vm._v(" Base Standard deviation "),_c('pc-block-field',{attrs:{"prefix":"±","fieldprop":"sdRate","fieldfromblock":"base","fieldvalue":_vm.view.sdRate,"testtype":_vm.testType,"isreadonly":_vm.calculateProp == 'base',"isblockfocused":_vm.focusedBlock == 'base',"enableedit":_vm.enabledMainInputs.base},on:{"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}})],1):_vm._e(),_vm._v(" "),_c('base-comp',{attrs:{"fieldfromblock":"base","sample":_vm.view.sample,"base":_vm.view.base,"calculateprop":_vm.calculateProp,"isblockfocused":_vm.focusedBlock == 'base',"testtype":_vm.testType,"enableedit":!_vm.enabledMainInputs.base},on:{"update:focus":_vm.updateFocus,"edit:update":_vm.editUpdate,"field:change":_vm.updateFields}})],1),_vm._v(" "),_c('div',{staticClass:"pc-block pc-block--impact",class:{'pc-block-focused': _vm.focusedBlock == 'impact', 'pc-block-to-calculate': _vm.calculateProp == 'impact'}},[_vm._m(1,false,false),_vm._v(" "),_c('label',{staticClass:"pc-value"},[_c('pc-block-field',{attrs:{"prefix":"±","suffix":"%","fieldprop":"impact","fieldvalue":_vm.view.impact,"testtype":_vm.testType,"isreadonly":_vm.calculateProp == 'impact',"isblockfocused":_vm.focusedBlock == 'impact',"enableedit":_vm.enabledMainInputs.impact,"aria-label":"Impact value"},on:{"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}})],1),_vm._v(" "),_c('impact-comp',{attrs:{"fieldfromblock":"impact","impact":_vm.view.impact,"base":_vm.view.base,"days":_vm.view.runtime,"sample":_vm.view.sample,"isblockfocused":_vm.focusedBlock == 'impact',"calculateprop":_vm.calculateProp,"testtype":_vm.testType,"enableedit":!_vm.enabledMainInputs.impact},on:{"field:change":_vm.updateFields,"edit:update":_vm.editUpdate,"update:focus":_vm.updateFocus}})],1),_vm._v(" "),_c('div',{staticClass:"pc-block pc-block--sample pc-block--rounded-right",class:{'pc-block-focused': _vm.focusedBlock == 'sample', 'pc-block-to-calculate': _vm.calculateProp == 'sample'}},[_vm._m(2,false,false),_vm._v(" "),_c('label',{staticClass:"pc-value"},[_c('pc-block-field',{attrs:{"fieldprop":"sample","fieldvalue":_vm.view.sample,"testtype":_vm.testType,"isreadonly":_vm.calculateProp == 'sample',"enableedit":_vm.enabledMainInputs.sample,"aria-label":"Sample size value"},on:{"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}})],1),_vm._v(" "),_c('sample-comp',{attrs:{"fieldfromblock":"sample","sample":_vm.view.sample,"runtime":_vm.view.runtime,"calculateprop":_vm.calculateProp,"enableedit":!_vm.enabledMainInputs.sample,"isblockfocused":_vm.focusedBlock == 'sample'},on:{"update:runtime":function($event){_vm.$set(_vm.view, "runtime", $event);},"field:change":_vm.updateFields,"edit:update":_vm.editUpdate,"update:focus":_vm.updateFocus}})],1),_vm._v(" "),_c('div',{staticClass:"pc-block pc-block--graph",class:{'pc-block-focused': _vm.focusedBlock == 'power', 'pc-block-to-calculate': _vm.calculateProp == 'power'}},[_vm._m(3,false,false),_vm._v(" "),_c('ul',{staticClass:"pc-list"},[_c('li',[_c('svg-graph',{attrs:{"sample":_vm.view.sample,"power":_vm.view.power,"impact":_vm.view.impact,"base":_vm.view.base,"sdrate":_vm.view.sdRate,"falseposrate":_vm.view.falsePosRate,"testtype":_vm.testType}})],1)])])])]),_vm._v(" "),_c('pc-overlay',{attrs:{"isoverlayopen":_vm.isOverlayOpened},on:{"update:isoverlayopen":function($event){_vm.isOverlayOpened=$event;}}})],1)},staticRenderFns: [function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-title"},[_vm._v("Power Calculator "),_c('sup',{staticStyle:{"color":"#F00","font-size":"11px"}},[_vm._v("BETA")])])},function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-header"},[_vm._v(" Impact "),_c('span',{staticClass:"pc-desc"},[_vm._v(" Relative impact ")])])},function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-header"},[_vm._v(" Sample Size "),_c('span',{staticClass:"pc-desc"},[_vm._v(" Total number of visitors in all variants ")])])},function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-header"},[_vm._v(" Graph "),_c('span',{staticClass:"pc-desc"},[_vm._v("   ")])])}],
+var powerCalculator$1 = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"power-calculator"},[_c('form',{staticClass:"pc-form",attrs:{"action":"."}},[_c('div',{staticClass:"pc-main-header"},[_c('div',{staticClass:"pc-test-type"},[_c('pc-tooltip',{staticClass:"pc-test-type-tooltip-wrapper"},[_c('label',{staticClass:"pc-test-type-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.testType),expression:"testType"}],attrs:{"type":"radio","name":"test-mode","value":"gTest","checked":"checked"},domProps:{"checked":_vm._q(_vm.testType,"gTest")},on:{"change":function($event){_vm.testType="gTest";}}}),_vm._v(" Binary Metric ")]),_vm._v(" "),_c('span',{attrs:{"slot":"tooltip"},slot:"tooltip"},[_vm._v(" A binary metric is one that can be only two values like 0 or 1, yes or no, converted or not converted ")])]),_vm._v(" "),_c('pc-tooltip',{staticClass:"pc-test-type-tooltip-wrapper"},[_c('label',{staticClass:"pc-test-type-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.testType),expression:"testType"}],attrs:{"type":"radio","name":"test-mode","value":"tTest"},domProps:{"checked":_vm._q(_vm.testType,"tTest")},on:{"change":function($event){_vm.testType="tTest";}}}),_vm._v(" Continuous Metric ")]),_vm._v(" "),_c('span',{attrs:{"slot":"tooltip"},slot:"tooltip"},[_vm._v(" A continuous metric is one that can be any number like time on site or the number of rooms sold ")])])],1),_vm._v(" "),_vm._m(0,false,false),_vm._v(" "),_c('label',{staticClass:"pc-false-positive"},[_c('pc-block-field',{staticClass:"pc-false-positive-input",class:{ 'pc-top-fields-error': _vm.view.falsePosRate > 10 },attrs:{"suffix":"%","fieldprop":"falsePosRate","fieldvalue":_vm.view.falsePosRate,"testtype":_vm.testType,"enableedit":true},on:{"field:change":_vm.updateFields}}),_vm._v(" false positive rate ")],1),_vm._v(" "),_c('label',{staticClass:"pc-power"},[_c('pc-block-field',{staticClass:"pc-power-input",class:{ 'pc-top-fields-error': _vm.view.power < 80 },attrs:{"suffix":"%","fieldprop":"power","fieldvalue":_vm.view.power,"testtype":_vm.testType,"enableedit":true},on:{"field:change":_vm.updateFields}}),_vm._v(" power ")],1)]),_vm._v(" "),_c('div',{staticClass:"pc-blocks-wrapper",class:{'pc-blocks-wrapper-ttest': _vm.testType == 'tTest'}},[_c('base-comp',{attrs:{"fieldfromblock":"base","view":_vm.view,"calculateprop":_vm.calculateProp,"isblockfocused":_vm.focusedBlock == 'base',"testtype":_vm.testType,"enableedit":_vm.enabledMainInputs.base},on:{"update:focus":_vm.updateFocus,"field:change":_vm.updateFields}}),_vm._v(" "),_c('sample-comp',{attrs:{"fieldfromblock":"sample","sample":_vm.view.sample,"runtime":_vm.view.runtime,"calculateprop":_vm.calculateProp,"enableedit":_vm.enabledMainInputs.sample,"isblockfocused":_vm.focusedBlock == 'sample'},on:{"update:runtime":function($event){_vm.$set(_vm.view, "runtime", $event);},"update:calculateprop":_vm.updateCalculateProp,"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}}),_vm._v(" "),_c('impact-comp',{attrs:{"fieldfromblock":"impact","view":_vm.view,"isblockfocused":_vm.focusedBlock == 'impact',"testtype":_vm.testType,"enableedit":_vm.enabledMainInputs.impact,"calculateprop":_vm.calculateProp},on:{"update:calculateprop":_vm.updateCalculateProp,"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}}),_vm._v(" "),_c('svg-graph',{attrs:{"sample":_vm.view.sample,"power":_vm.view.power,"impact":_vm.view.impact,"base":_vm.view.base,"sdrate":_vm.view.sdRate,"falseposrate":_vm.view.falsePosRate,"testtype":_vm.testType}})],1)])])},staticRenderFns: [function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-title"},[_vm._v("Power Calculator "),_c('sup',{staticStyle:{"color":"#F00","font-size":"11px"}},[_vm._v("BETA")])])}],
     mixins: [valueTransformationMixin],
     data: {
         testType: 'gTest',
@@ -5896,30 +6031,13 @@ var powerCalculator$1 = {render: function(){var _vm=this;var _h=_vm.$createEleme
                 this.focusedBlock = fieldProp;
             }
         },
-        editUpdate ({prop}) {
-            let {calculateProp, disableBaseSecondaryInput} = this,
-                enableEdit = false;
-
-            if (prop == 'base' && disableBaseSecondaryInput) {
-                enableEdit = false;
-                this.enabledMainInputs[prop] = true;
-            } else if(calculateProp == 'sample' || calculateProp != prop) {
-                enableEdit = true;
-            }
-
-            if (enableEdit) {
-                this.enabledMainInputs[prop] = !this.enabledMainInputs[prop];
-            }
+        updateCalculateProp (newProp) {
+            this.calculateProp = newProp;
         }
     },
     watch: {
         testType () {
             this.formulas();
-        },
-        calculateProp () {
-            if (this.disableBaseSecondaryInput) {
-                this.editUpdate({prop: 'base'});
-            }
         }
     },
     components: {

@@ -222,172 +222,40 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* application styles */
 
 /* colors */
 
 .power-calculator {
-    --light-blue: #c0e3ff;
-    --blue: #3d78df;
-    --dark-blue: #3d78df;
-    --light-gray: #e2e6eb;
-    --gray: #8f9194;
-    --dark-gray: #5d5f63;
-    --light-yellow: #fbf2cb;
-    --yellow: #f9e699;
-    --dark-yellow: #e1b735;
+
     --white: #FFF;
     --black: #000;
+
+    --gray: #B5B5B5;
+    --light-gray: #F0F0F0;
+    --dark-gray: #525252;
+
+    --light-blue: #C1CFD8;
+    --pale-blue: #7898AE;
+    --blue: #155EAB;
+    --dark-blue: #3d78df;
+
+    --light-yellow: #FEF1CB;
+    --dark-yellow: #E2B634;
     --fade-black: rgba(0, 0, 0, 0.3);
+
     --red: #F00;
+
 }
 
 /* layout */
 
 .pc-main-header {
     display: grid;
-    grid-template-columns: auto min-content min-content min-content;
+    grid-template-columns: min-content auto min-content min-content;
     grid-template-rows: auto;
     grid-template-areas:
-        "title test-type false-positive power";
+        "test-type title false-positive power";
     align-items: center;
 
     margin: 25px 0 25px 10px;
@@ -395,8 +263,8 @@
 
 .pc-title {
     grid-area: title;
-    font-weight: bold;
-    font-size: 1.2em;
+    font-size: 30px;
+    text-align: center;
 }
 
 .pc-test-type,
@@ -407,7 +275,6 @@
 
 .pc-test-type {
     grid-area: test-type;
-    white-space: nowrap;
 }
 
 .pc-test-type-tooltip-wrapper {
@@ -416,6 +283,7 @@
 
 .pc-test-type-labels {
     margin: 0 20px;
+    white-space: nowrap;
 }
 
 .pc-false-positive {
@@ -432,24 +300,15 @@
 .pc-blocks-wrapper {
     grid-area: pc-blocks-wrapper;
     display: grid;
-    grid-template-columns: 25% 25% 25% 25%;
+    grid-template-columns: 33% 33% 33%;
     grid-template-rows: auto;
     grid-template-areas:
-        "radio-base radio-impact radio-sample radio-graph"
-        "block-base block-impact block-sample block-graph"
+        "block-base block-sample block-impact"
+        "block-graph block-graph block-graph"
     ;
     grid-template-rows: auto;
-    grid-column-gap: 1px;
-}
-
-.pc-calc-radio--sample {
-    grid-area: radio-sample;
-}
-.pc-calc-radio--impact {
-    grid-area: radio-impact;
-}
-.pc-calc-radio--power {
-    grid-area: radio-power;
+    grid-column-gap: 8px;
+    grid-row-gap: 8px;
 }
 
 .pc-block--base {
@@ -472,38 +331,18 @@
 /* blocks */
 
 .pc-block {
-    --border-radius: 15px;
-
-    padding: 5%;
     background: var(--light-gray);
 }
 
-.pc-block--rounded-left {
-    border-radius: var(--border-radius) 0 0 var(--border-radius);
-}
-
-.pc-block--rounded-right {
-    border-radius: 0 var(--border-radius) var(--border-radius) 0;
-}
-
-.pc-block--graph {
-    background: none;
-}
-
-.pc-block.pc-block-focused {
-    background: var(--light-blue);
-}
-
 .pc-header {
-    font-weight: bold;
+    color: var(--white);
+    text-align: center;
+    font-size: 28px;
+    line-height: 80px;
+    height: 80px;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.29);
+    background: var(--pale-blue);
     margin-bottom: 25px;
-}
-
-.pc-desc {
-    font-weight: normal;
-    font-size: 0.8em;
-    display: block;
-    min-height: 1em;
 }
 
 .pc-calculate {
@@ -518,61 +357,26 @@
     margin-bottom: 25px;
 }
 
-.pc-switch-mode {
-    display: block;
-    margin-bottom: 10px;
-    color: var(--gray);
-    font-size: 0.7em;
-}
-
-.pc-switch-button {
-    display: block;
-    font-size: inherit;
-    padding: 0;
-    background: none;
-    border: none;
-    -webkit-appearance: none;
-    color: var(--blue);
-    font-size: 1.2em;
-}
-
-.pc-list {
-    display: block;
-    margin: 0;
-}
-
 /* block to calculate override rules*/
 
-.pc-block.pc-block-to-calculate {
-    --gradient-middle: 43%;
-    background: linear-gradient(var(--dark-yellow) var(--gradient-middle), var(--light-yellow) calc(var(--gradient-middle) + 1px));
+.pc-block-to-calculate {
+    background: var(--light-yellow);
 }
 
-.pc-block-to-calculate .pc-value-field-wrapper {
-    background: var(--yellow);
+.pc-block-to-calculate .pc-header {
+    background: var(--dark-yellow);
 }
 
-.pc-block-to-calculate .pc-value .pc-value-formatting:before {
-    content: "=" attr(data-prefix);
-    color: var(--dark-yellow);
-}
 
-.pc-block-to-calculate .pc-value-formatting:after {
-    color: var(--black);
-}
 
-/* list */
 
-.pc-list {
-    font-size: 0.8em;
-    color: var(--gray);
-    padding: 0;
-    list-style-type: none;
-}
 
-.pc-list strong {
-    color: var(--dark-gray);
-}
+
+
+
+
+
+
 
 
 
@@ -939,11 +743,16 @@
 .pc-graph-controls {
     display: flex;
     flex-direction: row;
+    padding: 30px 0 0 60px;
+    margin-bottom: 5px;
+    border-bottom: 1px solid var(--blue);
 }
 
 .pc-graph-radio-label {
     position: relative;
-    margin-bottom: 5px;
+    font-size: 14px;
+    color: var(--blue);
+    margin-right: 40px;
 }
 
 .pc-graph-radio-input {
@@ -953,16 +762,91 @@
 
 .pc-graph-radio-text {
     display: block;
-    border: 1px solid var(--dark-gray);
-    border-radius: 3px;
-    padding: 3px;
-    color: var(--black);
+    padding: 0 5px 15px;
+    position: relative;
 }
 
-.pc-graph-radio-selected {
-    border: 1px solid var(--dark-blue);
-    background: var(--light-blue);
+.pc-graph-radio-input:checked + .pc-graph-radio-text::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 4px;
+    background: var(--blue);
 }
+
+/* graph layout */
+
+.pc-graph {
+    padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1210,6 +1094,7 @@
     --base-padding: 5px;
 
     display: block;
+    position: relative;
     box-sizing: border-box;
     width: 100%;
     filter: drop-shadow(0 4px 2px rgba(0,0,0,0.1));
@@ -1222,6 +1107,14 @@
 
 .pc-field--focused {
     box-shadow: inset 0 0 0 1px var(--dark-blue);
+}
+
+.pc-value--formatted {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
 }
 
 .pc-value-display {
@@ -1241,10 +1134,10 @@
 .pc-false-positive-input {
     display: inline-block;
     vertical-align: middle;
-    padding: 0.6em;
+    padding: 4px 8px;
     text-align: center;
     width: 4em;
-    border: 2px solid var(--light-gray);
+    border: 2px solid var(--gray);
     border-radius: 8px;
     font-size: inherit;
 }
@@ -1256,15 +1149,30 @@
 /* prefixes and suffixes */
 
 .pc-value-formatting:before {
-    color: var(--light-gray);
+    color: var(--gray);
     content: attr(data-prefix);
 }
 
 .pc-value-formatting:after {
-    color: var(--light-gray);
+    color: var(--gray);
     content: attr(data-suffix);
 }
 
+/* block to calculate override rules*/
+
+.pc-block-to-calculate .pc-value-field-wrapper:not(.pc-value-display) {
+    background: var(--light-yellow);
+    outline: 2px solid var(--dark-yellow);
+}
+
+.pc-block-to-calculate .pc-value .pc-value-formatting:before {
+    content: "=" attr(data-prefix);
+    color: var(--black);
+}
+
+.pc-block-to-calculate .pc-value-formatting:after {
+    color: var(--black);
+}
 
 
 
@@ -1316,27 +1224,1266 @@
 
 
 
-.pc-field-lock-wrapper {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.pc-inputs[data-v-297fe272] {
+    grid-template-areas:
+        "pc-input-left pc-input-right"
+        "pc-input-left-swap pc-input-right-swap"
+    ;
+}
+
+.pc-input-right-swap[data-v-297fe272],
+.pc-input-right[data-v-297fe272] {
     position: relative;
+}
+
+.pc-input-right-swap[data-v-297fe272] {
+    grid-area: pc-input-right-swap;
+    margin-top: -10px;
+    filter: drop-shadow(0 4px 2px rgba(0,0,0,0.1)) drop-shadow(0 -4px 2px rgba(0,0,0,0.1));
+}
+
+.pc-input-right-swap .pc-value-field-wrapper[data-v-297fe272] {
+    filter: none;
+}
+
+.pc-value-formatting[data-v-297fe272]:after {
+    font-size: 14px;
+}
+
+.pc-block-to-calculate .pc-field-visitorsPerDay[data-v-297fe272],
+.pc-block-to-calculate .pc-field-days[data-v-297fe272] {
+    background: var(--white);
+}
+
+.pc-value-field--lockable:not(.pc-value-field--unlocked) .pc-value-field-wrapper[data-v-297fe272] {
+    background: linear-gradient(0deg, var(--light-gray) 0%, var(--white) 100%);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.pc-swap-button {
+    -webkit-appearance: none;
+    background: none;
+    border: 0;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    top: calc(100% - 10px);
+    left: 5px;
+    z-index: 5;
+}
+
+.pc-value-field--unlocked .pc-value-field-wrapper {
+    z-index: 1;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.pc-block {
+    position: relative;
+    padding-bottom: 25px;
+    border-bottom: 3px solid var(--pale-blue);
+}
+
+.pc-block-to-calculate {
+    border-bottom-color: var(--dark-yellow);
+}
+
+.pc-calc-radio {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--light-gray);
+    border-radius: 25% / 100%;
+    padding: 7px 15px;
+}
+
+.pc-calc-radio--active {
+    background: var(--white);
+}
+
+.pc-inputs {
+    display: block;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+
+    --row-gap: 10px;
+    --padding: 25px;
+    --columns-gap: 70px;
+    --grid-column-width: calc(50% - (var(--columns-gap) / 2));
+
+    display: grid;
+    grid-template-columns: var(--grid-column-width) var(--grid-column-width);
+    grid-template-rows: auto;
+    grid-template-areas:
+        "pc-input-left pc-input-right"
+    ;
+    align-items: start;
+    grid-gap: var(--row-gap) var(--columns-gap);
+    padding: 0 var(--padding);
+
+}
+
+.pc-input-item {
+    text-align: center;
+}
+
+.pc-input-title {
+    position: relative;
+    display: block;
+    margin-bottom: 25px;
+}
+
+.pc-input-sub-title {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 9px;
+}
+
+.pc-input-left {
+    grid-area: pc-input-left;
+
+}
+
+.pc-input-right {
+    grid-area: pc-input-right;
+}
+
+.pc-input-details {
+    font-size: 10px;
+    color: var(--dark-gray);
+}
+
+.pc-field-not-editable {
+    position: relative;
+    padding: 5px;
     display: block;
 }
 
-.pc-field-lock {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 20px;
-    height: 100%;
-
-    border: none;
-    background: transparent;
-    -webkit-appearance: none;
-    -webkit-border-radius: 0;
-    margin: 0;
-    padding: 0;
-    text-align: center;
-    overflow: hidden;
+.pc-input-left .pc-field-not-editable,
+.pc-input-right .pc-field-not-editable {
+    background: var(--light-gray);
+    outline: 2px solid var(--light-blue);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.pc-svg-chain-icon {
+    position: absolute;
+    top: 138px;
+    pointer-events: none;
+    z-index: 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.pc-inputs {
+    grid-template-areas:
+        "pc-input-left pc-input-right"
+    ;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.pc-input-left[data-v-0d0bef2b] {
+    position: relative;
+    z-index: 2;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.pc-input-sd-rate {
+    margin-top: -10px;
+    z-index: 1;
+    position: relative;
+    text-align: center;
+}
+
+.pc-field-sdRate {
+    width: 90%;
+    display: inline-block;
+}
+
 
 
 
@@ -1399,3 +2546,4 @@
     border-right-color: transparent;
     border-bottom-color: transparent;
 }
+

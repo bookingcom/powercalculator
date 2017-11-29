@@ -1,78 +1,122 @@
 <template id="base-comp">
-    <div>
-        <label class="pc-switch-mode">
-            Switch input mode to
-            <input type="button" class="pc-switch-button" :value="enableedit ? 'Base rate' : 'Metric totals'" v-on:click="enableInput">
-        </label>
+    <div class="pc-block pc-block--base" :class="{'pc-block-focused': focusedblock == 'base'}">
 
-        <ul class="pc-list">
-            <li>
-                <pc-block-field
+        <pc-svg-chain v-bind:calculateprop="calculateprop" v-bind:fieldfromblock="fieldfromblock"></pc-svg-chain>
+
+        <div class="pc-header" v-if="testtype == 'gTest'">
+            Base Rate
+        </div>
+        <div class="pc-header" v-else>
+            Base Average
+        </div>
+
+        <ul class="pc-inputs">
+            <li class="pc-input-item pc-input-left">
+                <label>
+                    <span class="pc-input-title">{{testtype == 'gTest' ? 'Base Rate' : 'Base Average'}} <small class="pc-input-sub-title">conversion</small></span>
+
+                    <pc-block-field
+                        fieldprop="baseRate"
+                        :suffix="testtype == 'gTest' ? '%' : ''"
+
+                        v-bind:fieldvalue="baseRate"
+                        v-bind:testtype="testtype"
+                        v-bind:isreadonly="isReadOnly"
+                        v-bind:isblockfocused="isblockfocused"
+                        v-bind:enableedit="enableedit"
+
+                        v-on:field:change="updateFields"
+                        v-on:update:focus="updateFocus"></pc-block-field>
+                </label>
+            </li>
+
+            <li class="pc-input-item pc-input-right">
+                <label>
+                    <span class="pc-input-title">Metric Totals<small class="pc-input-sub-title">visitors reached goal</small></span>
+
+                    <pc-block-field
                         fieldprop="visitorsWithGoals"
-                        prefix=""
-                        suffix=" Metric total"
                         v-bind:fieldvalue="visitorsWithGoals"
                         v-bind:testtype="testtype"
                         v-bind:fieldfromblock="fieldfromblock"
                         v-bind:isblockfocused="isblockfocused"
                         v-bind:isreadonly="isReadOnly"
-                        v-bind:enableedit="enableedit"
+                        v-bind:enableedit="enableedit && this.calculateprop != 'sample'"
+
                         v-on:field:change="updateFields"
-                        v-on:update:focus="updateFocus"
-                        aria-label="visitors with goals"></pc-block-field>
+                        v-on:update:focus="updateFocus"></pc-block-field>
+                </label>
+            </li>
+
+            <li class="pc-input-item pc-input-sd-rate" v-if="testtype == 'tTest'">
+                <label>
+                    <pc-block-field
+                        prefix="±"
+                        fieldprop="sdRate"
+                        fieldfromblock="base"
+
+                        v-bind:fieldvalue="view.sdRate"
+                        v-bind:testtype="testtype"
+                        v-bind:isreadonly="isReadOnly"
+                        v-bind:isblockfocused="isblockfocused"
+                        v-bind:enableedit="enableedit"
+
+                        v-on:field:change="updateFields"
+                        v-on:update:focus="updateFocus"></pc-block-field>
+                    <span class="pc-input-details">Base Standard deviation</span>
+                </label>
             </li>
         </ul>
     </div>
 </template>
 
 <script>
-import pcBlockField from './pc-block-field.vue'
-import valueTransformationMixin from '../js/value-transformation-mixin.js'
+import pcBlock from './pc-block.vue'
 import statFormulas from '../js/math.js'
 
 export default {
-    props: ['testtype', 'enableedit', 'base', 'sample', 'calculateprop', 'fieldfromblock', 'isblockfocused', 'apptesttype'],
-    mixins: [valueTransformationMixin],
+    props: ['testtype', 'enableedit', 'view', 'calculateprop', 'fieldfromblock', 'isblockfocused'],
+    extends: pcBlock,
     template: '#base-comp',
     data () {
         return {
-            visitorsWithGoals: this.computeVisitors(),
+            visitorsWithGoals: this.computeVisitors({init: true}),
             enableEdit: false,
             focusedBlock: '',
-            testType: this.apptesttype
+            baseRate: this.view.base
         }
     },
     computed: {
         isReadOnly () {
             return this.calculateprop == 'base'
         },
-        baseRealValue () {
-            return this.extractValue('base', this.base)
+        base () {
+            return this.view.base
         },
-        sampleRealValue () {
-            return this.extractValue('sample', this.sample)
+        sample () {
+            return this.view.sample
         }
     },
     watch: {
-        baseRealValue () {
+        base (newValue) {
+            this.baseRate = newValue;
+        },
+        sample () {
             if (this.focusedBlock != this.fieldfromblock) {
                 this.visitorsWithGoals = this.computeVisitors();
             }
         },
-        sampleRealValue () {
+        baseRate () {
             if (this.focusedBlock != this.fieldfromblock) {
                 this.visitorsWithGoals = this.computeVisitors();
             }
         },
-        apptesttype (newValue) {
-            this.testType = newValue;
-        }
     },
     methods: {
-        computeVisitors () {
+        computeVisitors (config) {
             let result = statFormulas.getVisitorsWithGoals({
-                    total_sample_size: this.extractValue('sample', this.sample),
-                    base_rate: this.extractValue('base', this.base)
+                    total_sample_size: this.extractValue('sample', this.view.sample),
+                    base_rate: this.extractValue('base', config && config.init ? this.view.base : this.baseRate)
                 })
 
             return this.displayValue('metricTotals', result)
@@ -81,9 +125,35 @@ export default {
             this.$emit('edit:update', {prop: 'base'})
         },
         updateFields ({prop, value}) {
-            this[prop] = window.parseInt(value || 0);
 
-            this.updateBaseRateMainField();
+            let result = 0;
+            let shouldUpdateBaseRate = prop == 'baseRate' || prop == 'visitorsWithGoals';
+
+            if (prop == 'baseRate') {
+                result = value;
+            } else if (prop == 'visitorsWithGoals') {
+                result = this.displayValue(
+                    'base',
+                    statFormulas.getBaseRate({
+                        total_sample_size: this.extractValue('sample', this.sample),
+                        visitors_with_goals: value
+                    })
+                );
+            } else if (prop == 'sdRate') {
+                this.$emit('field:change', {
+                    prop: 'sdRate',
+                    value: value
+                })
+            }
+
+            if (shouldUpdateBaseRate) {
+                this.baseRate = window.parseInt(result || 0);
+
+                this.$emit('field:change', {
+                    prop: 'base',
+                    value: result
+                })
+            }
         },
         updateFocus ({fieldProp, value}) {
             if (this.focusedBlock == fieldProp && value === false) {
@@ -96,28 +166,30 @@ export default {
                 fieldProp: this.fieldfromblock,
                 value: value
             })
-        },
-        updateBaseRateMainField () {
-            if (this.calculateprop != 'base') {
-                return
-            }
-            let baseToDisplay = this.displayValue(
-                    'base',
-                    statFormulas.getBaseRate({
-                        total_sample_size: this.sampleRealValue,
-                        visitors_with_goals: this.visitorsWithGoals
-                    })
-                );
-
-            this.$emit('field:change', {
-                prop: 'base',
-                value: baseToDisplay
-            })
         }
 
-    },
-    components: {
-        'pc-block-field': pcBlockField
     }
 }
 </script>
+
+
+<style>
+.pc-input-sd-rate {
+    margin-top: -10px;
+    z-index: 1;
+    position: relative;
+    text-align: center;
+}
+
+.pc-field-sdRate {
+    width: 90%;
+    display: inline-block;
+}
+</style>
+
+<style scoped>
+    .pc-input-left {
+        position: relative;
+        z-index: 2;
+    }
+</style>
