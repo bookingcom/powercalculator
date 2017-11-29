@@ -38,7 +38,7 @@
                         fieldprop="visitorsPerDay"
                         v-bind:fieldvalue="visitorsPerDay"
                         v-bind:testtype="testtype"
-                        v-bind:isreadonly="false"
+                        v-bind:isreadonly="lockedField == 'visitorsPerDay'"
                         v-bind:isblockfocused="isblockfocused"
                         v-bind:enableedit="enableedit"
 
@@ -87,7 +87,7 @@
                         suffix=" days"
                         v-bind:fieldvalue="days"
                         v-bind:testtype="testtype"
-                        v-bind:isreadonly="false"
+                        v-bind:isreadonly="lockedField == 'days'"
                         v-bind:isblockfocused="isblockfocused"
                         v-bind:enableedit="enableedit"
 
