@@ -16,7 +16,7 @@
             :data-suffix="suffix"
             :style="fieldEditableStyle"
         >
-            <span class="pc-value-display"
+            <span class="pc-value-display" :data-test="isFocused"
                 :contenteditable="!isreadonly"
 
                 v-on:focus="setFocusStyle(true)"
@@ -114,7 +114,7 @@ export default {
                 }, '')
 
                 if (decimal) {
-                    result += sep + decimal;
+                    result += '.' + decimal;
 
                 }
 
@@ -146,12 +146,33 @@ export default {
             }
 
             return result
-        },
+        }
     },
     methods: {
-        updateVal ({target}) {
+        getSanitizedPcValue () {
+            // People will use copy paste. We need some data sanitization
+
+            // remove markup
+            let oldValue = this.$refs['pc-value'].textContent + '',
+                newValue;
+
+            // remove commas
+            newValue = oldValue.replace(/\,/g, '');
+
+            // try to extract numbers from it
+            newValue = parseFloat(newValue);
+
+            // in case of NaN
+            if (isNaN(newValue)) {
+                newValue = 0;
+            }
+
+            return newValue
+
+        },
+        updateVal () {
             if (this.enableedit) {
-                let value = target.innerHTML;
+                let value = this.getSanitizedPcValue();
 
                 if (value != this.val) {
                     this.val = value;
@@ -160,7 +181,7 @@ export default {
         },
         formatDisplay () {
             if (this.enableedit) {
-                this.$refs['pc-value'].innerHTML = this.formatNumberFields(this.$refs['pc-value'].innerHTML);
+                this.$refs['pc-value'].textContent = this.formatNumberFields(this.getSanitizedPcValue());
             } else {
                 this.val = this.formatNumberFields(this.val);
             }
@@ -183,7 +204,6 @@ export default {
         setFocus () {
             let el = this.$refs['pc-value'];
             el.focus();
-            this.placeCaretAtEnd(el);
         },
         validateField (value) {
             let {testtype} = this,
@@ -257,6 +277,12 @@ export default {
 
     },
     watch: {
+        isFocused (newValue, oldValue) {
+            let el = this.$refs['pc-value'];
+            if (newValue == true && newValue != oldValue) {
+                this.placeCaretAtEnd(el);
+            }
+        },
         val (newValue, oldValue) {
             newValue = parseFloat(this.formatNumberFields(newValue));
             oldValue = parseFloat(this.formatNumberFields(oldValue));
@@ -282,7 +308,7 @@ export default {
 
             this.val = this.fieldvalue;
             if (this.enableedit) {
-                this.$refs['pc-value'].innerHTML = this.val;
+                this.$refs['pc-value'].textContent = this.val;
             }
         },
         isFocused (newValue) {
@@ -295,7 +321,7 @@ export default {
     directives: {
         initialvalue: {
             inserted (el, directive, vnode) {
-                el.innerHTML = vnode.context.val
+                el.textContent = vnode.context.val
             }
         }
     }
@@ -329,6 +355,7 @@ export default {
     top: 50%;
     transform: translate(-50%, -50%);
     pointer-events: none;
+    width: 100%;
 }
 
 .pc-value-display {

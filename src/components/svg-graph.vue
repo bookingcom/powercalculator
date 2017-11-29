@@ -1,17 +1,26 @@
 <template id="svg-graph">
     <div class="pc-block pc-block--graph">
-        <div class="pc-graph-controls" style="graphControlsHighlight">
-            <label class="pc-graph-radio-label" ref="sample-power">
+        <div class="pc-graph-controls">
+            <label class="pc-graph-radio-label">
                 <input type="radio" class="pc-graph-radio-input" name="graph-x" value="sample-power" v-model="graphType">
                 <span class="pc-graph-radio-text" :class="{'pc-graph-radio-selected': graphType == 'sample-power'}">{{getMetricDisplayName('power')}} / {{getMetricDisplayName('sample')}}</span>
             </label>
-            <label class="pc-graph-radio-label" ref="impact-power">
+            <label class="pc-graph-radio-label">
                 <input type="radio" class="pc-graph-radio-input" name="graph-x" value="impact-power" v-model="graphType">
                 <span class="pc-graph-radio-text" :class="{'pc-graph-radio-selected': graphType == 'impact-power'}">{{getMetricDisplayName('power')}} / {{getMetricDisplayName('impact')}}</span>
             </label>
-            <label class="pc-graph-radio-label" ref="sample-impact">
+            <label class="pc-graph-radio-label">
                 <input type="radio" class="pc-graph-radio-input" name="graph-x" value="sample-impact" v-model="graphType">
                 <span class="pc-graph-radio-text" :class="{'pc-graph-radio-selected': graphType == 'sample-impact'}">{{getMetricDisplayName('impact')}} / {{getMetricDisplayName('sample')}}</span>
+            </label>
+
+            <label class="pc-graph-radio-label">
+                <input type="radio" class="pc-graph-radio-input" name="graph-x" value="samplePerDay-power" v-model="graphType">
+                <span class="pc-graph-radio-text" :class="{'pc-graph-radio-selected': graphType == 'samplePerDay-power'}">{{getMetricDisplayName('power')}} / {{getMetricDisplayName('samplePerDay')}}</span>
+            </label>
+            <label class="pc-graph-radio-label">
+                <input type="radio" class="pc-graph-radio-input" name="graph-x" value="samplePerDay-incrementalTrials" v-model="graphType">
+                <span class="pc-graph-radio-text" :class="{'pc-graph-radio-selected': graphType == 'samplePerDay-incrementalTrials'}">{{getMetricDisplayName('incrementalTrials')}} / {{getMetricDisplayName('samplePerDay')}}</span>
             </label>
         </div>
         <div class="pc-graph" ref="pc-graph-size">
@@ -27,6 +36,7 @@
 
 import statFormulas from '../js/math.js'
 import valueTransformationMixin from '../js/value-transformation-mixin.js'
+import graphDataMixin from '../js/graph-data-mixin.js'
 
 let dataDefault = [
         ['x', 0, 0, 0, 0, 0, 0],
@@ -55,9 +65,9 @@ document.querySelector('head').appendChild(style);
 
 
 export default {
-    mixins: [valueTransformationMixin],
+    mixins: [valueTransformationMixin, graphDataMixin],
     template: '#svg-graph',
-    props: ['testtype', 'sample', 'impact', 'power', 'base', 'falseposrate', 'sdrate'],
+    props: ['testtype', 'sample', 'impact', 'power', 'base', 'falseposrate', 'sdrate', 'runtime'],
     data () {
         return {
             width: 100,
@@ -87,11 +97,6 @@ export default {
         graphY () {
             // 'power'
             return this.graphType.split('-')[1]
-        },
-        graphControlsHighlight () {
-
-            // graphType
-            return {}
         }
     },
     methods: {
@@ -142,20 +147,8 @@ export default {
 
             let clonedValues = this.deepCloneObject(this.convertDisplayedValues()),
                 newData = this.deepCloneObject(dataDefault),
-                curPower = window.parseInt(this.power),
-                curImpact = window.parseInt(this.impact),
-                yList,
-                curY;
-
-
-
-            if (this.graphY == 'power') {
-                yList = this.createYList({ amount: 10, cur: curPower });
-                curY = curPower;
-            } else if (this.graphY == 'impact') {
-                yList = this.createYList({ amount: 10, rate: 2, cur: curImpact });
-                curY = curImpact;
-            }
+                yList = this.getGraphYDataSet({amount: 10}),
+                curY = this.getCurrentYValue();
 
             // erase previous values but keep names of datasets
             newData[0].length = 1;
@@ -164,19 +157,13 @@ export default {
 
             yList.forEach((yValue, i) => {
 
-                if (this.graphY == 'power') {
-                    clonedValues.beta = 1 - this.extractValue(this.graphY, yValue);
-                } else if (this.graphY == 'impact') {
-                    clonedValues.effect_size = this.extractValue(this.graphY, yValue);
-                }
+                clonedValues = this.updateClonedValues(clonedValues, yValue);
 
-
-                let xValues = this.displayValue(this.graphX, (this.math[this.graphX](clonedValues)));
+                let xValues = this.getGraphXValueForClonedValues(clonedValues);
 
                  newData[0][i + 1] = xValues; // x
                  newData[1][i + 1] = yValue; // line
                  newData[2][i + 1] = yValue == curY ? yValue : null; // current power dot
-
             })
 
             newData = this.trimInvalidSamples(newData);
@@ -209,15 +196,17 @@ export default {
                 grouped: false,
                 contents ([{x = 0, value = 0, id = ''}]) {
 
-                    let {graphX, graphY, getMetricDisplayName} = V,
+                    let {graphX, graphY, getMetricDisplayName, getGraphXTicksFormatted, getGraphYTicksFormatted} = V,
                         th = getMetricDisplayName(graphX),
-                        name = getMetricDisplayName(graphY);
+                        name = getMetricDisplayName(graphY),
+                        xFormatted = getGraphXTicksFormatted(x),
+                        yFormatted = getGraphYTicksFormatted(value);
 
                     return `
                         <table class="c3-tooltip">
                             <tbody>
                                 <tr>
-                                    <th colspan="2">${th}: ${x}</th>
+                                    <th colspan="2">${th}: ${xFormatted}</th>
                                 </tr>
                                 <tr class="c3-tooltip-name--Current">
                                     <td class="name">
@@ -225,7 +214,7 @@ export default {
                                         </span>
                                         ${name}
                                     </td>
-                                    <td class="value">${value}</td>
+                                    <td class="value">${yFormatted}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -246,7 +235,10 @@ export default {
                 power: 'Power',
                 base: 'Base',
                 falseposrate: 'False Positive Rate',
-                sdrate: 'Base Standard deviation'
+                sdrate: 'Base Standard deviation',
+
+                samplePerDay: 'Daily Visitors',
+                incrementalTrials: 'Incremental Trials',
             }[metric] || ''
         }
     },
@@ -306,23 +298,7 @@ export default {
                             return result
                         },
                         format (x) {
-                            let {
-                                    graphX,
-                                    displayValue,
-                                } = vueInstance,
-                                result = x;
-
-                            if (graphX == 'sample') {
-                                result = displayValue('sample', result)
-                                if (result >= 1000) {
-                                    result = window.parseInt(result / 1000) + 'k'
-                                }
-                            } else if (graphX == 'impact') {
-                                result = displayValue('impact', result)
-                                result += '%';
-                            }
-
-                            return result
+                            return vueInstance.getGraphXTicksFormatted(x)
                         }
                     }
                 },
@@ -330,27 +306,10 @@ export default {
                     label: this.updateYLabel(),
                     tick: {
                         values () {
-                            let {
-                                    graphY,
-                                } = vueInstance,
-                                result = [0, 25, 50, 75, 100];// power
-
-                            if (graphY == 'impact') {
-                                result = [0, 10, 20];// impact
-                            }
-
-                            return result
+                            return vueInstance.getGraphYTicks()
                         },
-                        format (x) {
-                            let {
-                                    graphY,
-                                    displayValue,
-                                } = vueInstance,
-                                result = x;
-
-                            result += '%';
-
-                            return result
+                        format (y) {
+                            return vueInstance.getGraphYTicksFormatted(y)
                         }
                     }
                 }
@@ -383,7 +342,7 @@ export default {
     position: relative;
     font-size: 14px;
     color: var(--blue);
-    margin-right: 40px;
+    margin-right: 20px;
 }
 
 .pc-graph-radio-input {
