@@ -222,6 +222,27 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* application styles */
 
 /* colors */
@@ -698,47 +719,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* graph radio styles */
 .pc-graph-controls {
     display: flex;
@@ -752,7 +732,7 @@
     position: relative;
     font-size: 14px;
     color: var(--blue);
-    margin-right: 40px;
+    margin-right: 20px;
 }
 
 .pc-graph-radio-input {
@@ -1090,6 +1070,32 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 .pc-value-field-wrapper {
     --base-padding: 5px;
 
@@ -1115,6 +1121,7 @@
     top: 50%;
     transform: translate(-50%, -50%);
     pointer-events: none;
+    width: 100%;
 }
 
 .pc-value-display {

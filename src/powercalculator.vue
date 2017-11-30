@@ -100,12 +100,13 @@
 
 
                 <svg-graph
-                    v-bind:sample="view.sample"
                     v-bind:power="view.power"
                     v-bind:impact="view.impact"
                     v-bind:base="view.base"
+                    v-bind:sample="view.sample"
                     v-bind:sdrate="view.sdRate"
                     v-bind:falseposrate="view.falsePosRate"
+                    v-bind:runtime="view.runtime"
                     v-bind:testtype="testType"></svg-graph>
             </div>
         </form>
@@ -126,30 +127,36 @@ import valueTransformationMixin from './js/value-transformation-mixin.js'
 
 export default {
     mixins: [valueTransformationMixin],
-    data: {
-        testType: 'gTest',
-        calculateProp: 'sample', // power, impact, base, sample
-        focusedBlock: '',
-        view: {
-            sample: 561372,
-            base: 10,
-            impact: 2,
-            power: 80,
-            falsePosRate: 10,
-            sdRate: 10,
+    props: ['parentmetricdata'],
+    data () {
+        // values if parent component sends them
+        let importedData = this.parentmetricdata || {};
 
-            runtime: 14 //days
-        },
+        let data = {
+            testType: 'gTest',
+            calculateProp: 'sample', // power, impact, base, sample
+            focusedBlock: '',
+            view: {
+                sample: 561372,
+                base: 10,
+                impact: 2,
+                power: 80,
+                falsePosRate: 10,
+                sdRate: 10,
 
-        // false means the editable ones are the secondary mode (metric totals, days&daily trials and absolute impact)
-        enabledMainInputs: {
-            base: true,
-            sample: true,
-            impact: true,
-            power: true
-        },
+                runtime: 14 //days
+            },
 
-        isOverlayOpened: false
+            // false means the editable ones are the secondary mode (metric totals, days&daily trials and absolute impact)
+            enabledMainInputs: {
+                base: true,
+                sample: true,
+                impact: true,
+                power: true
+            }
+        };
+
+        return Object.assign(data, JSON.parse(JSON.stringify(importedData)));
     },
     computed: {
         math () {
@@ -160,6 +167,16 @@ export default {
             // creates a circular dependency
             // this also forces main input back
             return this.calculateProp == 'sample'
+        },
+
+        // in case parent component needs this information
+        metricData () {
+            let result =  {
+                    testType: this.testType,
+                    calculateProp: this.calculateProp,
+                    view: this.view,
+                };
+            return JSON.parse(JSON.stringify(result))
         }
     },
     methods: {
@@ -207,6 +224,10 @@ export default {
     watch: {
         testType () {
             this.formulas();
+        },
+        // in case parent component needs this information
+        metricData () {
+            this.$emit('update:metricdata', this.metricData)
         }
     },
     components: {
