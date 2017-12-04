@@ -49,6 +49,12 @@ let validateFunctions = {
                     return value >= 0 && value <= 100
                 },
                 defaultVal: 80
+            },
+            days: {
+                fn (value) {
+                    return value > 0
+                },
+                defaultVal: 14
             }
         },
         gTest: {
@@ -162,10 +168,7 @@ export default {
             // try to extract numbers from it
             newValue = parseFloat(newValue);
 
-            // in case of NaN
-            if (isNaN(newValue)) {
-                newValue = 0;
-            }
+            newValue = this.validateField(newValue);
 
             return newValue
 

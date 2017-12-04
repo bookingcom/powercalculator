@@ -30,7 +30,7 @@
                         v-on:update:focus="updateFocus"></pc-block-field>
                 </label>
             </li>
-            <li class="pc-input-item pc-input-right pc-value-field--lockable" :class="{'pc-value-field--unlocked': lockedField == 'days'}">
+            <li class="pc-input-item pc-input-right pc-value-field--lockable" :class="getLockedStateClass('visitorsPerDay')">
                 <label>
                     <span class="pc-input-title">Daily # <small class="pc-input-sub-title">of visitors</small></span>
 
@@ -79,7 +79,7 @@
                 </button>
 
             </li>
-            <li class="pc-input-item pc-input-right-swap pc-value-field--lockable" :class="{'pc-value-field--unlocked': lockedField != 'days'}">
+            <li class="pc-input-item pc-input-right-swap pc-value-field--lockable" :class="getLockedStateClass('days')">
                 <label>
                     <pc-block-field
                         fieldprop="days"
@@ -107,19 +107,18 @@
 import pcBlock from './pc-block.vue'
 
 export default {
-    props: ['runtime', 'testtype', 'calculateprop', 'enableedit', 'isblockfocused', 'sample', 'calculateprop', 'fieldfromblock'],
+    props: ['runtime', 'testtype', 'lockedfield', 'calculateprop', 'enableedit', 'isblockfocused', 'sample', 'calculateprop', 'fieldfromblock'],
     template: '#sample-comp',
     extends: pcBlock,
     data () {
-        let initialDaysValue = 14;
         return {
-            days: initialDaysValue,
-            visitorsPerDay: this.calculateVisitorsPerDay(this.sample, initialDaysValue),
+            days: this.runtime,
+            visitorsPerDay: this.calculateVisitorsPerDay(this.sample, this.runtime),
             variants: 2,
             totalSample: this.sample,
             enableEdit: false,
             focusedBlock: '',
-            lockedField: 'days'
+            lockedField: this.lockedfield
         }
     },
     methods: {
@@ -127,14 +126,33 @@ export default {
             let result =  Math.floor(window.parseInt(sample) / days)
             return isNaN(result) ? '-' : result;
         },
-        calculateDays(sample, newValue) {
-            let result =  Math.ceil(window.parseInt(sample) / newValue)
+        calculateDays(sample, visitorsPerDay) {
+            let result =  Math.ceil(window.parseInt(sample) / visitorsPerDay)
             return isNaN(result) ? '-' : result;
         },
         enableInput () {
             this.$emit('edit:update', {prop: 'sample'})
         },
         updateFields ({prop, value}) {
+
+            if (prop == 'days') {
+                this.days = value;
+            } else if (prop == 'visitorsPerDay') {
+                this.visitorsPerDay = value;
+            }
+
+            if (this.calculateprop == 'sample') {
+                if (prop == 'visitorsPerDay') {
+                    this.days = this.calculateDays(this.totalSample, this.visitorsPerDay);
+                } else if (prop == 'days') {
+                    this.visitorsPerDay = this.calculateVisitorsPerDay(this.totalSample, this.days);
+                }
+            } else {
+                this.updateTotalSampleField({prop, value});
+            }
+
+        },
+        updateTotalSampleField ({prop, value}) {
             let totalSample = 0;
 
             if (prop == 'totalSample') {
@@ -168,6 +186,9 @@ export default {
         },
         switchLockedField () {
             this.lockedField = this.lockedField == 'days' ? 'visitorsPerDay' : 'days';
+        },
+        getLockedStateClass (param) {
+            return this.lockedField == param ? 'pc-value-field--locked' : 'pc-value-field--unlocked'
         }
     },
     watch: {
@@ -176,12 +197,18 @@ export default {
         },
         totalSample (newValue) {
             if (this.lockedField == 'days') {
-                this.visitorsPerDay = this.calculateVisitorsPerDay(newValue, this.days)
-            } else {
                 this.days = this.calculateDays(newValue, this.visitorsPerDay)
+            } else {
+                this.visitorsPerDay = this.calculateVisitorsPerDay(newValue, this.days)
             }
 
             this.updateSampleMainField();
+        },
+        days (newValue) {
+            this.$emit('update:runtime', newValue)
+        },
+        lockedField (newValue) {
+            this.$emit('update:lockedfield', newValue)
         }
     }
 }
@@ -205,6 +232,13 @@ export default {
     z-index: 1;
 }
 
+.pc-block-to-calculate  .pc-value-field--locked .pc-value-formatting:before,
+.pc-block-to-calculate  .pc-value-field--locked .pc-value-formatting:after,
+.pc-value-field--locked .pc-value-formatting:before,
+.pc-value-field--locked .pc-value-formatting:after,
+.pc-value-field--locked .pc-value-field-wrapper {
+    color: var(--dark-gray);
+}
 </style>
 
 <style scoped>
@@ -239,7 +273,7 @@ export default {
     background: var(--white);
 }
 
-.pc-value-field--lockable:not(.pc-value-field--unlocked) .pc-value-field-wrapper {
+.pc-value-field--lockable.pc-value-field--locked .pc-value-field-wrapper {
     background: linear-gradient(0deg, var(--light-gray) 0%, var(--white) 100%);
 }
 
