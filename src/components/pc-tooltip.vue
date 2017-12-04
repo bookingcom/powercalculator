@@ -35,9 +35,8 @@ export default {
 
 .tooltip-wrapper {
     position: absolute;
-    left: 50%;
+    left: 0;
     top: calc(100% + 10px);
-    transform: translate(-50%, 0);
     background: var(--tooltip-background-color);
     color: var(--light-gray);
     padding: 5px;
@@ -45,6 +44,7 @@ export default {
     z-index: 10;
     width: 400px;
     white-space: normal;
+    pointer-events: none;
 }
 
 .tooltip-wrapper:after {
@@ -52,7 +52,7 @@ export default {
 
     content: '';
     position: absolute;
-    left: 50%;
+    left: 50px;
     bottom: calc(100% - var(--size));
     transform: translate(-50%, 0) rotateZ(45deg);
 

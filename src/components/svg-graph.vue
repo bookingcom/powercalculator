@@ -22,6 +22,10 @@
                 <input type="radio" class="pc-graph-radio-input" name="graph-x" value="samplePerDay-incrementalTrials" v-model="graphType">
                 <span class="pc-graph-radio-text" :class="{'pc-graph-radio-selected': graphType == 'samplePerDay-incrementalTrials'}">{{getMetricDisplayName('incrementalTrials')}} / {{getMetricDisplayName('samplePerDay')}}</span>
             </label>
+            <label class="pc-graph-radio-label">
+                <input type="radio" class="pc-graph-radio-input" name="graph-x" value="days-incrementalTrialsPerDay" v-model="graphType">
+                <span class="pc-graph-radio-text" :class="{'pc-graph-radio-selected': graphType == 'days-incrementalTrialsPerDay'}">{{getMetricDisplayName('incrementalTrialsPerDay')}} / {{getMetricDisplayName('days')}}</span>
+            </label>
         </div>
         <div class="pc-graph" ref="pc-graph-size">
             <div v-bind:style="style" ref="pc-graph-wrapper">
@@ -159,7 +163,7 @@ export default {
 
                 clonedValues = this.updateClonedValues(clonedValues, yValue);
 
-                let xValues = this.getGraphXValueForClonedValues(clonedValues);
+                let xValues = this.getGraphXValueForClonedValues(clonedValues, yValue);
 
                  newData[0][i + 1] = xValues; // x
                  newData[1][i + 1] = yValue; // line
@@ -239,6 +243,9 @@ export default {
 
                 samplePerDay: 'Daily Visitors',
                 incrementalTrials: 'Incremental Trials',
+
+                days: '# of days',
+                incrementalTrialsPerDay: 'Inc. Trials per day',
             }[metric] || ''
         }
     },
@@ -256,6 +263,9 @@ export default {
             this.updateGraphData();
         },
         graphX () {
+            this.updateGraphData();
+        },
+        runtime () {
             this.updateGraphData();
         }
     },
@@ -279,6 +289,14 @@ export default {
                 x: 'x',
                 columns: this.dataDefault,
                 type: 'line'
+            },
+            grid: {
+                x: {
+                    show: true
+                },
+                y: {
+                    show: true
+                }
             },
             axis: {
                 x: {
@@ -340,7 +358,7 @@ export default {
 
 .pc-graph-radio-label {
     position: relative;
-    font-size: 14px;
+    font-size: 13px;
     color: var(--blue);
     margin-right: 20px;
 }

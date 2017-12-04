@@ -2,9 +2,12 @@
 
 import _impact from './graph-data-impact.js'
 import _incrementalTrials from './graph-data-incremental-trials.js'
+import _incrementalTrialsPerDay from './graph-data-incremental-trials-per-day.js'
+import _days from './graph-data-days.js'
 import _sample from './graph-data-sample.js'
 import _samplePerDay from './graph-data-sample-per-day.js'
 import _power from './graph-data-power.js'
+
 
 var defaultConfig = {
     getGraphYTicks () {
@@ -21,17 +24,16 @@ var defaultConfig = {
             ratio = (lastTick - firstTick) / amount,
             result = Array.from(new Array(amount));
 
-        result[0] = firstTick;
-
-        result = result.map((cur, i) => {
-            return cur ? cur : ratio * i
+        result = result.map((cur, i, arr) => {
+            let value = firstTick + ratio * i;
+            return value
         })
 
         // add the current value in case it isn't there
         result.push(curYValue);
 
         // sort current value
-        result.sort((a,b) => { return a > b});
+        result.sort((a,b) => { return a - b});
 
         // remove duplicates
         result = [...new Set(result)]
@@ -63,11 +65,13 @@ export default {
         // this is done to agregate different pieces of configuration that need to work in harmony
         // for the svg graph
         Object.assign(this, {
-            _sample:            Object.assign({}, defaultConfig, _sample),
-            _samplePerDay:      Object.assign({}, defaultConfig, _samplePerDay),
-            _impact:            Object.assign({}, defaultConfig, _impact),
-            _incrementalTrials: Object.assign({}, defaultConfig, _incrementalTrials),
-            _power:             Object.assign({}, defaultConfig, _power),
+            _sample:                    Object.assign({}, defaultConfig, _sample),
+            _samplePerDay:              Object.assign({}, defaultConfig, _samplePerDay),
+            _impact:                    Object.assign({}, defaultConfig, _impact),
+            _incrementalTrials:         Object.assign({}, defaultConfig, _incrementalTrials),
+            _power:                     Object.assign({}, defaultConfig, _power),
+            _incrementalTrialsPerDay:   Object.assign({}, defaultConfig, _incrementalTrialsPerDay),
+            _days:                      Object.assign({}, defaultConfig, _days),
         })
     },
     methods: {

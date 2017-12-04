@@ -7,6 +7,7 @@ export default {
                 tTest: {type: 'float'}
             },
             impact: {type: 'percentage'},
+            runtime: {type: 'int'},
             power: {type: 'percentage'},
             falsePosRate: {type: 'percentage'},
             impactByMetricValue: {type: 'percentage'},
