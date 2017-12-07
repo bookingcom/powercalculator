@@ -1,3 +1,4 @@
+import fs from 'fs';
 import replace from 'rollup-plugin-replace';
 import vue from 'rollup-plugin-vue';
 import resolve from 'rollup-plugin-node-resolve';
@@ -19,7 +20,20 @@ export default {
     commonjs({
       include: ['node_modules/**'],
     }),
-    vue({ css: 'dist/powercalculator.css' }),
+    vue({
+      css (style, styles, compiler) {
+          fs.writeFileSync('dist/powercalculator.css', styles.reduce((str, styleData) => {
+            let { id, $compiled } = styleData,
+              { code } = $compiled,
+              relativeVuePath = id.replace(__dirname + '/src/', ''),
+              codeTrimLineBreaks = code.replace(/[\n]+/g, '\n');
+
+            str += `\n/* ${relativeVuePath} */\n${codeTrimLineBreaks}\n`;
+
+            return str
+          }, ''));
+      }
+    })
   ],
   output: {
     name: 'powercalculator',
