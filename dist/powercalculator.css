@@ -1,276 +1,24 @@
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/* powercalculator.vue */
 
 /* application styles */
-
 /* colors */
-
 .power-calculator {
-
     --white: #FFF;
     --black: #000;
-
     --gray: #B5B5B5;
     --light-gray: #F0F0F0;
     --dark-gray: #525252;
-
     --light-blue: #C1CFD8;
     --pale-blue: #7898AE;
     --blue: #155EAB;
     --dark-blue: #3d78df;
-
     --light-yellow: #FEF1CB;
     --dark-yellow: #E2B634;
     --fade-black: rgba(0, 0, 0, 0.3);
-
     --red: #F00;
-
 }
-
 /* layout */
-
 .pc-main-header {
     display: grid;
     grid-template-columns: min-content auto min-content min-content;
@@ -278,46 +26,37 @@
     grid-template-areas:
         "test-type title false-positive power";
     align-items: center;
-
     margin: 25px 0 25px 10px;
 }
-
 .pc-title {
     grid-area: title;
     font-size: 30px;
     text-align: center;
 }
-
 .pc-test-type,
 .pc-false-positive,
 .pc-power {
     font-size: 0.8em;
 }
-
 .pc-test-type {
     grid-area: test-type;
 }
-
 .pc-test-type-tooltip-wrapper {
     display: inline-block;
 }
-
 .pc-test-type-labels {
     margin: 0 20px;
     white-space: nowrap;
 }
-
 .pc-false-positive {
     grid-area: false-positive;
     white-space: nowrap;
 }
-
 .pc-power {
     grid-area: power;
     margin-left: 10px;
     white-space: nowrap;
 }
-
 .pc-blocks-wrapper {
     grid-area: pc-blocks-wrapper;
     display: grid;
@@ -331,30 +70,22 @@
     grid-column-gap: 8px;
     grid-row-gap: 8px;
 }
-
 .pc-block--base {
     grid-area: block-base;
 }
-
 .pc-block--sample {
     grid-area: block-sample;
 }
-
 .pc-block--impact {
     grid-area: block-impact;
 }
-
 .pc-block--graph {
     grid-area: block-graph;
 }
-
-
 /* blocks */
-
 .pc-block {
     background: var(--light-gray);
 }
-
 .pc-header {
     color: var(--white);
     text-align: center;
@@ -365,359 +96,26 @@
     background: var(--pale-blue);
     margin-bottom: 25px;
 }
-
 .pc-calculate {
     display: inline-block;
     margin-bottom: 25px;
     font-weight: bold;
     font-size: 0.8em;
 }
-
 .pc-value {
     display: block;
     margin-bottom: 25px;
 }
-
 /* block to calculate override rules*/
-
 .pc-block-to-calculate {
     background: var(--light-yellow);
 }
-
 .pc-block-to-calculate .pc-header {
     background: var(--dark-yellow);
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/* components/svg-graph.vue */
 
 /* graph radio styles */
 .pc-graph-controls {
@@ -727,25 +125,21 @@
     margin-bottom: 5px;
     border-bottom: 1px solid var(--blue);
 }
-
 .pc-graph-radio-label {
     position: relative;
-    font-size: 14px;
+    font-size: 13px;
     color: var(--blue);
     margin-right: 20px;
 }
-
 .pc-graph-radio-input {
     position: absolute;
     visibility: hidden;
 }
-
 .pc-graph-radio-text {
     display: block;
     padding: 0 5px 15px;
     position: relative;
 }
-
 .pc-graph-radio-input:checked + .pc-graph-radio-text::after {
     content: '';
     position: absolute;
@@ -755,9 +149,7 @@
     height: 4px;
     background: var(--blue);
 }
-
 /* graph layout */
-
 .pc-graph {
     padding: 10px;
     width: 100%;
@@ -765,340 +157,10 @@
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/* components/pc-block-field.vue */
 
 .pc-value-field-wrapper {
     --base-padding: 5px;
-
     display: block;
     position: relative;
     box-sizing: border-box;
@@ -1107,14 +169,11 @@
     border-radius: 5px;
     background: var(--white);
     padding: var(--base-padding);
-
     overflow: hidden;
 }
-
 .pc-field--focused {
     box-shadow: inset 0 0 0 1px var(--dark-blue);
 }
-
 .pc-value--formatted {
     position: absolute;
     left: 50%;
@@ -1123,7 +182,6 @@
     pointer-events: none;
     width: 100%;
 }
-
 .pc-value-display {
     box-sizing: border-box;
     font-size: 1em;
@@ -1132,11 +190,9 @@
     min-height: 1em;
     display: inline-block;
 }
-
 .pc-value-display:focus {
     outline: 0;
 }
-
 .pc-power-input,
 .pc-false-positive-input {
     display: inline-block;
@@ -1148,248 +204,33 @@
     border-radius: 8px;
     font-size: inherit;
 }
-
 .pc-top-fields-error {
     color: var(--red);
 }
-
 /* prefixes and suffixes */
-
 .pc-value-formatting:before {
     color: var(--gray);
     content: attr(data-prefix);
 }
-
 .pc-value-formatting:after {
     color: var(--gray);
     content: attr(data-suffix);
 }
-
 /* block to calculate override rules*/
-
 .pc-block-to-calculate .pc-value-field-wrapper:not(.pc-value-display) {
     background: var(--light-yellow);
     outline: 2px solid var(--dark-yellow);
 }
-
 .pc-block-to-calculate .pc-value .pc-value-formatting:before {
     content: "=" attr(data-prefix);
     color: var(--black);
 }
-
 .pc-block-to-calculate .pc-value-formatting:after {
     color: var(--black);
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/* components/sample-comp.vue */
 
 .pc-inputs[data-v-297fe272] {
     grid-template-areas:
@@ -1397,226 +238,31 @@
         "pc-input-left-swap pc-input-right-swap"
     ;
 }
-
 .pc-input-right-swap[data-v-297fe272],
 .pc-input-right[data-v-297fe272] {
     position: relative;
 }
-
 .pc-input-right-swap[data-v-297fe272] {
     grid-area: pc-input-right-swap;
     margin-top: -10px;
     filter: drop-shadow(0 4px 2px rgba(0,0,0,0.1)) drop-shadow(0 -4px 2px rgba(0,0,0,0.1));
 }
-
 .pc-input-right-swap .pc-value-field-wrapper[data-v-297fe272] {
     filter: none;
 }
-
 .pc-value-formatting[data-v-297fe272]:after {
     font-size: 14px;
 }
-
 .pc-block-to-calculate .pc-field-visitorsPerDay[data-v-297fe272],
 .pc-block-to-calculate .pc-field-days[data-v-297fe272] {
     background: var(--white);
 }
-
-.pc-value-field--lockable:not(.pc-value-field--unlocked) .pc-value-field-wrapper[data-v-297fe272] {
+.pc-value-field--lockable.pc-value-field--locked .pc-value-field-wrapper[data-v-297fe272] {
     background: linear-gradient(0deg, var(--light-gray) 0%, var(--white) 100%);
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/* components/sample-comp.vue */
 
 .pc-swap-button {
     -webkit-appearance: none;
@@ -1629,59 +275,28 @@
     left: 5px;
     z-index: 5;
 }
-
 .pc-value-field--unlocked .pc-value-field-wrapper {
     z-index: 1;
 }
+.pc-block-to-calculate  .pc-value-field--locked .pc-value-formatting:before,
+.pc-block-to-calculate  .pc-value-field--locked .pc-value-formatting:after,
+.pc-value-field--locked .pc-value-formatting:before,
+.pc-value-field--locked .pc-value-formatting:after,
+.pc-value-field--locked .pc-value-field-wrapper {
+    color: var(--dark-gray);
+}
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/* components/pc-block.vue */
 
 .pc-block {
     position: relative;
     padding-bottom: 25px;
     border-bottom: 3px solid var(--pale-blue);
 }
-
 .pc-block-to-calculate {
     border-bottom-color: var(--dark-yellow);
 }
-
 .pc-calc-radio {
     position: absolute;
     top: 0;
@@ -1691,22 +306,18 @@
     border-radius: 25% / 100%;
     padding: 7px 15px;
 }
-
 .pc-calc-radio--active {
     background: var(--white);
 }
-
 .pc-inputs {
     display: block;
     list-style-type: none;
     margin: 0;
     padding: 0;
-
     --row-gap: 10px;
     --padding: 25px;
     --columns-gap: 70px;
     --grid-column-width: calc(50% - (var(--columns-gap) / 2));
-
     display: grid;
     grid-template-columns: var(--grid-column-width) var(--grid-column-width);
     grid-template-rows: auto;
@@ -1716,19 +327,15 @@
     align-items: start;
     grid-gap: var(--row-gap) var(--columns-gap);
     padding: 0 var(--padding);
-
 }
-
 .pc-input-item {
     text-align: center;
 }
-
 .pc-input-title {
     position: relative;
     display: block;
     margin-bottom: 25px;
 }
-
 .pc-input-sub-title {
     position: absolute;
     top: 100%;
@@ -1737,27 +344,21 @@
     text-align: center;
     font-size: 9px;
 }
-
 .pc-input-left {
     grid-area: pc-input-left;
-
 }
-
 .pc-input-right {
     grid-area: pc-input-right;
 }
-
 .pc-input-details {
     font-size: 10px;
     color: var(--dark-gray);
 }
-
 .pc-field-not-editable {
     position: relative;
     padding: 5px;
     display: block;
 }
-
 .pc-input-left .pc-field-not-editable,
 .pc-input-right .pc-field-not-editable {
     background: var(--light-gray);
@@ -1765,64 +366,7 @@
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/* components/pc-svg-chain.vue */
 
 .pc-svg-chain-icon {
     position: absolute;
@@ -1832,274 +376,7 @@
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/* components/impact-comp.vue */
 
 .pc-inputs {
     grid-template-areas:
@@ -2108,195 +385,7 @@
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/* components/base-comp.vue */
 
 .pc-input-left[data-v-0d0bef2b] {
     position: relative;
@@ -2304,180 +393,7 @@
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/* components/base-comp.vue */
 
 .pc-input-sd-rate {
     margin-top: -10px;
@@ -2485,52 +401,22 @@
     position: relative;
     text-align: center;
 }
-
 .pc-field-sdRate {
     width: 90%;
     display: inline-block;
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/* components/pc-tooltip.vue */
 
 .pc-tooltip {
     --tooltip-background-color: var(--black);
     position: relative;
 }
-
 .tooltip-wrapper {
     position: absolute;
-    left: 50%;
+    left: 0;
     top: calc(100% + 10px);
-    transform: translate(-50%, 0);
     background: var(--tooltip-background-color);
     color: var(--light-gray);
     padding: 5px;
@@ -2538,17 +424,15 @@
     z-index: 10;
     width: 400px;
     white-space: normal;
+    pointer-events: none;
 }
-
 .tooltip-wrapper:after {
     --size: 5px;
-
     content: '';
     position: absolute;
-    left: 50%;
+    left: 50px;
     bottom: calc(100% - var(--size));
     transform: translate(-50%, 0) rotateZ(45deg);
-
     border: var(--size) solid var(--tooltip-background-color);
     border-right-color: transparent;
     border-bottom-color: transparent;

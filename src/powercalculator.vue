@@ -72,8 +72,10 @@
 
                 <sample-comp
                     fieldfromblock="sample"
+                    v-bind:testtype="testType"
                     v-bind:sample="view.sample"
                     v-bind:runtime.sync="view.runtime"
+                    v-bind:lockedfield.sync="lockedField"
                     v-bind:calculateprop="calculateProp"
                     v-bind:enableedit="enabledMainInputs.sample"
                     v-bind:isblockfocused="focusedBlock == 'sample'"
@@ -147,6 +149,9 @@ export default {
                 runtime: 14 //days
             },
 
+            // this is used for sample size but we also want to make it shareable
+            lockedField: 'days',
+
             // false means the editable ones are the secondary mode (metric totals, days&daily trials and absolute impact)
             enabledMainInputs: {
                 base: true,
@@ -175,6 +180,7 @@ export default {
                     testType: this.testType,
                     calculateProp: this.calculateProp,
                     view: this.view,
+                    lockedField: this.lockedField,
                 };
             return JSON.parse(JSON.stringify(result))
         }

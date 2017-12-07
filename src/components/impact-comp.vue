@@ -51,7 +51,7 @@
                         v-on:update:focus="updateFocus"
                         aria-label="visitors with goals"></pc-block-field>
                         <span class="pc-input-details">
-                            going from {{impactByMetricMinDisplay}} to {{impactByMetricMaxDisplay}}%
+                            going from {{base}} to either {{impactByMetricMinDisplay}} or {{impactByMetricMaxDisplay}}
                         </span>
                 </label>
             </li>
@@ -201,7 +201,7 @@ export default {
             })
         },
         getImpactByVisitorsPerDay () {
-            return this.getImpactByVisitor() / this.view.runtime
+            return Math.floor(this.getImpactByVisitor() / this.view.runtime);
         },
         updateData () {
             this.impactByMetricValue = this.getImpactByMetric();
