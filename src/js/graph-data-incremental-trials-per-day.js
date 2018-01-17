@@ -3,7 +3,7 @@ import statFormulas from '../js/math.js'
 export default {
     getGraphYTicks () {
         let impact = this.impact,
-            arr = [impact/4, impact/2, impact, impact*2, impact*4];
+        arr = [impact/1.50, impact/1.25, impact, impact*1.25, impact*1.50];
 
         return arr
     },
