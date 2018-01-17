@@ -72,7 +72,7 @@ export default {
             width: 100,
             height: 100,
             data:  this.dataDefault,
-            graphType: 'sample-power' // x, y
+            graphType: 'days-incrementalTrialsPerDay' // x, y
             // graphX: 'sample' // computed
             // graphY: 'power' // computed
         }
