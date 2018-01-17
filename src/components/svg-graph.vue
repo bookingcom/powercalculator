@@ -51,10 +51,6 @@ let dataDefault = [
 let style = document.createElement('style');
 
 style.innerHTML = `
-    .pc-graph .c3-circles-Sample {
-        display: none;
-    }
-
     .pc-graph .c3-axis-y-label {
         pointer-events: none;
     }
@@ -288,7 +284,7 @@ export default {
             data: {
                 x: 'x',
                 columns: this.dataDefault,
-                type: 'line'
+                type: 'area'
             },
             grid: {
                 x: {
