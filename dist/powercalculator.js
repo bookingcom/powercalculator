@@ -6338,7 +6338,8 @@ var powerCalculator$1 = {render: function(){var _vm=this;var _h=_vm.$createEleme
             }
         };
 
-        return Object.assign(data, JSON.parse(JSON.stringify(importedData)));
+        // mergeComponentData has no array support for now
+        return this.mergeComponentData(data, JSON.parse(JSON.stringify(importedData)));
     },
     computed: {
         math () {
@@ -6402,6 +6403,25 @@ var powerCalculator$1 = {render: function(){var _vm=this;var _h=_vm.$createEleme
         },
         updateCalculateProp (newProp) {
             this.calculateProp = newProp;
+        },
+        mergeComponentData (base, toClone) {
+            // merges default data with imported one from parent component
+            let result = recursive(base, toClone);
+
+            // no array support for now
+            function recursive (baseRef, cloneRef) {
+                Object.keys(cloneRef).forEach((prop) => {
+                    if (typeof cloneRef[prop] == 'object') {
+                        baseRef[prop] = recursive(baseRef[prop], cloneRef[prop]);
+                    } else {
+                        baseRef[prop] = cloneRef[prop];
+                    }
+                });
+
+                return baseRef;
+            }
+
+            return result;
         }
     },
     watch: {
