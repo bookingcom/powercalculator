@@ -2,29 +2,28 @@
     <div class="pc-block pc-block--graph">
         <div class="pc-graph-controls">
             <label class="pc-graph-radio-label">
-                <input type="radio" class="pc-graph-radio-input" name="graph-x" value="sample-power" v-model="graphType">
-                <span class="pc-graph-radio-text" :class="{'pc-graph-radio-selected': graphType == 'sample-power'}">{{getMetricDisplayName('power')}} / {{getMetricDisplayName('sample')}}</span>
-            </label>
-            <label class="pc-graph-radio-label">
-                <input type="radio" class="pc-graph-radio-input" name="graph-x" value="impact-power" v-model="graphType">
-                <span class="pc-graph-radio-text" :class="{'pc-graph-radio-selected': graphType == 'impact-power'}">{{getMetricDisplayName('power')}} / {{getMetricDisplayName('impact')}}</span>
-            </label>
-            <label class="pc-graph-radio-label">
-                <input type="radio" class="pc-graph-radio-input" name="graph-x" value="sample-impact" v-model="graphType">
-                <span class="pc-graph-radio-text" :class="{'pc-graph-radio-selected': graphType == 'sample-impact'}">{{getMetricDisplayName('impact')}} / {{getMetricDisplayName('sample')}}</span>
-            </label>
-
-            <label class="pc-graph-radio-label">
-                <input type="radio" class="pc-graph-radio-input" name="graph-x" value="samplePerDay-power" v-model="graphType">
-                <span class="pc-graph-radio-text" :class="{'pc-graph-radio-selected': graphType == 'samplePerDay-power'}">{{getMetricDisplayName('power')}} / {{getMetricDisplayName('samplePerDay')}}</span>
+                <input type="radio" class="pc-graph-radio-input" name="graph-x" value="days-incrementalTrialsPerDay" v-model="graphType">
+                <span class="pc-graph-radio-text" :class="{'pc-graph-radio-selected': graphType == 'days-incrementalTrialsPerDay'}">{{getMetricDisplayName('incrementalTrialsPerDay')}} / {{getMetricDisplayName('days')}}</span>
             </label>
             <label class="pc-graph-radio-label">
                 <input type="radio" class="pc-graph-radio-input" name="graph-x" value="samplePerDay-incrementalTrials" v-model="graphType">
                 <span class="pc-graph-radio-text" :class="{'pc-graph-radio-selected': graphType == 'samplePerDay-incrementalTrials'}">{{getMetricDisplayName('incrementalTrials')}} / {{getMetricDisplayName('samplePerDay')}}</span>
             </label>
             <label class="pc-graph-radio-label">
-                <input type="radio" class="pc-graph-radio-input" name="graph-x" value="days-incrementalTrialsPerDay" v-model="graphType">
-                <span class="pc-graph-radio-text" :class="{'pc-graph-radio-selected': graphType == 'days-incrementalTrialsPerDay'}">{{getMetricDisplayName('incrementalTrialsPerDay')}} / {{getMetricDisplayName('days')}}</span>
+                <input type="radio" class="pc-graph-radio-input" name="graph-x" value="sample-impact" v-model="graphType">
+                <span class="pc-graph-radio-text" :class="{'pc-graph-radio-selected': graphType == 'sample-impact'}">{{getMetricDisplayName('impact')}} / {{getMetricDisplayName('sample')}}</span>
+            </label>
+            <label class="pc-graph-radio-label">
+                <input type="radio" class="pc-graph-radio-input" name="graph-x" value="sample-power" v-model="graphType">
+                <span class="pc-graph-radio-text" :class="{'pc-graph-radio-selected': graphType == 'sample-power'}">{{getMetricDisplayName('power')}} / {{getMetricDisplayName('sample')}}</span>
+            </label>
+            <label class="pc-graph-radio-label">
+                <input type="radio" class="pc-graph-radio-input" name="graph-x" value="samplePerDay-power" v-model="graphType">
+                <span class="pc-graph-radio-text" :class="{'pc-graph-radio-selected': graphType == 'samplePerDay-power'}">{{getMetricDisplayName('power')}} / {{getMetricDisplayName('samplePerDay')}}</span>
+            </label>
+            <label class="pc-graph-radio-label">
+                <input type="radio" class="pc-graph-radio-input" name="graph-x" value="impact-power" v-model="graphType">
+                <span class="pc-graph-radio-text" :class="{'pc-graph-radio-selected': graphType == 'impact-power'}">{{getMetricDisplayName('power')}} / {{getMetricDisplayName('impact')}}</span>
             </label>
         </div>
         <div class="pc-graph" ref="pc-graph-size">
