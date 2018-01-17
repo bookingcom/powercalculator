@@ -4931,7 +4931,7 @@ var valueTransformationMixin = {
 var _impact = {
     getGraphYTicks () {
         let impact = this.impact,
-            arr = [impact/4, impact/2, impact, impact*2, impact*4];
+            arr = [impact/1.50, impact/1.25, impact, impact*1.25, impact*1.50];
 
         return arr
     },
@@ -4960,7 +4960,7 @@ var _impact = {
 var _incrementalTrials = {
     getGraphYTicks () {
         let impact = this.impact,
-            arr = [impact/4, impact/2, impact, impact*2, impact*4];
+        arr = [impact/1.50, impact/1.25, impact, impact*1.25, impact*1.50];
 
         return arr
     },
@@ -5020,7 +5020,7 @@ var _incrementalTrials = {
 var _incrementalTrialsPerDay = {
     getGraphYTicks () {
         let impact = this.impact,
-            arr = [impact/4, impact/2, impact, impact*2, impact*4];
+        arr = [impact/1.50, impact/1.25, impact, impact*1.25, impact*1.50];
 
         return arr
     },
@@ -5033,6 +5033,10 @@ var _incrementalTrialsPerDay = {
                 base_rate: this.extractValue('base', base),
                 effect_size: this.extractValue('impact', y)
             });
+
+        if (isNaN(result)) {
+            result = 0;
+        }
 
         return this.displayValue('impactByVisitors', result);
     },
@@ -5266,10 +5270,6 @@ let dataDefault = [
 let style = document.createElement('style');
 
 style.innerHTML = `
-    .pc-graph .c3-circles-Sample {
-        display: none;
-    }
-
     .pc-graph .c3-axis-y-label {
         pointer-events: none;
     }
@@ -5283,7 +5283,7 @@ document.querySelector('head').appendChild(style);
 
 
 
-var svgGraph = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-block pc-block--graph"},[_c('div',{staticClass:"pc-graph-controls"},[_c('label',{staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"sample-power"},domProps:{"checked":_vm._q(_vm.graphType,"sample-power")},on:{"change":function($event){_vm.graphType="sample-power";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'sample-power'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('power'))+" / "+_vm._s(_vm.getMetricDisplayName('sample')))])]),_vm._v(" "),_c('label',{staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"impact-power"},domProps:{"checked":_vm._q(_vm.graphType,"impact-power")},on:{"change":function($event){_vm.graphType="impact-power";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'impact-power'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('power'))+" / "+_vm._s(_vm.getMetricDisplayName('impact')))])]),_vm._v(" "),_c('label',{staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"sample-impact"},domProps:{"checked":_vm._q(_vm.graphType,"sample-impact")},on:{"change":function($event){_vm.graphType="sample-impact";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'sample-impact'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('impact'))+" / "+_vm._s(_vm.getMetricDisplayName('sample')))])]),_vm._v(" "),_c('label',{staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"samplePerDay-power"},domProps:{"checked":_vm._q(_vm.graphType,"samplePerDay-power")},on:{"change":function($event){_vm.graphType="samplePerDay-power";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'samplePerDay-power'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('power'))+" / "+_vm._s(_vm.getMetricDisplayName('samplePerDay')))])]),_vm._v(" "),_c('label',{staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"samplePerDay-incrementalTrials"},domProps:{"checked":_vm._q(_vm.graphType,"samplePerDay-incrementalTrials")},on:{"change":function($event){_vm.graphType="samplePerDay-incrementalTrials";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'samplePerDay-incrementalTrials'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('incrementalTrials'))+" / "+_vm._s(_vm.getMetricDisplayName('samplePerDay')))])]),_vm._v(" "),_c('label',{staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"days-incrementalTrialsPerDay"},domProps:{"checked":_vm._q(_vm.graphType,"days-incrementalTrialsPerDay")},on:{"change":function($event){_vm.graphType="days-incrementalTrialsPerDay";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'days-incrementalTrialsPerDay'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('incrementalTrialsPerDay'))+" / "+_vm._s(_vm.getMetricDisplayName('days')))])])]),_vm._v(" "),_c('div',{ref:"pc-graph-size",staticClass:"pc-graph"},[_c('div',{ref:"pc-graph-wrapper",style:(_vm.style)},[_c('div',{ref:"pc-graph"})])])])},staticRenderFns: [],
+var svgGraph = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-block pc-block--graph"},[_c('div',{staticClass:"pc-graph-controls"},[_c('label',{staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"days-incrementalTrialsPerDay"},domProps:{"checked":_vm._q(_vm.graphType,"days-incrementalTrialsPerDay")},on:{"change":function($event){_vm.graphType="days-incrementalTrialsPerDay";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'days-incrementalTrialsPerDay'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('incrementalTrialsPerDay'))+" / "+_vm._s(_vm.getMetricDisplayName('days')))])]),_vm._v(" "),_c('label',{staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"samplePerDay-incrementalTrials"},domProps:{"checked":_vm._q(_vm.graphType,"samplePerDay-incrementalTrials")},on:{"change":function($event){_vm.graphType="samplePerDay-incrementalTrials";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'samplePerDay-incrementalTrials'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('incrementalTrials'))+" / "+_vm._s(_vm.getMetricDisplayName('samplePerDay')))])]),_vm._v(" "),_c('label',{staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"sample-impact"},domProps:{"checked":_vm._q(_vm.graphType,"sample-impact")},on:{"change":function($event){_vm.graphType="sample-impact";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'sample-impact'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('impact'))+" / "+_vm._s(_vm.getMetricDisplayName('sample')))])]),_vm._v(" "),_c('label',{staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"sample-power"},domProps:{"checked":_vm._q(_vm.graphType,"sample-power")},on:{"change":function($event){_vm.graphType="sample-power";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'sample-power'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('power'))+" / "+_vm._s(_vm.getMetricDisplayName('sample')))])]),_vm._v(" "),_c('label',{staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"samplePerDay-power"},domProps:{"checked":_vm._q(_vm.graphType,"samplePerDay-power")},on:{"change":function($event){_vm.graphType="samplePerDay-power";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'samplePerDay-power'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('power'))+" / "+_vm._s(_vm.getMetricDisplayName('samplePerDay')))])]),_vm._v(" "),_c('label',{staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"impact-power"},domProps:{"checked":_vm._q(_vm.graphType,"impact-power")},on:{"change":function($event){_vm.graphType="impact-power";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'impact-power'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('power'))+" / "+_vm._s(_vm.getMetricDisplayName('impact')))])])]),_vm._v(" "),_c('div',{ref:"pc-graph-size",staticClass:"pc-graph"},[_c('div',{ref:"pc-graph-wrapper",style:(_vm.style)},[_c('div',{ref:"pc-graph"})])])])},staticRenderFns: [],
     mixins: [valueTransformationMixin, graphDataMixin],
     template: '#svg-graph',
     props: ['testtype', 'sample', 'impact', 'power', 'base', 'falseposrate', 'sdrate', 'runtime'],
@@ -5292,7 +5292,7 @@ var svgGraph = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c
             width: 100,
             height: 100,
             data:  this.dataDefault,
-            graphType: 'sample-power' // x, y
+            graphType: 'days-incrementalTrialsPerDay' // x, y
             // graphX: 'sample' // computed
             // graphY: 'power' // computed
         }
@@ -5503,7 +5503,7 @@ var svgGraph = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c
             data: {
                 x: 'x',
                 columns: this.dataDefault,
-                type: 'line'
+                type: 'area'
             },
             grid: {
                 x: {
@@ -6109,6 +6109,11 @@ var impactComp = {render: function(){var _vm=this;var _h=_vm.$createElement;var 
             // they should never be changes manually;
             this.impactByMetricMin = impactByMetricObj.min;
             this.impactByMetricMax = impactByMetricObj.max;
+        },
+        relativeImpact () {
+            if (this.isReadOnly) {
+                this.updateData();
+            }
         }
     },
     methods: {
@@ -6338,7 +6343,8 @@ var powerCalculator$1 = {render: function(){var _vm=this;var _h=_vm.$createEleme
             }
         };
 
-        return Object.assign(data, JSON.parse(JSON.stringify(importedData)));
+        // mergeComponentData has no array support for now
+        return this.mergeComponentData(data, JSON.parse(JSON.stringify(importedData)));
     },
     computed: {
         math () {
@@ -6402,6 +6408,25 @@ var powerCalculator$1 = {render: function(){var _vm=this;var _h=_vm.$createEleme
         },
         updateCalculateProp (newProp) {
             this.calculateProp = newProp;
+        },
+        mergeComponentData (base, toClone) {
+            // merges default data with imported one from parent component
+            let result = recursive(base, toClone);
+
+            // no array support for now
+            function recursive (baseRef, cloneRef) {
+                Object.keys(cloneRef).forEach((prop) => {
+                    if (typeof cloneRef[prop] == 'object') {
+                        baseRef[prop] = recursive(baseRef[prop], cloneRef[prop]);
+                    } else {
+                        baseRef[prop] = cloneRef[prop];
+                    }
+                });
+
+                return baseRef;
+            }
+
+            return result;
         }
     },
     watch: {
