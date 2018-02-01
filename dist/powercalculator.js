@@ -4679,108 +4679,160 @@ jStat.models = (function(){
 });
 
 // SOLVING FOR POWER
+function solveforpower_Gtest ({total_sample_size, base_rate, effect_size, alpha, alternative, mu}) {
+    var sample_size = total_sample_size/2;
 
-function solveforpower_Gtest ({total_sample_size, base_rate, effect_size, alpha}) {
-    var visitors_base = total_sample_size/2;
-    var visitors_var = total_sample_size/2;
     var mean_base = base_rate;
     var mean_var = base_rate * (1+effect_size);
+
     var mean_diff = mean_var - mean_base;
-    var variance_base = (mean_base*(1-mean_base))/visitors_base;
-    var variance_var = (mean_var*(1-mean_var))/visitors_var;
-    var SE = Math.sqrt(variance_var + variance_base);
-    var dof = visitors_base + visitors_var - 2;
+    var delta = mean_diff - mu;
 
-    var prop_hat = ((visitors_base*mean_base) + (visitors_var * mean_var)) / (visitors_base+visitors_var);
-    var SE_hat = Math.sqrt(prop_hat*(1-prop_hat)*(1/visitors_base + 1/visitors_var));
+    var variance = mean_base * (1-mean_base) + mean_var * (1-mean_var);
+    var z = jstat.normal.inv(1-alpha/2, 0, 1);
+    var mean = delta*Math.sqrt(sample_size/variance);
 
-    var power = 1 - jstat.studentt.cdf((jstat.studentt.inv(1-alpha/2,dof)*SE_hat - Math.abs(mean_diff))/SE,dof);
+    var power;
+    if (alternative == 'lower') {
+        power = jstat.normal.cdf(jstat.normal.inv(alpha, 0, 1), mean, 1);
+    } else if (alternative == 'greater') {
+	power = 1-jstat.normal.cdf(jstat.normal.inv(1-alpha, 0, 1), mean, 1);
+    } else {
+        power = 1 - (jstat.normal.cdf(z, mean, 1) -
+            jstat.normal.cdf(-z, mean, 1));
+    }
 
     return power
 }
 
-function solveforpower_Ttest({total_sample_size, base_rate, sd_rate, effect_size, alpha}) {
-    var visitors_base = total_sample_size/2;
-    var visitors_var = total_sample_size/2;
+function solveforpower_Ttest({total_sample_size, base_rate, sd_rate, effect_size, alpha, alternative, mu}) {
+    var sample_size = total_sample_size/2;
+
     var mean_base = base_rate;
     var mean_var = base_rate * (1+effect_size);
-    var mean_diff = mean_var - mean_base;
-    var variance_base = sd_rate**2;
-    var variance_var = sd_rate**2;
-    var SE = Math.sqrt((variance_base/visitors_base)+ (variance_var/visitors_var));
-    var dof = visitors_base + visitors_var - 2;
 
-    var power = 1 - jstat.studentt.cdf((jstat.studentt.inv((1-alpha/2), dof) - mean_diff/SE),dof)
-    +   jstat.studentt.cdf( (- jstat.studentt.inv(1-alpha/2,dof) - mean_diff/SE), dof);
+    var mean_diff = mean_var - mean_base;
+    var delta = mean_diff - mu;
+
+    var variance = 2*sd_rate**2;
+    var z = jstat.normal.inv(1-alpha/2, 0, 1);
+    var mean = delta*Math.sqrt(sample_size/variance);
+
+    var power;
+    if (alternative == 'lower') {
+        power = jstat.normal.cdf(jstat.normal.inv(alpha, 0, 1), mean, 1);
+    } else if (alternative == 'greater') {
+	power = 1-jstat.normal.cdf(jstat.normal.inv(1-alpha, 0, 1), mean, 1);
+    } else {
+        power = 1 - (jstat.normal.cdf(z, mean, 1) -
+            jstat.normal.cdf(-z, mean, 1));
+   } 
+
     return power
 }
 
 
 
 // SOLVING FOR SAMPLE SIZE
-
-//DOF cant be based on sample size here!
-function solveforsample_Ttest({base_rate, sd_rate, effect_size, alpha, beta}){
+function solveforsample_Ttest({base_rate, sd_rate, effect_size, alpha, beta, alternative, mu}){
     var mean_base = base_rate;
     var mean_var = base_rate * (1+effect_size);
+
+    var variance = 2*sd_rate**2;
+
     var mean_diff = mean_var - mean_base;
-    var variance_base = sd_rate**2;
-    var variance_var = sd_rate**2;
-    var dof = 10000;
-    var sample_one_group = ((variance_base + variance_var)*(jstat.studentt.inv((1-alpha/2),dof)
-        + jstat.studentt.inv(1-beta,dof))**2)/mean_diff**2;
-    var total_sample_size = sample_one_group*2;
-    return total_sample_size;
+    var multiplier = variance/(mu - mean_diff)**2;
+
+    var sample_one_group;
+    if (alternative == "greater" || alternative == "lower") {
+        sample_one_group = multiplier * (jstat.normal.inv(beta, 0, 1) - jstat.normal.inv(1-alpha, 0, 1))**2; 
+    } else {
+        sample_one_group = multiplier * (jstat.normal.inv(1-beta, 0, 1) + jstat.normal.inv(1-alpha/2, 0, 1))**2;
+    }
+
+    return 2*Math.ceil(sample_one_group);
 }
 
 
 
-function solveforsample_Gtest({base_rate, effect_size, alpha, beta}){
+function solveforsample_Gtest({base_rate, effect_size, alpha, beta, alternative, mu}){
     var mean_base = base_rate;
-    var mean_var = base_rate * (1+effect_size);
+    var mean_var = base_rate*(1+effect_size);
+
+    var variance = mean_base*(1-mean_base) + mean_var*(1-mean_var);
+
     var mean_diff = mean_var - mean_base;
-    var variance_base = (mean_base*(1-mean_base));
-    var variance_var = (mean_var*(1-mean_var));
-    var dof =100000;
-    var sample_one_group = ((variance_base + variance_var)*(jstat.studentt.inv((1-alpha/2),dof)
-        + jstat.studentt.inv(1-beta,dof))**2)/mean_diff**2;
-    var total_sample_size = sample_one_group*2;
-    return total_sample_size;
+    var multiplier = variance/((mu - mean_diff)**2);
+
+    var sample_one_group;
+    if (alternative == "greater" || alternative == "lower") {
+        sample_one_group = multiplier * (jstat.normal.inv(beta, 0, 1) - jstat.normal.inv(1-alpha, 0, 1))**2; 
+    } else {
+        sample_one_group = multiplier * (jstat.normal.inv(1-beta, 0, 1) + jstat.normal.inv(1-alpha/2, 0, 1))**2;
+    }
+
+    return 2*Math.ceil(sample_one_group);
 }
 
 
 
 // SOLVING FOR EFFECT SIZE
+function solveforeffectsize_Ttest({total_sample_size, base_rate, sd_rate, alpha, beta, alternative, mu}){
+    var sample_size = total_sample_size/2;
+    var variance = 2*sd_rate**2;
 
-function solveforeffectsize_Ttest({total_sample_size, base_rate, sd_rate, alpha, beta}){
-    var sample_one_group = total_sample_size/2;
-    var variance_base = sd_rate**2;
-    var variance_var = sd_rate**2;
-    var dof = total_sample_size - 2;
-    var absolute_mean_diff = ((variance_base + variance_var)*(jstat.studentt.inv((1-alpha/2),dof)
-        + jstat.studentt.inv(1-beta,dof))**2)/sample_one_group;
-    var effect_size = absolute_mean_diff/base_rate;
-    return effect_size;
+    var z = jstat.normal.inv(1-beta, 0, 1);
+    var multiplier = Math.sqrt(variance/sample_size);
+    var effect_size;
+    if (alternative == "greater") {
+        effect_size = mu + (z - jstat.normal.inv(alpha, 0, 1)) * multiplier;
+    } else if (alternative == "lower") {
+        effect_size = mu - (z - jstat.normal.inv(alpha, 0, 1)) * multiplier;
+    } else {
+        var delta = (z + jstat.normal.inv(1-alpha/2, 0, 1) )* multiplier;
+        effect_size = mu + delta;
+    }
+
+    return effect_size/base_rate;
 }
 
+function solve_quadratic(Z, sample_size, control_rate, mu) {
+  var a = (Z**2 + sample_size) * control_rate**2;
+  var b = -(Z**2) * control_rate - 2 * (control_rate + mu) * sample_size * control_rate;
+  var c = sample_size * (control_rate + mu)**2 - Z**2 * control_rate * (1-control_rate);
 
-function solveforeffectsize_Gtest({total_sample_size, base_rate, alpha, beta}){
-    var sample_one_group = total_sample_size / 2;
-    var mean_base = base_rate;
-    var dof = total_sample_size - 2;
-    var Z = (jstat.studentt.inv((1 - alpha / 2), dof) + jstat.studentt.inv(1 - beta, dof)) ** 2;
-    var a = sample_one_group * mean_base + Z * mean_base;
-    var b = -2 * sample_one_group * mean_base - Z;
-    var c = sample_one_group * mean_base - Z * (1 - mean_base);
-    var u1 = (-b + Math.sqrt(b ** 2 - 4 * a * c)) / (2 * a) - 1;
-    var u2 = (-b - Math.sqrt(b ** 2 - 4 * a * c)) / (2 * a) - 1;
-    var effect_size;
-    if (u1 < 0) {
-        effect_size = u2;
+  var det = b**2 - 4*a*c;
+  if (det < 0) {
+    return("-");
+  }
+
+  var sol_h = (-b + Math.sqrt(det)) / (2*a);
+  var sol_l = (-b - Math.sqrt(det)) / (2*a);
+
+  return [sol_h, sol_l];
+}
+
+function solveforeffectsize_Gtest({total_sample_size, base_rate, alpha, beta, alternative, mu}){
+    var sample_size = total_sample_size / 2;
+
+    var rel_effect_size;
+    var Z;
+    var solutions;
+    if (alternative == "greater" || alternative == "lower") {
+        Z = jstat.normal.inv(beta, 0, 1) + jstat.normal.inv(alpha, 0, 1);
+        solutions = solve_quadratic(Z, sample_size, base_rate, mu);
+        if (alternative == 'greater') {
+            rel_effect_size = solutions[0] - 1;
+        } else {
+            rel_effect_size = solutions[1] - 1;
+        }
     } else {
-        effect_size = u1;
+        Z = jstat.normal.inv(1-beta, 0, 1) + jstat.normal.inv(1-alpha/2, 0, 1);
+        solutions = solve_quadratic(Z, sample_size, base_rate, mu);
+        rel_effect_size = solutions[0] - 1;
     }
-    return effect_size;
+
+    return rel_effect_size;
 }
 
 
@@ -4794,7 +4846,6 @@ function get_base_rate({total_sample_size, visitors_with_goals}){
 
 function get_absolute_impact_in_metric_hash({base_rate, effect_size}) {
     let value = base_rate * effect_size;
-
     return {
         value,
         min: base_rate - value,
@@ -4837,7 +4888,7 @@ var statFormulas = {
     getAbsoluteImpactInVisitors: get_absolute_impact_in_visitors,
     getRelativeImpactFromAbsolute: get_relative_impact_from_absolute,
     getRelativeImpactFromVisitors: get_relative_impact_from_visitors
-};
+}
 
 var valueTransformationMixin = {
     beforeCreate () {
@@ -4926,7 +4977,7 @@ var valueTransformationMixin = {
             return result || ''
         }
     }
-};
+}
 
 var _impact = {
     getGraphYTicks () {
@@ -5140,7 +5191,7 @@ var _samplePerDay = {
 
 var _power = {
     getGraphYTicks () {
-        let arr = [0, 25, 50, 75, 100];
+        let arr = [10, 25, 50, 75, 100];
         return arr
     },
     getGraphYTicksFormatted (y) {
@@ -5267,7 +5318,7 @@ var graphDataMixin = {
             return graphY
         }
     }
-};
+}
 
 let dataDefault = [
         ['x', 0, 0, 0, 0, 0, 0],
@@ -5411,7 +5462,10 @@ var svgGraph = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c
                 effect_size: extractValue('impact', impact),
                 alpha: extractValue('falsePosRate', falseposrate),
                 beta: 1 - extractValue('power', power), // power of 80%, beta is actually 20%
-                sd_rate: extractValue('falsePosRate', sdrate)
+                sd_rate: extractValue('falsePosRate', sdrate),
+                mu: 0,
+                alternative: 'two-sided',
+                direction: 'increase'
             }
         },
         deepCloneObject (obj) {
@@ -5573,7 +5627,7 @@ var svgGraph = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c
 
         this.updateGraphData();
     }
-};
+}
 
 let validateFunctions = {
         '*': {
@@ -5869,7 +5923,7 @@ var pcBlockField = {render: function(){var _vm=this;var _h=_vm.$createElement;va
             }
         }
     }
-};
+}
 
 var pcSvgChain = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('svg',{staticClass:"pc-svg-chain-icon",style:(_vm.svgBgLine),attrs:{"width":"100%","height":"59px","viewBox":`0 0 ${_vm.svgBoxWidth} 59`,"version":"1.1","xmlns":"http://www.w3.org/2000/svg","xmlns:xlink":"http://www.w3.org/1999/xlink","aria-hidden":"true"}},[_c('g',{attrs:{"id":"Power-Calculator","transform":"translate(-811.000000, -485.000000)"}},[_c('g',{attrs:{"transform":"translate(676.000000, 327.000000)"}},[_c('g',{attrs:{"id":"Chain","transform":"translate(132.000000, 158.000000)"}},[_c('path',{attrs:{"d":"M12.1680332,24.5 L14.5,24.5 C16.709139,24.5 18.5,26.290861 18.5,28.5 L18.5,29.5 C18.5,31.709139 16.709139,33.5 14.5,33.5 L9.5,33.5 C7.290861,33.5 5.5,31.709139 5.5,29.5 L5.5,28.5 C6.20701437,28.5 6.87368104,28.5 7.5,28.5 L7.5,29.5 C7.5,30.6045695 8.3954305,31.5 9.5,31.5 L14.5,31.5 C15.6045695,31.5 16.5,30.6045695 16.5,29.5 L16.5,28.5 C16.5,27.3954305 15.6045695,26.5 14.5,26.5 L13.7237764,26.5 C13.463452,25.7924504 12.944871,25.1257837 12.1680332,24.5 Z","id":"Rectangle-5","fill":_vm.svgFillColor,"fill-rule":"nonzero","transform":"translate(12.000000, 29.000000) scale(-1, -1) translate(-12.000000, -29.000000) "}}),_vm._v(" "),_c('path',{attrs:{"d":"M18.1680332,24.5 L20.5,24.5 C22.709139,24.5 24.5,26.290861 24.5,28.5 L24.5,29.5 C24.5,31.709139 22.709139,33.5 20.5,33.5 L15.5,33.5 C13.290861,33.5 11.5,31.709139 11.5,29.5 L11.5,28.5 C12.2070144,28.5 12.873681,28.5 13.5,28.5 L13.5,29.5 C13.5,30.6045695 14.3954305,31.5 15.5,31.5 L20.5,31.5 C21.6045695,31.5 22.5,30.6045695 22.5,29.5 L22.5,28.5 C22.5,27.3954305 21.6045695,26.5 20.5,26.5 L19.7237764,26.5 C19.463452,25.7924504 18.944871,25.1257837 18.1680332,24.5 Z","id":"Rectangle-5","fill":_vm.svgFillColor,"fill-rule":"nonzero"}})])])])])},staticRenderFns: [],
     props: ['calculateprop', 'fieldfromblock'],
@@ -5912,7 +5966,7 @@ var pcSvgChain = {render: function(){var _vm=this;var _h=_vm.$createElement;var 
             return `background: ${strokeMask}, ${stokeStyle};`.replace(/\n/g, '');
         }
     }
-};
+}
 
 var pcBlock = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div')},staticRenderFns: [],
     mixins: [valueTransformationMixin],
@@ -5936,7 +5990,7 @@ var pcBlock = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=
         'pc-block-field': pcBlockField,
         'pc-svg-chain': pcSvgChain,
     }
-};
+}
 
 var sampleComp = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-block pc-block--sample",class:{'pc-block-focused': _vm.isblockfocused == 'sample', 'pc-block-to-calculate': _vm.calculateprop == 'sample'}},[_c('pc-svg-chain',{attrs:{"calculateprop":_vm.calculateprop,"fieldfromblock":_vm.fieldfromblock}}),_vm._v(" "),_c('label',{staticClass:"pc-calc-radio pc-calc-radio--sample",class:{'pc-calc-radio--active': _vm.isCalculated},attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.isCalculated),expression:"isCalculated"}],attrs:{"type":"radio"},domProps:{"value":true,"checked":_vm._q(_vm.isCalculated,true)},on:{"change":function($event){_vm.isCalculated=true;}}}),_vm._v(" "+_vm._s(_vm.isCalculated ? 'Calculating' : 'Calculate')+" ")]),_vm._v(" "),_c('div',{staticClass:"pc-header"},[_vm._v(" Sample Size ")]),_vm._v(" "),_c('ul',{staticClass:"pc-inputs"},[_c('li',{staticClass:"pc-input-item pc-input-left"},[_c('label',[_vm._m(0,false,false),_vm._v(" "),_c('pc-block-field',{attrs:{"fieldprop":"totalSample","fieldvalue":_vm.totalSample,"testtype":_vm.testtype,"isreadonly":_vm.calculateprop == 'sample',"enableedit":_vm.enableedit},on:{"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}})],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right pc-value-field--lockable",class:_vm.getLockedStateClass('visitorsPerDay')},[_c('label',[_vm._m(1,false,false),_vm._v(" "),_c('pc-block-field',{attrs:{"fieldprop":"visitorsPerDay","fieldvalue":_vm.visitorsPerDay,"testtype":_vm.testtype,"isreadonly":_vm.lockedField == 'visitorsPerDay',"isblockfocused":_vm.isblockfocused,"enableedit":_vm.enableedit,"lockedfield":_vm.lockedField,"lock":_vm.lockedField},on:{"update:lock":function($event){_vm.lockedField=$event;},"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}})],1),_vm._v(" "),_c('button',{staticClass:"pc-swap-button",attrs:{"type":"button"},on:{"click":_vm.switchLockedField}},[_c('svg',{attrs:{"width":"20px","height":"20px","viewBox":"0 0 20 20","version":"1.1","xmlns":"http://www.w3.org/2000/svg","xmlns:xlink":"http://www.w3.org/1999/xlink"}},[_c('desc',[_vm._v("Lock "+_vm._s(_vm.lockedField == 'days' ? 'number of days' : 'visitors per day'))]),_vm._v(" "),_c('defs',[_c('circle',{attrs:{"id":"path-1","cx":"13","cy":"13","r":"10"}}),_vm._v(" "),_c('filter',{attrs:{"x":"-5.0%","y":"-5.0%","width":"110.0%","height":"110.0%","filterUnits":"objectBoundingBox","id":"filter-2"}},[_c('feGaussianBlur',{attrs:{"stdDeviation":"0.5","in":"SourceAlpha","result":"shadowBlurInner1"}}),_vm._v(" "),_c('feOffset',{attrs:{"dx":"0","dy":"1","in":"shadowBlurInner1","result":"shadowOffsetInner1"}}),_vm._v(" "),_c('feComposite',{attrs:{"in":"shadowOffsetInner1","in2":"SourceAlpha","operator":"arithmetic","k2":"-1","k3":"1","result":"shadowInnerInner1"}}),_vm._v(" "),_c('feColorMatrix',{attrs:{"values":"0 0 0 0 0.489716199   0 0 0 0 0.489716199   0 0 0 0 0.489716199  0 0 0 0.5 0","type":"matrix","in":"shadowInnerInner1"}})],1)]),_vm._v(" "),_c('g',{attrs:{"id":"Page-1","stroke":"none","stroke-width":"1","fill":"none","fill-rule":"evenodd"}},[_c('g',{attrs:{"id":"Power-Calculator","transform":"translate(-550.000000, -522.000000)"}},[_c('g',{attrs:{"id":"Switcher","transform":"translate(547.000000, 519.000000)"}},[_c('g',{attrs:{"id":"Oval-3"}},[_c('use',{attrs:{"fill":"#EFEFEF","fill-rule":"evenodd","xlink:href":"#path-1"}}),_vm._v(" "),_c('use',{attrs:{"fill":"black","fill-opacity":"1","filter":"url(#filter-2)","xlink:href":"#path-1"}})]),_vm._v(" "),_c('g',{attrs:{"id":"Group","stroke-width":"1","fill-rule":"evenodd","transform":"translate(7.000000, 7.000000)","fill":"#155EAB"}},[_c('path',{attrs:{"d":"M4.5,4.20404051 L4.5,9.9127641 L2.5,9.9127641 L2.5,4.20404051 L0.5,4.20404051 L3.5,0.70872359 L6.5,4.20404051 L4.5,4.20404051 Z","id":"Combined-Shape"}}),_vm._v(" "),_c('path',{attrs:{"d":"M9.5,5.49531692 L9.5,11.2040405 L7.5,11.2040405 L7.5,5.49531692 L5.5,5.49531692 L8.5,2 L11.5,5.49531692 L9.5,5.49531692 Z","id":"Combined-Shape","transform":"translate(8.500000, 6.602020) scale(1, -1) translate(-8.500000, -6.602020) "}})])])])])])])]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right-swap pc-value-field--lockable",class:_vm.getLockedStateClass('days')},[_c('label',[_c('pc-block-field',{attrs:{"fieldprop":"days","prefix":"","suffix":" days","fieldvalue":_vm.days,"testtype":_vm.testtype,"isreadonly":_vm.lockedField == 'days',"isblockfocused":_vm.isblockfocused,"enableedit":_vm.enableedit,"lockedfield":_vm.lockedField,"lock":_vm.lockedField,"aria-label":"Days"},on:{"update:lock":function($event){_vm.lockedField=$event;},"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}})],1)])])],1)},staticRenderFns: [function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('span',{staticClass:"pc-input-title"},[_vm._v("Total # "),_c('small',{staticClass:"pc-input-sub-title"},[_vm._v("of visitors")])])},function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('span',{staticClass:"pc-input-title"},[_vm._v("Daily # "),_c('small',{staticClass:"pc-input-sub-title"},[_vm._v("of visitors")])])}],_scopeId: 'data-v-297fe272',
     props: ['runtime', 'testtype', 'lockedfield', 'calculateprop', 'enableedit', 'isblockfocused', 'sample', 'calculateprop', 'fieldfromblock'],
@@ -6043,7 +6097,7 @@ var sampleComp = {render: function(){var _vm=this;var _h=_vm.$createElement;var 
             this.$emit('update:lockedfield', newValue);
         }
     }
-};
+}
 
 var impactComp = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-block pc-block--impact",class:{'pc-block-focused': _vm.isblockfocused, 'pc-block-to-calculate': _vm.calculateprop == 'impact'}},[_c('pc-svg-chain',{attrs:{"calculateprop":_vm.calculateprop,"fieldfromblock":_vm.fieldfromblock}}),_vm._v(" "),_c('label',{staticClass:"pc-calc-radio pc-calc-radio--impact",class:{'pc-calc-radio--active': _vm.isCalculated},attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.isCalculated),expression:"isCalculated"}],attrs:{"type":"radio"},domProps:{"value":true,"checked":_vm._q(_vm.isCalculated,true)},on:{"change":function($event){_vm.isCalculated=true;}}}),_vm._v(" "+_vm._s(_vm.isCalculated ? 'Calculating' : 'Calculate')+" ")]),_vm._v(" "),_c('div',{staticClass:"pc-header"},[_vm._v(" Impact ")]),_vm._v(" "),_c('ul',{staticClass:"pc-inputs"},[_c('li',{staticClass:"pc-input-item pc-input-left"},[_c('label',[_c('span',{staticClass:"pc-input-title"},[_vm._v("Relative")]),_vm._v(" "),_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"prefix":"±","suffix":"%","fieldprop":"relativeImpact","fieldvalue":_vm.relativeImpact,"testtype":_vm.testType,"isreadonly":_vm.calculateprop == 'impact',"isblockfocused":_vm.isblockfocused,"enableedit":_vm.enableedit},on:{"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}})],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right"},[_c('label',[_c('span',{staticClass:"pc-input-title"},[_vm._v("Absolute")]),_vm._v(" "),_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"fieldprop":"impactByMetricValue","fieldvalue":_vm.impactByMetricDisplay,"testtype":_vm.testtype,"isreadonly":_vm.isReadOnly,"isblockfocused":_vm.isblockfocused,"enableedit":_vm.enableedit,"aria-label":"visitors with goals"},on:{"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v(" going from "+_vm._s(_vm.base)+" to either "+_vm._s(_vm.impactByMetricMinDisplay)+" or "+_vm._s(_vm.impactByMetricMaxDisplay)+" ")])],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-bottom-left"},[_c('label',[_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"fieldprop":"impactByVisitors","fieldvalue":_vm.impactByVisitorsDisplay,"testtype":_vm.testtype,"isreadonly":_vm.isReadOnly,"isblockfocused":_vm.isblockfocused,"enableedit":_vm.enableedit && _vm.calculateprop != 'sample'},on:{"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v(" "+_vm._s(_vm.testtype == 'gTest' ? ' Incremental trials': ' Incremental change in the metric')+" ")])],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-bottom-right"},[_c('label',[_c('pc-block-field',{attrs:{"fieldprop":"impactByVisitorsPerDay","fieldvalue":_vm.impactByVisitorsPerDayDisplay,"testtype":_vm.testtype,"isreadonly":_vm.isReadOnly,"isblockfocused":_vm.isblockfocused,"enableedit":_vm.enableedit && _vm.calculateprop != 'sample'},on:{"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v(" "+_vm._s(_vm.testtype == 'gTest' ? ' Incremental trials per day': ' Incremental change in the metric per day')+" ")])],1)])])],1)},staticRenderFns: [],
     extends: pcBlock,
@@ -6212,7 +6266,7 @@ var impactComp = {render: function(){var _vm=this;var _h=_vm.$createElement;var 
             });
         }
     }
-};
+}
 
 var baseComp = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-block pc-block--base",class:{'pc-block-focused': _vm.focusedblock == 'base'}},[_c('pc-svg-chain',{attrs:{"calculateprop":_vm.calculateprop,"fieldfromblock":_vm.fieldfromblock}}),_vm._v(" "),(_vm.testtype == 'gTest')?_c('div',{staticClass:"pc-header"},[_vm._v(" Base Rate ")]):_c('div',{staticClass:"pc-header"},[_vm._v(" Base Average ")]),_vm._v(" "),_c('ul',{staticClass:"pc-inputs"},[_c('li',{staticClass:"pc-input-item pc-input-left"},[_c('label',[_c('span',{staticClass:"pc-input-title"},[_vm._v(_vm._s(_vm.testtype == 'gTest' ? 'Base Rate' : 'Base Average')+" "),_c('small',{staticClass:"pc-input-sub-title"},[_vm._v("conversion")])]),_vm._v(" "),_c('pc-block-field',{attrs:{"fieldprop":"baseRate","suffix":_vm.testtype == 'gTest' ? '%' : '',"fieldvalue":_vm.baseRate,"testtype":_vm.testtype,"isreadonly":_vm.isReadOnly,"isblockfocused":_vm.isblockfocused,"enableedit":_vm.enableedit},on:{"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}})],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right"},[_c('label',[_vm._m(0,false,false),_vm._v(" "),_c('pc-block-field',{attrs:{"fieldprop":"visitorsWithGoals","fieldvalue":_vm.visitorsWithGoals,"testtype":_vm.testtype,"fieldfromblock":_vm.fieldfromblock,"isblockfocused":_vm.isblockfocused,"isreadonly":_vm.isReadOnly,"enableedit":_vm.enableedit && this.calculateprop != 'sample'},on:{"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}})],1)]),_vm._v(" "),(_vm.testtype == 'tTest')?_c('li',{staticClass:"pc-input-item pc-input-sd-rate"},[_c('label',[_c('pc-block-field',{attrs:{"prefix":"±","fieldprop":"sdRate","fieldfromblock":"base","fieldvalue":_vm.view.sdRate,"testtype":_vm.testtype,"isreadonly":_vm.isReadOnly,"isblockfocused":_vm.isblockfocused,"enableedit":_vm.enableedit},on:{"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v("Base Standard deviation")])],1)]):_vm._e()])],1)},staticRenderFns: [function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('span',{staticClass:"pc-input-title"},[_vm._v("Metric Totals"),_c('small',{staticClass:"pc-input-sub-title"},[_vm._v("visitors reached goal")])])}],_scopeId: 'data-v-0d0bef2b',
     props: ['testtype', 'enableedit', 'view', 'calculateprop', 'fieldfromblock', 'isblockfocused'],
@@ -6309,7 +6363,7 @@ var baseComp = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c
         }
 
     }
-};
+}
 
 var pcTooltip = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-tooltip"},[_c('div',{on:{"mouseover":function($event){_vm.showTooltip(true);},"mouseout":function($event){_vm.showTooltip(false);}}},[_vm._t("text")],2),_vm._v(" "),_c('div',{directives:[{name:"show",rawName:"v-show",value:(_vm.isTooltipShown),expression:"isTooltipShown"}],staticClass:"tooltip-wrapper"},[_vm._t("tooltip")],2)])},staticRenderFns: [],
     template: '#pc-tooltip',
@@ -6324,9 +6378,9 @@ var pcTooltip = {render: function(){var _vm=this;var _h=_vm.$createElement;var _
         }
     }
 
-};
+}
 
-var powerCalculator$1 = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"power-calculator"},[_c('form',{staticClass:"pc-form",attrs:{"action":"."}},[_c('div',{staticClass:"pc-main-header"},[_c('div',{staticClass:"pc-test-type"},[_c('pc-tooltip',{staticClass:"pc-test-type-tooltip-wrapper"},[_c('label',{staticClass:"pc-test-type-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.testType),expression:"testType"}],attrs:{"type":"radio","name":"test-mode","value":"gTest","checked":"checked"},domProps:{"checked":_vm._q(_vm.testType,"gTest")},on:{"change":function($event){_vm.testType="gTest";}}}),_vm._v(" Binary Metric ")]),_vm._v(" "),_c('span',{attrs:{"slot":"tooltip"},slot:"tooltip"},[_vm._v(" A binary metric is one that can be only two values like 0 or 1, yes or no, converted or not converted ")])]),_vm._v(" "),_c('pc-tooltip',{staticClass:"pc-test-type-tooltip-wrapper"},[_c('label',{staticClass:"pc-test-type-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.testType),expression:"testType"}],attrs:{"type":"radio","name":"test-mode","value":"tTest"},domProps:{"checked":_vm._q(_vm.testType,"tTest")},on:{"change":function($event){_vm.testType="tTest";}}}),_vm._v(" Continuous Metric ")]),_vm._v(" "),_c('span',{attrs:{"slot":"tooltip"},slot:"tooltip"},[_vm._v(" A continuous metric is one that can be any number like time on site or the number of rooms sold ")])])],1),_vm._v(" "),_vm._m(0,false,false),_vm._v(" "),_c('label',{staticClass:"pc-false-positive"},[_c('pc-block-field',{staticClass:"pc-false-positive-input",class:{ 'pc-top-fields-error': _vm.view.falsePosRate > 10 },attrs:{"suffix":"%","fieldprop":"falsePosRate","fieldvalue":_vm.view.falsePosRate,"testtype":_vm.testType,"enableedit":true},on:{"field:change":_vm.updateFields}}),_vm._v(" false positive rate ")],1),_vm._v(" "),_c('label',{staticClass:"pc-power"},[_c('pc-block-field',{staticClass:"pc-power-input",class:{ 'pc-top-fields-error': _vm.view.power < 80 },attrs:{"suffix":"%","fieldprop":"power","fieldvalue":_vm.view.power,"testtype":_vm.testType,"enableedit":true},on:{"field:change":_vm.updateFields}}),_vm._v(" power ")],1)]),_vm._v(" "),_c('div',{staticClass:"pc-blocks-wrapper",class:{'pc-blocks-wrapper-ttest': _vm.testType == 'tTest'}},[_c('base-comp',{attrs:{"fieldfromblock":"base","view":_vm.view,"calculateprop":_vm.calculateProp,"isblockfocused":_vm.focusedBlock == 'base',"testtype":_vm.testType,"enableedit":_vm.enabledMainInputs.base},on:{"update:focus":_vm.updateFocus,"field:change":_vm.updateFields}}),_vm._v(" "),_c('sample-comp',{attrs:{"fieldfromblock":"sample","testtype":_vm.testType,"sample":_vm.view.sample,"runtime":_vm.view.runtime,"lockedfield":_vm.lockedField,"calculateprop":_vm.calculateProp,"enableedit":_vm.enabledMainInputs.sample,"isblockfocused":_vm.focusedBlock == 'sample'},on:{"update:runtime":function($event){_vm.$set(_vm.view, "runtime", $event);},"update:lockedfield":function($event){_vm.lockedField=$event;},"update:calculateprop":_vm.updateCalculateProp,"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}}),_vm._v(" "),_c('impact-comp',{attrs:{"fieldfromblock":"impact","view":_vm.view,"isblockfocused":_vm.focusedBlock == 'impact',"testtype":_vm.testType,"enableedit":_vm.enabledMainInputs.impact,"calculateprop":_vm.calculateProp},on:{"update:calculateprop":_vm.updateCalculateProp,"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}}),_vm._v(" "),_c('svg-graph',{attrs:{"power":_vm.view.power,"impact":_vm.view.impact,"base":_vm.view.base,"sample":_vm.view.sample,"sdrate":_vm.view.sdRate,"falseposrate":_vm.view.falsePosRate,"runtime":_vm.view.runtime,"testtype":_vm.testType}})],1)])])},staticRenderFns: [function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-title"},[_vm._v("Power Calculator "),_c('sup',{staticStyle:{"color":"#F00","font-size":"11px"}},[_vm._v("BETA")])])}],
+var powerCalculator = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"power-calculator"},[_c('form',{staticClass:"pc-form",attrs:{"action":"."}},[_c('div',{staticClass:"pc-main-header"},[_c('div',{staticClass:"pc-test-type"},[_c('pc-tooltip',{staticClass:"pc-test-type-tooltip-wrapper"},[_c('label',{staticClass:"pc-test-type-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.testType),expression:"testType"}],attrs:{"type":"radio","name":"test-mode","value":"gTest","checked":"checked"},domProps:{"checked":_vm._q(_vm.testType,"gTest")},on:{"change":function($event){_vm.testType="gTest";}}}),_vm._v(" Binary Metric ")]),_vm._v(" "),_c('span',{attrs:{"slot":"tooltip"},slot:"tooltip"},[_vm._v(" A binary metric is one that can be only two values like 0 or 1, yes or no, converted or not converted ")])]),_vm._v(" "),_c('pc-tooltip',{staticClass:"pc-test-type-tooltip-wrapper"},[_c('label',{staticClass:"pc-test-type-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.testType),expression:"testType"}],attrs:{"type":"radio","name":"test-mode","value":"tTest"},domProps:{"checked":_vm._q(_vm.testType,"tTest")},on:{"change":function($event){_vm.testType="tTest";}}}),_vm._v(" Continuous Metric ")]),_vm._v(" "),_c('span',{attrs:{"slot":"tooltip"},slot:"tooltip"},[_vm._v(" A continuous metric is one that can be any number like time on site or the number of rooms sold ")])])],1),_vm._v(" "),_vm._m(0,false,false),_vm._v(" "),_c('label',{staticClass:"pc-false-positive"},[_c('pc-block-field',{staticClass:"pc-false-positive-input",class:{ 'pc-top-fields-error': _vm.view.falsePosRate > 10 },attrs:{"suffix":"%","fieldprop":"falsePosRate","fieldvalue":_vm.view.falsePosRate,"testtype":_vm.testType,"enableedit":true},on:{"field:change":_vm.updateFields}}),_vm._v(" false positive rate ")],1),_vm._v(" "),_c('label',{staticClass:"pc-power"},[_c('pc-block-field',{staticClass:"pc-power-input",class:{ 'pc-top-fields-error': _vm.view.power < 80 },attrs:{"suffix":"%","fieldprop":"power","fieldvalue":_vm.view.power,"testtype":_vm.testType,"enableedit":true},on:{"field:change":_vm.updateFields}}),_vm._v(" power ")],1)]),_vm._v(" "),_c('div',{staticClass:"pc-blocks-wrapper",class:{'pc-blocks-wrapper-ttest': _vm.testType == 'tTest'}},[_c('base-comp',{attrs:{"fieldfromblock":"base","view":_vm.view,"calculateprop":_vm.calculateProp,"isblockfocused":_vm.focusedBlock == 'base',"testtype":_vm.testType,"enableedit":_vm.enabledMainInputs.base},on:{"update:focus":_vm.updateFocus,"field:change":_vm.updateFields}}),_vm._v(" "),_c('sample-comp',{attrs:{"fieldfromblock":"sample","testtype":_vm.testType,"sample":_vm.view.sample,"runtime":_vm.view.runtime,"lockedfield":_vm.lockedField,"calculateprop":_vm.calculateProp,"enableedit":_vm.enabledMainInputs.sample,"isblockfocused":_vm.focusedBlock == 'sample'},on:{"update:runtime":function($event){_vm.$set(_vm.view, "runtime", $event);},"update:lockedfield":function($event){_vm.lockedField=$event;},"update:calculateprop":_vm.updateCalculateProp,"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}}),_vm._v(" "),_c('impact-comp',{attrs:{"fieldfromblock":"impact","view":_vm.view,"isblockfocused":_vm.focusedBlock == 'impact',"testtype":_vm.testType,"enableedit":_vm.enabledMainInputs.impact,"calculateprop":_vm.calculateProp},on:{"update:calculateprop":_vm.updateCalculateProp,"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}}),_vm._v(" "),_c('svg-graph',{attrs:{"power":_vm.view.power,"impact":_vm.view.impact,"base":_vm.view.base,"sample":_vm.view.sample,"sdrate":_vm.view.sdRate,"falseposrate":_vm.view.falsePosRate,"runtime":_vm.view.runtime,"testtype":_vm.testType}})],1)])])},staticRenderFns: [function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-title"},[_vm._v("Power Calculator "),_c('sup',{staticStyle:{"color":"#F00","font-size":"11px"}},[_vm._v("BETA")])])}],
     mixins: [valueTransformationMixin],
     props: ['parentmetricdata'],
     data () {
@@ -6413,7 +6467,10 @@ var powerCalculator$1 = {render: function(){var _vm=this;var _h=_vm.$createEleme
                 effect_size: extractValue('impact', impact),
                 alpha: extractValue('falsePosRate', falsePosRate),
                 beta: 1 - extractValue('power', power), // power of 80%, beta is actually 20%
-                sd_rate: extractValue('sdRate', sdRate)
+                sd_rate: extractValue('sdRate', sdRate),
+                mu: 0,
+                alternative: 'two-sided',
+                direction: 'increase'
             }
         },
         updateFocus ({fieldProp, value}) {
@@ -6464,8 +6521,8 @@ var powerCalculator$1 = {render: function(){var _vm=this;var _h=_vm.$createEleme
         'base-comp': baseComp
 
     }
-};
+}
 
-return powerCalculator$1;
+return powerCalculator;
 
 })));

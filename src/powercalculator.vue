@@ -214,7 +214,10 @@ export default {
                 effect_size: extractValue('impact', impact),
                 alpha: extractValue('falsePosRate', falsePosRate),
                 beta: 1 - extractValue('power', power), // power of 80%, beta is actually 20%
-                sd_rate: extractValue('sdRate', sdRate)
+                sd_rate: extractValue('sdRate', sdRate),
+                mu: 0,
+                alternative: 'two-sided',
+                direction: 'increase'
             }
         },
         updateFocus ({fieldProp, value}) {

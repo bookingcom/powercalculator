@@ -183,7 +183,10 @@ export default {
                 effect_size: extractValue('impact', impact),
                 alpha: extractValue('falsePosRate', falseposrate),
                 beta: 1 - extractValue('power', power), // power of 80%, beta is actually 20%
-                sd_rate: extractValue('falsePosRate', sdrate)
+                sd_rate: extractValue('falsePosRate', sdrate),
+                mu: 0,
+                alternative: 'two-sided',
+                direction: 'increase'
             }
         },
         deepCloneObject (obj) {
