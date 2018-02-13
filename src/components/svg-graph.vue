@@ -337,6 +337,7 @@ export default {
             },
             padding: {
                 top: 20,
+                left: 70,
                 right: 20
             },
             tooltip: createTooltip(this)
