@@ -4932,7 +4932,6 @@ var _impact = {
     getGraphYTicks () {
         let impact = this.impact,
             arr = [impact/1.50, impact/1.25, impact, impact*1.25, impact*1.50];
-
         return arr
     },
     getGraphYTicksFormatted (y) {
@@ -4961,7 +4960,6 @@ var _incrementalTrials = {
     getGraphYTicks () {
         let impact = this.impact,
         arr = [impact/1.50, impact/1.25, impact, impact*1.25, impact*1.50];
-
         return arr
     },
     getGraphYTicksFormatted (y) {
@@ -5021,7 +5019,6 @@ var _incrementalTrialsPerDay = {
     getGraphYTicks () {
         let impact = this.impact,
         arr = [impact/1.50, impact/1.25, impact, impact*1.25, impact*1.50];
-
         return arr
     },
     getGraphYTicksFormatted (y) {
@@ -5033,6 +5030,7 @@ var _incrementalTrialsPerDay = {
                 base_rate: this.extractValue('base', base),
                 effect_size: this.extractValue('impact', y)
             });
+
 
         if (isNaN(result)) {
             result = 0;
@@ -5504,6 +5502,14 @@ var svgGraph = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c
                 x: 'x',
                 columns: this.dataDefault,
                 type: 'area'
+            },
+            grid: {
+                x: {
+                    show: true
+                },
+                y: {
+                    show: true
+                }
             },
             grid: {
                 x: {

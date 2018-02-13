@@ -293,6 +293,14 @@ export default {
                     show: true
                 }
             },
+            grid: {
+                x: {
+                    show: true
+                },
+                y: {
+                    show: true
+                }
+            },
             axis: {
                 x: {
                     label:  this.updateXLabel(),

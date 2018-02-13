@@ -2,7 +2,6 @@ export default {
     getGraphYTicks () {
         let impact = this.impact,
             arr = [impact/1.50, impact/1.25, impact, impact*1.25, impact*1.50];
-
         return arr
     },
     getGraphYTicksFormatted (y) {
