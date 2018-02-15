@@ -27,6 +27,28 @@
 
                 </div>
 
+                <div class="pc-non-inferiority">
+                    <label class="pc-non-inferiority">
+                        Use non inferiority test
+                        <input type="checkbox" v-model="nonInferiority.is">
+                    </label>
+                    <div v-if="nonInferiority.is" class="pc-non-inf-treshold">
+                        <select v-model="nonInferiority.selected">
+                            <option v-for="option in nonInferiority.options" v-bind:value="option.value">
+                                {{option.text}}
+                            </option>
+                        </select>
+
+                        <pc-block-field
+                            class="pc-non-inf-treshold-input"
+                            fieldprop="nonInfTreshold"
+                            v-bind:fieldvalue="view.nonInfTreshold"
+                            v-bind:testtype="testType"
+                            v-bind:enableedit="true"
+                            v-on:field:change="updateFields"></pc-block-field>
+                    </div>
+                </div>
+
                 <div class="pc-title">Power Calculator <sup style="color: #F00; font-size: 11px;">BETA</sup> </div>
 
                 <label class="pc-false-positive">
@@ -146,7 +168,24 @@ export default {
                 falsePosRate: 10,
                 sdRate: 10,
 
-                runtime: 14 //days
+                runtime: 14, //days
+
+                nonInfTreshold: 0
+            },
+
+            nonInferiority: {
+                is: false,
+                selected: 'relative',
+                options: [
+                    {
+                        text: 'relative difference of',
+                        value: 'relative'
+                    },
+                    {
+                        text: 'absolute impact per day',
+                        value: 'absolute'
+                    }
+                ]
             },
 
             // this is used for sample size but we also want to make it shareable
@@ -215,9 +254,7 @@ export default {
                 alpha: extractValue('falsePosRate', falsePosRate),
                 beta: 1 - extractValue('power', power), // power of 80%, beta is actually 20%
                 sd_rate: extractValue('sdRate', sdRate),
-                mu: 0,
-                alternative: 'two-sided',
-                direction: 'increase'
+                mu: this.getMu()
             }
         },
         updateFocus ({fieldProp, value}) {
@@ -248,6 +285,28 @@ export default {
             };
 
             return result;
+        },
+        getMu () {
+            let thresholdType = this.nonInferiority.selected,
+                { view, extractValue } = this,
+                { runtime, nonInfTreshold, sample, base, impact, falsePosRate, power, sdRate } = view,
+                data = {
+                    runtime,
+                    treshold: extractValue('nonInfTreshold', nonInfTreshold),
+
+                    total_sample_size: extractValue('sample', sample),
+                    base_rate: extractValue('base', base),
+                    effect_size: extractValue('impact', impact),
+                    alpha: extractValue('falsePosRate', falsePosRate),
+                    beta: 1 - extractValue('power', power), // power of 80%, beta is actually 20%
+                    sd_rate: extractValue('sdRate', sdRate),
+                };
+
+
+            return {
+                absolute: statFormulas.getMuFromAbsolutePerDay,
+                relative: statFormulas.getMuFromRelativeDifferenceOf
+            }[thresholdType](data)
         }
     },
     watch: {
@@ -302,10 +361,10 @@ export default {
 
 .pc-main-header {
     display: grid;
-    grid-template-columns: min-content auto min-content min-content;
+    grid-template-columns: min-content  min-content auto min-content min-content;
     grid-template-rows: auto;
     grid-template-areas:
-        "test-type title false-positive power";
+        "test-type calc-options title false-positive power";
     align-items: center;
 
     margin: 25px 0 25px 10px;
@@ -317,6 +376,7 @@ export default {
     text-align: center;
 }
 
+.pc-non-inferiority,
 .pc-test-type,
 .pc-false-positive,
 .pc-power {
@@ -325,6 +385,10 @@ export default {
 
 .pc-test-type {
     grid-area: test-type;
+}
+
+.pc-non-inferiority {
+    grid-area: calc-options;
 }
 
 .pc-test-type-tooltip-wrapper {

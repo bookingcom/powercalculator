@@ -14,7 +14,8 @@ export default {
             impactByVisitors: {type: 'int'},
             impactByVisitorsPerDay: {type: 'int'},
             metricTotals: {type: 'int'},
-            sdRate: {type: 'float'}
+            sdRate: {type: 'float'},
+            nonInfTreshold: {type: 'float'}
         }
 
         // add validation for component version of main data

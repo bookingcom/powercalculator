@@ -21,10 +21,10 @@
 /* layout */
 .pc-main-header {
     display: grid;
-    grid-template-columns: min-content auto min-content min-content;
+    grid-template-columns: min-content  min-content auto min-content min-content;
     grid-template-rows: auto;
     grid-template-areas:
-        "test-type title false-positive power";
+        "test-type calc-options title false-positive power";
     align-items: center;
     margin: 25px 0 25px 10px;
 }
@@ -33,6 +33,7 @@
     font-size: 30px;
     text-align: center;
 }
+.pc-non-inferiority,
 .pc-test-type,
 .pc-false-positive,
 .pc-power {
@@ -40,6 +41,9 @@
 }
 .pc-test-type {
     grid-area: test-type;
+}
+.pc-non-inferiority {
+    grid-area: calc-options;
 }
 .pc-test-type-tooltip-wrapper {
     display: inline-block;

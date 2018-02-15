@@ -55,6 +55,12 @@ let validateFunctions = {
                     return value > 0
                 },
                 defaultVal: 14
+            },
+            nonInfTreshold: {
+                fn (value) {
+                    return value > 0
+                },
+                defaultVal: 0
             }
         },
         gTest: {

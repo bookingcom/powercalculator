@@ -193,6 +193,18 @@ function get_relative_impact_from_visitors({total_sample_size, base_rate, visito
     })
 }
 
+function get_mu_from_relative_difference_of ({runtime, treshold, total_sample_size, base_rate, effect_size, alpha, beta, sd_rate}) {
+    let mu = 0;
+    console.log('[get_mu_from_relative_difference_of]', JSON.stringify(arguments));
+    return mu;
+}
+
+function get_mu_from_absolute_per_day ({runtime, treshold, total_sample_size, base_rate, effect_size, alpha, beta, sd_rate}) {
+    let mu = 0;
+    console.log('[get_mu_from_absolute_per_day]', JSON.stringify(arguments));
+    return mu;
+}
+
 export default {
     gTest: {
         power: solveforpower_Gtest,
@@ -209,5 +221,7 @@ export default {
     getAbsoluteImpactInMetricHash: get_absolute_impact_in_metric_hash,
     getAbsoluteImpactInVisitors: get_absolute_impact_in_visitors,
     getRelativeImpactFromAbsolute: get_relative_impact_from_absolute,
-    getRelativeImpactFromVisitors: get_relative_impact_from_visitors
+    getRelativeImpactFromVisitors: get_relative_impact_from_visitors,
+    getMuFromRelativeDifferenceOf: get_mu_from_relative_difference_of,
+    getMuFromAbsolutePerDay: get_mu_from_absolute_per_day
 }
