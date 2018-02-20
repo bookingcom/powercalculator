@@ -4902,7 +4902,7 @@ var valueTransformationMixin = {
             }
         },
         getType (prop, methodName) {
-            let testType = this.testType || 'gTest',
+            let testType = this.testType || this.testtype || 'gTest',
                 validationConfig = this.validations[prop],
                 result,
                 throwError = false;
