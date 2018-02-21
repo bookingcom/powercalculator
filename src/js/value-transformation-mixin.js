@@ -10,7 +10,10 @@ export default {
             runtime: {type: 'int'},
             power: {type: 'percentage'},
             falsePosRate: {type: 'percentage'},
-            impactByMetricValue: {type: 'percentage'},
+            impactByMetricValue: {
+                gTest: {type: 'percentage'},
+                tTest: {type: 'float'}
+            },
             impactByVisitors: {type: 'int'},
             impactByVisitorsPerDay: {type: 'int'},
             metricTotals: {type: 'int'},
