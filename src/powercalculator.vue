@@ -30,9 +30,9 @@
                 <div class="pc-non-inferiority">
                     <label class="pc-non-inferiority">
                         Use non inferiority test
-                        <input type="checkbox" v-model="nonInferiority.is">
+                        <input type="checkbox" v-model="nonInferiority.enabled">
                     </label>
-                    <div v-if="nonInferiority.is" class="pc-non-inf-treshold">
+                    <div v-if="nonInferiority.enabled" class="pc-non-inf-treshold">
                         <select v-model="nonInferiority.selected">
                             <option v-for="option in nonInferiority.options" v-bind:value="option.value">
                                 {{option.text}}
@@ -174,7 +174,7 @@ export default {
             },
 
             nonInferiority: {
-                is: false,
+                enabled: false,
                 selected: 'relative',
                 options: [
                     {
@@ -206,6 +206,15 @@ export default {
     computed: {
         math () {
             return statFormulas[this.testType]
+        },
+        mu () {
+            let mu = 0;
+
+            if (this.nonInferiority.enabled) {
+                mu = this.getMu();
+            }
+
+            return mu
         },
         disableBaseSecondaryInput () {
             // only metric total is available and as it depends on sample this
@@ -239,22 +248,22 @@ export default {
                 result = 0;
 
             result = math[calculateProp](this.convertDisplayedValues());
-
+console.log(calculateProp, result);
             this.view[calculateProp] = this.displayValue(calculateProp, result);
 
         },
         convertDisplayedValues () {
-            let { view, extractValue } = this,
+            let { view, extractValue, mu } = this,
                 { sample, base, impact, falsePosRate, power, sdRate } = view;
 
             return {
+                mu,
                 total_sample_size: extractValue('sample', sample),
                 base_rate: extractValue('base', base),
                 effect_size: extractValue('impact', impact),
                 alpha: extractValue('falsePosRate', falsePosRate),
                 beta: 1 - extractValue('power', power), // power of 80%, beta is actually 20%
-                sd_rate: extractValue('sdRate', sdRate),
-                mu: this.getMu()
+                sd_rate: extractValue('sdRate', sdRate)
             }
         },
         updateFocus ({fieldProp, value}) {
