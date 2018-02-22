@@ -56,7 +56,7 @@ let validateFunctions = {
                 },
                 defaultVal: 14
             },
-            nonInfTreshold: {
+            nonInfThreshold: {
                 fn (value) {
                     return value > 0
                 },

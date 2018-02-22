@@ -41,8 +41,8 @@
 
                         <pc-block-field
                             class="pc-non-inf-treshold-input"
-                            fieldprop="nonInfTreshold"
-                            v-bind:fieldvalue="view.nonInfTreshold"
+                            fieldprop="nonInfThreshold"
+                            v-bind:fieldvalue="view.nonInfThreshold"
                             v-bind:testtype="testType"
                             v-bind:enableedit="true"
                             v-on:field:change="updateFields"></pc-block-field>
@@ -170,7 +170,7 @@ export default {
 
                 runtime: 14, //days
 
-                nonInfTreshold: 0
+                nonInfThreshold: 0
             },
 
             nonInferiority: {
@@ -183,7 +183,7 @@ export default {
                     },
                     {
                         text: 'absolute impact per day',
-                        value: 'absolute'
+                        value: 'absolutePerDay'
                     }
                 ]
             },
@@ -248,7 +248,6 @@ export default {
                 result = 0;
 
             result = math[calculateProp](this.convertDisplayedValues());
-console.log(calculateProp, result);
             this.view[calculateProp] = this.displayValue(calculateProp, result);
 
         },
@@ -263,7 +262,10 @@ console.log(calculateProp, result);
                 effect_size: extractValue('impact', impact),
                 alpha: extractValue('falsePosRate', falsePosRate),
                 beta: 1 - extractValue('power', power), // power of 80%, beta is actually 20%
-                sd_rate: extractValue('sdRate', sdRate)
+                sd_rate: extractValue('sdRate', sdRate),
+                mu: this.getMu(),
+                opts: this.getExtraOpts(),
+                alternative: this.getAlternative()
             }
         },
         updateFocus ({fieldProp, value}) {
@@ -297,25 +299,39 @@ console.log(calculateProp, result);
         },
         getMu () {
             let thresholdType = this.nonInferiority.selected,
-                { view, extractValue } = this,
-                { runtime, nonInfTreshold, sample, base, impact, falsePosRate, power, sdRate } = view,
+                { view, extractValue, lockedField} = this,
+                { runtime, nonInfThreshold, sample, base } = view,
                 data = {
-                    runtime,
-                    treshold: extractValue('nonInfTreshold', nonInfTreshold),
-
+                    runtime: runtime,
+                    threshold: extractValue('nonInfThreshold', nonInfThreshold),
                     total_sample_size: extractValue('sample', sample),
                     base_rate: extractValue('base', base),
-                    effect_size: extractValue('impact', impact),
-                    alpha: extractValue('falsePosRate', falsePosRate),
-                    beta: 1 - extractValue('power', power), // power of 80%, beta is actually 20%
-                    sd_rate: extractValue('sdRate', sdRate),
                 };
 
-
             return {
-                absolute: statFormulas.getMuFromAbsolutePerDay,
-                relative: statFormulas.getMuFromRelativeDifferenceOf
+                absolutePerDay: statFormulas.getMuFromAbsolutePerDay,
+                relative: statFormulas.getMuFromRelativeDifference
             }[thresholdType](data)
+        },
+        getExtraOpts () {
+            let { view, extractValue, lockedField } = this,
+                { runtime, nonInfThreshold, sample } = view;
+            return {
+                calculating: lockedField,
+                days: runtime,
+                type: this.nonInferiority.selected,
+                threshold: extractValue('nonInfThreshold', nonInfThreshold),
+                visitors_per_day: extractValue('sample', sample)/(2*runtime)
+            }
+        },
+        getAlternative () {
+            let testType;
+            if(this.nonInferiority.is) {
+                testType = 'noninferiority';
+            } else {
+                testType = 'comparative';
+            }
+            return statFormulas.getAlternative({type: testType});
         }
     },
     watch: {

@@ -31,7 +31,11 @@ function replications_power() {
 function serialize(test_case) {
     var output = [];
     Object.keys(test_case).forEach(function(element) {
-       output.push(`${element}: ${test_case[element]}`);
+       if (typeof(test_case[element]) == 'object') {
+           output.push(`${element}:` + JSON.stringify(test_case[element]));
+       } else {
+           output.push(`${element}: ${test_case[element]}`);
+       }
     });
     return output.join(', '); 
 }
