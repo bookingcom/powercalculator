@@ -376,7 +376,7 @@ export default {
     text-align: center;
 }
 
-.pc-non-inferiority,
+.pc-non-inf-label,
 .pc-test-type,
 .pc-false-positive,
 .pc-power {

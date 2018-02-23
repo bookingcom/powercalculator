@@ -1,11 +1,11 @@
 <template>
     <div class="pc-non-inferiority">
-        <label class="pc-non-inferiority">
+        <label class="pc-non-inf-label">
             Use non inferiority test
             <input type="checkbox" v-model="enabled">
         </label>
         <div v-if="enabled" class="pc-non-inf-treshold">
-            <select v-model="selected">
+            <select v-model="selected" class="pc-non-inf-select">
                 <option v-for="option in options" v-bind:value="option.value">
                     {{option.text}}
                 </option>
@@ -40,7 +40,7 @@ export default {
                     value: 'relative'
                 },
                 {
-                    text: 'absolute impact per day',
+                    text: 'absolute impact per day of',
                     value: 'absolutePerDay'
                 }
             ]
@@ -187,5 +187,18 @@ export default {
 </script>
 
 <style>
+
+.pc-non-inf-label {
+    white-space: nowrap;
+}
+
+.pc-non-inf-treshold {
+    display: flex;
+    align-items: center;
+}
+
+.pc-non-inf-treshold-input {
+    margin-left: 5px;
+}
 
 </style>

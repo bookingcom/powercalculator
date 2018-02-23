@@ -33,7 +33,7 @@
     font-size: 30px;
     text-align: center;
 }
-.pc-non-inferiority,
+.pc-non-inf-label,
 .pc-test-type,
 .pc-false-positive,
 .pc-power {
@@ -446,4 +446,14 @@
 
 /* components/non-inferiority.vue */
 
-/*# sourceMappingURL=non-inferiority.vue.map */
+.pc-non-inf-label {
+    white-space: nowrap;
+}
+.pc-non-inf-treshold {
+    display: flex;
+    align-items: center;
+}
+.pc-non-inf-treshold-input {
+    margin-left: 5px;
+}
+
