@@ -104,7 +104,8 @@
 
                     v-on:update:calculateprop="updateCalculateProp"
                     v-on:field:change="updateFields"
-                    v-on:update:focus="updateFocus">
+                    v-on:update:focus="updateFocus"
+                    v-on:readonly:visitorsPerDay="updateVisitorsPerDay">
 
                 </sample-comp>
 
@@ -197,7 +198,8 @@ export default {
                 sample: true,
                 impact: true,
                 power: true
-            }
+            },
+            readOnlyVisitorsPerDay: 0
         };
 
         // mergeComponentData has no array support for now
@@ -210,11 +212,17 @@ export default {
         mu () {
             let mu = 0;
 
-            if (this.nonInferiority.enabled) {
+            if (this.nonInferiority.enabled && this.calculateProp == 'impact') {
                 mu = this.getMu();
             }
 
             return mu
+        },
+        opts () {
+            return this.getExtraOpts()
+        },
+        alternative () {
+            return this.getAlternative()
         },
         disableBaseSecondaryInput () {
             // only metric total is available and as it depends on sample this
@@ -252,20 +260,19 @@ export default {
 
         },
         convertDisplayedValues () {
-            let { view, extractValue, mu } = this,
+            let { view, extractValue, mu, opts, alternative } = this,
                 { sample, base, impact, falsePosRate, power, sdRate } = view;
 
             return {
                 mu,
+                opts,
+                alternative,
                 total_sample_size: extractValue('sample', sample),
                 base_rate: extractValue('base', base),
                 effect_size: extractValue('impact', impact),
                 alpha: extractValue('falsePosRate', falsePosRate),
                 beta: 1 - extractValue('power', power), // power of 80%, beta is actually 20%
-                sd_rate: extractValue('sdRate', sdRate),
-                mu: this.getMu(),
-                opts: this.getExtraOpts(),
-                alternative: this.getAlternative()
+                sd_rate: extractValue('sdRate', sdRate)
             }
         },
         updateFocus ({fieldProp, value}) {
@@ -297,6 +304,9 @@ export default {
 
             return result;
         },
+        updateVisitorsPerDay (newValue) {
+            this.readOnlyVisitorsPerDay = newValue;
+        },
         getMu () {
             let thresholdType = this.nonInferiority.selected,
                 { view, extractValue, lockedField} = this,
@@ -315,18 +325,39 @@ export default {
         },
         getExtraOpts () {
             let { view, extractValue, lockedField } = this,
-                { runtime, nonInfThreshold, sample } = view;
-            return {
+                { runtime, nonInfThreshold, sample } = view,
+                type = this.nonInferiority.selected,
+                opts;
+
+            opts = {
+                type,
                 calculating: lockedField,
-                days: runtime,
-                type: this.nonInferiority.selected,
                 threshold: extractValue('nonInfThreshold', nonInfThreshold),
-                visitors_per_day: extractValue('sample', sample)/(2*runtime)
+            };
+
+            if (type == 'absolutePerDay') {
+                if (lockedField == 'visitorsPerDay') {
+                    opts = Object.assign(
+                        opts,
+                        {
+                            days: runtime
+                        }
+                    );
+                } else {
+                    opts = Object.assign(
+                        opts,
+                        {
+                            visitors_per_day: extractValue('sample', this.readOnlyVisitorsPerDay)
+                        }
+                    );
+                }
             }
+
+            return opts
         },
         getAlternative () {
             let testType;
-            if(this.nonInferiority.is) {
+            if(this.nonInferiority.enabled) {
                 testType = 'noninferiority';
             } else {
                 testType = 'comparative';
