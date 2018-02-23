@@ -27,27 +27,21 @@
 
                 </div>
 
-                <div class="pc-non-inferiority">
-                    <label class="pc-non-inferiority">
-                        Use non inferiority test
-                        <input type="checkbox" v-model="nonInferiority.enabled">
-                    </label>
-                    <div v-if="nonInferiority.enabled" class="pc-non-inf-treshold">
-                        <select v-model="nonInferiority.selected">
-                            <option v-for="option in nonInferiority.options" v-bind:value="option.value">
-                                {{option.text}}
-                            </option>
-                        </select>
+                <non-inferiority
+                    v-bind:thresholdProp="view.nonInfThreshold"
+                    v-bind:enabledProp.sync="nonInferiority.enabled"
+                    v-bind:selectedProp.sync="nonInferiority.selected"
 
-                        <pc-block-field
-                            class="pc-non-inf-treshold-input"
-                            fieldprop="nonInfThreshold"
-                            v-bind:fieldvalue="view.nonInfThreshold"
-                            v-bind:testtype="testType"
-                            v-bind:enableedit="true"
-                            v-on:field:change="updateFields"></pc-block-field>
-                    </div>
-                </div>
+                    v-bind:readOnlyVisitorsPerDay="readOnlyVisitorsPerDay"
+
+                    v-bind:view="view"
+                    v-bind:extractValue="extractValue"
+                    v-bind:lockedField="lockedField"
+
+                    v-on:update:noninf="updateNonInf"
+                    v-on:field:change="updateFields"
+                >
+                </non-inferiority>
 
                 <div class="pc-title">Power Calculator <sup style="color: #F00; font-size: 11px;">BETA</sup> </div>
 
@@ -118,6 +112,8 @@
                     v-bind:enableedit="enabledMainInputs.impact"
                     v-bind:calculateprop="calculateProp"
 
+                    v-bind:isnoninferiority="nonInferiority.enabled"
+
                     v-on:update:calculateprop="updateCalculateProp"
                     v-on:field:change="updateFields"
                     v-on:update:focus="updateFocus">
@@ -132,10 +128,7 @@
                     v-bind:falseposrate="view.falsePosRate"
                     v-bind:runtime="view.runtime"
 
-                    v-bind:mu="mu"
-                    v-bind:opts="opts"
-                    v-bind:alternative="alternative"
-
+                    v-bind:noninferiority="nonInferiority"
                     v-bind:testtype="testType"></svg-graph>
             </div>
         </form>
@@ -149,6 +142,7 @@ import sampleComp from './components/sample-comp.vue'
 import impactComp from './components/impact-comp.vue'
 import baseComp from './components/base-comp.vue'
 import pcTooltip from './components/pc-tooltip.vue'
+import nonInferiority from './components/non-inferiority.vue'
 
 import statFormulas from './js/math.js'
 import valueTransformationMixin from './js/value-transformation-mixin.js'
@@ -181,16 +175,9 @@ export default {
             nonInferiority: {
                 enabled: false,
                 selected: 'relative',
-                options: [
-                    {
-                        text: 'relative difference of',
-                        value: 'relative'
-                    },
-                    {
-                        text: 'absolute impact per day',
-                        value: 'absolutePerDay'
-                    }
-                ]
+                mu: 0,
+                alternative: '',
+                opts: false,
             },
 
             // this is used for sample size but we also want to make it shareable
@@ -213,27 +200,6 @@ export default {
         math () {
             return statFormulas[this.testType]
         },
-        mu () {
-            let mu = 0;
-
-            if (this.nonInferiorityEnabled) {
-                mu = this.getMu();
-            }
-
-            return mu
-        },
-        opts () {
-            if (!this.nonInferiorityEnabled) {
-                return false
-            }
-            return this.getExtraOpts()
-        },
-        alternative () {
-            if (!this.nonInferiorityEnabled) {
-                return false
-            }
-            return this.getAlternative()
-        },
         disableBaseSecondaryInput () {
             // only metric total is available and as it depends on sample this
             // creates a circular dependency
@@ -251,6 +217,7 @@ export default {
                 };
             return JSON.parse(JSON.stringify(result))
         },
+
         nonInferiorityEnabled () {
             return this.nonInferiority.enabled;
         },
@@ -277,8 +244,9 @@ export default {
 
         },
         convertDisplayedValues () {
-            let { view, extractValue, mu, opts, alternative } = this,
-                { sample, base, impact, falsePosRate, power, sdRate } = view;
+            let { view, extractValue, nonInferiority } = this,
+                { sample, base, impact, falsePosRate, power, sdRate } = view,
+                { mu, opts, alternative } = nonInferiority;
 
             return {
                 mu,
@@ -324,62 +292,13 @@ export default {
         updateVisitorsPerDay (newValue) {
             this.readOnlyVisitorsPerDay = newValue;
         },
-        getMu () {
-            let thresholdType = this.nonInferiority.selected,
-                { view, extractValue, lockedField} = this,
-                { runtime, nonInfThreshold, sample, base } = view,
-                data = {
-                    runtime: runtime,
-                    threshold: extractValue('nonInfThreshold', nonInfThreshold),
-                    total_sample_size: extractValue('sample', sample),
-                    base_rate: extractValue('base', base),
-                };
+        updateNonInf ({ mu, alternative, opts }) {
 
-            return {
-                absolutePerDay: statFormulas.getMuFromAbsolutePerDay,
-                relative: statFormulas.getMuFromRelativeDifference
-            }[thresholdType](data)
-        },
-        getExtraOpts () {
-            let { view, extractValue, lockedField } = this,
-                { runtime, nonInfThreshold, sample } = view,
-                type = this.nonInferiority.selected,
-                opts;
+            this.nonInferiority.mu = mu;
+            this.nonInferiority.alternative = alternative;
+            this.nonInferiority.opts = opts;
 
-            opts = {
-                type,
-                calculating: lockedField,
-                threshold: extractValue('nonInfThreshold', nonInfThreshold),
-            };
-
-            if (type == 'absolutePerDay') {
-                if (lockedField == 'visitorsPerDay') {
-                    opts = Object.assign(
-                        opts,
-                        {
-                            days: runtime
-                        }
-                    );
-                } else {
-                    opts = Object.assign(
-                        opts,
-                        {
-                            visitors_per_day: extractValue('sample', this.readOnlyVisitorsPerDay)
-                        }
-                    );
-                }
-            }
-
-            return opts
-        },
-        getAlternative () {
-            let testType;
-            if(this.nonInferiority.enabled) {
-                testType = 'noninferiority';
-            } else {
-                testType = 'comparative';
-            }
-            return statFormulas.getAlternative({type: testType});
+            this.formulas();
         }
     },
     watch: {
@@ -404,7 +323,8 @@ export default {
         'pc-tooltip': pcTooltip,
         'sample-comp': sampleComp,
         'impact-comp' : impactComp,
-        'base-comp': baseComp
+        'base-comp': baseComp,
+        'non-inferiority': nonInferiority
 
     }
 }

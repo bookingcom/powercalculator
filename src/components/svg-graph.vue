@@ -66,7 +66,7 @@ document.querySelector('head').appendChild(style);
 export default {
     mixins: [valueTransformationMixin, graphDataMixin],
     template: '#svg-graph',
-    props: ['testtype', 'sample', 'impact', 'power', 'base', 'falseposrate', 'sdrate', 'runtime', 'mu', 'opts', 'alternative'],
+    props: ['testtype', 'sample', 'impact', 'power', 'base', 'falseposrate', 'sdrate', 'runtime', 'noninferiority'],
     data () {
         return {
             width: 100,
@@ -175,7 +175,8 @@ export default {
         },
         convertDisplayedValues () {
             let { extractValue } = this,
-                { sample, base, impact, falseposrate, power, sdrate, mu, opts, alternative } = this;
+                { mu, opts, alternative } = this.noninferiority,
+                { sample, base, impact, falseposrate, power, sdrate } = this;
 
             return {
                 mu,

@@ -197,6 +197,7 @@
 .pc-value-display:focus {
     outline: 0;
 }
+.pc-non-inf-treshold-input,
 .pc-power-input,
 .pc-false-positive-input {
     display: inline-block;
@@ -442,3 +443,7 @@
     border-bottom-color: transparent;
 }
 
+
+/* components/non-inferiority.vue */
+
+/*# sourceMappingURL=non-inferiority.vue.map */

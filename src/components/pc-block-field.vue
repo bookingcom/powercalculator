@@ -380,6 +380,7 @@ export default {
     outline: 0;
 }
 
+.pc-non-inf-treshold-input,
 .pc-power-input,
 .pc-false-positive-input {
     display: inline-block;

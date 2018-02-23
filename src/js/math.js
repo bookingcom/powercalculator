@@ -64,16 +64,16 @@ function solve_quadratic_for_sample({mean_diff, Z, days, threshold, variance}) {
 
     var b = Math.sqrt(variance)*Z/Math.sqrt(days);
     var c = -threshold/2;
-    
+
     var det = b**2 - 4*a*c;
     if (det < 0) {
       return NaN;
     }
-    
+
     var sol_h = (-b + Math.sqrt(det)) / (2*a);
     var sol_l = (-b - Math.sqrt(det)) / (2*a);
-  
-    return sol_h >= 0 ? sol_h : sol_l; 
+
+    return sol_h >= 0 ? sol_h : sol_l;
 }
 
 function solveforsample_Ttest({base_rate, sd_rate, effect_size, alpha, beta, alternative, mu, opts}){
@@ -83,7 +83,7 @@ function solveforsample_Ttest({base_rate, sd_rate, effect_size, alpha, beta, alt
     var variance = 2*sd_rate**2;
     var mean_diff = mean_var - mean_base;
 
-    var multiplier; 
+    var multiplier;
     var sample_one_group;
     if (opts && opts.type == 'absolutePerDay') {
         if (opts.calculating == 'visitorsPerDay') {
@@ -103,18 +103,18 @@ function solveforsample_Ttest({base_rate, sd_rate, effect_size, alpha, beta, alt
             multiplier = variance/(mean_diff*Math.sqrt(opts.visitors_per_day) - opts.threshold/(2*Math.sqrt(opts.visitors_per_day)))**2;
             var days;
             if (alternative == "greater" || alternative == "lower") {
-                days = multiplier * (jstat.normal.inv(beta, 0, 1) - jstat.normal.inv(1-alpha, 0, 1))**2 
+                days = multiplier * (jstat.normal.inv(beta, 0, 1) - jstat.normal.inv(1-alpha, 0, 1))**2
             } else {
                 days = multiplier * (jstat.normal.inv(1-beta, 0, 1) + jstat.normal.inv(1-alpha/2, 0, 1))**2
             }
             sample_one_group = days*opts.visitors_per_day;
-        } 
+        }
     } else {
         var multiplier = variance/(mu - mean_diff)**2
-    
+
         var sample_one_group;
         if (alternative == "greater" || alternative == "lower") {
-            sample_one_group = multiplier * (jstat.normal.inv(beta, 0, 1) - jstat.normal.inv(1-alpha, 0, 1))**2 
+            sample_one_group = multiplier * (jstat.normal.inv(beta, 0, 1) - jstat.normal.inv(1-alpha, 0, 1))**2
         } else {
             sample_one_group = multiplier * (jstat.normal.inv(1-beta, 0, 1) + jstat.normal.inv(1-alpha/2, 0, 1))**2
         }
@@ -131,7 +131,7 @@ function solveforsample_Gtest({base_rate, effect_size, alpha, beta, alternative,
 
     var mean_diff = mean_var - mean_base;
 
-    var multiplier; 
+    var multiplier;
     var sample_one_group;
     if (opts && opts.type == 'absolutePerDay') {
         if (opts.calculating == 'visitorsPerDay') {
@@ -151,18 +151,18 @@ function solveforsample_Gtest({base_rate, effect_size, alpha, beta, alternative,
             multiplier = variance/(mean_diff*Math.sqrt(opts.visitors_per_day) - opts.threshold/(2*Math.sqrt(opts.visitors_per_day)))**2;
             var days;
             if (alternative == "greater" || alternative == "lower") {
-                days = multiplier * (jstat.normal.inv(beta, 0, 1) - jstat.normal.inv(1-alpha, 0, 1))**2 
+                days = multiplier * (jstat.normal.inv(beta, 0, 1) - jstat.normal.inv(1-alpha, 0, 1))**2
             } else {
                 days = multiplier * (jstat.normal.inv(1-beta, 0, 1) + jstat.normal.inv(1-alpha/2, 0, 1))**2
             }
             sample_one_group = days*opts.visitors_per_day;
-        } 
+        }
     } else {
         var multiplier = variance/(mu - mean_diff)**2
-    
+
         var sample_one_group;
         if (alternative == "greater" || alternative == "lower") {
-            sample_one_group = multiplier * (jstat.normal.inv(beta, 0, 1) - jstat.normal.inv(1-alpha, 0, 1))**2 
+            sample_one_group = multiplier * (jstat.normal.inv(beta, 0, 1) - jstat.normal.inv(1-alpha, 0, 1))**2
         } else {
             sample_one_group = multiplier * (jstat.normal.inv(1-beta, 0, 1) + jstat.normal.inv(1-alpha/2, 0, 1))**2
         }
@@ -197,15 +197,15 @@ function solve_quadratic(Z, sample_size, control_rate, mu) {
     var a = (Z**2 + sample_size) * control_rate**2;
     var b = -(Z**2) * control_rate - 2 * (control_rate + mu) * sample_size * control_rate;
     var c = sample_size * (control_rate + mu)**2 - Z**2 * control_rate * (1-control_rate);
-  
+
     var det = b**2 - 4*a*c;
     if (det < 0) {
       return [NaN, NaN];
     }
-  
+
     var sol_h = (-b + Math.sqrt(det)) / (2*a);
     var sol_l = (-b - Math.sqrt(det)) / (2*a);
-  
+
     return [sol_h, sol_l];
 }
 
@@ -283,7 +283,7 @@ function get_alternative ({type}) {
     }
     return alternative;
 }
- 
+
 export default {
     gTest: {
         power: solveforpower_Gtest,

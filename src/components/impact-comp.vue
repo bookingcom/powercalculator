@@ -19,7 +19,7 @@
 
                     <pc-block-field
                         class="pc-input-field"
-                        prefix="±"
+                        :prefix="isnoninferiority ? '' : '±'"
                         suffix="%"
                         fieldprop="relativeImpact"
 
@@ -104,7 +104,7 @@ import statFormulas from '../js/math.js'
 export default {
     extends: pcBlock,
     template: '#impact-comp',
-    props: ['view', 'testtype', 'enableedit', 'calculateprop', 'fieldfromblock', 'isblockfocused', 'testtype'],
+    props: ['view', 'testtype', 'enableedit', 'calculateprop', 'fieldfromblock', 'isblockfocused', 'testtype', 'isnoninferiority'],
     data () {
         return {
             // impactByMetric: {
