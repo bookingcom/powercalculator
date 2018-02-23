@@ -4726,7 +4726,7 @@ function solveforpower_Ttest({total_sample_size, base_rate, sd_rate, effect_size
     } else {
         power = 1 - (jstat.normal.cdf(z, mean, 1) -
             jstat.normal.cdf(-z, mean, 1));
-   } 
+   }
 
     return power
 }
@@ -5474,7 +5474,15 @@ var sampleComp = {render: function(){var _vm=this;var _h=_vm.$createElement;var 
     },
     methods: {
         calculateVisitorsPerDay (sample, days) {
-            let result =  Math.floor(window.parseInt(sample) / days);
+            let result =  Math.floor(window.parseInt(sample) / days),
+                isInvalid = isNaN(result);
+
+            result = isInvalid ? '-' : result;
+
+            // have to make this available to the application but
+            // need to keep in mind this won't be changed outside this component
+            !isInvalid && this.$emit('readonly:visitorsPerDay', result);
+
             return isNaN(result) ? '-' : result;
         },
         calculateDays(sample, visitorsPerDay) {
@@ -5845,7 +5853,7 @@ var pcTooltip = {render: function(){var _vm=this;var _h=_vm.$createElement;var _
 
 };
 
-var powerCalculator$1 = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"power-calculator"},[_c('form',{staticClass:"pc-form",attrs:{"action":"."}},[_c('div',{staticClass:"pc-main-header"},[_c('div',{staticClass:"pc-test-type"},[_c('pc-tooltip',{staticClass:"pc-test-type-tooltip-wrapper"},[_c('label',{staticClass:"pc-test-type-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.testType),expression:"testType"}],attrs:{"type":"radio","name":"test-mode","value":"gTest","checked":"checked"},domProps:{"checked":_vm._q(_vm.testType,"gTest")},on:{"change":function($event){_vm.testType="gTest";}}}),_vm._v(" Binary Metric ")]),_vm._v(" "),_c('span',{attrs:{"slot":"tooltip"},slot:"tooltip"},[_vm._v(" A binary metric is one that can be only two values like 0 or 1, yes or no, converted or not converted ")])]),_vm._v(" "),_c('pc-tooltip',{staticClass:"pc-test-type-tooltip-wrapper"},[_c('label',{staticClass:"pc-test-type-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.testType),expression:"testType"}],attrs:{"type":"radio","name":"test-mode","value":"tTest"},domProps:{"checked":_vm._q(_vm.testType,"tTest")},on:{"change":function($event){_vm.testType="tTest";}}}),_vm._v(" Continuous Metric ")]),_vm._v(" "),_c('span',{attrs:{"slot":"tooltip"},slot:"tooltip"},[_vm._v(" A continuous metric is one that can be any number like time on site or the number of rooms sold ")])])],1),_vm._v(" "),_c('div',{staticClass:"pc-non-inferiority"},[_c('label',{staticClass:"pc-non-inferiority"},[_vm._v(" Use non inferiority test "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.nonInferiority.enabled),expression:"nonInferiority.enabled"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.nonInferiority.enabled)?_vm._i(_vm.nonInferiority.enabled,null)>-1:(_vm.nonInferiority.enabled)},on:{"change":function($event){var $$a=_vm.nonInferiority.enabled,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.nonInferiority.enabled=$$a.concat([$$v]));}else{$$i>-1&&(_vm.nonInferiority.enabled=$$a.slice(0,$$i).concat($$a.slice($$i+1)));}}else{_vm.$set(_vm.nonInferiority, "enabled", $$c);}}}})]),_vm._v(" "),(_vm.nonInferiority.enabled)?_c('div',{staticClass:"pc-non-inf-treshold"},[_c('select',{directives:[{name:"model",rawName:"v-model",value:(_vm.nonInferiority.selected),expression:"nonInferiority.selected"}],on:{"change":function($event){var $$selectedVal = Array.prototype.filter.call($event.target.options,function(o){return o.selected}).map(function(o){var val = "_value" in o ? o._value : o.value;return val}); _vm.$set(_vm.nonInferiority, "selected", $event.target.multiple ? $$selectedVal : $$selectedVal[0]);}}},_vm._l((_vm.nonInferiority.options),function(option){return _c('option',{domProps:{"value":option.value}},[_vm._v(" "+_vm._s(option.text)+" ")])})),_vm._v(" "),_c('pc-block-field',{staticClass:"pc-non-inf-treshold-input",attrs:{"fieldprop":"nonInfThreshold","fieldvalue":_vm.view.nonInfThreshold,"testtype":_vm.testType,"enableedit":true},on:{"field:change":_vm.updateFields}})],1):_vm._e()]),_vm._v(" "),_vm._m(0,false,false),_vm._v(" "),_c('label',{staticClass:"pc-false-positive"},[_c('pc-block-field',{staticClass:"pc-false-positive-input",class:{ 'pc-top-fields-error': _vm.view.falsePosRate > 10 },attrs:{"suffix":"%","fieldprop":"falsePosRate","fieldvalue":_vm.view.falsePosRate,"testtype":_vm.testType,"enableedit":true},on:{"field:change":_vm.updateFields}}),_vm._v(" false positive rate ")],1),_vm._v(" "),_c('label',{staticClass:"pc-power"},[_c('pc-block-field',{staticClass:"pc-power-input",class:{ 'pc-top-fields-error': _vm.view.power < 80 },attrs:{"suffix":"%","fieldprop":"power","fieldvalue":_vm.view.power,"testtype":_vm.testType,"enableedit":true},on:{"field:change":_vm.updateFields}}),_vm._v(" power ")],1)]),_vm._v(" "),_c('div',{staticClass:"pc-blocks-wrapper",class:{'pc-blocks-wrapper-ttest': _vm.testType == 'tTest'}},[_c('base-comp',{attrs:{"fieldfromblock":"base","view":_vm.view,"calculateprop":_vm.calculateProp,"isblockfocused":_vm.focusedBlock == 'base',"testtype":_vm.testType,"enableedit":_vm.enabledMainInputs.base},on:{"update:focus":_vm.updateFocus,"field:change":_vm.updateFields}}),_vm._v(" "),_c('sample-comp',{attrs:{"fieldfromblock":"sample","testtype":_vm.testType,"sample":_vm.view.sample,"runtime":_vm.view.runtime,"lockedfield":_vm.lockedField,"calculateprop":_vm.calculateProp,"enableedit":_vm.enabledMainInputs.sample,"isblockfocused":_vm.focusedBlock == 'sample'},on:{"update:runtime":function($event){_vm.$set(_vm.view, "runtime", $event);},"update:lockedfield":function($event){_vm.lockedField=$event;},"update:calculateprop":_vm.updateCalculateProp,"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}}),_vm._v(" "),_c('impact-comp',{attrs:{"fieldfromblock":"impact","view":_vm.view,"isblockfocused":_vm.focusedBlock == 'impact',"testtype":_vm.testType,"enableedit":_vm.enabledMainInputs.impact,"calculateprop":_vm.calculateProp},on:{"update:calculateprop":_vm.updateCalculateProp,"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}})],1)])])},staticRenderFns: [function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-title"},[_vm._v("Power Calculator "),_c('sup',{staticStyle:{"color":"#F00","font-size":"11px"}},[_vm._v("BETA")])])}],
+var powerCalculator$1 = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"power-calculator"},[_c('form',{staticClass:"pc-form",attrs:{"action":"."}},[_c('div',{staticClass:"pc-main-header"},[_c('div',{staticClass:"pc-test-type"},[_c('pc-tooltip',{staticClass:"pc-test-type-tooltip-wrapper"},[_c('label',{staticClass:"pc-test-type-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.testType),expression:"testType"}],attrs:{"type":"radio","name":"test-mode","value":"gTest","checked":"checked"},domProps:{"checked":_vm._q(_vm.testType,"gTest")},on:{"change":function($event){_vm.testType="gTest";}}}),_vm._v(" Binary Metric ")]),_vm._v(" "),_c('span',{attrs:{"slot":"tooltip"},slot:"tooltip"},[_vm._v(" A binary metric is one that can be only two values like 0 or 1, yes or no, converted or not converted ")])]),_vm._v(" "),_c('pc-tooltip',{staticClass:"pc-test-type-tooltip-wrapper"},[_c('label',{staticClass:"pc-test-type-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.testType),expression:"testType"}],attrs:{"type":"radio","name":"test-mode","value":"tTest"},domProps:{"checked":_vm._q(_vm.testType,"tTest")},on:{"change":function($event){_vm.testType="tTest";}}}),_vm._v(" Continuous Metric ")]),_vm._v(" "),_c('span',{attrs:{"slot":"tooltip"},slot:"tooltip"},[_vm._v(" A continuous metric is one that can be any number like time on site or the number of rooms sold ")])])],1),_vm._v(" "),_c('div',{staticClass:"pc-non-inferiority"},[_c('label',{staticClass:"pc-non-inferiority"},[_vm._v(" Use non inferiority test "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.nonInferiority.enabled),expression:"nonInferiority.enabled"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.nonInferiority.enabled)?_vm._i(_vm.nonInferiority.enabled,null)>-1:(_vm.nonInferiority.enabled)},on:{"change":function($event){var $$a=_vm.nonInferiority.enabled,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.nonInferiority.enabled=$$a.concat([$$v]));}else{$$i>-1&&(_vm.nonInferiority.enabled=$$a.slice(0,$$i).concat($$a.slice($$i+1)));}}else{_vm.$set(_vm.nonInferiority, "enabled", $$c);}}}})]),_vm._v(" "),(_vm.nonInferiority.enabled)?_c('div',{staticClass:"pc-non-inf-treshold"},[_c('select',{directives:[{name:"model",rawName:"v-model",value:(_vm.nonInferiority.selected),expression:"nonInferiority.selected"}],on:{"change":function($event){var $$selectedVal = Array.prototype.filter.call($event.target.options,function(o){return o.selected}).map(function(o){var val = "_value" in o ? o._value : o.value;return val}); _vm.$set(_vm.nonInferiority, "selected", $event.target.multiple ? $$selectedVal : $$selectedVal[0]);}}},_vm._l((_vm.nonInferiority.options),function(option){return _c('option',{domProps:{"value":option.value}},[_vm._v(" "+_vm._s(option.text)+" ")])})),_vm._v(" "),_c('pc-block-field',{staticClass:"pc-non-inf-treshold-input",attrs:{"fieldprop":"nonInfThreshold","fieldvalue":_vm.view.nonInfThreshold,"testtype":_vm.testType,"enableedit":true},on:{"field:change":_vm.updateFields}})],1):_vm._e()]),_vm._v(" "),_vm._m(0,false,false),_vm._v(" "),_c('label',{staticClass:"pc-false-positive"},[_c('pc-block-field',{staticClass:"pc-false-positive-input",class:{ 'pc-top-fields-error': _vm.view.falsePosRate > 10 },attrs:{"suffix":"%","fieldprop":"falsePosRate","fieldvalue":_vm.view.falsePosRate,"testtype":_vm.testType,"enableedit":true},on:{"field:change":_vm.updateFields}}),_vm._v(" false positive rate ")],1),_vm._v(" "),_c('label',{staticClass:"pc-power"},[_c('pc-block-field',{staticClass:"pc-power-input",class:{ 'pc-top-fields-error': _vm.view.power < 80 },attrs:{"suffix":"%","fieldprop":"power","fieldvalue":_vm.view.power,"testtype":_vm.testType,"enableedit":true},on:{"field:change":_vm.updateFields}}),_vm._v(" power ")],1)]),_vm._v(" "),_c('div',{staticClass:"pc-blocks-wrapper",class:{'pc-blocks-wrapper-ttest': _vm.testType == 'tTest'}},[_c('base-comp',{attrs:{"fieldfromblock":"base","view":_vm.view,"calculateprop":_vm.calculateProp,"isblockfocused":_vm.focusedBlock == 'base',"testtype":_vm.testType,"enableedit":_vm.enabledMainInputs.base},on:{"update:focus":_vm.updateFocus,"field:change":_vm.updateFields}}),_vm._v(" "),_c('sample-comp',{attrs:{"fieldfromblock":"sample","testtype":_vm.testType,"sample":_vm.view.sample,"runtime":_vm.view.runtime,"lockedfield":_vm.lockedField,"calculateprop":_vm.calculateProp,"enableedit":_vm.enabledMainInputs.sample,"isblockfocused":_vm.focusedBlock == 'sample'},on:{"update:runtime":function($event){_vm.$set(_vm.view, "runtime", $event);},"update:lockedfield":function($event){_vm.lockedField=$event;},"update:calculateprop":_vm.updateCalculateProp,"field:change":_vm.updateFields,"update:focus":_vm.updateFocus,"readonly:visitorsPerDay":_vm.updateVisitorsPerDay}}),_vm._v(" "),_c('impact-comp',{attrs:{"fieldfromblock":"impact","view":_vm.view,"isblockfocused":_vm.focusedBlock == 'impact',"testtype":_vm.testType,"enableedit":_vm.enabledMainInputs.impact,"calculateprop":_vm.calculateProp},on:{"update:calculateprop":_vm.updateCalculateProp,"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}})],1)])])},staticRenderFns: [function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-title"},[_vm._v("Power Calculator "),_c('sup',{staticStyle:{"color":"#F00","font-size":"11px"}},[_vm._v("BETA")])])}],
     mixins: [valueTransformationMixin],
     props: ['parentmetricdata'],
     data () {
@@ -5893,7 +5901,8 @@ var powerCalculator$1 = {render: function(){var _vm=this;var _h=_vm.$createEleme
                 sample: true,
                 impact: true,
                 power: true
-            }
+            },
+            readOnlyVisitorsPerDay: 0
         };
 
         // mergeComponentData has no array support for now
@@ -5906,11 +5915,23 @@ var powerCalculator$1 = {render: function(){var _vm=this;var _h=_vm.$createEleme
         mu () {
             let mu = 0;
 
-            if (this.nonInferiority.enabled) {
+            if (this.nonInferiorityEnabled) {
                 mu = this.getMu();
             }
 
             return mu
+        },
+        opts () {
+            if (!this.nonInferiorityEnabled) {
+                return false
+            }
+            return this.getExtraOpts()
+        },
+        alternative () {
+            if (!this.nonInferiorityEnabled) {
+                return false
+            }
+            return this.getAlternative()
         },
         disableBaseSecondaryInput () {
             // only metric total is available and as it depends on sample this
@@ -5928,6 +5949,13 @@ var powerCalculator$1 = {render: function(){var _vm=this;var _h=_vm.$createEleme
                     lockedField: this.lockedField,
                 };
             return JSON.parse(JSON.stringify(result))
+        },
+        nonInferiorityEnabled () {
+            return this.nonInferiority.enabled;
+        },
+
+        nonInferioritySelected () {
+            return this.nonInferiority.selected;
         }
     },
     methods: {
@@ -5948,20 +5976,19 @@ var powerCalculator$1 = {render: function(){var _vm=this;var _h=_vm.$createEleme
 
         },
         convertDisplayedValues () {
-            let { view, extractValue, mu } = this,
+            let { view, extractValue, mu, opts, alternative } = this,
                 { sample, base, impact, falsePosRate, power, sdRate } = view;
 
             return {
                 mu,
+                opts,
+                alternative,
                 total_sample_size: extractValue('sample', sample),
                 base_rate: extractValue('base', base),
                 effect_size: extractValue('impact', impact),
                 alpha: extractValue('falsePosRate', falsePosRate),
                 beta: 1 - extractValue('power', power), // power of 80%, beta is actually 20%
-                sd_rate: extractValue('sdRate', sdRate),
-                mu: this.getMu(),
-                opts: this.getExtraOpts(),
-                alternative: this.getAlternative()
+                sd_rate: extractValue('sdRate', sdRate)
             }
         },
         updateFocus ({fieldProp, value}) {
@@ -5993,6 +6020,9 @@ var powerCalculator$1 = {render: function(){var _vm=this;var _h=_vm.$createEleme
 
             return result;
         },
+        updateVisitorsPerDay (newValue) {
+            this.readOnlyVisitorsPerDay = newValue;
+        },
         getMu () {
             let thresholdType = this.nonInferiority.selected,
                 { view, extractValue, lockedField} = this,
@@ -6011,18 +6041,39 @@ var powerCalculator$1 = {render: function(){var _vm=this;var _h=_vm.$createEleme
         },
         getExtraOpts () {
             let { view, extractValue, lockedField } = this,
-                { runtime, nonInfThreshold, sample } = view;
-            return {
+                { runtime, nonInfThreshold, sample } = view,
+                type = this.nonInferiority.selected,
+                opts;
+
+            opts = {
+                type,
                 calculating: lockedField,
-                days: runtime,
-                type: this.nonInferiority.selected,
                 threshold: extractValue('nonInfThreshold', nonInfThreshold),
-                visitors_per_day: extractValue('sample', sample)/(2*runtime)
+            };
+
+            if (type == 'absolutePerDay') {
+                if (lockedField == 'visitorsPerDay') {
+                    opts = Object.assign(
+                        opts,
+                        {
+                            days: runtime
+                        }
+                    );
+                } else {
+                    opts = Object.assign(
+                        opts,
+                        {
+                            visitors_per_day: extractValue('sample', this.readOnlyVisitorsPerDay)
+                        }
+                    );
+                }
             }
+
+            return opts
         },
         getAlternative () {
             let testType;
-            if(this.nonInferiority.is) {
+            if(this.nonInferiority.enabled) {
                 testType = 'noninferiority';
             } else {
                 testType = 'comparative';
@@ -6032,6 +6083,13 @@ var powerCalculator$1 = {render: function(){var _vm=this;var _h=_vm.$createEleme
     },
     watch: {
         testType () {
+            this.formulas();
+        },
+        nonInferiorityEnabled () {
+            this.formulas();
+        },
+
+        nonInferioritySelected () {
             this.formulas();
         },
         // in case parent component needs this information

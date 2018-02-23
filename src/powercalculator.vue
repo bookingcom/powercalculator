@@ -212,16 +212,22 @@ export default {
         mu () {
             let mu = 0;
 
-            if (this.nonInferiority.enabled && this.calculateProp == 'impact') {
+            if (this.nonInferiorityEnabled) {
                 mu = this.getMu();
             }
 
             return mu
         },
         opts () {
+            if (!this.nonInferiorityEnabled) {
+                return false
+            }
             return this.getExtraOpts()
         },
         alternative () {
+            if (!this.nonInferiorityEnabled) {
+                return false
+            }
             return this.getAlternative()
         },
         disableBaseSecondaryInput () {
@@ -240,6 +246,13 @@ export default {
                     lockedField: this.lockedField,
                 };
             return JSON.parse(JSON.stringify(result))
+        },
+        nonInferiorityEnabled () {
+            return this.nonInferiority.enabled;
+        },
+
+        nonInferioritySelected () {
+            return this.nonInferiority.selected;
         }
     },
     methods: {
@@ -367,6 +380,13 @@ export default {
     },
     watch: {
         testType () {
+            this.formulas();
+        },
+        nonInferiorityEnabled () {
+            this.formulas();
+        },
+
+        nonInferioritySelected () {
             this.formulas();
         },
         // in case parent component needs this information

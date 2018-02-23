@@ -48,7 +48,7 @@ function solveforpower_Ttest({total_sample_size, base_rate, sd_rate, effect_size
     } else {
         power = 1 - (jstat.normal.cdf(z, mean, 1) -
             jstat.normal.cdf(-z, mean, 1))
-   } 
+   }
 
     return power
 }
