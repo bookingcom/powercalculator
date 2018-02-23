@@ -1,19 +1,19 @@
 import util from './test_utils.js';
 import statFormula from '../src/js/math.js';
 
-var greater = [{control_rate: 0.01, change: -0.001, opts: {calculating:'days', type: 'absolutePerDay', threshold: -40,  visitors_per_day:10000}},
-               {control_rate: 0.01, change: 0,      opts: {calculating:'days', type: 'absolutePerDay', threshold: -40,  visitors_per_day:10000}},
-               {control_rate: 0.1,  change: -0.01,  opts: {calculating:'days', type: 'absolutePerDay', threshold: -400, visitors_per_day:10000}},
-               {control_rate: 0.1,  change: 0,      opts: {calculating:'days', type: 'absolutePerDay', threshold: -400, visitors_per_day:10000}},
+var greater = [{control_rate: 0.01, change: -0.001, opts: {calculating:'days', type: 'absolutePerDay', threshold: -40,  visitors_per_day:20000}},
+               {control_rate: 0.01, change: 0,      opts: {calculating:'days', type: 'absolutePerDay', threshold: -40,  visitors_per_day:20000}},
+               {control_rate: 0.1,  change: -0.01,  opts: {calculating:'days', type: 'absolutePerDay', threshold: -400, visitors_per_day:20000}},
+               {control_rate: 0.1,  change: 0,      opts: {calculating:'days', type: 'absolutePerDay', threshold: -400, visitors_per_day:20000}},
                {control_rate: 0.01, change: -0.001,  opts: {calculating:'visitorsPerDay', days: 14, type: 'absolutePerDay', threshold: -40 }},
                {control_rate: 0.01, change: 0,      opts: {calculating:'visitorsPerDay', days: 14, type: 'absolutePerDay', threshold: -40 }},
                {control_rate: 0.1,  change: -0.01,  opts: {calculating:'visitorsPerDay', days: 14, type: 'absolutePerDay', threshold: -400}},
                {control_rate: 0.1,  change: 0,      opts: {calculating:'visitorsPerDay', days: 14, type: 'absolutePerDay', threshold: -400}}];
 
-var lower = [{control_rate: 0.01, change: 0.001, opts: {calculating:'days', type: 'absolutePerDay', threshold: 40,  visitors_per_day:10000}},
-             {control_rate: 0.01, change: 0,     opts: {calculating:'days', type: 'absolutePerDay', threshold: 40,  visitors_per_day:10000}},
-             {control_rate: 0.1,  change: 0.01,  opts: {calculating:'days', type: 'absolutePerDay', threshold: 400, visitors_per_day:10000}},
-             {control_rate: 0.1,  change: 0,     opts: {calculating:'days', type: 'absolutePerDay', threshold: 400, visitors_per_day:10000}},
+var lower = [{control_rate: 0.01, change: 0.001, opts: {calculating:'days', type: 'absolutePerDay', threshold: 40,  visitors_per_day:20000}},
+             {control_rate: 0.01, change: 0,     opts: {calculating:'days', type: 'absolutePerDay', threshold: 40,  visitors_per_day:20000}},
+             {control_rate: 0.1,  change: 0.01,  opts: {calculating:'days', type: 'absolutePerDay', threshold: 400, visitors_per_day:20000}},
+             {control_rate: 0.1,  change: 0,     opts: {calculating:'days', type: 'absolutePerDay', threshold: 400, visitors_per_day:20000}},
              {control_rate: 0.01, change: 0.001, opts: {calculating:'visitorsPerDay', days: 14, type: 'absolutePerDay', threshold: 40 }},
              {control_rate: 0.01, change: 0,     opts: {calculating:'visitorsPerDay', days: 14, type: 'absolutePerDay', threshold: 40 }},
              {control_rate: 0.1,  change: 0.01,  opts: {calculating:'visitorsPerDay', days: 14, type: 'absolutePerDay', threshold: 400}},
@@ -43,7 +43,7 @@ configs.forEach(function(config) {
 
             var mu;
             if (test_case.opts.visitors_per_day) {
-                mu = test_case.opts.threshold/(2*test_case.opts.visitors_per_day);
+                mu = test_case.opts.threshold/(test_case.opts.visitors_per_day);
             } else {
                 mu  = test_case.opts.threshold*test_case.opts.days/sample_size;
             }

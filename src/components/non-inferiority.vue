@@ -127,7 +127,7 @@ export default {
                 { runtime, sample, base } = view,
                 data = {
                     runtime: runtime,
-                    threshold: extractValue('nonInfThreshold', thresholdCorrectedValue),
+                    threshold: -extractValue('nonInfThreshold', thresholdCorrectedValue),
                     total_sample_size: extractValue('sample', sample),
                     base_rate: extractValue('base', base),
                 };
@@ -146,7 +146,7 @@ export default {
             opts = {
                 type,
                 calculating: lockedField,
-                threshold: extractValue('nonInfThreshold', thresholdCorrectedValue),
+                threshold: -extractValue('nonInfThreshold', thresholdCorrectedValue),
             };
 
             if (type == 'absolutePerDay') {
