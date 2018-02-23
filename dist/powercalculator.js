@@ -4678,7 +4678,6 @@ jStat.models = (function(){
 });
 });
 
-// SOLVING FOR POWER
 function solveforpower_Gtest ({total_sample_size, base_rate, effect_size, alpha, alternative, mu}) {
     var sample_size = total_sample_size/2;
 
@@ -5072,7 +5071,352 @@ var valueTransformationMixin = {
     }
 };
 
+var _impact = {
+    getGraphYTicks () {
+        let impact = isNaN(this.impact) ? 0 : this.impact,
+            arr = [impact/1.50, impact/1.25, impact, impact*1.25, impact*1.50];
+        return arr
+    },
+    getGraphYTicksFormatted (y) {
+        let num = window.parseFloat(y);
+        if ((num % 1) !== 0) {
+            num = num.toFixed(2);
+        }
+
+        if (isNaN(num)) {
+            num = 0;
+        }
+
+        return `${num}%`
+    },
+    updateClonedValues (clonedObj, value) {
+        clonedObj.effect_size = this.extractValue('impact', value);
+
+        return clonedObj;
+    },
+    getCurrentYValue () {
+        return this.impact
+    },
+    getGraphXTicksFormatted (x) {
+        let { displayValue } = this,
+            result = x;
+
+        result = result;
+        result += '%';
+
+        return result
+    },
+};
+
+var _incrementalTrials = {
+    getGraphYTicks () {
+        let impact = isNaN(this.impact) ? 0 : this.impact,
+            arr = [impact/1.50, impact/1.25, impact, impact*1.25, impact*1.50];
+
+        return arr
+    },
+    getGraphYTicksFormatted (y) {
+        let sample = this.sample,
+            base = this.base,
+
+            result = statFormulas.getAbsoluteImpactInVisitors({
+                total_sample_size: this.extractValue('sample', sample),
+                base_rate: this.extractValue('base', base),
+                effect_size: this.extractValue('impact', y)
+            });
+
+        return this.displayValue('impactByVisitors', result);
+    },
+    updateClonedValues (clonedObj, value) {
+        clonedObj.effect_size = this.extractValue('impact', value);
+
+        return clonedObj;
+    },
+    getCurrentYValue () {
+        return this.impact
+    },
+    getGraphXTicksFormatted (x) {
+        let { displayValue } = this,
+            result = x;
+
+        result = result;
+        result += '%';
+
+        return result
+    },
+    getGraphXTicksFormatted (x) {
+        let { displayValue } = this,
+            result = x / this.runtime;
+
+        result = displayValue('impactByVisitors', result);
+        if (result >= 1000) {
+            result = window.parseInt(result / 1000) + 'k';
+        }
+
+        return result
+    },
+    getGraphXValueForClonedValues (clonedValues) {
+        let {total_sample_size, base_rate, effect_size} = clonedValues,
+
+            impactByVisitor = statFormulas.getAbsoluteImpactInVisitors({
+                total_sample_size,
+                base_rate,
+                effect_size,
+            });
+
+        return this.displayValue('impactByVisitors', impactByVisitor);
+    }
+};
+
+var _incrementalTrialsPerDay = {
+    getGraphYTicks () {
+        let impact = isNaN(this.impact) ? 0 : this.impact,
+            arr = [impact/1.50, impact/1.25, impact, impact*1.25, impact*1.50];
+
+        return arr
+    },
+    getGraphYTicksFormatted (y) {
+        let sample = this.sample,
+            base = this.base,
+
+            result = statFormulas.getAbsoluteImpactInVisitors({
+                total_sample_size: this.extractValue('sample', sample / this.runtime),
+                base_rate: this.extractValue('base', base),
+                effect_size: this.extractValue('impact', y)
+            });
+
+        if (isNaN(result)) {
+            result = 0;
+        }
+
+        return this.displayValue('impactByVisitors', result);
+    },
+    updateClonedValues (clonedObj, value) {
+        clonedObj.effect_size = this.extractValue('impact', value);
+
+        return clonedObj;
+    },
+    getCurrentYValue () {
+        return this.impact
+    },
+    getGraphXTicksFormatted (x) {
+        let { displayValue } = this,
+            result = x;
+
+        result = result;
+        result += '%';
+
+        return result
+    },
+    getGraphXTicksFormatted (x) {
+        let { displayValue } = this,
+            result = x / this.runtime;
+
+        result = displayValue('impactByVisitors', result);
+        if (result >= 1000) {
+            result = window.parseInt(result / 1000) + 'k';
+        }
+
+        return result
+    },
+    getGraphXValueForClonedValues (clonedValues) {
+        let {total_sample_size, base_rate, effect_size} = clonedValues,
+
+            impactByVisitor = statFormulas.getAbsoluteImpactInVisitors({
+                total_sample_size,
+                base_rate,
+                effect_size,
+            });
+
+        return this.displayValue('impactByVisitors', impactByVisitor);
+    }
+};
+
+var _days = {
+    getGraphXTicksFormatted (x) {
+        let { displayValue } = this,
+            samplePerDay = this.sample / this.runtime,
+            result = x / samplePerDay;
+        result = displayValue('sample', result);
+        if (result >= 1000) {
+            result = window.parseInt(result / 1000) + 'k';
+        }
+
+        return result
+    },
+    getGraphXValueForClonedValues (clonedValues) {
+        let graphX = 'sample';
+        return this.displayValue(graphX, (this.math[graphX](clonedValues)));
+    }
+};
+
+var _sample = {
+    getGraphXTicksFormatted (x) {
+        let { displayValue } = this,
+            result = x;
+
+        result = displayValue('sample', result);
+        if (result >= 1000) {
+            result = window.parseInt(result / 1000) + 'k';
+        }
+
+        return result
+    }
+};
+
+var _samplePerDay = {
+    getGraphXTicksFormatted (x) {
+        let { displayValue } = this,
+            result = x / this.runtime;
+        result = displayValue('sample', result);
+        if (result >= 1000) {
+            result = window.parseInt(result / 1000) + 'k';
+        }
+
+        return result
+    },
+    getGraphXValueForClonedValues (clonedValues) {
+        let graphX = 'sample';
+        return this.displayValue(graphX, (this.math[graphX](clonedValues)));
+    }
+};
+
+var _power = {
+    getGraphYTicks () {
+        let arr = [10, 25, 50, 75, 100];
+        return arr
+    },
+    getGraphYTicksFormatted (y) {
+        return `${y}%`
+    },
+    updateClonedValues (clonedObj, value) {
+        clonedObj.beta = 1 - this.extractValue('power', value);
+
+        return clonedObj;
+    },
+    getCurrentYValue () {
+        return this.power
+    },
+    getGraphXTicksFormatted () {
+        // not needed yet
+    },
+};
+
 // name convention is the name used to set the graphY and graphX with a underscore before it
+
+var defaultConfig = {
+    getGraphYTicks () {
+        throw Error (`getGraphYTicks not defined for ${this.graphY}`)
+    },
+    getGraphYTicksFormatted () {
+        throw Error (`getGraphYTicksFormatted not defined for ${this.graphY}`)
+    },
+    getGraphYDataSet ({amount}) {
+        let yTicks = this.getGraphYTicks(),
+            curYValue = this.getCurrentYValue(),
+            firstTick = yTicks[0],
+            lastTick = yTicks[yTicks.length - 1],
+            ratio = (lastTick - firstTick) / amount,
+            result = Array.from(new Array(amount));
+
+        result = result.map((cur, i, arr) => {
+            let value = firstTick + ratio * i;
+            return value
+        });
+
+        // add the current value in case it isn't there
+        result.push(curYValue);
+
+        // sort current value
+        result.sort((a,b) => { return a - b});
+
+        // remove duplicates
+        result = [...new Set(result)];
+
+        return result
+    },
+    updateClonedValues () {
+        throw Error (`updateClonedValues not defined for ${this.graphY}`)
+    },
+    getCurrentYValue () {
+        throw Error (`getCurrentYValue not defined for ${this.graphY}`)
+    },
+    getGraphXTicksFormatted () {
+        throw Error (`getGraphXTicksFormatted not defined for ${this.graphY}`)
+    },
+    getGraphXValueForClonedValues (clonedValues) {
+        if (!this.math[this.graphX]) {
+            throw Error (`getGraphXValueForClonedValues didn't find math formula for ${this.graphX}`)
+        }
+        return this.displayValue(this.graphX, (this.math[this.graphX](clonedValues)));
+    }
+};
+
+
+
+var graphDataMixin = {
+    beforeCreate () {
+        // register configurations for metric params
+        // this is done to agregate different pieces of configuration that need to work in harmony
+        // for the svg graph
+        Object.assign(this, {
+            _sample:                    Object.assign({}, defaultConfig, _sample),
+            _samplePerDay:              Object.assign({}, defaultConfig, _samplePerDay),
+            _impact:                    Object.assign({}, defaultConfig, _impact),
+            _incrementalTrials:         Object.assign({}, defaultConfig, _incrementalTrials),
+            _power:                     Object.assign({}, defaultConfig, _power),
+            _incrementalTrialsPerDay:   Object.assign({}, defaultConfig, _incrementalTrialsPerDay),
+            _days:                      Object.assign({}, defaultConfig, _days),
+        });
+    },
+    methods: {
+        getGraphYTicks () {
+            return this._getGraphY().getGraphYTicks.apply(this, []);
+        },
+        getGraphYTicksFormatted () {
+            return this._getGraphY().getGraphYTicksFormatted.apply(this, [...arguments]);
+        },
+        getGraphYDataSet () {
+            return this._getGraphY().getGraphYDataSet.apply(this, [...arguments]);
+        },
+        updateClonedValues () {
+            return this._getGraphY().updateClonedValues.apply(this, [...arguments]);
+        },
+        getCurrentYValue () {
+            return this._getGraphY().getCurrentYValue.apply(this, [...arguments]);
+        },
+        getGraphXValueForClonedValues () {
+            return this._getGraphX().getGraphXValueForClonedValues.apply(this, [...arguments]);
+        },
+        getGraphXTicksFormatted () {
+            return this._getGraphX().getGraphXTicksFormatted.apply(this, [...arguments]);
+        },
+        _getGraphX () {
+            let graphX = this[`_${this.graphX}`];
+
+            if (!graphX) {
+                throw Error (`_${this.graphX} is not registered`);
+            }
+
+            return graphX
+        },
+        _getGraphY () {
+            let graphY = this[`_${this.graphY}`];
+
+            if (!graphY) {
+                throw Error (`_${this.graphY} is not registered`);
+            }
+
+            return graphY
+        }
+    }
+};
+
+let dataDefault = [
+        ['x', 0, 0, 0, 0, 0, 0],
+        ['Sample', 0, 0, 0, 0, 0],
+        ['Current', null, null, 50]
+    ];
 
 let style = document.createElement('style');
 
@@ -5087,6 +5431,295 @@ style.innerHTML = `
 `;
 
 document.querySelector('head').appendChild(style);
+
+
+
+var svgGraph = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-block pc-block--graph"},[_c('div',{staticClass:"pc-graph-controls"},[_c('label',{staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"days-incrementalTrialsPerDay"},domProps:{"checked":_vm._q(_vm.graphType,"days-incrementalTrialsPerDay")},on:{"change":function($event){_vm.graphType="days-incrementalTrialsPerDay";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'days-incrementalTrialsPerDay'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('incrementalTrialsPerDay'))+" / "+_vm._s(_vm.getMetricDisplayName('days')))])]),_vm._v(" "),_c('label',{staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"samplePerDay-incrementalTrials"},domProps:{"checked":_vm._q(_vm.graphType,"samplePerDay-incrementalTrials")},on:{"change":function($event){_vm.graphType="samplePerDay-incrementalTrials";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'samplePerDay-incrementalTrials'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('incrementalTrials'))+" / "+_vm._s(_vm.getMetricDisplayName('samplePerDay')))])]),_vm._v(" "),_c('label',{staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"sample-impact"},domProps:{"checked":_vm._q(_vm.graphType,"sample-impact")},on:{"change":function($event){_vm.graphType="sample-impact";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'sample-impact'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('impact'))+" / "+_vm._s(_vm.getMetricDisplayName('sample')))])]),_vm._v(" "),_c('label',{staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"sample-power"},domProps:{"checked":_vm._q(_vm.graphType,"sample-power")},on:{"change":function($event){_vm.graphType="sample-power";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'sample-power'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('power'))+" / "+_vm._s(_vm.getMetricDisplayName('sample')))])]),_vm._v(" "),_c('label',{staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"samplePerDay-power"},domProps:{"checked":_vm._q(_vm.graphType,"samplePerDay-power")},on:{"change":function($event){_vm.graphType="samplePerDay-power";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'samplePerDay-power'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('power'))+" / "+_vm._s(_vm.getMetricDisplayName('samplePerDay')))])]),_vm._v(" "),_c('label',{staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"impact-power"},domProps:{"checked":_vm._q(_vm.graphType,"impact-power")},on:{"change":function($event){_vm.graphType="impact-power";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'impact-power'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('power'))+" / "+_vm._s(_vm.getMetricDisplayName('impact')))])])]),_vm._v(" "),_c('div',{ref:"pc-graph-size",staticClass:"pc-graph"},[_c('div',{ref:"pc-graph-wrapper",style:(_vm.style)},[_c('div',{ref:"pc-graph"})])])])},staticRenderFns: [],
+    mixins: [valueTransformationMixin, graphDataMixin],
+    template: '#svg-graph',
+    props: ['testtype', 'sample', 'impact', 'power', 'base', 'falseposrate', 'sdrate', 'runtime', 'mu', 'opts', 'alternative'],
+    data () {
+        return {
+            width: 100,
+            height: 100,
+            data:  this.dataDefault,
+            graphType: 'days-incrementalTrialsPerDay' // x, y
+            // graphX: 'sample' // computed
+            // graphY: 'power' // computed
+        }
+    },
+    computed: {
+        style () {
+            let { width, height } = this;
+
+            return {
+                width: `${width}px`,
+                height: `${height}px`
+            }
+        },
+        math () {
+            return statFormulas[this.testtype]
+        },
+        graphX () {
+            // 'sample'
+            return this.graphType.split('-')[0]
+        },
+        graphY () {
+            // 'power'
+            return this.graphType.split('-')[1]
+        }
+    },
+    methods: {
+        resize () {
+            let {width, paddingLeft, paddingRight} = window.getComputedStyle(this.$refs['pc-graph-size']);
+
+            // update svg size
+            this.width = window.parseInt(width) - window.parseInt(paddingLeft) - window.parseInt(paddingRight);
+            this.height = 220;
+        },
+        createYList ({ amount, rate = 10,  cur }) { //rate of 10 and amount of 10 will reach from 0 to 100
+            let result = [];
+
+            for (let i = 0; i <= amount; i++) {
+                let y = rate * i,
+                    nextY = rate * (i + 1);
+
+                result.push(y);
+
+                if (cur > y && cur < nextY) {
+                    result.push(cur);
+                }
+            }
+
+            return result;
+        },
+        trimInvalidSamples (newData) {
+            let result = newData[0].reduce((prevArr, xValue, i) => {
+
+                if (i == 0) {
+                    prevArr[0] = [];
+                    prevArr[1] = [];
+                    prevArr[2] = [];
+                }
+
+                // i == 0 is the name of the dataset
+                if (i == 0 || (!isNaN(xValue) && isFinite(xValue))) {
+                    prevArr[0].push(newData[0][i]);
+                    prevArr[1].push(newData[1][i]);
+                    prevArr[2].push(newData[2][i]);
+                }
+
+                return prevArr;
+            }, []);
+            return result;
+        },
+        updateGraphData () {
+
+            let clonedValues = this.deepCloneObject(this.convertDisplayedValues()),
+                newData = this.deepCloneObject(dataDefault),
+                yList = this.getGraphYDataSet({amount: 10}),
+                curY = this.getCurrentYValue();
+
+            // erase previous values but keep names of datasets
+            newData[0].length = 1;
+            newData[1].length = 1;
+            newData[2].length = 1;
+
+            yList.forEach((yValue, i) => {
+
+                clonedValues = this.updateClonedValues(clonedValues, yValue);
+
+                let xValues = this.getGraphXValueForClonedValues(clonedValues, yValue);
+
+                 newData[0][i + 1] = xValues; // x
+                 newData[1][i + 1] = yValue; // line
+                 newData[2][i + 1] = yValue == curY ? yValue : null; // current power dot
+            });
+
+            newData = this.trimInvalidSamples(newData);
+
+            this.chart.axis.labels({x: this.updateXLabel(), y: this.updateYLabel()});
+
+            this.chart.load({
+                columns: newData
+            });
+        },
+        convertDisplayedValues () {
+            let { extractValue } = this,
+                { sample, base, impact, falseposrate, power, sdrate, mu, opts, alternative } = this;
+
+            return {
+                mu,
+                opts,
+                alternative,
+                total_sample_size: extractValue('sample', sample),
+                base_rate: extractValue('base', base),
+                effect_size: extractValue('impact', impact),
+                alpha: extractValue('falsePosRate', falseposrate),
+                beta: 1 - extractValue('power', power), // power of 80%, beta is actually 20%
+                sd_rate: extractValue('falsePosRate', sdrate)
+            }
+        },
+        deepCloneObject (obj) {
+            return JSON.parse(JSON.stringify(obj))
+        },
+        createTooltip (V) {
+
+            return {
+                grouped: false,
+                contents ([{x = 0, value = 0, id = ''}]) {
+
+                    let {graphX, graphY, getMetricDisplayName, getGraphXTicksFormatted, getGraphYTicksFormatted} = V,
+                        th = getMetricDisplayName(graphX),
+                        name = getMetricDisplayName(graphY),
+                        xFormatted = getGraphXTicksFormatted(x),
+                        yFormatted = getGraphYTicksFormatted(value);
+
+                    return `
+                        <table class="c3-tooltip">
+                            <tbody>
+                                <tr>
+                                    <th colspan="2">${th}: ${xFormatted}</th>
+                                </tr>
+                                <tr class="c3-tooltip-name--Current">
+                                    <td class="name">
+                                        <span style="background-color:#ff7f0e">
+                                        </span>
+                                        ${name}
+                                    </td>
+                                    <td class="value">${yFormatted}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    `
+                }
+            }
+        },
+        updateYLabel () {
+            return this.getMetricDisplayName(this.graphY)
+        },
+        updateXLabel () {
+            return this.getMetricDisplayName(this.graphX)
+        },
+        getMetricDisplayName (metric) {
+            return {
+                sample: 'Sample',
+                impact: 'Impact',
+                power: 'Power',
+                base: 'Base',
+                falseposrate: 'False Positive Rate',
+                sdrate: 'Base Standard deviation',
+
+                samplePerDay: 'Daily Visitors',
+                incrementalTrials: 'Incremental Trials',
+
+                days: '# of days',
+                incrementalTrialsPerDay: 'Inc. Trials per day',
+            }[metric] || ''
+        }
+    },
+    watch: {
+        sample () {
+            this.updateGraphData();
+        },
+        impact () {
+            this.updateGraphData();
+        },
+        power () {
+            this.updateGraphData();
+        },
+        graphY () {
+            this.updateGraphData();
+        },
+        graphX () {
+            this.updateGraphData();
+        },
+        runtime () {
+            this.updateGraphData();
+        }
+    },
+    mounted () {
+        let {resize, createTooltip} = this,
+            vueInstance = this;
+        resize();
+
+        this.dataDefault = dataDefault;
+
+        this.chart = c3.generate({
+            bindto: this.$refs['pc-graph'],
+            size: {
+                width: this.width,
+                height: this.height
+            },
+            legend: {
+                show: false
+            },
+            data: {
+                x: 'x',
+                columns: this.dataDefault,
+                type: 'area'
+            },
+            grid: {
+                x: {
+                    show: true
+                },
+                y: {
+                    show: true
+                }
+            },
+            grid: {
+                x: {
+                    show: true
+                },
+                y: {
+                    show: true
+                }
+            },
+            axis: {
+                x: {
+                    label:  this.updateXLabel(),
+                    tick: {
+                        values (minMax) {
+                            let [min, max] = minMax.map((num) => {return window.parseInt(num)}),
+                                amount = 7,
+                                ratio = (max - min) / amount,
+                                result = new Array(amount + 1);
+
+                            // create the values
+                            result = Array.from(result).map((undef, i) => {
+                                return (min + (ratio * i)).toFixed(2)
+                            });
+
+                            return result
+                        },
+                        format (x) {
+                            return vueInstance.getGraphXTicksFormatted(x)
+                        }
+                    }
+                },
+                y: {
+                    label: this.updateYLabel(),
+                    tick: {
+                        values () {
+                            return vueInstance.getGraphYTicks()
+                        },
+                        format (y) {
+                            return vueInstance.getGraphYTicksFormatted(y)
+                        }
+                    }
+                }
+            },
+            padding: {
+                top: 20,
+                left: 70,
+                right: 20
+            },
+            tooltip: createTooltip(this)
+        });
+
+        this.updateGraphData();
+    }
+};
 
 let validateFunctions = {
         '*': {
@@ -5853,7 +6486,7 @@ var pcTooltip = {render: function(){var _vm=this;var _h=_vm.$createElement;var _
 
 };
 
-var powerCalculator$1 = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"power-calculator"},[_c('form',{staticClass:"pc-form",attrs:{"action":"."}},[_c('div',{staticClass:"pc-main-header"},[_c('div',{staticClass:"pc-test-type"},[_c('pc-tooltip',{staticClass:"pc-test-type-tooltip-wrapper"},[_c('label',{staticClass:"pc-test-type-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.testType),expression:"testType"}],attrs:{"type":"radio","name":"test-mode","value":"gTest","checked":"checked"},domProps:{"checked":_vm._q(_vm.testType,"gTest")},on:{"change":function($event){_vm.testType="gTest";}}}),_vm._v(" Binary Metric ")]),_vm._v(" "),_c('span',{attrs:{"slot":"tooltip"},slot:"tooltip"},[_vm._v(" A binary metric is one that can be only two values like 0 or 1, yes or no, converted or not converted ")])]),_vm._v(" "),_c('pc-tooltip',{staticClass:"pc-test-type-tooltip-wrapper"},[_c('label',{staticClass:"pc-test-type-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.testType),expression:"testType"}],attrs:{"type":"radio","name":"test-mode","value":"tTest"},domProps:{"checked":_vm._q(_vm.testType,"tTest")},on:{"change":function($event){_vm.testType="tTest";}}}),_vm._v(" Continuous Metric ")]),_vm._v(" "),_c('span',{attrs:{"slot":"tooltip"},slot:"tooltip"},[_vm._v(" A continuous metric is one that can be any number like time on site or the number of rooms sold ")])])],1),_vm._v(" "),_c('div',{staticClass:"pc-non-inferiority"},[_c('label',{staticClass:"pc-non-inferiority"},[_vm._v(" Use non inferiority test "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.nonInferiority.enabled),expression:"nonInferiority.enabled"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.nonInferiority.enabled)?_vm._i(_vm.nonInferiority.enabled,null)>-1:(_vm.nonInferiority.enabled)},on:{"change":function($event){var $$a=_vm.nonInferiority.enabled,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.nonInferiority.enabled=$$a.concat([$$v]));}else{$$i>-1&&(_vm.nonInferiority.enabled=$$a.slice(0,$$i).concat($$a.slice($$i+1)));}}else{_vm.$set(_vm.nonInferiority, "enabled", $$c);}}}})]),_vm._v(" "),(_vm.nonInferiority.enabled)?_c('div',{staticClass:"pc-non-inf-treshold"},[_c('select',{directives:[{name:"model",rawName:"v-model",value:(_vm.nonInferiority.selected),expression:"nonInferiority.selected"}],on:{"change":function($event){var $$selectedVal = Array.prototype.filter.call($event.target.options,function(o){return o.selected}).map(function(o){var val = "_value" in o ? o._value : o.value;return val}); _vm.$set(_vm.nonInferiority, "selected", $event.target.multiple ? $$selectedVal : $$selectedVal[0]);}}},_vm._l((_vm.nonInferiority.options),function(option){return _c('option',{domProps:{"value":option.value}},[_vm._v(" "+_vm._s(option.text)+" ")])})),_vm._v(" "),_c('pc-block-field',{staticClass:"pc-non-inf-treshold-input",attrs:{"fieldprop":"nonInfThreshold","fieldvalue":_vm.view.nonInfThreshold,"testtype":_vm.testType,"enableedit":true},on:{"field:change":_vm.updateFields}})],1):_vm._e()]),_vm._v(" "),_vm._m(0,false,false),_vm._v(" "),_c('label',{staticClass:"pc-false-positive"},[_c('pc-block-field',{staticClass:"pc-false-positive-input",class:{ 'pc-top-fields-error': _vm.view.falsePosRate > 10 },attrs:{"suffix":"%","fieldprop":"falsePosRate","fieldvalue":_vm.view.falsePosRate,"testtype":_vm.testType,"enableedit":true},on:{"field:change":_vm.updateFields}}),_vm._v(" false positive rate ")],1),_vm._v(" "),_c('label',{staticClass:"pc-power"},[_c('pc-block-field',{staticClass:"pc-power-input",class:{ 'pc-top-fields-error': _vm.view.power < 80 },attrs:{"suffix":"%","fieldprop":"power","fieldvalue":_vm.view.power,"testtype":_vm.testType,"enableedit":true},on:{"field:change":_vm.updateFields}}),_vm._v(" power ")],1)]),_vm._v(" "),_c('div',{staticClass:"pc-blocks-wrapper",class:{'pc-blocks-wrapper-ttest': _vm.testType == 'tTest'}},[_c('base-comp',{attrs:{"fieldfromblock":"base","view":_vm.view,"calculateprop":_vm.calculateProp,"isblockfocused":_vm.focusedBlock == 'base',"testtype":_vm.testType,"enableedit":_vm.enabledMainInputs.base},on:{"update:focus":_vm.updateFocus,"field:change":_vm.updateFields}}),_vm._v(" "),_c('sample-comp',{attrs:{"fieldfromblock":"sample","testtype":_vm.testType,"sample":_vm.view.sample,"runtime":_vm.view.runtime,"lockedfield":_vm.lockedField,"calculateprop":_vm.calculateProp,"enableedit":_vm.enabledMainInputs.sample,"isblockfocused":_vm.focusedBlock == 'sample'},on:{"update:runtime":function($event){_vm.$set(_vm.view, "runtime", $event);},"update:lockedfield":function($event){_vm.lockedField=$event;},"update:calculateprop":_vm.updateCalculateProp,"field:change":_vm.updateFields,"update:focus":_vm.updateFocus,"readonly:visitorsPerDay":_vm.updateVisitorsPerDay}}),_vm._v(" "),_c('impact-comp',{attrs:{"fieldfromblock":"impact","view":_vm.view,"isblockfocused":_vm.focusedBlock == 'impact',"testtype":_vm.testType,"enableedit":_vm.enabledMainInputs.impact,"calculateprop":_vm.calculateProp},on:{"update:calculateprop":_vm.updateCalculateProp,"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}})],1)])])},staticRenderFns: [function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-title"},[_vm._v("Power Calculator "),_c('sup',{staticStyle:{"color":"#F00","font-size":"11px"}},[_vm._v("BETA")])])}],
+var powerCalculator$1 = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"power-calculator"},[_c('form',{staticClass:"pc-form",attrs:{"action":"."}},[_c('div',{staticClass:"pc-main-header"},[_c('div',{staticClass:"pc-test-type"},[_c('pc-tooltip',{staticClass:"pc-test-type-tooltip-wrapper"},[_c('label',{staticClass:"pc-test-type-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.testType),expression:"testType"}],attrs:{"type":"radio","name":"test-mode","value":"gTest","checked":"checked"},domProps:{"checked":_vm._q(_vm.testType,"gTest")},on:{"change":function($event){_vm.testType="gTest";}}}),_vm._v(" Binary Metric ")]),_vm._v(" "),_c('span',{attrs:{"slot":"tooltip"},slot:"tooltip"},[_vm._v(" A binary metric is one that can be only two values like 0 or 1, yes or no, converted or not converted ")])]),_vm._v(" "),_c('pc-tooltip',{staticClass:"pc-test-type-tooltip-wrapper"},[_c('label',{staticClass:"pc-test-type-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.testType),expression:"testType"}],attrs:{"type":"radio","name":"test-mode","value":"tTest"},domProps:{"checked":_vm._q(_vm.testType,"tTest")},on:{"change":function($event){_vm.testType="tTest";}}}),_vm._v(" Continuous Metric ")]),_vm._v(" "),_c('span',{attrs:{"slot":"tooltip"},slot:"tooltip"},[_vm._v(" A continuous metric is one that can be any number like time on site or the number of rooms sold ")])])],1),_vm._v(" "),_c('div',{staticClass:"pc-non-inferiority"},[_c('label',{staticClass:"pc-non-inferiority"},[_vm._v(" Use non inferiority test "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.nonInferiority.enabled),expression:"nonInferiority.enabled"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.nonInferiority.enabled)?_vm._i(_vm.nonInferiority.enabled,null)>-1:(_vm.nonInferiority.enabled)},on:{"change":function($event){var $$a=_vm.nonInferiority.enabled,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.nonInferiority.enabled=$$a.concat([$$v]));}else{$$i>-1&&(_vm.nonInferiority.enabled=$$a.slice(0,$$i).concat($$a.slice($$i+1)));}}else{_vm.$set(_vm.nonInferiority, "enabled", $$c);}}}})]),_vm._v(" "),(_vm.nonInferiority.enabled)?_c('div',{staticClass:"pc-non-inf-treshold"},[_c('select',{directives:[{name:"model",rawName:"v-model",value:(_vm.nonInferiority.selected),expression:"nonInferiority.selected"}],on:{"change":function($event){var $$selectedVal = Array.prototype.filter.call($event.target.options,function(o){return o.selected}).map(function(o){var val = "_value" in o ? o._value : o.value;return val}); _vm.$set(_vm.nonInferiority, "selected", $event.target.multiple ? $$selectedVal : $$selectedVal[0]);}}},_vm._l((_vm.nonInferiority.options),function(option){return _c('option',{domProps:{"value":option.value}},[_vm._v(" "+_vm._s(option.text)+" ")])})),_vm._v(" "),_c('pc-block-field',{staticClass:"pc-non-inf-treshold-input",attrs:{"fieldprop":"nonInfThreshold","fieldvalue":_vm.view.nonInfThreshold,"testtype":_vm.testType,"enableedit":true},on:{"field:change":_vm.updateFields}})],1):_vm._e()]),_vm._v(" "),_vm._m(0,false,false),_vm._v(" "),_c('label',{staticClass:"pc-false-positive"},[_c('pc-block-field',{staticClass:"pc-false-positive-input",class:{ 'pc-top-fields-error': _vm.view.falsePosRate > 10 },attrs:{"suffix":"%","fieldprop":"falsePosRate","fieldvalue":_vm.view.falsePosRate,"testtype":_vm.testType,"enableedit":true},on:{"field:change":_vm.updateFields}}),_vm._v(" false positive rate ")],1),_vm._v(" "),_c('label',{staticClass:"pc-power"},[_c('pc-block-field',{staticClass:"pc-power-input",class:{ 'pc-top-fields-error': _vm.view.power < 80 },attrs:{"suffix":"%","fieldprop":"power","fieldvalue":_vm.view.power,"testtype":_vm.testType,"enableedit":true},on:{"field:change":_vm.updateFields}}),_vm._v(" power ")],1)]),_vm._v(" "),_c('div',{staticClass:"pc-blocks-wrapper",class:{'pc-blocks-wrapper-ttest': _vm.testType == 'tTest'}},[_c('base-comp',{attrs:{"fieldfromblock":"base","view":_vm.view,"calculateprop":_vm.calculateProp,"isblockfocused":_vm.focusedBlock == 'base',"testtype":_vm.testType,"enableedit":_vm.enabledMainInputs.base},on:{"update:focus":_vm.updateFocus,"field:change":_vm.updateFields}}),_vm._v(" "),_c('sample-comp',{attrs:{"fieldfromblock":"sample","testtype":_vm.testType,"sample":_vm.view.sample,"runtime":_vm.view.runtime,"lockedfield":_vm.lockedField,"calculateprop":_vm.calculateProp,"enableedit":_vm.enabledMainInputs.sample,"isblockfocused":_vm.focusedBlock == 'sample'},on:{"update:runtime":function($event){_vm.$set(_vm.view, "runtime", $event);},"update:lockedfield":function($event){_vm.lockedField=$event;},"update:calculateprop":_vm.updateCalculateProp,"field:change":_vm.updateFields,"update:focus":_vm.updateFocus,"readonly:visitorsPerDay":_vm.updateVisitorsPerDay}}),_vm._v(" "),_c('impact-comp',{attrs:{"fieldfromblock":"impact","view":_vm.view,"isblockfocused":_vm.focusedBlock == 'impact',"testtype":_vm.testType,"enableedit":_vm.enabledMainInputs.impact,"calculateprop":_vm.calculateProp},on:{"update:calculateprop":_vm.updateCalculateProp,"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}}),_vm._v(" "),_c('svg-graph',{attrs:{"power":_vm.view.power,"impact":_vm.view.impact,"base":_vm.view.base,"sample":_vm.view.sample,"sdrate":_vm.view.sdRate,"falseposrate":_vm.view.falsePosRate,"runtime":_vm.view.runtime,"mu":_vm.mu,"opts":_vm.opts,"alternative":_vm.alternative,"testtype":_vm.testType}})],1)])])},staticRenderFns: [function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-title"},[_vm._v("Power Calculator "),_c('sup',{staticStyle:{"color":"#F00","font-size":"11px"}},[_vm._v("BETA")])])}],
     mixins: [valueTransformationMixin],
     props: ['parentmetricdata'],
     data () {
@@ -6098,7 +6731,7 @@ var powerCalculator$1 = {render: function(){var _vm=this;var _h=_vm.$createEleme
         }
     },
     components: {
-        // 'svg-graph': svgGraph,
+        'svg-graph': svgGraph,
         'pc-block-field': pcBlockField,
         'pc-tooltip': pcTooltip,
         'sample-comp': sampleComp,

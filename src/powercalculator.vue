@@ -123,7 +123,6 @@
                     v-on:update:focus="updateFocus">
                 </impact-comp>
 
-<!--
                 <svg-graph
                     v-bind:power="view.power"
                     v-bind:impact="view.impact"
@@ -132,7 +131,12 @@
                     v-bind:sdrate="view.sdRate"
                     v-bind:falseposrate="view.falsePosRate"
                     v-bind:runtime="view.runtime"
-                    v-bind:testtype="testType"></svg-graph> -->
+
+                    v-bind:mu="mu"
+                    v-bind:opts="opts"
+                    v-bind:alternative="alternative"
+
+                    v-bind:testtype="testType"></svg-graph>
             </div>
         </form>
     </div>
@@ -395,7 +399,7 @@ export default {
         }
     },
     components: {
-        // 'svg-graph': svgGraph,
+        'svg-graph': svgGraph,
         'pc-block-field': pcBlockField,
         'pc-tooltip': pcTooltip,
         'sample-comp': sampleComp,

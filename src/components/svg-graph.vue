@@ -66,7 +66,7 @@ document.querySelector('head').appendChild(style);
 export default {
     mixins: [valueTransformationMixin, graphDataMixin],
     template: '#svg-graph',
-    props: ['testtype', 'sample', 'impact', 'power', 'base', 'falseposrate', 'sdrate', 'runtime'],
+    props: ['testtype', 'sample', 'impact', 'power', 'base', 'falseposrate', 'sdrate', 'runtime', 'mu', 'opts', 'alternative'],
     data () {
         return {
             width: 100,
@@ -175,18 +175,18 @@ export default {
         },
         convertDisplayedValues () {
             let { extractValue } = this,
-                { sample, base, impact, falseposrate, power, sdrate } = this;
+                { sample, base, impact, falseposrate, power, sdrate, mu, opts, alternative } = this;
 
             return {
+                mu,
+                opts,
+                alternative,
                 total_sample_size: extractValue('sample', sample),
                 base_rate: extractValue('base', base),
                 effect_size: extractValue('impact', impact),
                 alpha: extractValue('falsePosRate', falseposrate),
                 beta: 1 - extractValue('power', power), // power of 80%, beta is actually 20%
-                sd_rate: extractValue('falsePosRate', sdrate),
-                mu: 0,
-                alternative: 'two-sided',
-                direction: 'increase'
+                sd_rate: extractValue('falsePosRate', sdrate)
             }
         },
         deepCloneObject (obj) {
