@@ -4,7 +4,7 @@
   "description": "Calculator to help define runtime for A/B Experiments",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "NODE_ENV=development jest"
   },
   "repository": {
     "type": "git",
@@ -17,7 +17,12 @@
   },
   "homepage": "https://github.com/bookingcom/powercalculator#readme",
   "devDependencies": {
+    "babel": "^6.23.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-es2015": "^6.24.1",
     "jStat": "^1.7.1",
+    "jest": "^22.2.2",
+    "rands": "^1.0.0",
     "rollup-plugin-commonjs": "^8.2.6",
     "rollup-plugin-css-only": "^0.2.0",
     "rollup-plugin-node-resolve": "^3.0.0",

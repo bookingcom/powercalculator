@@ -1,6 +1,6 @@
 export default {
     getGraphYTicks () {
-        let arr = [0, 25, 50, 75, 100];
+        let arr = [10, 25, 50, 75, 100];
         return arr
     },
     getGraphYTicksFormatted (y) {

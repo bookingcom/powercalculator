@@ -19,7 +19,7 @@
 
                     <pc-block-field
                         class="pc-input-field"
-                        prefix="±"
+                        :prefix="isnoninferiority ? '' : '±'"
                         suffix="%"
                         fieldprop="relativeImpact"
 
@@ -41,6 +41,9 @@
                     <pc-block-field
                         class="pc-input-field"
                         fieldprop="impactByMetricValue"
+
+                        :suffix="testtype == 'gTest' ? '%' : ''"
+
                         v-bind:fieldvalue="impactByMetricDisplay"
                         v-bind:testtype="testtype"
                         v-bind:isreadonly="isReadOnly"
@@ -51,7 +54,9 @@
                         v-on:update:focus="updateFocus"
                         aria-label="visitors with goals"></pc-block-field>
                         <span class="pc-input-details">
-                            going from {{base}} to either {{impactByMetricMinDisplay}} or {{impactByMetricMaxDisplay}}
+                            going from {{ addPercentToString(base) }} to
+                            either {{ addPercentToString(impactByMetricMinDisplay) }} or
+                            {{ addPercentToString(impactByMetricMaxDisplay) }}
                         </span>
                 </label>
             </li>
@@ -104,7 +109,7 @@ import statFormulas from '../js/math.js'
 export default {
     extends: pcBlock,
     template: '#impact-comp',
-    props: ['view', 'testtype', 'enableedit', 'calculateprop', 'fieldfromblock', 'isblockfocused', 'testtype'],
+    props: ['view', 'testtype', 'enableedit', 'calculateprop', 'fieldfromblock', 'isblockfocused', 'testtype', 'isnoninferiority'],
     data () {
         return {
             // impactByMetric: {
@@ -266,6 +271,14 @@ export default {
                 fieldProp: this.fieldfromblock,
                 value: value
             })
+        },
+        addPercentToString (str) {
+            let result = str;
+            if (this.testtype == 'gTest') {
+                result += '%'
+            }
+
+            return result
         }
     }
 }

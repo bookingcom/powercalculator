@@ -27,6 +27,22 @@
 
                 </div>
 
+                <non-inferiority
+                    v-bind:thresholdProp="view.nonInfThreshold"
+                    v-bind:enabledProp.sync="nonInferiority.enabled"
+                    v-bind:selectedProp.sync="nonInferiority.selected"
+
+                    v-bind:readOnlyVisitorsPerDay="readOnlyVisitorsPerDay"
+
+                    v-bind:view="view"
+                    v-bind:extractValue="extractValue"
+                    v-bind:lockedField="lockedField"
+
+                    v-on:update:noninf="updateNonInf"
+                    v-on:field:change="updateFields"
+                >
+                </non-inferiority>
+
                 <div class="pc-title">Power Calculator <sup style="color: #F00; font-size: 11px;">BETA</sup> </div>
 
                 <label class="pc-false-positive">
@@ -82,7 +98,8 @@
 
                     v-on:update:calculateprop="updateCalculateProp"
                     v-on:field:change="updateFields"
-                    v-on:update:focus="updateFocus">
+                    v-on:update:focus="updateFocus"
+                    v-on:readonly:visitorsPerDay="updateVisitorsPerDay">
 
                 </sample-comp>
 
@@ -95,11 +112,12 @@
                     v-bind:enableedit="enabledMainInputs.impact"
                     v-bind:calculateprop="calculateProp"
 
+                    v-bind:isnoninferiority="nonInferiority.enabled"
+
                     v-on:update:calculateprop="updateCalculateProp"
                     v-on:field:change="updateFields"
                     v-on:update:focus="updateFocus">
                 </impact-comp>
-
 
                 <svg-graph
                     v-bind:power="view.power"
@@ -109,6 +127,8 @@
                     v-bind:sdrate="view.sdRate"
                     v-bind:falseposrate="view.falsePosRate"
                     v-bind:runtime="view.runtime"
+
+                    v-bind:noninferiority="nonInferiority"
                     v-bind:testtype="testType"></svg-graph>
             </div>
         </form>
@@ -122,6 +142,7 @@ import sampleComp from './components/sample-comp.vue'
 import impactComp from './components/impact-comp.vue'
 import baseComp from './components/base-comp.vue'
 import pcTooltip from './components/pc-tooltip.vue'
+import nonInferiority from './components/non-inferiority.vue'
 
 import statFormulas from './js/math.js'
 import valueTransformationMixin from './js/value-transformation-mixin.js'
@@ -146,7 +167,17 @@ export default {
                 falsePosRate: 10,
                 sdRate: 10,
 
-                runtime: 14 //days
+                runtime: 14, //days
+
+                nonInfThreshold: 0
+            },
+
+            nonInferiority: {
+                enabled: false,
+                selected: 'relative',
+                mu: 0,
+                alternative: '',
+                opts: false,
             },
 
             // this is used for sample size but we also want to make it shareable
@@ -158,7 +189,8 @@ export default {
                 sample: true,
                 impact: true,
                 power: true
-            }
+            },
+            readOnlyVisitorsPerDay: 0
         };
 
         // mergeComponentData has no array support for now
@@ -184,6 +216,14 @@ export default {
                     lockedField: this.lockedField,
                 };
             return JSON.parse(JSON.stringify(result))
+        },
+
+        nonInferiorityEnabled () {
+            return this.nonInferiority.enabled;
+        },
+
+        nonInferioritySelected () {
+            return this.nonInferiority.selected;
         }
     },
     methods: {
@@ -200,15 +240,18 @@ export default {
                 result = 0;
 
             result = math[calculateProp](this.convertDisplayedValues());
-
             this.view[calculateProp] = this.displayValue(calculateProp, result);
 
         },
         convertDisplayedValues () {
-            let { view, extractValue } = this,
-                { sample, base, impact, falsePosRate, power, sdRate } = view;
+            let { view, extractValue, nonInferiority } = this,
+                { sample, base, impact, falsePosRate, power, sdRate } = view,
+                { mu, opts, alternative } = nonInferiority;
 
             return {
+                mu,
+                opts,
+                alternative,
                 total_sample_size: extractValue('sample', sample),
                 base_rate: extractValue('base', base),
                 effect_size: extractValue('impact', impact),
@@ -245,10 +288,28 @@ export default {
             };
 
             return result;
+        },
+        updateVisitorsPerDay (newValue) {
+            this.readOnlyVisitorsPerDay = newValue;
+        },
+        updateNonInf ({ mu, alternative, opts }) {
+
+            this.nonInferiority.mu = mu;
+            this.nonInferiority.alternative = alternative;
+            this.nonInferiority.opts = opts;
+
+            this.formulas();
         }
     },
     watch: {
         testType () {
+            this.formulas();
+        },
+        nonInferiorityEnabled () {
+            this.formulas();
+        },
+
+        nonInferioritySelected () {
             this.formulas();
         },
         // in case parent component needs this information
@@ -262,7 +323,8 @@ export default {
         'pc-tooltip': pcTooltip,
         'sample-comp': sampleComp,
         'impact-comp' : impactComp,
-        'base-comp': baseComp
+        'base-comp': baseComp,
+        'non-inferiority': nonInferiority
 
     }
 }
@@ -299,10 +361,10 @@ export default {
 
 .pc-main-header {
     display: grid;
-    grid-template-columns: min-content auto min-content min-content;
+    grid-template-columns: min-content  min-content auto min-content min-content;
     grid-template-rows: auto;
     grid-template-areas:
-        "test-type title false-positive power";
+        "test-type calc-options title false-positive power";
     align-items: center;
 
     margin: 25px 0 25px 10px;
@@ -314,6 +376,7 @@ export default {
     text-align: center;
 }
 
+.pc-non-inf-label,
 .pc-test-type,
 .pc-false-positive,
 .pc-power {
@@ -322,6 +385,10 @@ export default {
 
 .pc-test-type {
     grid-area: test-type;
+}
+
+.pc-non-inferiority {
+    grid-area: calc-options;
 }
 
 .pc-test-type-tooltip-wrapper {

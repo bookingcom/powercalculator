@@ -123,7 +123,15 @@ export default {
     },
     methods: {
         calculateVisitorsPerDay (sample, days) {
-            let result =  Math.floor(window.parseInt(sample) / days)
+            let result =  Math.floor(window.parseInt(sample) / days),
+                isInvalid = isNaN(result);
+
+            result = isInvalid ? '-' : result;
+
+            // have to make this available to the application but
+            // need to keep in mind this won't be changed outside this component
+            !isInvalid && this.$emit('readonly:visitorsPerDay', result)
+
             return isNaN(result) ? '-' : result;
         },
         calculateDays(sample, visitorsPerDay) {

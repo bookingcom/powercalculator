@@ -55,6 +55,12 @@ let validateFunctions = {
                     return value > 0
                 },
                 defaultVal: 14
+            },
+            nonInfThreshold: {
+                fn (value) {
+                    return value > 0
+                },
+                defaultVal: 0
             }
         },
         gTest: {
@@ -374,6 +380,7 @@ export default {
     outline: 0;
 }
 
+.pc-non-inf-treshold-input,
 .pc-power-input,
 .pc-false-positive-input {
     display: inline-block;
