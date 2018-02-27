@@ -27,6 +27,8 @@
 import statFormulas from '../js/math.js'
 import pcBlockField from './pc-block-field.vue'
 
+let storedImpact = 0;
+
 export default {
     props: [ 'thresholdProp', 'enabledProp', 'selectedProp', 'view', 'extractValue', 'lockedField', 'readOnlyVisitorsPerDay' ],
     data () {
@@ -91,6 +93,24 @@ export default {
         },
         enabled (newValue) {
             this.$emit('update:enabledProp', newValue);
+
+            if (newValue) {
+                storedImpact = this.view.impact;
+
+                this.$emit('field:change', {
+                    prop: 'impact',
+                    value: 0
+                })
+            } else {
+                this.$emit('field:change', {
+                    prop: 'impact',
+                    value: storedImpact
+                })
+            }
+
+
+
+
         },
         selected (newValue) {
             this.$emit('update:selectedProp', newValue);

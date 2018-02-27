@@ -4678,7 +4678,6 @@ jStat.models = (function(){
 });
 });
 
-// SOLVING FOR POWER
 function solveforpower_Gtest ({total_sample_size, base_rate, effect_size, alpha, alternative, mu}) {
     var sample_size = total_sample_size/2;
 
@@ -6539,6 +6538,8 @@ var pcTooltip = {render: function(){var _vm=this;var _h=_vm.$createElement;var _
 
 };
 
+let storedImpact = 0;
+
 var nonInferiority = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-non-inferiority"},[_c('label',{staticClass:"pc-non-inf-label"},[_vm._v(" Use non inferiority test "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.enabled),expression:"enabled"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.enabled)?_vm._i(_vm.enabled,null)>-1:(_vm.enabled)},on:{"change":function($event){var $$a=_vm.enabled,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.enabled=$$a.concat([$$v]));}else{$$i>-1&&(_vm.enabled=$$a.slice(0,$$i).concat($$a.slice($$i+1)));}}else{_vm.enabled=$$c;}}}})]),_vm._v(" "),(_vm.enabled)?_c('div',{staticClass:"pc-non-inf-treshold"},[_c('select',{directives:[{name:"model",rawName:"v-model",value:(_vm.selected),expression:"selected"}],staticClass:"pc-non-inf-select",on:{"change":function($event){var $$selectedVal = Array.prototype.filter.call($event.target.options,function(o){return o.selected}).map(function(o){var val = "_value" in o ? o._value : o.value;return val}); _vm.selected=$event.target.multiple ? $$selectedVal : $$selectedVal[0];}}},_vm._l((_vm.options),function(option){return _c('option',{domProps:{"value":option.value}},[_vm._v(" "+_vm._s(option.text)+" ")])})),_vm._v(" "),_c('pc-block-field',{staticClass:"pc-non-inf-treshold-input",attrs:{"fieldprop":"nonInfThreshold","suffix":_vm.isRelative ? '%' : '',"fieldvalue":_vm.threshold,"testtype":_vm.testType,"enableedit":true},on:{"field:change":_vm.updateFields}})],1):_vm._e()])},staticRenderFns: [],
     props: [ 'thresholdProp', 'enabledProp', 'selectedProp', 'view', 'extractValue', 'lockedField', 'readOnlyVisitorsPerDay' ],
     data () {
@@ -6603,6 +6604,24 @@ var nonInferiority = {render: function(){var _vm=this;var _h=_vm.$createElement;
         },
         enabled (newValue) {
             this.$emit('update:enabledProp', newValue);
+
+            if (newValue) {
+                storedImpact = this.view.impact;
+
+                this.$emit('field:change', {
+                    prop: 'impact',
+                    value: 0
+                });
+            } else {
+                this.$emit('field:change', {
+                    prop: 'impact',
+                    value: storedImpact
+                });
+            }
+
+
+
+
         },
         selected (newValue) {
             this.$emit('update:selectedProp', newValue);
