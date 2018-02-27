@@ -41,10 +41,12 @@ export default {
                     text: 'relative difference of',
                     value: 'relative'
                 },
-                {
-                    text: 'absolute impact per day of',
-                    value: 'absolutePerDay'
-                }
+                // this one is broken because we need to update the
+                // threshold value when visitors per day changes
+                // {
+                //     text: 'absolute impact per day of',
+                //     value: 'absolutePerDay'
+                // }
             ]
         }
     },

@@ -4678,6 +4678,7 @@ jStat.models = (function(){
 });
 });
 
+// SOLVING FOR POWER
 function solveforpower_Gtest ({total_sample_size, base_rate, effect_size, alpha, alternative, mu}) {
     var sample_size = total_sample_size/2;
 
@@ -6552,10 +6553,12 @@ var nonInferiority = {render: function(){var _vm=this;var _h=_vm.$createElement;
                     text: 'relative difference of',
                     value: 'relative'
                 },
-                {
-                    text: 'absolute impact per day of',
-                    value: 'absolutePerDay'
-                }
+                // this one is broken because we need to update the
+                // threshold value when visitors per day changes
+                // {
+                //     text: 'absolute impact per day of',
+                //     value: 'absolutePerDay'
+                // }
             ]
         }
     },
