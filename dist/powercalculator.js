@@ -6803,6 +6803,7 @@ var powerCalculator$1 = {render: function(){var _vm=this;var _h=_vm.$createEleme
                     calculateProp: this.calculateProp,
                     view: this.view,
                     lockedField: this.lockedField,
+                    nonInferiority: this.nonInferiority
                 };
             return JSON.parse(JSON.stringify(result))
         },
