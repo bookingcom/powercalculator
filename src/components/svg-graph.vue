@@ -1,15 +1,15 @@
 <template id="svg-graph">
     <div class="pc-block pc-block--graph">
         <div class="pc-graph-controls">
-            <label class="pc-graph-radio-label">
+            <label class="pc-graph-radio-label" v-show="!isNonInferiorityEnabled">
                 <input type="radio" class="pc-graph-radio-input" name="graph-x" value="days-incrementalTrialsPerDay" v-model="graphType">
                 <span class="pc-graph-radio-text" :class="{'pc-graph-radio-selected': graphType == 'days-incrementalTrialsPerDay'}">{{getMetricDisplayName('incrementalTrialsPerDay')}} / {{getMetricDisplayName('days')}}</span>
             </label>
-            <label class="pc-graph-radio-label">
+            <label class="pc-graph-radio-label" v-show="!isNonInferiorityEnabled">
                 <input type="radio" class="pc-graph-radio-input" name="graph-x" value="samplePerDay-incrementalTrials" v-model="graphType">
                 <span class="pc-graph-radio-text" :class="{'pc-graph-radio-selected': graphType == 'samplePerDay-incrementalTrials'}">{{getMetricDisplayName('incrementalTrials')}} / {{getMetricDisplayName('samplePerDay')}}</span>
             </label>
-            <label class="pc-graph-radio-label">
+            <label class="pc-graph-radio-label" v-show="!isNonInferiorityEnabled">
                 <input type="radio" class="pc-graph-radio-input" name="graph-x" value="sample-impact" v-model="graphType">
                 <span class="pc-graph-radio-text" :class="{'pc-graph-radio-selected': graphType == 'sample-impact'}">{{getMetricDisplayName('impact')}} / {{getMetricDisplayName('sample')}}</span>
             </label>
@@ -72,7 +72,7 @@ export default {
             width: 100,
             height: 100,
             data:  this.dataDefault,
-            graphType: 'days-incrementalTrialsPerDay' // x, y
+            graphType: this.getDefaultGraphOption() // x, y
             // graphX: 'sample' // computed
             // graphY: 'power' // computed
         }
@@ -96,9 +96,19 @@ export default {
         graphY () {
             // 'power'
             return this.graphType.split('-')[1]
+        },
+        isNonInferiorityEnabled () {
+            return this.noninferiority.enabled
         }
     },
     methods: {
+        getDefaultGraphOption () {
+            if (this.isNonInferiorityEnabled) {
+                return 'sample-power'
+            } else {
+                return 'days-incrementalTrialsPerDay'
+            }
+        },
         resize () {
             let {width, paddingLeft, paddingRight} = window.getComputedStyle(this.$refs['pc-graph-size']);
 
@@ -266,6 +276,11 @@ export default {
         },
         runtime () {
             this.updateGraphData();
+        },
+        isNonInferiorityEnabled (bool) {
+            if (bool) {
+                this.graphType = 'sample-power'
+            }
         }
     },
     mounted () {

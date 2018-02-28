@@ -4988,8 +4988,8 @@ function get_mu_from_relative_difference ({threshold, base_rate}) {
     return threshold*base_rate;
 }
 
-function get_mu_from_absolute_per_day ({days, threshold, total_sample_size}) {
-    return threshold*days/total_sample_size;
+function get_mu_from_absolute_per_day ({threshold, visitorsPerDay}) {
+    return threshold/visitorsPerDay;
 }
 
 function get_alternative ({type}) {
@@ -5478,7 +5478,7 @@ document.querySelector('head').appendChild(style);
 
 
 
-var svgGraph = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-block pc-block--graph"},[_c('div',{staticClass:"pc-graph-controls"},[_c('label',{staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"days-incrementalTrialsPerDay"},domProps:{"checked":_vm._q(_vm.graphType,"days-incrementalTrialsPerDay")},on:{"change":function($event){_vm.graphType="days-incrementalTrialsPerDay";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'days-incrementalTrialsPerDay'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('incrementalTrialsPerDay'))+" / "+_vm._s(_vm.getMetricDisplayName('days')))])]),_vm._v(" "),_c('label',{staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"samplePerDay-incrementalTrials"},domProps:{"checked":_vm._q(_vm.graphType,"samplePerDay-incrementalTrials")},on:{"change":function($event){_vm.graphType="samplePerDay-incrementalTrials";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'samplePerDay-incrementalTrials'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('incrementalTrials'))+" / "+_vm._s(_vm.getMetricDisplayName('samplePerDay')))])]),_vm._v(" "),_c('label',{staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"sample-impact"},domProps:{"checked":_vm._q(_vm.graphType,"sample-impact")},on:{"change":function($event){_vm.graphType="sample-impact";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'sample-impact'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('impact'))+" / "+_vm._s(_vm.getMetricDisplayName('sample')))])]),_vm._v(" "),_c('label',{staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"sample-power"},domProps:{"checked":_vm._q(_vm.graphType,"sample-power")},on:{"change":function($event){_vm.graphType="sample-power";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'sample-power'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('power'))+" / "+_vm._s(_vm.getMetricDisplayName('sample')))])]),_vm._v(" "),_c('label',{staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"samplePerDay-power"},domProps:{"checked":_vm._q(_vm.graphType,"samplePerDay-power")},on:{"change":function($event){_vm.graphType="samplePerDay-power";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'samplePerDay-power'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('power'))+" / "+_vm._s(_vm.getMetricDisplayName('samplePerDay')))])]),_vm._v(" "),_c('label',{staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"impact-power"},domProps:{"checked":_vm._q(_vm.graphType,"impact-power")},on:{"change":function($event){_vm.graphType="impact-power";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'impact-power'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('power'))+" / "+_vm._s(_vm.getMetricDisplayName('impact')))])])]),_vm._v(" "),_c('div',{ref:"pc-graph-size",staticClass:"pc-graph"},[_c('div',{ref:"pc-graph-wrapper",style:(_vm.style)},[_c('div',{ref:"pc-graph"})])])])},staticRenderFns: [],
+var svgGraph = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-block pc-block--graph"},[_c('div',{staticClass:"pc-graph-controls"},[_c('label',{directives:[{name:"show",rawName:"v-show",value:(!_vm.isNonInferiorityEnabled),expression:"!isNonInferiorityEnabled"}],staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"days-incrementalTrialsPerDay"},domProps:{"checked":_vm._q(_vm.graphType,"days-incrementalTrialsPerDay")},on:{"change":function($event){_vm.graphType="days-incrementalTrialsPerDay";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'days-incrementalTrialsPerDay'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('incrementalTrialsPerDay'))+" / "+_vm._s(_vm.getMetricDisplayName('days')))])]),_vm._v(" "),_c('label',{directives:[{name:"show",rawName:"v-show",value:(!_vm.isNonInferiorityEnabled),expression:"!isNonInferiorityEnabled"}],staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"samplePerDay-incrementalTrials"},domProps:{"checked":_vm._q(_vm.graphType,"samplePerDay-incrementalTrials")},on:{"change":function($event){_vm.graphType="samplePerDay-incrementalTrials";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'samplePerDay-incrementalTrials'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('incrementalTrials'))+" / "+_vm._s(_vm.getMetricDisplayName('samplePerDay')))])]),_vm._v(" "),_c('label',{directives:[{name:"show",rawName:"v-show",value:(!_vm.isNonInferiorityEnabled),expression:"!isNonInferiorityEnabled"}],staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"sample-impact"},domProps:{"checked":_vm._q(_vm.graphType,"sample-impact")},on:{"change":function($event){_vm.graphType="sample-impact";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'sample-impact'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('impact'))+" / "+_vm._s(_vm.getMetricDisplayName('sample')))])]),_vm._v(" "),_c('label',{staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"sample-power"},domProps:{"checked":_vm._q(_vm.graphType,"sample-power")},on:{"change":function($event){_vm.graphType="sample-power";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'sample-power'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('power'))+" / "+_vm._s(_vm.getMetricDisplayName('sample')))])]),_vm._v(" "),_c('label',{staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"samplePerDay-power"},domProps:{"checked":_vm._q(_vm.graphType,"samplePerDay-power")},on:{"change":function($event){_vm.graphType="samplePerDay-power";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'samplePerDay-power'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('power'))+" / "+_vm._s(_vm.getMetricDisplayName('samplePerDay')))])]),_vm._v(" "),_c('label',{staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"impact-power"},domProps:{"checked":_vm._q(_vm.graphType,"impact-power")},on:{"change":function($event){_vm.graphType="impact-power";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'impact-power'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('power'))+" / "+_vm._s(_vm.getMetricDisplayName('impact')))])])]),_vm._v(" "),_c('div',{ref:"pc-graph-size",staticClass:"pc-graph"},[_c('div',{ref:"pc-graph-wrapper",style:(_vm.style)},[_c('div',{ref:"pc-graph"})])])])},staticRenderFns: [],
     mixins: [valueTransformationMixin, graphDataMixin],
     template: '#svg-graph',
     props: ['testtype', 'sample', 'impact', 'power', 'base', 'falseposrate', 'sdrate', 'runtime', 'noninferiority'],
@@ -5487,7 +5487,7 @@ var svgGraph = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c
             width: 100,
             height: 100,
             data:  this.dataDefault,
-            graphType: 'days-incrementalTrialsPerDay' // x, y
+            graphType: this.getDefaultGraphOption() // x, y
             // graphX: 'sample' // computed
             // graphY: 'power' // computed
         }
@@ -5511,9 +5511,19 @@ var svgGraph = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c
         graphY () {
             // 'power'
             return this.graphType.split('-')[1]
+        },
+        isNonInferiorityEnabled () {
+            return this.noninferiority.enabled
         }
     },
     methods: {
+        getDefaultGraphOption () {
+            if (this.isNonInferiorityEnabled) {
+                return 'sample-power'
+            } else {
+                return 'days-incrementalTrialsPerDay'
+            }
+        },
         resize () {
             let {width, paddingLeft, paddingRight} = window.getComputedStyle(this.$refs['pc-graph-size']);
 
@@ -5681,6 +5691,11 @@ var svgGraph = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c
         },
         runtime () {
             this.updateGraphData();
+        },
+        isNonInferiorityEnabled (bool) {
+            if (bool) {
+                this.graphType = 'sample-power';
+            }
         }
     },
     mounted () {
@@ -6246,6 +6261,13 @@ var sampleComp = {render: function(){var _vm=this;var _h=_vm.$createElement;var 
         },
         lockedField (newValue) {
             this.$emit('update:lockedfield', newValue);
+        },
+        visitorsPerDay (newValue) {
+            const isInvalid = isNaN(newValue);
+
+            // have to make this available to the application but
+            // need to keep in mind this won't be changed outside this component
+            !isInvalid && this.$emit('readonly:visitorsPerDay', newValue);
         }
     }
 };
@@ -6553,12 +6575,10 @@ var nonInferiority = {render: function(){var _vm=this;var _h=_vm.$createElement;
                     text: 'relative difference of',
                     value: 'relative'
                 },
-                // this one is broken because we need to update the
-                // threshold value when visitors per day changes
-                // {
-                //     text: 'absolute impact per day of',
-                //     value: 'absolutePerDay'
-                // }
+                {
+                    text: 'absolute impact per day of',
+                    value: 'absolutePerDay'
+                }
             ]
         }
     },
@@ -6660,9 +6680,8 @@ var nonInferiority = {render: function(){var _vm=this;var _h=_vm.$createElement;
                 { view, extractValue, lockedField, thresholdCorrectedValue } = this,
                 { runtime, sample, base } = view,
                 data = {
-                    runtime: runtime,
                     threshold: -extractValue('nonInfThreshold', thresholdCorrectedValue),
-                    total_sample_size: extractValue('sample', sample),
+                    visitorsPerDay: extractValue('sample', this.readOnlyVisitorsPerDay),
                     base_rate: extractValue('base', base),
                 };
 
