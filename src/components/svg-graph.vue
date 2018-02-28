@@ -103,7 +103,7 @@ export default {
     },
     methods: {
         getDefaultGraphOption () {
-            if (this.nonInferiority.enabled) {
+            if (this.noninferiority.enabled) {
                 return 'sample-power'
             } else {
                 return 'days-incrementalTrialsPerDay'

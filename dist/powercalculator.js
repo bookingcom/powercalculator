@@ -4678,7 +4678,6 @@ jStat.models = (function(){
 });
 });
 
-// SOLVING FOR POWER
 function solveforpower_Gtest ({total_sample_size, base_rate, effect_size, alpha, alternative, mu}) {
     var sample_size = total_sample_size/2;
 
@@ -5518,7 +5517,7 @@ var svgGraph = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c
     },
     methods: {
         getDefaultGraphOption () {
-            if (this.nonInferiority.enabled) {
+            if (this.noninferiority.enabled) {
                 return 'sample-power'
             } else {
                 return 'days-incrementalTrialsPerDay'
