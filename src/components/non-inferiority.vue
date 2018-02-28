@@ -41,12 +41,10 @@ export default {
                     text: 'relative difference of',
                     value: 'relative'
                 },
-                // this one is broken because we need to update the
-                // threshold value when visitors per day changes
-                // {
-                //     text: 'absolute impact per day of',
-                //     value: 'absolutePerDay'
-                // }
+                {
+                    text: 'absolute impact per day of',
+                    value: 'absolutePerDay'
+                }
             ]
         }
     },
@@ -148,9 +146,8 @@ export default {
                 { view, extractValue, lockedField, thresholdCorrectedValue } = this,
                 { runtime, sample, base } = view,
                 data = {
-                    runtime: runtime,
                     threshold: -extractValue('nonInfThreshold', thresholdCorrectedValue),
-                    total_sample_size: extractValue('sample', sample),
+                    visitorsPerDay: extractValue('sample', this.readOnlyVisitorsPerDay),
                     base_rate: extractValue('base', base),
                 };
 

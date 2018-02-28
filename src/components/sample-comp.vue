@@ -217,6 +217,13 @@ export default {
         },
         lockedField (newValue) {
             this.$emit('update:lockedfield', newValue)
+        },
+        visitorsPerDay (newValue) {
+            const isInvalid = isNaN(newValue)
+
+            // have to make this available to the application but
+            // need to keep in mind this won't be changed outside this component
+            !isInvalid && this.$emit('readonly:visitorsPerDay', newValue)
         }
     }
 }

@@ -312,8 +312,8 @@ function get_mu_from_relative_difference ({threshold, base_rate}) {
     return threshold*base_rate;
 }
 
-function get_mu_from_absolute_per_day ({days, threshold, total_sample_size}) {
-    return threshold*days/total_sample_size;
+function get_mu_from_absolute_per_day ({threshold, visitorsPerDay}) {
+    return threshold/visitorsPerDay;
 }
 
 function get_alternative ({type}) {
