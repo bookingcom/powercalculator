@@ -214,6 +214,7 @@ export default {
                     calculateProp: this.calculateProp,
                     view: this.view,
                     lockedField: this.lockedField,
+                    nonInferiority: this.nonInferiority
                 };
             return JSON.parse(JSON.stringify(result))
         },

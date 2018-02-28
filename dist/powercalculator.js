@@ -5518,7 +5518,7 @@ var svgGraph = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c
     },
     methods: {
         getDefaultGraphOption () {
-            if (this.isNonInferiorityEnabled) {
+            if (this.nonInferiority.enabled) {
                 return 'sample-power'
             } else {
                 return 'days-incrementalTrialsPerDay'
@@ -6803,6 +6803,7 @@ var powerCalculator$1 = {render: function(){var _vm=this;var _h=_vm.$createEleme
                     calculateProp: this.calculateProp,
                     view: this.view,
                     lockedField: this.lockedField,
+                    nonInferiority: this.nonInferiority
                 };
             return JSON.parse(JSON.stringify(result))
         },
