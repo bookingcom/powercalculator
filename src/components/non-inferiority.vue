@@ -88,7 +88,7 @@ export default {
         thresholdCorrectedValue () {
             this.$emit('field:change', {
                 prop: 'nonInfThreshold',
-                value: this.thresholdCorrectedValue
+                value: this.threshold
             })
         },
         enabled (newValue) {

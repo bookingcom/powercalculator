@@ -4678,6 +4678,7 @@ jStat.models = (function(){
 });
 });
 
+// SOLVING FOR POWER
 function solveforpower_Gtest ({total_sample_size, base_rate, effect_size, alpha, alternative, mu}) {
     var sample_size = total_sample_size/2;
 
@@ -6621,7 +6622,7 @@ var nonInferiority = {render: function(){var _vm=this;var _h=_vm.$createElement;
         thresholdCorrectedValue () {
             this.$emit('field:change', {
                 prop: 'nonInfThreshold',
-                value: this.thresholdCorrectedValue
+                value: this.threshold
             });
         },
         enabled (newValue) {
