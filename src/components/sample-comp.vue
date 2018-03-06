@@ -1,7 +1,7 @@
 <template id="sample-comp">
-    <div class="pc-block pc-block--sample" :class="{'pc-block-focused': isblockfocused == 'sample', 'pc-block-to-calculate': calculateprop == 'sample'}">
+    <div class="pc-block pc-block--sample" :class="{'pc-block-focused': isBlockFocused == 'sample', 'pc-block-to-calculate': calculateProp == 'sample'}">
 
-        <pc-svg-chain v-bind:calculateprop="calculateprop" v-bind:fieldfromblock="fieldfromblock"></pc-svg-chain>
+        <pc-svg-chain v-bind:calculateProp="calculateProp" v-bind:fieldFromBlock="fieldFromBlock"></pc-svg-chain>
 
         <label slot="text" class="pc-calc-radio pc-calc-radio--sample" :class="{'pc-calc-radio--active': isCalculated}">
             <input type="radio" v-model="isCalculated" :value="true" >
@@ -19,14 +19,12 @@
                     <span class="pc-input-title">Total # <small class="pc-input-sub-title">of visitors</small></span>
 
                     <pc-block-field
-                        fieldprop="totalSample"
+                        fieldProp="sample"
 
-                        v-bind:fieldvalue="totalSample"
-                        v-bind:testtype="testtype"
-                        v-bind:isreadonly="calculateprop == 'sample'"
-                        v-bind:enableedit="enableedit"
+                        v-bind:fieldValue="sample"
+                        v-bind:isReadOnly="calculateProp == 'sample'"
+                        v-bind:enableEdit="enableEdit"
 
-                        v-on:field:change="updateFields"
                         v-on:update:focus="updateFocus"></pc-block-field>
                 </label>
             </li>
@@ -35,17 +33,14 @@
                     <span class="pc-input-title">Daily # <small class="pc-input-sub-title">of visitors</small></span>
 
                     <pc-block-field
-                        fieldprop="visitorsPerDay"
-                        v-bind:fieldvalue="visitorsPerDay"
-                        v-bind:testtype="testtype"
-                        v-bind:isreadonly="lockedField == 'visitorsPerDay'"
-                        v-bind:isblockfocused="isblockfocused"
-                        v-bind:enableedit="enableedit"
+                        fieldProp="visitorsPerDay"
+                        v-bind:fieldValue="visitorsPerDay"
+                        v-bind:isReadOnly="lockedField == 'visitorsPerDay'"
+                        v-bind:isBlockFocused="isBlockFocused"
+                        v-bind:enableEdit="enableEdit"
 
-                        v-bind:lockedfield="lockedField"
-                        v-bind:lock.sync="lockedField"
+                        v-bind:lockedField="lockedField"
 
-                        v-on:field:change="updateFields"
                         v-on:update:focus="updateFocus"></pc-block-field>
                 </label>
 
@@ -82,19 +77,16 @@
             <li class="pc-input-item pc-input-right-swap pc-value-field--lockable" :class="getLockedStateClass('days')">
                 <label>
                     <pc-block-field
-                        fieldprop="days"
+                        fieldProp="runtime"
                         prefix=""
                         suffix=" days"
-                        v-bind:fieldvalue="days"
-                        v-bind:testtype="testtype"
-                        v-bind:isreadonly="lockedField == 'days'"
-                        v-bind:isblockfocused="isblockfocused"
-                        v-bind:enableedit="enableedit"
+                        v-bind:fieldValue="runtime"
+                        v-bind:isReadOnly="lockedField == 'days'"
+                        v-bind:isBlockFocused="isBlockFocused"
+                        v-bind:enableEdit="enableEdit"
 
-                        v-bind:lockedfield="lockedField"
-                        v-bind:lock.sync="lockedField"
+                        v-bind:lockedField="lockedField"
 
-                        v-on:field:change="updateFields"
                         v-on:update:focus="updateFocus"
                         aria-label="Days"></pc-block-field>
                 </label>
@@ -107,72 +99,30 @@
 import pcBlock from './pc-block.vue'
 
 export default {
-    props: ['runtime', 'testtype', 'lockedfield', 'calculateprop', 'enableedit', 'isblockfocused', 'sample', 'calculateprop', 'fieldfromblock'],
+    props: ['enableEdit', 'isBlockFocused', 'fieldFromBlock'],
     template: '#sample-comp',
     extends: pcBlock,
     data () {
         return {
-            days: this.runtime,
-            visitorsPerDay: this.calculateVisitorsPerDay(this.sample, this.runtime),
             variants: 2,
-            totalSample: this.sample,
-            enableEdit: false,
-            focusedBlock: '',
-            lockedField: this.lockedfield
+            focusedBlock: ''
+        }
+    },
+    computed: {
+        sample () {
+            return this.$store.state.attributes.sample
+        },
+        visitorsPerDay () {
+            return this.$store.state.attributes.visitorsPerDay
+        },
+        runtime () {
+            return this.$store.state.attributes.runtime
+        },
+        lockedField () {
+            return this.$store.state.attributes.lockedField
         }
     },
     methods: {
-        calculateVisitorsPerDay (sample, days) {
-            let result =  Math.floor(window.parseInt(sample) / days),
-                isInvalid = isNaN(result);
-
-            result = isInvalid ? '-' : result;
-
-            // have to make this available to the application but
-            // need to keep in mind this won't be changed outside this component
-            !isInvalid && this.$emit('readonly:visitorsPerDay', result)
-
-            return isNaN(result) ? '-' : result;
-        },
-        calculateDays(sample, visitorsPerDay) {
-            let result =  Math.ceil(window.parseInt(sample) / visitorsPerDay)
-            return isNaN(result) ? '-' : result;
-        },
-        enableInput () {
-            this.$emit('edit:update', {prop: 'sample'})
-        },
-        updateFields ({prop, value}) {
-
-            if (prop == 'days') {
-                this.days = value;
-            } else if (prop == 'visitorsPerDay') {
-                this.visitorsPerDay = value;
-            }
-
-            if (this.calculateprop == 'sample') {
-                if (prop == 'visitorsPerDay') {
-                    this.days = this.calculateDays(this.totalSample, this.visitorsPerDay);
-                } else if (prop == 'days') {
-                    this.visitorsPerDay = this.calculateVisitorsPerDay(this.totalSample, this.days);
-                }
-            } else {
-                this.updateTotalSampleField({prop, value});
-            }
-
-        },
-        updateTotalSampleField ({prop, value}) {
-            let totalSample = 0;
-
-            if (prop == 'totalSample') {
-                totalSample = value;
-            } else if (prop == 'visitorsPerDay') {
-                totalSample = value * this.days;
-            } else if (prop == 'days') {
-                totalSample = this.visitorsPerDay * value;
-            }
-
-            this.totalSample = window.parseInt(totalSample || 0);
-        },
         updateFocus ({fieldProp, value}) {
 
             if (this.focusedBlock == fieldProp && value === false) {
@@ -182,48 +132,15 @@ export default {
             }
 
             this.$emit('update:focus', {
-                fieldProp: this.fieldfromblock,
+                fieldProp: this.fieldFromBlock,
                 value: value
             })
         },
-        updateSampleMainField () {
-            this.$emit('field:change', {
-                prop: 'sample',
-                value: this.totalSample
-            })
-        },
         switchLockedField () {
-            this.lockedField = this.lockedField == 'days' ? 'visitorsPerDay' : 'days';
+            this.$store.dispatch('switch:lockedfield');
         },
         getLockedStateClass (param) {
             return this.lockedField == param ? 'pc-value-field--locked' : 'pc-value-field--unlocked'
-        }
-    },
-    watch: {
-        sample (newValue) {
-            this.totalSample = newValue
-        },
-        totalSample (newValue) {
-            if (this.lockedField == 'days') {
-                this.days = this.calculateDays(newValue, this.visitorsPerDay)
-            } else {
-                this.visitorsPerDay = this.calculateVisitorsPerDay(newValue, this.days)
-            }
-
-            this.updateSampleMainField();
-        },
-        days (newValue) {
-            this.$emit('update:runtime', newValue)
-        },
-        lockedField (newValue) {
-            this.$emit('update:lockedfield', newValue)
-        },
-        visitorsPerDay (newValue) {
-            const isInvalid = isNaN(newValue)
-
-            // have to make this available to the application but
-            // need to keep in mind this won't be changed outside this component
-            !isInvalid && this.$emit('readonly:visitorsPerDay', newValue)
         }
     }
 }
@@ -284,7 +201,7 @@ export default {
 }
 
 .pc-block-to-calculate .pc-field-visitorsPerDay,
-.pc-block-to-calculate .pc-field-days {
+.pc-block-to-calculate .pc-field-runtime {
     background: var(--white);
 }
 

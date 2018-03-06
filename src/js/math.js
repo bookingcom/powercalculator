@@ -18,7 +18,7 @@ function solveforpower_Gtest ({total_sample_size, base_rate, effect_size, alpha,
     if (alternative == 'lower') {
         power = jstat.normal.cdf(jstat.normal.inv(alpha, 0, 1), mean, 1)
     } else if (alternative == 'greater') {
-	power = 1-jstat.normal.cdf(jstat.normal.inv(1-alpha, 0, 1), mean, 1)
+        power = 1-jstat.normal.cdf(jstat.normal.inv(1-alpha, 0, 1), mean, 1)
     } else {
         power = 1 - (jstat.normal.cdf(z, mean, 1) -
             jstat.normal.cdf(-z, mean, 1))
@@ -55,7 +55,7 @@ function solveforpower_Ttest({total_sample_size, base_rate, sd_rate, effect_size
 
 
 function is_valid_input(data) {
-    var { base_rate, effect_size, alternative, opts } = data;
+    var { base_rate, effect_size, alternative, opts, mu } = data;
     var change = effect_size*base_rate;
     if (typeof(mu) != 'undefined') {
         if (alternative == 'greater' && mu >= change) {
@@ -112,7 +112,7 @@ function solveforsample_Ttest(data){
     var { base_rate, sd_rate, effect_size, alpha, beta, alternative, mu, opts } = data;
     if (!is_valid_input(data)) {
        return NaN;
-    } 
+    }
     var mean_base = base_rate;
     var mean_var = base_rate * (1+effect_size);
 
@@ -123,7 +123,6 @@ function solveforsample_Ttest(data){
     var sample_one_group;
     if (opts && opts.type == 'absolutePerDay') {
         if (opts.calculating == 'visitorsPerDay') {
-            var visitors_per_day;
             var Z;
             if (alternative == "greater") {
                 Z = jstat.normal.inv(beta, 0, 1) - jstat.normal.inv(1-alpha, 0, 1);
@@ -146,9 +145,8 @@ function solveforsample_Ttest(data){
             sample_one_group = days*opts.visitors_per_day/2;
         }
     } else {
-        var multiplier = variance/(mu - mean_diff)**2
+        multiplier = variance/(mu - mean_diff)**2
 
-        var sample_one_group;
         if (alternative == "greater" || alternative == "lower") {
             sample_one_group = multiplier * (jstat.normal.inv(beta, 0, 1) - jstat.normal.inv(1-alpha, 0, 1))**2
         } else {
@@ -163,7 +161,7 @@ function solveforsample_Gtest(data){
     var { base_rate, effect_size, alpha, beta, alternative, mu, opts } = data;
     if (!is_valid_input(data)) {
        return NaN;
-    } 
+    }
     var mean_base = base_rate;
     var mean_var = base_rate*(1+effect_size);
 
@@ -175,7 +173,6 @@ function solveforsample_Gtest(data){
     var sample_one_group;
     if (opts && opts.type == 'absolutePerDay') {
         if (opts.calculating == 'visitorsPerDay') {
-            var visitors_per_day;
             var Z;
             if (alternative == "greater") {
                 Z = jstat.normal.inv(beta, 0, 1) - jstat.normal.inv(1-alpha, 0, 1);
@@ -198,9 +195,8 @@ function solveforsample_Gtest(data){
             sample_one_group = days*opts.visitors_per_day/2;
         }
     } else {
-        var multiplier = variance/(mu - mean_diff)**2
+        multiplier = variance/(mu - mean_diff)**2
 
-        var sample_one_group;
         if (alternative == "greater" || alternative == "lower") {
             sample_one_group = multiplier * (jstat.normal.inv(beta, 0, 1) - jstat.normal.inv(1-alpha, 0, 1))**2
         } else {
@@ -312,8 +308,8 @@ function get_mu_from_relative_difference ({threshold, base_rate}) {
     return threshold*base_rate;
 }
 
-function get_mu_from_absolute_per_day ({threshold, visitorsPerDay}) {
-    return threshold/visitorsPerDay;
+function get_mu_from_absolute_per_day ({threshold, visitors_per_day}) {
+    return threshold/visitors_per_day;
 }
 
 function get_alternative ({type}) {

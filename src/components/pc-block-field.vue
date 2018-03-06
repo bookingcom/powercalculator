@@ -1,8 +1,8 @@
 <template id="pc-block-field">
-    <span v-if="enableedit" class="pc-value-field-wrapper" :class="fieldWrapperClasses" v-on:click="setFocus()">
+    <span v-if="enableEdit" class="pc-value-field-wrapper" :class="fieldWrapperClasses" v-on:click="setFocus()">
 
         <span class="pc-value-formatting pc-value--formatted" aria-hidden="true"
-            :class="'pc-value-formatting-' + fieldprop"
+            :class="'pc-value-formatting-' + fieldProp"
             :data-prefix="prefix"
             :data-suffix="suffix"
             :style="fieldFormattedStyle"
@@ -11,13 +11,13 @@
         </span>
 
         <span class="pc-value-formatting"
-            :class="'pc-value-formatting-' + fieldprop"
+            :class="'pc-value-formatting-' + fieldProp"
             :data-prefix="prefix"
             :data-suffix="suffix"
             :style="fieldEditableStyle"
         >
             <span class="pc-value-display" :data-test="isFocused"
-                :contenteditable="!isreadonly"
+                :contenteditable="!isReadOnly"
 
                 v-on:focus="setFocusStyle(true)"
                 v-on:blur="blur"
@@ -86,26 +86,25 @@ let validateFunctions = {
 export default {
     template: '#pc-block-field',
     props: [
-        'lockedfield',
-        'testtype',
-        'enableedit',
-        'isreadonly',
-        'fieldprop',
-        'fieldvalue',
+        'lockedField',
+        'enableEdit',
+        'isReadOnly',
+        'fieldProp',
+        'fieldValue',
         'prefix',
         'suffix',
-        'fieldfromblock'
+        'fieldFromBlock'
     ],
     data () {
         return {
-            isLockedFieldSet: (this.lockedfield || '').length > 0,
-            val: parseFloat(this.fieldvalue),
+            islockedFieldSet: (this.lockedField || '').length > 0,
+            val: parseFloat(this.fieldValue),
             isFocused: false,
         }
     },
     computed: {
         isLocked () {
-            return this.lockedfield && this.lockedfield == this.fieldprop
+            return this.lockedField && this.lockedField == this.fieldProp
         },
         formattedVal () {
             let result = this.val;
@@ -137,9 +136,9 @@ export default {
         fieldWrapperClasses () {
             let obj = {};
 
-            obj['pc-field--read-only'] = this.isreadonly;
+            obj['pc-field--read-only'] = this.isReadOnly;
             obj['pc-field--focused'] = this.isFocused;
-            obj['pc-field-' + this.fieldprop] = true;
+            obj['pc-field-' + this.fieldProp] = true;
 
             return obj
         },
@@ -158,6 +157,9 @@ export default {
             }
 
             return result
+        },
+        testType () {
+            return this.$store.state.attributes.testType
         }
     },
     methods: {
@@ -169,7 +171,7 @@ export default {
                 newValue;
 
             // remove commas
-            newValue = oldValue.replace(/\,/g, '');
+            newValue = oldValue.replace(/,/g, '');
 
             // try to extract numbers from it
             newValue = parseFloat(newValue);
@@ -180,7 +182,7 @@ export default {
 
         },
         updateVal () {
-            if (this.enableedit) {
+            if (this.enableEdit) {
                 let value = this.getSanitizedPcValue();
 
                 if (value != this.val) {
@@ -189,7 +191,7 @@ export default {
             }
         },
         formatDisplay () {
-            if (this.enableedit) {
+            if (this.enableEdit) {
                 this.$refs['pc-value'].textContent = this.formatNumberFields(this.getSanitizedPcValue());
             } else {
                 this.val = this.formatNumberFields(this.val);
@@ -215,8 +217,7 @@ export default {
             el.focus();
         },
         validateField (value) {
-            let {testtype} = this,
-                validateConfigList = this.getValidationConfig(),
+            let validateConfigList = this.getValidationConfig(),
                 isValid = true,
                 result = value;
 
@@ -239,18 +240,18 @@ export default {
             return result
         },
         getValidationConfig () {
-            let {fieldprop, testtype} = this,
+            let {fieldProp, testtype} = this,
                 validationTypeCategories,
                 result;
 
-            if (validationCache[testtype] && validationCache[testtype][fieldprop]) {
-                return validationCache[testtype][fieldprop]
+            if (validationCache[testtype] && validationCache[testtype][fieldProp]) {
+                return validationCache[testtype][fieldProp]
             }
 
             validationTypeCategories = [validateFunctions['*'], validateFunctions[testtype]].filter(Boolean);
 
             result = validationTypeCategories.reduce((prev, cur) => {
-                let {fn, defaultVal} = cur[fieldprop] || {};
+                let {fn, defaultVal} = cur[fieldProp] || {};
 
                 if (typeof fn != 'undefined') {
                     prev.fns.push(fn);
@@ -263,7 +264,7 @@ export default {
 
             //cacheing
             validationCache[testtype] = validationCache[testtype] || {};
-            validationCache[testtype][fieldprop] = result;
+            validationCache[testtype][fieldProp] = result;
 
             return result
         },
@@ -286,43 +287,36 @@ export default {
 
     },
     watch: {
-        isFocused (newValue, oldValue) {
-            let el = this.$refs['pc-value'];
-            if (newValue == true && newValue != oldValue) {
-                this.placeCaretAtEnd(el);
-            }
-        },
         val (newValue, oldValue) {
-            newValue = parseFloat(this.formatNumberFields(newValue));
-            oldValue = parseFloat(this.formatNumberFields(oldValue));
+            let newVal = parseFloat(this.formatNumberFields(newValue)),
+                oldVal = parseFloat(this.formatNumberFields(oldValue));
 
-            if (this.isreadonly || !this.isFocused || (newValue == oldValue)) {
+            if (this.isReadOnly || !this.isFocused || (newVal == oldVal)) {
                 return;
             }
 
             // updating calculations
-            this.$emit('field:change', {
-                prop: this.fieldprop,
-                value: newValue || 0
-
+            this.$store.dispatch('field:change', {
+                prop: this.fieldProp,
+                value: newVal || 0
             })
         },
-        fieldvalue () {
+        fieldValue () {
             // in case some input field on the same block changes the main math values
             // we need to update the input fiel
             let anotherFieldInBlockIsUpdating = !this.isFocused;
-            if (!this.isreadonly && !anotherFieldInBlockIsUpdating) {
+            if (!this.isReadOnly && !anotherFieldInBlockIsUpdating) {
                 return
             }
 
-            this.val = this.fieldvalue;
-            if (this.enableedit) {
+            this.val = this.fieldValue;
+            if (this.enableEdit) {
                 this.$refs['pc-value'].textContent = this.val;
             }
         },
         isFocused (newValue) {
             this.$emit('update:focus', {
-                fieldProp: this.fieldfromblock || this.fieldprop,
+                fieldProp: this.fieldFromBlock || this.fieldProp,
                 value: newValue
             })
         }

@@ -7,7 +7,7 @@ export default {
         return `${y}%`
     },
     updateClonedValues (clonedObj, value) {
-        clonedObj.beta = 1 - this.extractValue('power', value);
+        clonedObj.beta = 1 - this.$store.getters.extractValue('power', value);
 
         return clonedObj;
     },

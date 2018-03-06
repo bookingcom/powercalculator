@@ -6,24 +6,29 @@
 
 import pcBlockField from './pc-block-field.vue'
 import pcSvgChain from './pc-svg-chain.vue'
-import valueTransformationMixin from '../js/value-transformation-mixin.js'
 
 export default {
-    mixins: [valueTransformationMixin],
-    props: ['calculateprop', 'fieldfromblock'],
+    props: ['fieldFromBlock'],
     data () {
         return {
-            isCalculated: this.calculateprop == this.fieldfromblock,
+            // isCalculated: this.calculateProp == this.fieldFromBlock,
         }
     },
-    watch: {
-        calculateprop () {
-            this.isCalculated = this.calculateprop == this.fieldfromblock;
-        },
-        isCalculated (newValue) {
-            if (newValue === true) {
-                this.$emit('update:calculateprop', this.fieldfromblock)
+    computed: {
+        isCalculated: {
+            get () {
+                return this.$store.state.attributes.calculateProp == this.fieldFromBlock
+            },
+            set () {
+                this.$store.dispatch('update:calculateprop', {value: this.fieldFromBlock})
             }
+        },
+
+        calculateProp () {
+            return this.$store.state.attributes.calculateProp
+        },
+        testType () {
+            return this.$store.state.attributes.testType
         }
     },
     components: {

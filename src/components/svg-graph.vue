@@ -21,7 +21,7 @@
                 <input type="radio" class="pc-graph-radio-input" name="graph-x" value="samplePerDay-power" v-model="graphType">
                 <span class="pc-graph-radio-text" :class="{'pc-graph-radio-selected': graphType == 'samplePerDay-power'}">{{getMetricDisplayName('power')}} / {{getMetricDisplayName('samplePerDay')}}</span>
             </label>
-            <label class="pc-graph-radio-label">
+            <label class="pc-graph-radio-label" v-show="!isNonInferiorityEnabled">
                 <input type="radio" class="pc-graph-radio-input" name="graph-x" value="impact-power" v-model="graphType">
                 <span class="pc-graph-radio-text" :class="{'pc-graph-radio-selected': graphType == 'impact-power'}">{{getMetricDisplayName('power')}} / {{getMetricDisplayName('impact')}}</span>
             </label>
@@ -39,8 +39,6 @@
 /*global c3*/
 /*eslint no-undef: "error"*/
 
-import statFormulas from '../js/math.js'
-import valueTransformationMixin from '../js/value-transformation-mixin.js'
 import graphDataMixin from '../js/graph-data-mixin.js'
 
 let dataDefault = [
@@ -66,9 +64,9 @@ document.querySelector('head').appendChild(style);
 
 
 export default {
-    mixins: [valueTransformationMixin, graphDataMixin],
+    mixins: [graphDataMixin],
     template: '#svg-graph',
-    props: ['testtype', 'sample', 'impact', 'power', 'base', 'falseposrate', 'sdrate', 'runtime', 'noninferiority'],
+    props: [],
     data () {
         return {
             width: 100,
@@ -88,9 +86,6 @@ export default {
                 height: `${height}px`
             }
         },
-        math () {
-            return statFormulas[this.testtype]
-        },
         graphX () {
             // 'sample'
             return this.graphType.split('-')[0]
@@ -99,17 +94,41 @@ export default {
             // 'power'
             return this.graphType.split('-')[1]
         },
+        math () {
+            return this.$store.getters.formulaToSolveProp
+        },
         isNonInferiorityEnabled () {
-            return this.noninferiority.enabled
+            return this.$store.state.nonInferiority.enabled
+        },
+        sample () {
+            return this.$store.state.attributes.sample
+        },
+        impact () {
+            return this.$store.state.attributes.impact
+        },
+        power () {
+            return this.$store.state.attributes.power
+        },
+        base () {
+            return this.$store.state.attributes.base
+        },
+        falsePosRate () {
+            return this.$store.state.attributes.falsePosRate
+        },
+        sdRate () {
+            return this.$store.state.attributes.sdRate
+        },
+        runtime () {
+            return this.$store.state.attributes.runtime
         }
     },
     methods: {
         getDefaultGraphOption () {
-            if (this.noninferiority.enabled) {
-                return 'sample-power'
-            } else {
-                return 'days-incrementalTrialsPerDay'
+            let result = 'days-incrementalTrialsPerDay';
+            if (this.$store.state.nonInferiority.enabled) {
+                result = 'sample-power'
             }
+            return result
         },
         resize () {
             let {width, paddingLeft, paddingRight} = window.getComputedStyle(this.$refs['pc-graph-size']);
@@ -118,10 +137,10 @@ export default {
             this.width = window.parseInt(width) - window.parseInt(paddingLeft) - window.parseInt(paddingRight);
             this.height = 220;
         },
-        createYList ({ amount, rate = 10,  cur }) { //rate of 10 and amount of 10 will reach from 0 to 100
+        createYList ({ amount, rate = 10, cur }) { //rate of 10 and amount of 10 will reach from 0 to 100
             let result = [];
 
-            for (let i = 0; i <= amount; i++) {
+            for (let i = 0; i <= amount; i += 1) {
                 let y = rate * i,
                     nextY = rate * (i + 1);
 
@@ -156,7 +175,7 @@ export default {
         },
         updateGraphData () {
 
-            let clonedValues = this.deepCloneObject(this.convertDisplayedValues()),
+            let clonedValues = this.deepCloneObject(this.$store.getters.convertDisplayedValues),
                 newData = this.deepCloneObject(dataDefault),
                 yList = this.getGraphYDataSet({amount: 10}),
                 curY = this.getCurrentYValue();
@@ -184,23 +203,6 @@ export default {
             this.chart.load({
                 columns: newData
             })
-        },
-        convertDisplayedValues () {
-            let { extractValue } = this,
-                { mu, opts, alternative } = this.noninferiority,
-                { sample, base, impact, falseposrate, power, sdrate } = this;
-
-            return {
-                mu,
-                opts,
-                alternative,
-                total_sample_size: extractValue('sample', sample),
-                base_rate: extractValue('base', base),
-                effect_size: extractValue('impact', impact),
-                alpha: extractValue('falsePosRate', falseposrate),
-                beta: 1 - extractValue('power', power), // power of 80%, beta is actually 20%
-                sd_rate: extractValue('falsePosRate', sdrate)
-            }
         },
         deepCloneObject (obj) {
             return JSON.parse(JSON.stringify(obj))
@@ -305,14 +307,6 @@ export default {
                 x: 'x',
                 columns: this.dataDefault,
                 type: 'area'
-            },
-            grid: {
-                x: {
-                    show: true
-                },
-                y: {
-                    show: true
-                }
             },
             grid: {
                 x: {

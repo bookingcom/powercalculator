@@ -64,7 +64,7 @@
         "for-direction": "error",
         "func-call-spacing": "off",
         "func-name-matching": "error",
-        "func-names": "error",
+        "func-names": ["error", "as-needed"],
         "func-style": [
             "error",
             "declaration"
@@ -225,7 +225,7 @@
             "off",
             "always"
         ],
-        "operator-linebreak": "error",
+        "operator-linebreak": "off",
         "padded-blocks": "off",
         "padding-line-between-statements": "error",
         "prefer-arrow-callback": "error",

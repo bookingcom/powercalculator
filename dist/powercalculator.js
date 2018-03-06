@@ -8,6 +8,41 @@
 	(global.powercalculator = factory());
 }(this, (function () { 'use strict';
 
+var _impact = {
+    getGraphYTicks () {
+        let impact = isNaN(this.impact) ? 0 : this.impact,
+            arr = [impact/1.50, impact/1.25, impact, impact*1.25, impact*1.50];
+        return arr
+    },
+    getGraphYTicksFormatted (y) {
+        let num = window.parseFloat(y);
+        if ((num % 1) !== 0) {
+            num = num.toFixed(2);
+        }
+
+        if (isNaN(num)) {
+            num = 0;
+        }
+
+        return `${num}%`
+    },
+    updateClonedValues (clonedObj, value) {
+        clonedObj.effect_size = this.$store.getters.extractValue('impact', value);
+
+        return clonedObj;
+    },
+    getCurrentYValue () {
+        return this.impact
+    },
+    getGraphXTicksFormatted (x) {
+        let result = x;
+
+        result += '%';
+
+        return result
+    },
+};
+
 var commonjsGlobal = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
 
@@ -3289,7 +3324,10 @@ jStat.extend({
     if (arr.length === undefined && arg.length === undefined) {
       return arr * arg;
     }
-    nrow = arr.length, ncol = arr[0].length, res = jStat.zeros(nrow, nrescols = (isUsable(arg)) ? arg[0].length : ncol), rescols = 0;
+    nrow = arr.length,
+    ncol = arr[0].length,
+    res = jStat.zeros(nrow, nrescols = (isUsable(arg)) ? arg[0].length : ncol),
+    rescols = 0;
     if (isUsable(arg)) {
       for (; rescols < nrescols; rescols++) {
         for (row = 0; row < nrow; row++) {
@@ -4696,7 +4734,7 @@ function solveforpower_Gtest ({total_sample_size, base_rate, effect_size, alpha,
     if (alternative == 'lower') {
         power = jstat.normal.cdf(jstat.normal.inv(alpha, 0, 1), mean, 1);
     } else if (alternative == 'greater') {
-	power = 1-jstat.normal.cdf(jstat.normal.inv(1-alpha, 0, 1), mean, 1);
+        power = 1-jstat.normal.cdf(jstat.normal.inv(1-alpha, 0, 1), mean, 1);
     } else {
         power = 1 - (jstat.normal.cdf(z, mean, 1) -
             jstat.normal.cdf(-z, mean, 1));
@@ -4733,7 +4771,7 @@ function solveforpower_Ttest({total_sample_size, base_rate, sd_rate, effect_size
 
 
 function is_valid_input(data) {
-    var { base_rate, effect_size, alternative, opts } = data;
+    var { base_rate, effect_size, alternative, opts, mu } = data;
     var change = effect_size*base_rate;
     if (typeof(mu) != 'undefined') {
         if (alternative == 'greater' && mu >= change) {
@@ -4790,7 +4828,7 @@ function solveforsample_Ttest(data){
     var { base_rate, sd_rate, effect_size, alpha, beta, alternative, mu, opts } = data;
     if (!is_valid_input(data)) {
        return NaN;
-    } 
+    }
     var mean_base = base_rate;
     var mean_var = base_rate * (1+effect_size);
 
@@ -4823,9 +4861,8 @@ function solveforsample_Ttest(data){
             sample_one_group = days*opts.visitors_per_day/2;
         }
     } else {
-        var multiplier = variance/(mu - mean_diff)**2;
+        multiplier = variance/(mu - mean_diff)**2;
 
-        var sample_one_group;
         if (alternative == "greater" || alternative == "lower") {
             sample_one_group = multiplier * (jstat.normal.inv(beta, 0, 1) - jstat.normal.inv(1-alpha, 0, 1))**2;
         } else {
@@ -4840,7 +4877,7 @@ function solveforsample_Gtest(data){
     var { base_rate, effect_size, alpha, beta, alternative, mu, opts } = data;
     if (!is_valid_input(data)) {
        return NaN;
-    } 
+    }
     var mean_base = base_rate;
     var mean_var = base_rate*(1+effect_size);
 
@@ -4874,9 +4911,8 @@ function solveforsample_Gtest(data){
             sample_one_group = days*opts.visitors_per_day/2;
         }
     } else {
-        var multiplier = variance/(mu - mean_diff)**2;
+        multiplier = variance/(mu - mean_diff)**2;
 
-        var sample_one_group;
         if (alternative == "greater" || alternative == "lower") {
             sample_one_group = multiplier * (jstat.normal.inv(beta, 0, 1) - jstat.normal.inv(1-alpha, 0, 1))**2;
         } else {
@@ -4988,8 +5024,8 @@ function get_mu_from_relative_difference ({threshold, base_rate}) {
     return threshold*base_rate;
 }
 
-function get_mu_from_absolute_per_day ({threshold, visitorsPerDay}) {
-    return threshold/visitorsPerDay;
+function get_mu_from_absolute_per_day ({threshold, visitors_per_day}) {
+    return threshold/visitors_per_day;
 }
 
 function get_alternative ({type}) {
@@ -5022,136 +5058,6 @@ var statFormulas = {
     getAlternative: get_alternative,
 };
 
-var valueTransformationMixin = {
-    beforeCreate () {
-        let validations = {
-            sample: {type: 'int'},
-            base: {
-                gTest: {type: 'percentage'},
-                tTest: {type: 'float'}
-            },
-            impact: {type: 'percentage'},
-            runtime: {type: 'int'},
-            power: {type: 'percentage'},
-            falsePosRate: {type: 'percentage'},
-            impactByMetricValue: {
-                gTest: {type: 'percentage'},
-                tTest: {type: 'float'}
-            },
-            impactByVisitors: {type: 'int'},
-            impactByVisitorsPerDay: {type: 'int'},
-            metricTotals: {type: 'int'},
-            sdRate: {type: 'float'},
-            nonInfThreshold: {type: 'float'}
-        };
-
-        // add validation for component version of main data
-        validations.totalSample = validations.sample;
-        validations.relativeImpact = validations.impact;
-        validations.baseRate = validations.base;
-
-        this.validations = validations;
-    },
-    methods: {
-        displayValue (prop, value) {
-            let result = value,
-                type = this.getType(prop, 'displayValue');
-
-            if (type == 'int') {
-                result = window.parseInt(result);
-            }
-
-            if (type == 'float') {
-                result = window.parseFloat(result);
-            }
-
-            if (type == 'percentage') {
-                result = (window.parseFloat(result) * 100).toFixed(2);
-                result = +result.toString();
-            }
-
-            return isNaN(result) || !isFinite(result) ? '-' : result;
-        },
-        extractValue (prop, value) {
-            let result = value,
-                type = this.getType(prop, 'extractValue');
-
-            if (type == 'int') {
-                return window.parseInt(result);
-            }
-
-            if (type == 'float') {
-                return window.parseFloat(result);
-            }
-
-            if (type == 'percentage') {
-                return window.parseFloat(result) / 100;
-            }
-        },
-        getType (prop, methodName) {
-            let testType = this.testType || this.testtype || 'gTest',
-                validationConfig = this.validations[prop],
-                result,
-                throwError = false;
-
-            if (validationConfig) {
-                if (validationConfig.type) {
-                    result = validationConfig.type;
-                } else if (validationConfig[testType] && validationConfig[testType].type) {
-                    result = validationConfig[testType].type;
-                } else {
-                    throwError = true;
-                }
-            } else {
-                throwError = true;
-            }
-
-            if (throwError) {
-                throw new Error(`Type not found for "${prop}" when trying to call "${methodName}".`)
-            }
-
-            return result || ''
-        }
-    }
-};
-
-var _impact = {
-    getGraphYTicks () {
-        let impact = isNaN(this.impact) ? 0 : this.impact,
-            arr = [impact/1.50, impact/1.25, impact, impact*1.25, impact*1.50];
-        return arr
-    },
-    getGraphYTicksFormatted (y) {
-        let num = window.parseFloat(y);
-        if ((num % 1) !== 0) {
-            num = num.toFixed(2);
-        }
-
-        if (isNaN(num)) {
-            num = 0;
-        }
-
-        return `${num}%`
-    },
-    updateClonedValues (clonedObj, value) {
-        clonedObj.effect_size = this.extractValue('impact', value);
-
-        return clonedObj;
-    },
-    getCurrentYValue () {
-        return this.impact
-    },
-    getGraphXTicksFormatted (x) {
-        let { displayValue } = this,
-            result = x;
-
-        result = result;
-        result += '%';
-
-        return result
-    },
-};
-
 var _incrementalTrials = {
     getGraphYTicks () {
         let impact = isNaN(this.impact) ? 0 : this.impact,
@@ -5164,29 +5070,20 @@ var _incrementalTrials = {
             base = this.base,
 
             result = statFormulas.getAbsoluteImpactInVisitors({
-                total_sample_size: this.extractValue('sample', sample),
-                base_rate: this.extractValue('base', base),
-                effect_size: this.extractValue('impact', y)
+                total_sample_size: this.$store.getters.extractValue('sample', sample),
+                base_rate: this.$store.getters.extractValue('base', base),
+                effect_size: this.$store.getters.extractValue('impact', y)
             });
 
-        return this.displayValue('impactByVisitors', result);
+        return this.$store.getters.displayValue('impactByVisitors', result);
     },
     updateClonedValues (clonedObj, value) {
-        clonedObj.effect_size = this.extractValue('impact', value);
+        clonedObj.effect_size = this.$store.getters.extractValue('impact', value);
 
         return clonedObj;
     },
     getCurrentYValue () {
         return this.impact
-    },
-    getGraphXTicksFormatted (x) {
-        let { displayValue } = this,
-            result = x;
-
-        result = result;
-        result += '%';
-
-        return result
     },
     getGraphXTicksFormatted (x) {
         let { displayValue } = this,
@@ -5208,7 +5105,7 @@ var _incrementalTrials = {
                 effect_size,
             });
 
-        return this.displayValue('impactByVisitors', impactByVisitor);
+        return this.$store.getters.displayValue('impactByVisitors', impactByVisitor);
     }
 };
 
@@ -5224,33 +5121,24 @@ var _incrementalTrialsPerDay = {
             base = this.base,
 
             result = statFormulas.getAbsoluteImpactInVisitors({
-                total_sample_size: this.extractValue('sample', sample / this.runtime),
-                base_rate: this.extractValue('base', base),
-                effect_size: this.extractValue('impact', y)
+                total_sample_size: this.$store.getters.extractValue('sample', sample / this.runtime),
+                base_rate: this.$store.getters.extractValue('base', base),
+                effect_size: this.$store.getters.extractValue('impact', y)
             });
 
         if (isNaN(result)) {
             result = 0;
         }
 
-        return this.displayValue('impactByVisitors', result);
+        return this.$store.getters.displayValue('impactByVisitors', result);
     },
     updateClonedValues (clonedObj, value) {
-        clonedObj.effect_size = this.extractValue('impact', value);
+        clonedObj.effect_size = this.$store.getters.extractValue('impact', value);
 
         return clonedObj;
     },
     getCurrentYValue () {
         return this.impact
-    },
-    getGraphXTicksFormatted (x) {
-        let { displayValue } = this,
-            result = x;
-
-        result = result;
-        result += '%';
-
-        return result
     },
     getGraphXTicksFormatted (x) {
         let { displayValue } = this,
@@ -5272,16 +5160,15 @@ var _incrementalTrialsPerDay = {
                 effect_size,
             });
 
-        return this.displayValue('impactByVisitors', impactByVisitor);
+        return this.$store.getters.displayValue('impactByVisitors', impactByVisitor);
     }
 };
 
 var _days = {
     getGraphXTicksFormatted (x) {
-        let { displayValue } = this,
-            samplePerDay = this.sample / this.runtime,
+        let samplePerDay = this.sample / this.runtime,
             result = x / samplePerDay;
-        result = displayValue('sample', result);
+        result = this.$store.getters.displayValue('sample', result);
         if (result >= 1000) {
             result = window.parseInt(result / 1000) + 'k';
         }
@@ -5290,16 +5177,15 @@ var _days = {
     },
     getGraphXValueForClonedValues (clonedValues) {
         let graphX = 'sample';
-        return this.displayValue(graphX, (this.math[graphX](clonedValues)));
+        return this.$store.getters.displayValue(graphX, (this.math[graphX](clonedValues)));
     }
 };
 
 var _sample = {
     getGraphXTicksFormatted (x) {
-        let { displayValue } = this,
-            result = x;
+        let result = x;
 
-        result = displayValue('sample', result);
+        result = this.$store.getters.displayValue('sample', result);
         if (result >= 1000) {
             result = window.parseInt(result / 1000) + 'k';
         }
@@ -5310,9 +5196,8 @@ var _sample = {
 
 var _samplePerDay = {
     getGraphXTicksFormatted (x) {
-        let { displayValue } = this,
-            result = x / this.runtime;
-        result = displayValue('sample', result);
+        let result = x / this.runtime;
+        result = this.$store.getters.displayValue('sample', result);
         if (result >= 1000) {
             result = window.parseInt(result / 1000) + 'k';
         }
@@ -5321,7 +5206,7 @@ var _samplePerDay = {
     },
     getGraphXValueForClonedValues (clonedValues) {
         let graphX = 'sample';
-        return this.displayValue(graphX, (this.math[graphX](clonedValues)));
+        return this.$store.getters.displayValue(graphX, (this.math[graphX](clonedValues)));
     }
 };
 
@@ -5334,7 +5219,7 @@ var _power = {
         return `${y}%`
     },
     updateClonedValues (clonedObj, value) {
-        clonedObj.beta = 1 - this.extractValue('power', value);
+        clonedObj.beta = 1 - this.$store.getters.extractValue('power', value);
 
         return clonedObj;
     },
@@ -5392,7 +5277,7 @@ var defaultConfig = {
         if (!this.math[this.graphX]) {
             throw Error (`getGraphXValueForClonedValues didn't find math formula for ${this.graphX}`)
         }
-        return this.displayValue(this.graphX, (this.math[this.graphX](clonedValues)));
+        return this.$store.getters.displayValue(this.graphX, (this.math[this.graphX](clonedValues)));
     }
 };
 
@@ -5456,6 +5341,9 @@ var graphDataMixin = {
     }
 };
 
+/*global c3*/
+/*eslint no-undef: "error"*/
+
 let dataDefault = [
         ['x', 0, 0, 0, 0, 0, 0],
         ['Sample', 0, 0, 0, 0, 0],
@@ -5478,10 +5366,10 @@ document.querySelector('head').appendChild(style);
 
 
 
-var svgGraph = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-block pc-block--graph"},[_c('div',{staticClass:"pc-graph-controls"},[_c('label',{directives:[{name:"show",rawName:"v-show",value:(!_vm.isNonInferiorityEnabled),expression:"!isNonInferiorityEnabled"}],staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"days-incrementalTrialsPerDay"},domProps:{"checked":_vm._q(_vm.graphType,"days-incrementalTrialsPerDay")},on:{"change":function($event){_vm.graphType="days-incrementalTrialsPerDay";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'days-incrementalTrialsPerDay'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('incrementalTrialsPerDay'))+" / "+_vm._s(_vm.getMetricDisplayName('days')))])]),_vm._v(" "),_c('label',{directives:[{name:"show",rawName:"v-show",value:(!_vm.isNonInferiorityEnabled),expression:"!isNonInferiorityEnabled"}],staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"samplePerDay-incrementalTrials"},domProps:{"checked":_vm._q(_vm.graphType,"samplePerDay-incrementalTrials")},on:{"change":function($event){_vm.graphType="samplePerDay-incrementalTrials";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'samplePerDay-incrementalTrials'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('incrementalTrials'))+" / "+_vm._s(_vm.getMetricDisplayName('samplePerDay')))])]),_vm._v(" "),_c('label',{directives:[{name:"show",rawName:"v-show",value:(!_vm.isNonInferiorityEnabled),expression:"!isNonInferiorityEnabled"}],staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"sample-impact"},domProps:{"checked":_vm._q(_vm.graphType,"sample-impact")},on:{"change":function($event){_vm.graphType="sample-impact";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'sample-impact'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('impact'))+" / "+_vm._s(_vm.getMetricDisplayName('sample')))])]),_vm._v(" "),_c('label',{staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"sample-power"},domProps:{"checked":_vm._q(_vm.graphType,"sample-power")},on:{"change":function($event){_vm.graphType="sample-power";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'sample-power'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('power'))+" / "+_vm._s(_vm.getMetricDisplayName('sample')))])]),_vm._v(" "),_c('label',{staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"samplePerDay-power"},domProps:{"checked":_vm._q(_vm.graphType,"samplePerDay-power")},on:{"change":function($event){_vm.graphType="samplePerDay-power";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'samplePerDay-power'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('power'))+" / "+_vm._s(_vm.getMetricDisplayName('samplePerDay')))])]),_vm._v(" "),_c('label',{staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"impact-power"},domProps:{"checked":_vm._q(_vm.graphType,"impact-power")},on:{"change":function($event){_vm.graphType="impact-power";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'impact-power'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('power'))+" / "+_vm._s(_vm.getMetricDisplayName('impact')))])])]),_vm._v(" "),_c('div',{ref:"pc-graph-size",staticClass:"pc-graph"},[_c('div',{ref:"pc-graph-wrapper",style:(_vm.style)},[_c('div',{ref:"pc-graph"})])])])},staticRenderFns: [],
-    mixins: [valueTransformationMixin, graphDataMixin],
+var svgGraph = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-block pc-block--graph"},[_c('div',{staticClass:"pc-graph-controls"},[_c('label',{directives:[{name:"show",rawName:"v-show",value:(!_vm.isNonInferiorityEnabled),expression:"!isNonInferiorityEnabled"}],staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"days-incrementalTrialsPerDay"},domProps:{"checked":_vm._q(_vm.graphType,"days-incrementalTrialsPerDay")},on:{"change":function($event){_vm.graphType="days-incrementalTrialsPerDay";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'days-incrementalTrialsPerDay'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('incrementalTrialsPerDay'))+" / "+_vm._s(_vm.getMetricDisplayName('days')))])]),_vm._v(" "),_c('label',{directives:[{name:"show",rawName:"v-show",value:(!_vm.isNonInferiorityEnabled),expression:"!isNonInferiorityEnabled"}],staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"samplePerDay-incrementalTrials"},domProps:{"checked":_vm._q(_vm.graphType,"samplePerDay-incrementalTrials")},on:{"change":function($event){_vm.graphType="samplePerDay-incrementalTrials";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'samplePerDay-incrementalTrials'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('incrementalTrials'))+" / "+_vm._s(_vm.getMetricDisplayName('samplePerDay')))])]),_vm._v(" "),_c('label',{directives:[{name:"show",rawName:"v-show",value:(!_vm.isNonInferiorityEnabled),expression:"!isNonInferiorityEnabled"}],staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"sample-impact"},domProps:{"checked":_vm._q(_vm.graphType,"sample-impact")},on:{"change":function($event){_vm.graphType="sample-impact";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'sample-impact'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('impact'))+" / "+_vm._s(_vm.getMetricDisplayName('sample')))])]),_vm._v(" "),_c('label',{staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"sample-power"},domProps:{"checked":_vm._q(_vm.graphType,"sample-power")},on:{"change":function($event){_vm.graphType="sample-power";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'sample-power'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('power'))+" / "+_vm._s(_vm.getMetricDisplayName('sample')))])]),_vm._v(" "),_c('label',{staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"samplePerDay-power"},domProps:{"checked":_vm._q(_vm.graphType,"samplePerDay-power")},on:{"change":function($event){_vm.graphType="samplePerDay-power";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'samplePerDay-power'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('power'))+" / "+_vm._s(_vm.getMetricDisplayName('samplePerDay')))])]),_vm._v(" "),_c('label',{directives:[{name:"show",rawName:"v-show",value:(!_vm.isNonInferiorityEnabled),expression:"!isNonInferiorityEnabled"}],staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"impact-power"},domProps:{"checked":_vm._q(_vm.graphType,"impact-power")},on:{"change":function($event){_vm.graphType="impact-power";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'impact-power'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('power'))+" / "+_vm._s(_vm.getMetricDisplayName('impact')))])])]),_vm._v(" "),_c('div',{ref:"pc-graph-size",staticClass:"pc-graph"},[_c('div',{ref:"pc-graph-wrapper",style:(_vm.style)},[_c('div',{ref:"pc-graph"})])])])},staticRenderFns: [],
+    mixins: [graphDataMixin],
     template: '#svg-graph',
-    props: ['testtype', 'sample', 'impact', 'power', 'base', 'falseposrate', 'sdrate', 'runtime', 'noninferiority'],
+    props: [],
     data () {
         return {
             width: 100,
@@ -5501,9 +5389,6 @@ var svgGraph = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c
                 height: `${height}px`
             }
         },
-        math () {
-            return statFormulas[this.testtype]
-        },
         graphX () {
             // 'sample'
             return this.graphType.split('-')[0]
@@ -5512,17 +5397,41 @@ var svgGraph = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c
             // 'power'
             return this.graphType.split('-')[1]
         },
+        math () {
+            return this.$store.getters.formulaToSolveProp
+        },
         isNonInferiorityEnabled () {
-            return this.noninferiority.enabled
+            return this.$store.state.nonInferiority.enabled
+        },
+        sample () {
+            return this.$store.state.attributes.sample
+        },
+        impact () {
+            return this.$store.state.attributes.impact
+        },
+        power () {
+            return this.$store.state.attributes.power
+        },
+        base () {
+            return this.$store.state.attributes.base
+        },
+        falsePosRate () {
+            return this.$store.state.attributes.falsePosRate
+        },
+        sdRate () {
+            return this.$store.state.attributes.sdRate
+        },
+        runtime () {
+            return this.$store.state.attributes.runtime
         }
     },
     methods: {
         getDefaultGraphOption () {
-            if (this.noninferiority.enabled) {
-                return 'sample-power'
-            } else {
-                return 'days-incrementalTrialsPerDay'
+            let result = 'days-incrementalTrialsPerDay';
+            if (this.$store.state.nonInferiority.enabled) {
+                result = 'sample-power';
             }
+            return result
         },
         resize () {
             let {width, paddingLeft, paddingRight} = window.getComputedStyle(this.$refs['pc-graph-size']);
@@ -5531,10 +5440,10 @@ var svgGraph = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c
             this.width = window.parseInt(width) - window.parseInt(paddingLeft) - window.parseInt(paddingRight);
             this.height = 220;
         },
-        createYList ({ amount, rate = 10,  cur }) { //rate of 10 and amount of 10 will reach from 0 to 100
+        createYList ({ amount, rate = 10, cur }) { //rate of 10 and amount of 10 will reach from 0 to 100
             let result = [];
 
-            for (let i = 0; i <= amount; i++) {
+            for (let i = 0; i <= amount; i += 1) {
                 let y = rate * i,
                     nextY = rate * (i + 1);
 
@@ -5569,7 +5478,7 @@ var svgGraph = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c
         },
         updateGraphData () {
 
-            let clonedValues = this.deepCloneObject(this.convertDisplayedValues()),
+            let clonedValues = this.deepCloneObject(this.$store.getters.convertDisplayedValues),
                 newData = this.deepCloneObject(dataDefault),
                 yList = this.getGraphYDataSet({amount: 10}),
                 curY = this.getCurrentYValue();
@@ -5597,23 +5506,6 @@ var svgGraph = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c
             this.chart.load({
                 columns: newData
             });
-        },
-        convertDisplayedValues () {
-            let { extractValue } = this,
-                { mu, opts, alternative } = this.noninferiority,
-                { sample, base, impact, falseposrate, power, sdrate } = this;
-
-            return {
-                mu,
-                opts,
-                alternative,
-                total_sample_size: extractValue('sample', sample),
-                base_rate: extractValue('base', base),
-                effect_size: extractValue('impact', impact),
-                alpha: extractValue('falsePosRate', falseposrate),
-                beta: 1 - extractValue('power', power), // power of 80%, beta is actually 20%
-                sd_rate: extractValue('falsePosRate', sdrate)
-            }
         },
         deepCloneObject (obj) {
             return JSON.parse(JSON.stringify(obj))
@@ -5727,14 +5619,6 @@ var svgGraph = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c
                     show: true
                 }
             },
-            grid: {
-                x: {
-                    show: true
-                },
-                y: {
-                    show: true
-                }
-            },
             axis: {
                 x: {
                     label:  this.updateXLabel(),
@@ -5830,29 +5714,28 @@ let validateFunctions = {
     };
 let validationCache = {};
 
-var pcBlockField = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return (_vm.enableedit)?_c('span',{staticClass:"pc-value-field-wrapper",class:_vm.fieldWrapperClasses,on:{"click":function($event){_vm.setFocus();}}},[_c('span',{staticClass:"pc-value-formatting pc-value--formatted",class:'pc-value-formatting-' + _vm.fieldprop,style:(_vm.fieldFormattedStyle),attrs:{"aria-hidden":"true","data-prefix":_vm.prefix,"data-suffix":_vm.suffix}},[_c('span',{ref:"pc-formatted-value",staticClass:"pc-value-display"},[_vm._v(_vm._s(_vm.formattedVal))])]),_vm._v(" "),_c('span',{staticClass:"pc-value-formatting",class:'pc-value-formatting-' + _vm.fieldprop,style:(_vm.fieldEditableStyle),attrs:{"data-prefix":_vm.prefix,"data-suffix":_vm.suffix}},[_c('span',{directives:[{name:"initialvalue",rawName:"v-initialvalue"}],ref:"pc-value",staticClass:"pc-value-display",attrs:{"data-test":_vm.isFocused,"contenteditable":!_vm.isreadonly},on:{"focus":function($event){_vm.setFocusStyle(true);},"blur":_vm.blur,"input":_vm.updateVal}})])]):_c('span',{staticClass:"pc-value-display pc-field-not-editable"},[_vm._v(" "+_vm._s(_vm.prefix)+" "),_c('strong',[_vm._v(_vm._s(_vm.formattedVal))]),_vm._v(" "+_vm._s(_vm.suffix)+" ")])},staticRenderFns: [],
+var pcBlockField = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return (_vm.enableEdit)?_c('span',{staticClass:"pc-value-field-wrapper",class:_vm.fieldWrapperClasses,on:{"click":function($event){_vm.setFocus();}}},[_c('span',{staticClass:"pc-value-formatting pc-value--formatted",class:'pc-value-formatting-' + _vm.fieldProp,style:(_vm.fieldFormattedStyle),attrs:{"aria-hidden":"true","data-prefix":_vm.prefix,"data-suffix":_vm.suffix}},[_c('span',{ref:"pc-formatted-value",staticClass:"pc-value-display"},[_vm._v(_vm._s(_vm.formattedVal))])]),_vm._v(" "),_c('span',{staticClass:"pc-value-formatting",class:'pc-value-formatting-' + _vm.fieldProp,style:(_vm.fieldEditableStyle),attrs:{"data-prefix":_vm.prefix,"data-suffix":_vm.suffix}},[_c('span',{directives:[{name:"initialvalue",rawName:"v-initialvalue"}],ref:"pc-value",staticClass:"pc-value-display",attrs:{"data-test":_vm.isFocused,"contenteditable":!_vm.isReadOnly},on:{"focus":function($event){_vm.setFocusStyle(true);},"blur":_vm.blur,"input":_vm.updateVal}})])]):_c('span',{staticClass:"pc-value-display pc-field-not-editable"},[_vm._v(" "+_vm._s(_vm.prefix)+" "),_c('strong',[_vm._v(_vm._s(_vm.formattedVal))]),_vm._v(" "+_vm._s(_vm.suffix)+" ")])},staticRenderFns: [],
     template: '#pc-block-field',
     props: [
-        'lockedfield',
-        'testtype',
-        'enableedit',
-        'isreadonly',
-        'fieldprop',
-        'fieldvalue',
+        'lockedField',
+        'enableEdit',
+        'isReadOnly',
+        'fieldProp',
+        'fieldValue',
         'prefix',
         'suffix',
-        'fieldfromblock'
+        'fieldFromBlock'
     ],
     data () {
         return {
-            isLockedFieldSet: (this.lockedfield || '').length > 0,
-            val: parseFloat(this.fieldvalue),
+            islockedFieldSet: (this.lockedField || '').length > 0,
+            val: parseFloat(this.fieldValue),
             isFocused: false,
         }
     },
     computed: {
         isLocked () {
-            return this.lockedfield && this.lockedfield == this.fieldprop
+            return this.lockedField && this.lockedField == this.fieldProp
         },
         formattedVal () {
             let result = this.val;
@@ -5884,9 +5767,9 @@ var pcBlockField = {render: function(){var _vm=this;var _h=_vm.$createElement;va
         fieldWrapperClasses () {
             let obj = {};
 
-            obj['pc-field--read-only'] = this.isreadonly;
+            obj['pc-field--read-only'] = this.isReadOnly;
             obj['pc-field--focused'] = this.isFocused;
-            obj['pc-field-' + this.fieldprop] = true;
+            obj['pc-field-' + this.fieldProp] = true;
 
             return obj
         },
@@ -5905,6 +5788,9 @@ var pcBlockField = {render: function(){var _vm=this;var _h=_vm.$createElement;va
             }
 
             return result
+        },
+        testType () {
+            return this.$store.state.attributes.testType
         }
     },
     methods: {
@@ -5916,7 +5802,7 @@ var pcBlockField = {render: function(){var _vm=this;var _h=_vm.$createElement;va
                 newValue;
 
             // remove commas
-            newValue = oldValue.replace(/\,/g, '');
+            newValue = oldValue.replace(/,/g, '');
 
             // try to extract numbers from it
             newValue = parseFloat(newValue);
@@ -5927,7 +5813,7 @@ var pcBlockField = {render: function(){var _vm=this;var _h=_vm.$createElement;va
 
         },
         updateVal () {
-            if (this.enableedit) {
+            if (this.enableEdit) {
                 let value = this.getSanitizedPcValue();
 
                 if (value != this.val) {
@@ -5936,7 +5822,7 @@ var pcBlockField = {render: function(){var _vm=this;var _h=_vm.$createElement;va
             }
         },
         formatDisplay () {
-            if (this.enableedit) {
+            if (this.enableEdit) {
                 this.$refs['pc-value'].textContent = this.formatNumberFields(this.getSanitizedPcValue());
             } else {
                 this.val = this.formatNumberFields(this.val);
@@ -5962,8 +5848,7 @@ var pcBlockField = {render: function(){var _vm=this;var _h=_vm.$createElement;va
             el.focus();
         },
         validateField (value) {
-            let {testtype} = this,
-                validateConfigList = this.getValidationConfig(),
+            let validateConfigList = this.getValidationConfig(),
                 isValid = true,
                 result = value;
 
@@ -5986,18 +5871,18 @@ var pcBlockField = {render: function(){var _vm=this;var _h=_vm.$createElement;va
             return result
         },
         getValidationConfig () {
-            let {fieldprop, testtype} = this,
+            let {fieldProp, testtype} = this,
                 validationTypeCategories,
                 result;
 
-            if (validationCache[testtype] && validationCache[testtype][fieldprop]) {
-                return validationCache[testtype][fieldprop]
+            if (validationCache[testtype] && validationCache[testtype][fieldProp]) {
+                return validationCache[testtype][fieldProp]
             }
 
             validationTypeCategories = [validateFunctions['*'], validateFunctions[testtype]].filter(Boolean);
 
             result = validationTypeCategories.reduce((prev, cur) => {
-                let {fn, defaultVal} = cur[fieldprop] || {};
+                let {fn, defaultVal} = cur[fieldProp] || {};
 
                 if (typeof fn != 'undefined') {
                     prev.fns.push(fn);
@@ -6010,7 +5895,7 @@ var pcBlockField = {render: function(){var _vm=this;var _h=_vm.$createElement;va
 
             //cacheing
             validationCache[testtype] = validationCache[testtype] || {};
-            validationCache[testtype][fieldprop] = result;
+            validationCache[testtype][fieldProp] = result;
 
             return result
         },
@@ -6033,43 +5918,36 @@ var pcBlockField = {render: function(){var _vm=this;var _h=_vm.$createElement;va
 
     },
     watch: {
-        isFocused (newValue, oldValue) {
-            let el = this.$refs['pc-value'];
-            if (newValue == true && newValue != oldValue) {
-                this.placeCaretAtEnd(el);
-            }
-        },
         val (newValue, oldValue) {
-            newValue = parseFloat(this.formatNumberFields(newValue));
-            oldValue = parseFloat(this.formatNumberFields(oldValue));
+            let newVal = parseFloat(this.formatNumberFields(newValue)),
+                oldVal = parseFloat(this.formatNumberFields(oldValue));
 
-            if (this.isreadonly || !this.isFocused || (newValue == oldValue)) {
+            if (this.isReadOnly || !this.isFocused || (newVal == oldVal)) {
                 return;
             }
 
             // updating calculations
-            this.$emit('field:change', {
-                prop: this.fieldprop,
-                value: newValue || 0
-
+            this.$store.dispatch('field:change', {
+                prop: this.fieldProp,
+                value: newVal || 0
             });
         },
-        fieldvalue () {
+        fieldValue () {
             // in case some input field on the same block changes the main math values
             // we need to update the input fiel
             let anotherFieldInBlockIsUpdating = !this.isFocused;
-            if (!this.isreadonly && !anotherFieldInBlockIsUpdating) {
+            if (!this.isReadOnly && !anotherFieldInBlockIsUpdating) {
                 return
             }
 
-            this.val = this.fieldvalue;
-            if (this.enableedit) {
+            this.val = this.fieldValue;
+            if (this.enableEdit) {
                 this.$refs['pc-value'].textContent = this.val;
             }
         },
         isFocused (newValue) {
             this.$emit('update:focus', {
-                fieldProp: this.fieldfromblock || this.fieldprop,
+                fieldProp: this.fieldFromBlock || this.fieldProp,
                 value: newValue
             });
         }
@@ -6084,19 +5962,21 @@ var pcBlockField = {render: function(){var _vm=this;var _h=_vm.$createElement;va
 };
 
 var pcSvgChain = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('svg',{staticClass:"pc-svg-chain-icon",style:(_vm.svgBgLine),attrs:{"width":"100%","height":"59px","viewBox":`0 0 ${_vm.svgBoxWidth} 59`,"version":"1.1","xmlns":"http://www.w3.org/2000/svg","xmlns:xlink":"http://www.w3.org/1999/xlink","aria-hidden":"true"}},[_c('g',{attrs:{"id":"Power-Calculator","transform":"translate(-811.000000, -485.000000)"}},[_c('g',{attrs:{"transform":"translate(676.000000, 327.000000)"}},[_c('g',{attrs:{"id":"Chain","transform":"translate(132.000000, 158.000000)"}},[_c('path',{attrs:{"d":"M12.1680332,24.5 L14.5,24.5 C16.709139,24.5 18.5,26.290861 18.5,28.5 L18.5,29.5 C18.5,31.709139 16.709139,33.5 14.5,33.5 L9.5,33.5 C7.290861,33.5 5.5,31.709139 5.5,29.5 L5.5,28.5 C6.20701437,28.5 6.87368104,28.5 7.5,28.5 L7.5,29.5 C7.5,30.6045695 8.3954305,31.5 9.5,31.5 L14.5,31.5 C15.6045695,31.5 16.5,30.6045695 16.5,29.5 L16.5,28.5 C16.5,27.3954305 15.6045695,26.5 14.5,26.5 L13.7237764,26.5 C13.463452,25.7924504 12.944871,25.1257837 12.1680332,24.5 Z","id":"Rectangle-5","fill":_vm.svgFillColor,"fill-rule":"nonzero","transform":"translate(12.000000, 29.000000) scale(-1, -1) translate(-12.000000, -29.000000) "}}),_vm._v(" "),_c('path',{attrs:{"d":"M18.1680332,24.5 L20.5,24.5 C22.709139,24.5 24.5,26.290861 24.5,28.5 L24.5,29.5 C24.5,31.709139 22.709139,33.5 20.5,33.5 L15.5,33.5 C13.290861,33.5 11.5,31.709139 11.5,29.5 L11.5,28.5 C12.2070144,28.5 12.873681,28.5 13.5,28.5 L13.5,29.5 C13.5,30.6045695 14.3954305,31.5 15.5,31.5 L20.5,31.5 C21.6045695,31.5 22.5,30.6045695 22.5,29.5 L22.5,28.5 C22.5,27.3954305 21.6045695,26.5 20.5,26.5 L19.7237764,26.5 C19.463452,25.7924504 18.944871,25.1257837 18.1680332,24.5 Z","id":"Rectangle-5","fill":_vm.svgFillColor,"fill-rule":"nonzero"}})])])])])},staticRenderFns: [],
-    props: ['calculateprop', 'fieldfromblock'],
+    props: ['fieldFromBlock'],
     data () {
         return {
             svgBoxWidth: 26
         }
     },
     computed: {
-
+        calculateProp () {
+            return this.$store.state.attributes.calculateProp
+        },
         svgFillColor () {
-            return this.calculateprop == this.fieldfromblock ? '#E2B634' : '#C1CFD8'
+            return this.calculateProp == this.fieldFromBlock ? '#E2B634' : '#C1CFD8'
         },
         svgBgColor () {
-            return this.calculateprop == this.fieldfromblock ? '#FEF1CB' : '#F0F0F0'
+            return this.calculateProp == this.fieldFromBlock ? '#FEF1CB' : '#F0F0F0'
         },
         svgBgLine () {
             let { svgFillColor, svgBgColor, svgBoxWidth } = this,
@@ -6127,21 +6007,27 @@ var pcSvgChain = {render: function(){var _vm=this;var _h=_vm.$createElement;var 
 };
 
 var pcBlock = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div')},staticRenderFns: [],
-    mixins: [valueTransformationMixin],
-    props: ['calculateprop', 'fieldfromblock'],
+    props: ['fieldFromBlock'],
     data () {
         return {
-            isCalculated: this.calculateprop == this.fieldfromblock,
+            // isCalculated: this.calculateProp == this.fieldFromBlock,
         }
     },
-    watch: {
-        calculateprop () {
-            this.isCalculated = this.calculateprop == this.fieldfromblock;
-        },
-        isCalculated (newValue) {
-            if (newValue === true) {
-                this.$emit('update:calculateprop', this.fieldfromblock);
+    computed: {
+        isCalculated: {
+            get () {
+                return this.$store.state.attributes.calculateProp == this.fieldFromBlock
+            },
+            set () {
+                this.$store.dispatch('update:calculateprop', {value: this.fieldFromBlock});
             }
+        },
+
+        calculateProp () {
+            return this.$store.state.attributes.calculateProp
+        },
+        testType () {
+            return this.$store.state.attributes.testType
         }
     },
     components: {
@@ -6150,73 +6036,31 @@ var pcBlock = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=
     }
 };
 
-var sampleComp = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-block pc-block--sample",class:{'pc-block-focused': _vm.isblockfocused == 'sample', 'pc-block-to-calculate': _vm.calculateprop == 'sample'}},[_c('pc-svg-chain',{attrs:{"calculateprop":_vm.calculateprop,"fieldfromblock":_vm.fieldfromblock}}),_vm._v(" "),_c('label',{staticClass:"pc-calc-radio pc-calc-radio--sample",class:{'pc-calc-radio--active': _vm.isCalculated},attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.isCalculated),expression:"isCalculated"}],attrs:{"type":"radio"},domProps:{"value":true,"checked":_vm._q(_vm.isCalculated,true)},on:{"change":function($event){_vm.isCalculated=true;}}}),_vm._v(" "+_vm._s(_vm.isCalculated ? 'Calculating' : 'Calculate')+" ")]),_vm._v(" "),_c('div',{staticClass:"pc-header"},[_vm._v(" Sample Size ")]),_vm._v(" "),_c('ul',{staticClass:"pc-inputs"},[_c('li',{staticClass:"pc-input-item pc-input-left"},[_c('label',[_vm._m(0),_vm._v(" "),_c('pc-block-field',{attrs:{"fieldprop":"totalSample","fieldvalue":_vm.totalSample,"testtype":_vm.testtype,"isreadonly":_vm.calculateprop == 'sample',"enableedit":_vm.enableedit},on:{"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}})],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right pc-value-field--lockable",class:_vm.getLockedStateClass('visitorsPerDay')},[_c('label',[_vm._m(1),_vm._v(" "),_c('pc-block-field',{attrs:{"fieldprop":"visitorsPerDay","fieldvalue":_vm.visitorsPerDay,"testtype":_vm.testtype,"isreadonly":_vm.lockedField == 'visitorsPerDay',"isblockfocused":_vm.isblockfocused,"enableedit":_vm.enableedit,"lockedfield":_vm.lockedField,"lock":_vm.lockedField},on:{"update:lock":function($event){_vm.lockedField=$event;},"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}})],1),_vm._v(" "),_c('button',{staticClass:"pc-swap-button",attrs:{"type":"button"},on:{"click":_vm.switchLockedField}},[_c('svg',{attrs:{"width":"20px","height":"20px","viewBox":"0 0 20 20","version":"1.1","xmlns":"http://www.w3.org/2000/svg","xmlns:xlink":"http://www.w3.org/1999/xlink"}},[_c('desc',[_vm._v("Lock "+_vm._s(_vm.lockedField == 'days' ? 'number of days' : 'visitors per day'))]),_vm._v(" "),_c('defs',[_c('circle',{attrs:{"id":"path-1","cx":"13","cy":"13","r":"10"}}),_vm._v(" "),_c('filter',{attrs:{"x":"-5.0%","y":"-5.0%","width":"110.0%","height":"110.0%","filterUnits":"objectBoundingBox","id":"filter-2"}},[_c('feGaussianBlur',{attrs:{"stdDeviation":"0.5","in":"SourceAlpha","result":"shadowBlurInner1"}}),_vm._v(" "),_c('feOffset',{attrs:{"dx":"0","dy":"1","in":"shadowBlurInner1","result":"shadowOffsetInner1"}}),_vm._v(" "),_c('feComposite',{attrs:{"in":"shadowOffsetInner1","in2":"SourceAlpha","operator":"arithmetic","k2":"-1","k3":"1","result":"shadowInnerInner1"}}),_vm._v(" "),_c('feColorMatrix',{attrs:{"values":"0 0 0 0 0.489716199   0 0 0 0 0.489716199   0 0 0 0 0.489716199  0 0 0 0.5 0","type":"matrix","in":"shadowInnerInner1"}})],1)]),_vm._v(" "),_c('g',{attrs:{"id":"Page-1","stroke":"none","stroke-width":"1","fill":"none","fill-rule":"evenodd"}},[_c('g',{attrs:{"id":"Power-Calculator","transform":"translate(-550.000000, -522.000000)"}},[_c('g',{attrs:{"id":"Switcher","transform":"translate(547.000000, 519.000000)"}},[_c('g',{attrs:{"id":"Oval-3"}},[_c('use',{attrs:{"fill":"#EFEFEF","fill-rule":"evenodd","xlink:href":"#path-1"}}),_vm._v(" "),_c('use',{attrs:{"fill":"black","fill-opacity":"1","filter":"url(#filter-2)","xlink:href":"#path-1"}})]),_vm._v(" "),_c('g',{attrs:{"id":"Group","stroke-width":"1","fill-rule":"evenodd","transform":"translate(7.000000, 7.000000)","fill":"#155EAB"}},[_c('path',{attrs:{"d":"M4.5,4.20404051 L4.5,9.9127641 L2.5,9.9127641 L2.5,4.20404051 L0.5,4.20404051 L3.5,0.70872359 L6.5,4.20404051 L4.5,4.20404051 Z","id":"Combined-Shape"}}),_vm._v(" "),_c('path',{attrs:{"d":"M9.5,5.49531692 L9.5,11.2040405 L7.5,11.2040405 L7.5,5.49531692 L5.5,5.49531692 L8.5,2 L11.5,5.49531692 L9.5,5.49531692 Z","id":"Combined-Shape","transform":"translate(8.500000, 6.602020) scale(1, -1) translate(-8.500000, -6.602020) "}})])])])])])])]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right-swap pc-value-field--lockable",class:_vm.getLockedStateClass('days')},[_c('label',[_c('pc-block-field',{attrs:{"fieldprop":"days","prefix":"","suffix":" days","fieldvalue":_vm.days,"testtype":_vm.testtype,"isreadonly":_vm.lockedField == 'days',"isblockfocused":_vm.isblockfocused,"enableedit":_vm.enableedit,"lockedfield":_vm.lockedField,"lock":_vm.lockedField,"aria-label":"Days"},on:{"update:lock":function($event){_vm.lockedField=$event;},"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}})],1)])])],1)},staticRenderFns: [function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('span',{staticClass:"pc-input-title"},[_vm._v("Total # "),_c('small',{staticClass:"pc-input-sub-title"},[_vm._v("of visitors")])])},function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('span',{staticClass:"pc-input-title"},[_vm._v("Daily # "),_c('small',{staticClass:"pc-input-sub-title"},[_vm._v("of visitors")])])}],_scopeId: 'data-v-297fe272',
-    props: ['runtime', 'testtype', 'lockedfield', 'calculateprop', 'enableedit', 'isblockfocused', 'sample', 'calculateprop', 'fieldfromblock'],
+var sampleComp = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-block pc-block--sample",class:{'pc-block-focused': _vm.isBlockFocused == 'sample', 'pc-block-to-calculate': _vm.calculateProp == 'sample'}},[_c('pc-svg-chain',{attrs:{"calculateProp":_vm.calculateProp,"fieldFromBlock":_vm.fieldFromBlock}}),_vm._v(" "),_c('label',{staticClass:"pc-calc-radio pc-calc-radio--sample",class:{'pc-calc-radio--active': _vm.isCalculated},attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.isCalculated),expression:"isCalculated"}],attrs:{"type":"radio"},domProps:{"value":true,"checked":_vm._q(_vm.isCalculated,true)},on:{"change":function($event){_vm.isCalculated=true;}}}),_vm._v(" "+_vm._s(_vm.isCalculated ? 'Calculating' : 'Calculate')+" ")]),_vm._v(" "),_c('div',{staticClass:"pc-header"},[_vm._v(" Sample Size ")]),_vm._v(" "),_c('ul',{staticClass:"pc-inputs"},[_c('li',{staticClass:"pc-input-item pc-input-left"},[_c('label',[_vm._m(0),_vm._v(" "),_c('pc-block-field',{attrs:{"fieldProp":"sample","fieldValue":_vm.sample,"isReadOnly":_vm.calculateProp == 'sample',"enableEdit":_vm.enableEdit},on:{"update:focus":_vm.updateFocus}})],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right pc-value-field--lockable",class:_vm.getLockedStateClass('visitorsPerDay')},[_c('label',[_vm._m(1),_vm._v(" "),_c('pc-block-field',{attrs:{"fieldProp":"visitorsPerDay","fieldValue":_vm.visitorsPerDay,"isReadOnly":_vm.lockedField == 'visitorsPerDay',"isBlockFocused":_vm.isBlockFocused,"enableEdit":_vm.enableEdit,"lockedField":_vm.lockedField},on:{"update:focus":_vm.updateFocus}})],1),_vm._v(" "),_c('button',{staticClass:"pc-swap-button",attrs:{"type":"button"},on:{"click":_vm.switchLockedField}},[_c('svg',{attrs:{"width":"20px","height":"20px","viewBox":"0 0 20 20","version":"1.1","xmlns":"http://www.w3.org/2000/svg","xmlns:xlink":"http://www.w3.org/1999/xlink"}},[_c('desc',[_vm._v("Lock "+_vm._s(_vm.lockedField == 'days' ? 'number of days' : 'visitors per day'))]),_vm._v(" "),_c('defs',[_c('circle',{attrs:{"id":"path-1","cx":"13","cy":"13","r":"10"}}),_vm._v(" "),_c('filter',{attrs:{"x":"-5.0%","y":"-5.0%","width":"110.0%","height":"110.0%","filterUnits":"objectBoundingBox","id":"filter-2"}},[_c('feGaussianBlur',{attrs:{"stdDeviation":"0.5","in":"SourceAlpha","result":"shadowBlurInner1"}}),_vm._v(" "),_c('feOffset',{attrs:{"dx":"0","dy":"1","in":"shadowBlurInner1","result":"shadowOffsetInner1"}}),_vm._v(" "),_c('feComposite',{attrs:{"in":"shadowOffsetInner1","in2":"SourceAlpha","operator":"arithmetic","k2":"-1","k3":"1","result":"shadowInnerInner1"}}),_vm._v(" "),_c('feColorMatrix',{attrs:{"values":"0 0 0 0 0.489716199   0 0 0 0 0.489716199   0 0 0 0 0.489716199  0 0 0 0.5 0","type":"matrix","in":"shadowInnerInner1"}})],1)]),_vm._v(" "),_c('g',{attrs:{"id":"Page-1","stroke":"none","stroke-width":"1","fill":"none","fill-rule":"evenodd"}},[_c('g',{attrs:{"id":"Power-Calculator","transform":"translate(-550.000000, -522.000000)"}},[_c('g',{attrs:{"id":"Switcher","transform":"translate(547.000000, 519.000000)"}},[_c('g',{attrs:{"id":"Oval-3"}},[_c('use',{attrs:{"fill":"#EFEFEF","fill-rule":"evenodd","xlink:href":"#path-1"}}),_vm._v(" "),_c('use',{attrs:{"fill":"black","fill-opacity":"1","filter":"url(#filter-2)","xlink:href":"#path-1"}})]),_vm._v(" "),_c('g',{attrs:{"id":"Group","stroke-width":"1","fill-rule":"evenodd","transform":"translate(7.000000, 7.000000)","fill":"#155EAB"}},[_c('path',{attrs:{"d":"M4.5,4.20404051 L4.5,9.9127641 L2.5,9.9127641 L2.5,4.20404051 L0.5,4.20404051 L3.5,0.70872359 L6.5,4.20404051 L4.5,4.20404051 Z","id":"Combined-Shape"}}),_vm._v(" "),_c('path',{attrs:{"d":"M9.5,5.49531692 L9.5,11.2040405 L7.5,11.2040405 L7.5,5.49531692 L5.5,5.49531692 L8.5,2 L11.5,5.49531692 L9.5,5.49531692 Z","id":"Combined-Shape","transform":"translate(8.500000, 6.602020) scale(1, -1) translate(-8.500000, -6.602020) "}})])])])])])])]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right-swap pc-value-field--lockable",class:_vm.getLockedStateClass('days')},[_c('label',[_c('pc-block-field',{attrs:{"fieldProp":"runtime","prefix":"","suffix":" days","fieldValue":_vm.runtime,"isReadOnly":_vm.lockedField == 'days',"isBlockFocused":_vm.isBlockFocused,"enableEdit":_vm.enableEdit,"lockedField":_vm.lockedField,"aria-label":"Days"},on:{"update:focus":_vm.updateFocus}})],1)])])],1)},staticRenderFns: [function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('span',{staticClass:"pc-input-title"},[_vm._v("Total # "),_c('small',{staticClass:"pc-input-sub-title"},[_vm._v("of visitors")])])},function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('span',{staticClass:"pc-input-title"},[_vm._v("Daily # "),_c('small',{staticClass:"pc-input-sub-title"},[_vm._v("of visitors")])])}],_scopeId: 'data-v-297fe272',
+    props: ['enableEdit', 'isBlockFocused', 'fieldFromBlock'],
     template: '#sample-comp',
     extends: pcBlock,
     data () {
         return {
-            days: this.runtime,
-            visitorsPerDay: this.calculateVisitorsPerDay(this.sample, this.runtime),
             variants: 2,
-            totalSample: this.sample,
-            enableEdit: false,
-            focusedBlock: '',
-            lockedField: this.lockedfield
+            focusedBlock: ''
+        }
+    },
+    computed: {
+        sample () {
+            return this.$store.state.attributes.sample
+        },
+        visitorsPerDay () {
+            return this.$store.state.attributes.visitorsPerDay
+        },
+        runtime () {
+            return this.$store.state.attributes.runtime
+        },
+        lockedField () {
+            return this.$store.state.attributes.lockedField
         }
     },
     methods: {
-        calculateVisitorsPerDay (sample, days) {
-            let result =  Math.floor(window.parseInt(sample) / days),
-                isInvalid = isNaN(result);
-
-            result = isInvalid ? '-' : result;
-
-            // have to make this available to the application but
-            // need to keep in mind this won't be changed outside this component
-            !isInvalid && this.$emit('readonly:visitorsPerDay', result);
-
-            return isNaN(result) ? '-' : result;
-        },
-        calculateDays(sample, visitorsPerDay) {
-            let result =  Math.ceil(window.parseInt(sample) / visitorsPerDay);
-            return isNaN(result) ? '-' : result;
-        },
-        enableInput () {
-            this.$emit('edit:update', {prop: 'sample'});
-        },
-        updateFields ({prop, value}) {
-
-            if (prop == 'days') {
-                this.days = value;
-            } else if (prop == 'visitorsPerDay') {
-                this.visitorsPerDay = value;
-            }
-
-            if (this.calculateprop == 'sample') {
-                if (prop == 'visitorsPerDay') {
-                    this.days = this.calculateDays(this.totalSample, this.visitorsPerDay);
-                } else if (prop == 'days') {
-                    this.visitorsPerDay = this.calculateVisitorsPerDay(this.totalSample, this.days);
-                }
-            } else {
-                this.updateTotalSampleField({prop, value});
-            }
-
-        },
-        updateTotalSampleField ({prop, value}) {
-            let totalSample = 0;
-
-            if (prop == 'totalSample') {
-                totalSample = value;
-            } else if (prop == 'visitorsPerDay') {
-                totalSample = value * this.days;
-            } else if (prop == 'days') {
-                totalSample = this.visitorsPerDay * value;
-            }
-
-            this.totalSample = window.parseInt(totalSample || 0);
-        },
         updateFocus ({fieldProp, value}) {
 
             if (this.focusedBlock == fieldProp && value === false) {
@@ -6226,206 +6070,69 @@ var sampleComp = {render: function(){var _vm=this;var _h=_vm.$createElement;var 
             }
 
             this.$emit('update:focus', {
-                fieldProp: this.fieldfromblock,
+                fieldProp: this.fieldFromBlock,
                 value: value
             });
         },
-        updateSampleMainField () {
-            this.$emit('field:change', {
-                prop: 'sample',
-                value: this.totalSample
-            });
-        },
         switchLockedField () {
-            this.lockedField = this.lockedField == 'days' ? 'visitorsPerDay' : 'days';
+            this.$store.dispatch('switch:lockedfield');
         },
         getLockedStateClass (param) {
             return this.lockedField == param ? 'pc-value-field--locked' : 'pc-value-field--unlocked'
         }
-    },
-    watch: {
-        sample (newValue) {
-            this.totalSample = newValue;
-        },
-        totalSample (newValue) {
-            if (this.lockedField == 'days') {
-                this.days = this.calculateDays(newValue, this.visitorsPerDay);
-            } else {
-                this.visitorsPerDay = this.calculateVisitorsPerDay(newValue, this.days);
-            }
-
-            this.updateSampleMainField();
-        },
-        days (newValue) {
-            this.$emit('update:runtime', newValue);
-        },
-        lockedField (newValue) {
-            this.$emit('update:lockedfield', newValue);
-        },
-        visitorsPerDay (newValue) {
-            const isInvalid = isNaN(newValue);
-
-            // have to make this available to the application but
-            // need to keep in mind this won't be changed outside this component
-            !isInvalid && this.$emit('readonly:visitorsPerDay', newValue);
-        }
     }
 };
 
-var impactComp = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-block pc-block--impact",class:{'pc-block-focused': _vm.isblockfocused, 'pc-block-to-calculate': _vm.calculateprop == 'impact'}},[_c('pc-svg-chain',{attrs:{"calculateprop":_vm.calculateprop,"fieldfromblock":_vm.fieldfromblock}}),_vm._v(" "),_c('label',{staticClass:"pc-calc-radio pc-calc-radio--impact",class:{'pc-calc-radio--active': _vm.isCalculated},attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.isCalculated),expression:"isCalculated"}],attrs:{"type":"radio"},domProps:{"value":true,"checked":_vm._q(_vm.isCalculated,true)},on:{"change":function($event){_vm.isCalculated=true;}}}),_vm._v(" "+_vm._s(_vm.isCalculated ? 'Calculating' : 'Calculate')+" ")]),_vm._v(" "),_c('div',{staticClass:"pc-header"},[_vm._v(" Impact ")]),_vm._v(" "),_c('ul',{staticClass:"pc-inputs"},[_c('li',{staticClass:"pc-input-item pc-input-left"},[_c('label',[_c('span',{staticClass:"pc-input-title"},[_vm._v("Relative")]),_vm._v(" "),_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"prefix":_vm.isnoninferiority ? '' : '±',"suffix":"%","fieldprop":"relativeImpact","fieldvalue":_vm.relativeImpact,"testtype":_vm.testType,"isreadonly":_vm.calculateprop == 'impact',"isblockfocused":_vm.isblockfocused,"enableedit":_vm.enableedit},on:{"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}})],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right"},[_c('label',[_c('span',{staticClass:"pc-input-title"},[_vm._v("Absolute")]),_vm._v(" "),_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"fieldprop":"impactByMetricValue","suffix":_vm.testtype == 'gTest' ? '%' : '',"fieldvalue":_vm.impactByMetricDisplay,"testtype":_vm.testtype,"isreadonly":_vm.isReadOnly,"isblockfocused":_vm.isblockfocused,"enableedit":_vm.enableedit,"aria-label":"visitors with goals"},on:{"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v(" going from "+_vm._s(_vm.addPercentToString(_vm.base))+" to either "+_vm._s(_vm.addPercentToString(_vm.impactByMetricMinDisplay))+" or "+_vm._s(_vm.addPercentToString(_vm.impactByMetricMaxDisplay))+" ")])],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-bottom-left"},[_c('label',[_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"fieldprop":"impactByVisitors","fieldvalue":_vm.impactByVisitorsDisplay,"testtype":_vm.testtype,"isreadonly":_vm.isReadOnly,"isblockfocused":_vm.isblockfocused,"enableedit":_vm.enableedit && _vm.calculateprop != 'sample'},on:{"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v(" "+_vm._s(_vm.testtype == 'gTest' ? ' Incremental trials': ' Incremental change in the metric')+" ")])],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-bottom-right"},[_c('label',[_c('pc-block-field',{attrs:{"fieldprop":"impactByVisitorsPerDay","fieldvalue":_vm.impactByVisitorsPerDayDisplay,"testtype":_vm.testtype,"isreadonly":_vm.isReadOnly,"isblockfocused":_vm.isblockfocused,"enableedit":_vm.enableedit && _vm.calculateprop != 'sample'},on:{"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v(" "+_vm._s(_vm.testtype == 'gTest' ? ' Incremental trials per day': ' Incremental change in the metric per day')+" ")])],1)])])],1)},staticRenderFns: [],
+var impactComp = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-block pc-block--impact",class:{'pc-block-focused': _vm.isBlockFocused, 'pc-block-to-calculate': _vm.calculateProp == 'impact'}},[_c('pc-svg-chain',{attrs:{"calculateProp":_vm.calculateProp,"fieldFromBlock":_vm.fieldFromBlock}}),_vm._v(" "),_c('label',{staticClass:"pc-calc-radio pc-calc-radio--impact",class:{'pc-calc-radio--active': _vm.isCalculated},attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.isCalculated),expression:"isCalculated"}],attrs:{"type":"radio"},domProps:{"value":true,"checked":_vm._q(_vm.isCalculated,true)},on:{"change":function($event){_vm.isCalculated=true;}}}),_vm._v(" "+_vm._s(_vm.isCalculated ? 'Calculating' : 'Calculate')+" ")]),_vm._v(" "),_c('div',{staticClass:"pc-header"},[_vm._v(" Impact ")]),_vm._v(" "),_c('ul',{staticClass:"pc-inputs"},[_c('li',{staticClass:"pc-input-item pc-input-left"},[_c('label',[_c('span',{staticClass:"pc-input-title"},[_vm._v("Relative")]),_vm._v(" "),_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"prefix":_vm.isnoninferiority ? '' : '±',"suffix":"%","fieldProp":"impact","fieldValue":_vm.impact,"testType":_vm.testType,"isReadOnly":_vm.calculateProp == 'impact',"isBlockFocused":_vm.isBlockFocused,"enableEdit":_vm.enableEdit},on:{"update:focus":_vm.updateFocus}})],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right"},[_c('label',[_c('span',{staticClass:"pc-input-title"},[_vm._v("Absolute")]),_vm._v(" "),_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"fieldProp":"impactByMetricValue","suffix":_vm.testType == 'gTest' ? '%' : '',"fieldValue":_vm.impactByMetricDisplay,"testType":_vm.testType,"isReadOnly":_vm.isReadOnly,"isBlockFocused":_vm.isBlockFocused,"enableEdit":_vm.enableEdit,"aria-label":"visitors with goals"},on:{"update:focus":_vm.updateFocus}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v(" going from "+_vm._s(_vm.addPercentToString(_vm.base))+" to either "+_vm._s(_vm.addPercentToString(_vm.impactByMetricMinDisplay))+" or "+_vm._s(_vm.addPercentToString(_vm.impactByMetricMaxDisplay))+" ")])],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-bottom-left"},[_c('label',[_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"fieldProp":"impactByVisitors","fieldValue":_vm.impactByVisitorsDisplay,"testType":_vm.testType,"isReadOnly":_vm.isReadOnly,"isBlockFocused":_vm.isBlockFocused,"enableEdit":_vm.enableEdit && _vm.calculateProp != 'sample'},on:{"update:focus":_vm.updateFocus}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v(" "+_vm._s(_vm.testType == 'gTest' ? ' Incremental trials': ' Incremental change in the metric')+" ")])],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-bottom-right"},[_c('label',[_c('pc-block-field',{attrs:{"fieldProp":"impactByVisitorsPerDay","fieldValue":_vm.impactByVisitorsPerDayDisplay,"testType":_vm.testType,"isReadOnly":_vm.isReadOnly,"isBlockFocused":_vm.isBlockFocused,"enableEdit":_vm.enableEdit && _vm.calculateProp != 'sample'},on:{"update:focus":_vm.updateFocus}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v(" "+_vm._s(_vm.testType == 'gTest' ? ' Incremental trials per day': ' Incremental change in the metric per day')+" ")])],1)])])],1)},staticRenderFns: [],
     extends: pcBlock,
     template: '#impact-comp',
-    props: ['view', 'testtype', 'enableedit', 'calculateprop', 'fieldfromblock', 'isblockfocused', 'testtype', 'isnoninferiority'],
+    props: ['enableEdit', 'fieldFromBlock', 'isBlockFocused', 'isnoninferiority'],
     data () {
         return {
-            // impactByMetric: {
-            //     value: 0.75,
-            //     min: 18,
-            //     max: 50
-            // }
-            impactByMetricMin: this.getImpactByMetric('min'),
-            impactByMetricMax: this.getImpactByMetric('max'),
-            impactByMetricValue: this.getImpactByMetric(),
-            impactByVisitors: this.getImpactByVisitor(),
-            impactByVisitorsPerDay: this.getImpactByVisitorsPerDay(),
-            enableEdit: false,
-            focusedBlock: '',
-            relativeImpact: this.view.impact
+            focusedBlock: ''
         }
     },
     computed: {
         days () {
-            return this.view.runtime
+            return this.$store.state.attributes.runtime
         },
         base () {
-            return this.view.base
+            return this.$store.state.attributes.base
         },
         sample () {
-            return this.view.sample
+            return this.$store.state.attributes.sample
         },
         impact () {
-            return this.view.impact
+            return this.$store.state.attributes.impact
         },
-
+        testType () {
+            return this.$store.state.attributes.testType
+        },
         isReadOnly () {
-            return this.calculateprop == 'impact'
+            return this.calculateProp == 'impact'
         },
         impactByMetricDisplay () {
-            return this.displayValue('impactByMetricValue', this.impactByMetricValue);
+            return this.$store.getters.impactByMetricDisplay
         },
         impactByMetricMinDisplay () {
-            return this.displayValue('impactByMetricValue', this.impactByMetricMin);
+            return this.$store.getters.impactByMetricMinDisplay
         },
         impactByMetricMaxDisplay () {
-            return this.displayValue('impactByMetricValue', this.impactByMetricMax);
+            return this.$store.getters.impactByMetricMaxDisplay
         },
         impactByVisitorsDisplay () {
-            return this.displayValue('impactByVisitors', this.impactByVisitors)
+            return this.$store.getters.impactByVisitorsDisplay
         },
         impactByVisitorsPerDayDisplay () {
-            return this.displayValue('impactByVisitorsPerDay', this.impactByVisitorsPerDay)
+            return this.$store.getters.impactByVisitorsPerDayDisplay
         }
     },
     watch: {
         isReadOnly () {
-            return this.calculateprop == 'impact'
-        },
-        base () {
-            this.updateData();
-        },
-        impact () {
-            this.relativeImpact = this.impact;
-        },
-        sample () {
-            this.updateData();
-        },
-        days () {
-            this.impactByVisitorsPerDay = this.getImpactByVisitorsPerDay();
-        },
-        impactByMetricValue () {
-            // keeping all math related stuff in statFormulas
-            let impactByMetricObj = statFormulas.getAbsoluteImpactInMetricHash({
-                base_rate: this.extractValue('base', this.base),
-                effect_size: this.extractValue('impact', this.impact)
-            });
-
-            // this needs to be consistent;
-            // they should never be changes manually;
-            this.impactByMetricMin = impactByMetricObj.min;
-            this.impactByMetricMax = impactByMetricObj.max;
-        },
-        relativeImpact () {
-            if (this.isReadOnly) {
-                this.updateData();
-            }
+            return this.calculateProp == 'impact'
         }
     },
     methods: {
-        getImpactByMetric (prop = 'value') {
-            let impactByMetricObj = statFormulas.getAbsoluteImpactInMetricHash({
-                base_rate: this.extractValue('base', this.view.base),
-                effect_size: this.extractValue('impact', this.view.impact)
-            });
-
-            return impactByMetricObj[prop];
-        },
-        getImpactByVisitor () {
-            return statFormulas.getAbsoluteImpactInVisitors({
-                total_sample_size: this.extractValue('sample', this.view.sample),
-                base_rate: this.extractValue('base', this.view.base),
-                effect_size: this.extractValue('impact', this.view.impact)
-            })
-        },
-        getImpactByVisitorsPerDay () {
-            return Math.floor(this.getImpactByVisitor() / this.view.runtime);
-        },
-        updateData () {
-            this.impactByMetricValue = this.getImpactByMetric();
-            this.impactByVisitors = this.getImpactByVisitor();
-            this.impactByVisitorsPerDay = this.getImpactByVisitorsPerDay();
-        },
-        enableInput () {
-            this.$emit('edit:update', {prop: 'impact'});
-        },
-        updateFields ({prop, value}) {
-
-            if (isNaN(value)) {
-                return;
-            }
-
-            this[prop] = this.extractValue(prop, value);
-
-            let {impact, base, sample} = this,
-                realValue = this[prop],
-
-                relative;
-
-            if (prop == 'impactByMetricValue') {
-                // this.impactByVisitors = this.getImpactByVisitor();
-                relative = statFormulas.getRelativeImpactFromAbsolute({
-                        base_rate: this.extractValue('base', this.base),
-                        absolute_effect_size: realValue
-                });
-            } else if (prop == 'impactByVisitors') {
-                // this.impactByMetricValue = this.getImpactByMetric();
-                relative = statFormulas.getRelativeImpactFromVisitors({
-                        total_sample_size: sample,
-                        base_rate: this.extractValue('base', this.base),
-                        visitors: realValue
-                });
-            } else if (prop == 'relativeImpact') {
-                relative = this.extractValue('impact', value);
-            }
-
-            if (!relative) {
-                return;
-            }
-
-            this.$emit('field:change', {
-                prop: 'impact',
-                value: this.displayValue('impact', relative)
-            });
-        },
         updateFocus ({fieldProp, value}) {
             if (this.focusedBlock == fieldProp && value === false) {
                 this.focusedBlock = '';
@@ -6434,13 +6141,13 @@ var impactComp = {render: function(){var _vm=this;var _h=_vm.$createElement;var 
             }
 
             this.$emit('update:focus', {
-                fieldProp: this.fieldfromblock,
+                fieldProp: this.fieldFromBlock,
                 value: value
             });
         },
         addPercentToString (str) {
             let result = str;
-            if (this.testtype == 'gTest') {
+            if (this.testType == 'gTest') {
                 result += '%';
             }
 
@@ -6449,86 +6156,38 @@ var impactComp = {render: function(){var _vm=this;var _h=_vm.$createElement;var 
     }
 };
 
-var baseComp = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-block pc-block--base",class:{'pc-block-focused': _vm.focusedblock == 'base'}},[_c('pc-svg-chain',{attrs:{"calculateprop":_vm.calculateprop,"fieldfromblock":_vm.fieldfromblock}}),_vm._v(" "),(_vm.testtype == 'gTest')?_c('div',{staticClass:"pc-header"},[_vm._v(" Base Rate ")]):_c('div',{staticClass:"pc-header"},[_vm._v(" Base Average ")]),_vm._v(" "),_c('ul',{staticClass:"pc-inputs"},[_c('li',{staticClass:"pc-input-item pc-input-left"},[_c('label',[_c('span',{staticClass:"pc-input-title"},[_vm._v(_vm._s(_vm.testtype == 'gTest' ? 'Base Rate' : 'Base Average')+" "),_c('small',{staticClass:"pc-input-sub-title"},[_vm._v("conversion")])]),_vm._v(" "),_c('pc-block-field',{attrs:{"fieldprop":"baseRate","suffix":_vm.testtype == 'gTest' ? '%' : '',"fieldvalue":_vm.baseRate,"testtype":_vm.testtype,"isreadonly":_vm.isReadOnly,"isblockfocused":_vm.isblockfocused,"enableedit":_vm.enableedit},on:{"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}})],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right"},[_c('label',[_vm._m(0),_vm._v(" "),_c('pc-block-field',{attrs:{"fieldprop":"visitorsWithGoals","fieldvalue":_vm.visitorsWithGoals,"testtype":_vm.testtype,"fieldfromblock":_vm.fieldfromblock,"isblockfocused":_vm.isblockfocused,"isreadonly":_vm.isReadOnly,"enableedit":_vm.enableedit && this.calculateprop != 'sample'},on:{"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}})],1)]),_vm._v(" "),(_vm.testtype == 'tTest')?_c('li',{staticClass:"pc-input-item pc-input-sd-rate"},[_c('label',[_c('pc-block-field',{attrs:{"prefix":"±","fieldprop":"sdRate","fieldfromblock":"base","fieldvalue":_vm.view.sdRate,"testtype":_vm.testtype,"isreadonly":_vm.isReadOnly,"isblockfocused":_vm.isblockfocused,"enableedit":_vm.enableedit},on:{"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v("Base Standard deviation")])],1)]):_vm._e()])],1)},staticRenderFns: [function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('span',{staticClass:"pc-input-title"},[_vm._v("Metric Totals"),_c('small',{staticClass:"pc-input-sub-title"},[_vm._v("visitors reached goal")])])}],_scopeId: 'data-v-0d0bef2b',
-    props: ['testtype', 'enableedit', 'view', 'calculateprop', 'fieldfromblock', 'isblockfocused'],
+var baseComp = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-block pc-block--base",class:{'pc-block-focused': _vm.focusedblock == 'base'}},[_c('pc-svg-chain',{attrs:{"fieldFromBlock":_vm.fieldFromBlock}}),_vm._v(" "),(_vm.testType == 'gTest')?_c('div',{staticClass:"pc-header"},[_vm._v(" Base Rate ")]):_c('div',{staticClass:"pc-header"},[_vm._v(" Base Average ")]),_vm._v(" "),_c('ul',{staticClass:"pc-inputs"},[_c('li',{staticClass:"pc-input-item pc-input-left"},[_c('label',[_c('span',{staticClass:"pc-input-title"},[_vm._v(_vm._s(_vm.testType == 'gTest' ? 'Base Rate' : 'Base Average')+" "),_c('small',{staticClass:"pc-input-sub-title"},[_vm._v("conversion")])]),_vm._v(" "),_c('pc-block-field',{attrs:{"fieldProp":"base","suffix":_vm.testType == 'gTest' ? '%' : '',"fieldValue":_vm.base,"isReadOnly":_vm.isReadOnly,"isBlockFocused":_vm.isBlockFocused,"enableEdit":_vm.enableEdit},on:{"update:focus":_vm.updateFocus}})],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right"},[_c('label',[_vm._m(0),_vm._v(" "),_c('pc-block-field',{attrs:{"fieldProp":"visitorsWithGoals","fieldValue":_vm.visitorsWithGoals,"fieldFromBlock":_vm.fieldFromBlock,"isBlockFocused":_vm.isBlockFocused,"isReadOnly":_vm.isReadOnly,"enableEdit":_vm.enableEdit && this.calculateProp != 'sample'},on:{"update:focus":_vm.updateFocus}})],1)]),_vm._v(" "),(_vm.testType == 'tTest')?_c('li',{staticClass:"pc-input-item pc-input-sd-rate"},[_c('label',[_c('pc-block-field',{attrs:{"prefix":"±","fieldProp":"sdRate","fieldFromBlock":"base","fieldValue":_vm.sdRate,"isReadOnly":_vm.isReadOnly,"isBlockFocused":_vm.isBlockFocused,"enableEdit":_vm.enableEdit},on:{"update:focus":_vm.updateFocus}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v("Base Standard deviation")])],1)]):_vm._e()])],1)},staticRenderFns: [function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('span',{staticClass:"pc-input-title"},[_vm._v("Metric Totals"),_c('small',{staticClass:"pc-input-sub-title"},[_vm._v("visitors reached goal")])])}],_scopeId: 'data-v-0d0bef2b',
+    props: ['enableEdit', 'fieldFromBlock', 'isBlockFocused'],
     extends: pcBlock,
     template: '#base-comp',
     data () {
         return {
-            visitorsWithGoals: this.computeVisitors({init: true}),
-            enableEdit: false,
             focusedBlock: '',
-            baseRate: this.view.base
         }
     },
     computed: {
         isReadOnly () {
-            return this.calculateprop == 'base'
+            return this.calculateProp == 'base'
         },
         base () {
-            return this.view.base
+            return this.$store.state.attributes.base
+        },
+        sdRate () {
+            return this.$store.state.attributes.sdRate
         },
         sample () {
-            return this.view.sample
+            return this.$store.state.attributes.sample
+        },
+        testType () {
+            return this.$store.state.attributes.testType
+        },
+        visitorsWithGoals () {
+            return this.$store.getters.visitorsWithGoals
         }
     },
-    watch: {
-        base (newValue) {
-            this.baseRate = newValue;
-        },
-        sample () {
-            if (this.focusedBlock != this.fieldfromblock) {
-                this.visitorsWithGoals = this.computeVisitors();
-            }
-        },
-        baseRate () {
-            if (this.focusedBlock != this.fieldfromblock) {
-                this.visitorsWithGoals = this.computeVisitors();
-            }
-        },
-    },
     methods: {
-        computeVisitors (config) {
-            let result = statFormulas.getVisitorsWithGoals({
-                    total_sample_size: this.extractValue('sample', this.view.sample),
-                    base_rate: this.extractValue('base', config && config.init ? this.view.base : this.baseRate)
-                });
-
-            return this.displayValue('metricTotals', result)
-        },
         enableInput () {
             this.$emit('edit:update', {prop: 'base'});
-        },
-        updateFields ({prop, value}) {
-
-            let result = 0;
-            let shouldUpdateBaseRate = prop == 'baseRate' || prop == 'visitorsWithGoals';
-
-            if (prop == 'baseRate') {
-                result = value;
-            } else if (prop == 'visitorsWithGoals') {
-                result = this.displayValue(
-                    'base',
-                    statFormulas.getBaseRate({
-                        total_sample_size: this.extractValue('sample', this.sample),
-                        visitors_with_goals: value
-                    })
-                );
-            } else if (prop == 'sdRate') {
-                this.$emit('field:change', {
-                    prop: 'sdRate',
-                    value: value
-                });
-            }
-
-            if (shouldUpdateBaseRate) {
-                this.baseRate = window.parseInt(result || 0);
-
-                this.$emit('field:change', {
-                    prop: 'base',
-                    value: result
-                });
-            }
         },
         updateFocus ({fieldProp, value}) {
             if (this.focusedBlock == fieldProp && value === false) {
@@ -6538,7 +6197,7 @@ var baseComp = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c
             }
 
             this.$emit('update:focus', {
-                fieldProp: this.fieldfromblock,
+                fieldProp: this.fieldFromBlock,
                 value: value
             });
         }
@@ -6561,15 +6220,10 @@ var pcTooltip = {render: function(){var _vm=this;var _h=_vm.$createElement;var _
 
 };
 
-let storedImpact = 0;
-
-var nonInferiority = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-non-inferiority"},[_c('label',{staticClass:"pc-non-inf-label"},[_vm._v(" Use non inferiority test "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.enabled),expression:"enabled"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.enabled)?_vm._i(_vm.enabled,null)>-1:(_vm.enabled)},on:{"change":function($event){var $$a=_vm.enabled,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.enabled=$$a.concat([$$v]));}else{$$i>-1&&(_vm.enabled=$$a.slice(0,$$i).concat($$a.slice($$i+1)));}}else{_vm.enabled=$$c;}}}})]),_vm._v(" "),(_vm.enabled)?_c('div',{staticClass:"pc-non-inf-treshold"},[_c('select',{directives:[{name:"model",rawName:"v-model",value:(_vm.selected),expression:"selected"}],staticClass:"pc-non-inf-select",on:{"change":function($event){var $$selectedVal = Array.prototype.filter.call($event.target.options,function(o){return o.selected}).map(function(o){var val = "_value" in o ? o._value : o.value;return val}); _vm.selected=$event.target.multiple ? $$selectedVal : $$selectedVal[0];}}},_vm._l((_vm.options),function(option){return _c('option',{domProps:{"value":option.value}},[_vm._v(" "+_vm._s(option.text)+" ")])})),_vm._v(" "),_c('pc-block-field',{staticClass:"pc-non-inf-treshold-input",attrs:{"fieldprop":"nonInfThreshold","suffix":_vm.isRelative ? '%' : '',"fieldvalue":_vm.threshold,"testtype":_vm.testType,"enableedit":true},on:{"field:change":_vm.updateFields}})],1):_vm._e()])},staticRenderFns: [],
-    props: [ 'thresholdProp', 'enabledProp', 'selectedProp', 'view', 'extractValue', 'lockedField', 'readOnlyVisitorsPerDay' ],
+var nonInferiority = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-non-inferiority"},[_c('label',{staticClass:"pc-non-inf-label"},[_vm._v(" Use non inferiority test "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.enabled),expression:"enabled"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.enabled)?_vm._i(_vm.enabled,null)>-1:(_vm.enabled)},on:{"change":function($event){var $$a=_vm.enabled,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.enabled=$$a.concat([$$v]));}else{$$i>-1&&(_vm.enabled=$$a.slice(0,$$i).concat($$a.slice($$i+1)));}}else{_vm.enabled=$$c;}}}})]),_vm._v(" "),(_vm.enabled)?_c('div',{staticClass:"pc-non-inf-treshold"},[_c('select',{directives:[{name:"model",rawName:"v-model",value:(_vm.selected),expression:"selected"}],staticClass:"pc-non-inf-select",on:{"change":function($event){var $$selectedVal = Array.prototype.filter.call($event.target.options,function(o){return o.selected}).map(function(o){var val = "_value" in o ? o._value : o.value;return val}); _vm.selected=$event.target.multiple ? $$selectedVal : $$selectedVal[0];}}},_vm._l((_vm.options),function(option,index){return _c('option',{key:index,domProps:{"value":option.value}},[_vm._v(" "+_vm._s(option.text)+" ")])})),_vm._v(" "),_c('pc-block-field',{staticClass:"pc-non-inf-treshold-input",attrs:{"fieldProp":"threshold","suffix":_vm.isRelative ? '%' : '',"fieldValue":_vm.nonInfThreshold,"enableEdit":true}})],1):_vm._e()])},staticRenderFns: [],
+    props: [ 'lockedField', 'readOnlyVisitorsPerDay' ],
     data () {
         return {
-            threshold: this.thresholdProp,
-            enabled: this.enabledProp,
-            selected: this.selectedProp,
             options: [
                 {
                     text: 'relative difference of',
@@ -6583,153 +6237,34 @@ var nonInferiority = {render: function(){var _vm=this;var _h=_vm.$createElement;
         }
     },
     computed: {
+        enabled: {
+            get () {
+                return this.$store.state.nonInferiority.enabled
+            },
+            set (newValue) {
+                this.$store.dispatch('change:noninferiority', {
+                    prop: 'enabled',
+                    value: newValue
+                });
+            }
+        },
+        selected: {
+            get () {
+                return this.$store.state.nonInferiority.selected
+            },
+            set (newValue) {
+                this.$store.dispatch('change:noninferiority', {
+                    prop: 'selected',
+                    value: newValue
+                });
+            }
+        },
+
         isRelative () {
-            return this.selectedProp == 'relative';
+            return this.$store.state.nonInferiority.selected == 'relative'
         },
-        thresholdCorrectedValue () {
-            // when relative is selected the value we will convert it to
-            // percentage
-
-            let result = this.threshold;
-            if (this.isRelative) {
-                result = result / 100;
-            }
-            return result;
-        },
-        mu () {
-            let mu = 0;
-
-            if (this.enabled) {
-                mu = this.getMu();
-            }
-
-            return mu
-        },
-        opts () {
-            if (!this.enabled) {
-                return false
-            }
-            return this.getExtraOpts()
-        },
-        alternative () {
-            if (!this.enabled) {
-                return false
-            }
-            return this.getAlternative()
-        },
-    },
-    watch: {
-        thresholdCorrectedValue () {
-            this.$emit('field:change', {
-                prop: 'nonInfThreshold',
-                value: this.threshold
-            });
-        },
-        enabled (newValue) {
-            this.$emit('update:enabledProp', newValue);
-
-            if (newValue) {
-                storedImpact = this.view.impact;
-
-                this.$emit('field:change', {
-                    prop: 'impact',
-                    value: 0
-                });
-            } else {
-                this.$emit('field:change', {
-                    prop: 'impact',
-                    value: storedImpact
-                });
-            }
-
-
-
-
-        },
-        selected (newValue) {
-            this.$emit('update:selectedProp', newValue);
-        },
-        mu (newValue) {
-            this.updateSettings();
-        },
-        opts (newValue) {
-            this.updateSettings();
-        },
-        alternative (newValue) {
-            this.updateSettings();
-        }
-
-    },
-    methods: {
-        updateFields ({prop, value}) {
-            this.threshold = value;
-        },
-        updateSettings () {
-            let { mu, opts, alternative } = this,
-                data = {
-                    mu,
-                    opts,
-                    alternative
-                },
-                result = JSON.parse(JSON.stringify(data));
-
-            this.$emit('update:noninf', result);
-        },
-        getMu () {
-            let thresholdType = this.selected,
-                { view, extractValue, lockedField, thresholdCorrectedValue } = this,
-                { runtime, sample, base } = view,
-                data = {
-                    threshold: -extractValue('nonInfThreshold', thresholdCorrectedValue),
-                    visitorsPerDay: extractValue('sample', this.readOnlyVisitorsPerDay),
-                    base_rate: extractValue('base', base),
-                };
-
-            return {
-                absolutePerDay: statFormulas.getMuFromAbsolutePerDay,
-                relative: statFormulas.getMuFromRelativeDifference
-            }[thresholdType](data)
-        },
-        getExtraOpts () {
-            let { view, extractValue, lockedField, thresholdCorrectedValue } = this,
-                { runtime, sample } = view,
-                type = this.selected,
-                opts;
-
-            opts = {
-                type,
-                calculating: lockedField,
-                threshold: -extractValue('nonInfThreshold', thresholdCorrectedValue),
-            };
-
-            if (type == 'absolutePerDay') {
-                if (lockedField == 'visitorsPerDay') {
-                    opts = Object.assign(
-                        opts,
-                        {
-                            days: runtime
-                        }
-                    );
-                } else {
-                    opts = Object.assign(
-                        opts,
-                        {
-                            visitors_per_day: extractValue('sample', this.readOnlyVisitorsPerDay)
-                        }
-                    );
-                }
-            }
-
-            return opts
-        },
-        getAlternative () {
-            let testType;
-            if(this.enabled) {
-                testType = 'noninferiority';
-            } else {
-                testType = 'comparative';
-            }
-            return statFormulas.getAlternative({type: testType});
+        nonInfThreshold () {
+            return this.$store.state.nonInferiority.threshold
         }
     },
     components: {
@@ -6737,40 +6272,18 @@ var nonInferiority = {render: function(){var _vm=this;var _h=_vm.$createElement;
     }
 };
 
-var powerCalculator$1 = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"power-calculator"},[_c('form',{staticClass:"pc-form",attrs:{"action":"."}},[_c('div',{staticClass:"pc-main-header"},[_c('div',{staticClass:"pc-test-type"},[_c('pc-tooltip',{staticClass:"pc-test-type-tooltip-wrapper"},[_c('label',{staticClass:"pc-test-type-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.testType),expression:"testType"}],attrs:{"type":"radio","name":"test-mode","value":"gTest","checked":"checked"},domProps:{"checked":_vm._q(_vm.testType,"gTest")},on:{"change":function($event){_vm.testType="gTest";}}}),_vm._v(" Binary Metric ")]),_vm._v(" "),_c('span',{attrs:{"slot":"tooltip"},slot:"tooltip"},[_vm._v(" A binary metric is one that can be only two values like 0 or 1, yes or no, converted or not converted ")])]),_vm._v(" "),_c('pc-tooltip',{staticClass:"pc-test-type-tooltip-wrapper"},[_c('label',{staticClass:"pc-test-type-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.testType),expression:"testType"}],attrs:{"type":"radio","name":"test-mode","value":"tTest"},domProps:{"checked":_vm._q(_vm.testType,"tTest")},on:{"change":function($event){_vm.testType="tTest";}}}),_vm._v(" Continuous Metric ")]),_vm._v(" "),_c('span',{attrs:{"slot":"tooltip"},slot:"tooltip"},[_vm._v(" A continuous metric is one that can be any number like time on site or the number of rooms sold ")])])],1),_vm._v(" "),_c('non-inferiority',{attrs:{"thresholdProp":_vm.view.nonInfThreshold,"enabledProp":_vm.nonInferiority.enabled,"selectedProp":_vm.nonInferiority.selected,"readOnlyVisitorsPerDay":_vm.readOnlyVisitorsPerDay,"view":_vm.view,"extractValue":_vm.extractValue,"lockedField":_vm.lockedField},on:{"update:enabledProp":function($event){_vm.$set(_vm.nonInferiority, "enabled", $event);},"update:selectedProp":function($event){_vm.$set(_vm.nonInferiority, "selected", $event);},"update:noninf":_vm.updateNonInf,"field:change":_vm.updateFields}}),_vm._v(" "),_vm._m(0),_vm._v(" "),_c('label',{staticClass:"pc-false-positive"},[_c('pc-block-field',{staticClass:"pc-false-positive-input",class:{ 'pc-top-fields-error': _vm.view.falsePosRate > 10 },attrs:{"suffix":"%","fieldprop":"falsePosRate","fieldvalue":_vm.view.falsePosRate,"testtype":_vm.testType,"enableedit":true},on:{"field:change":_vm.updateFields}}),_vm._v(" false positive rate ")],1),_vm._v(" "),_c('label',{staticClass:"pc-power"},[_c('pc-block-field',{staticClass:"pc-power-input",class:{ 'pc-top-fields-error': _vm.view.power < 80 },attrs:{"suffix":"%","fieldprop":"power","fieldvalue":_vm.view.power,"testtype":_vm.testType,"enableedit":true},on:{"field:change":_vm.updateFields}}),_vm._v(" power ")],1)],1),_vm._v(" "),_c('div',{staticClass:"pc-blocks-wrapper",class:{'pc-blocks-wrapper-ttest': _vm.testType == 'tTest'}},[_c('base-comp',{attrs:{"fieldfromblock":"base","view":_vm.view,"calculateprop":_vm.calculateProp,"isblockfocused":_vm.focusedBlock == 'base',"testtype":_vm.testType,"enableedit":_vm.enabledMainInputs.base},on:{"update:focus":_vm.updateFocus,"field:change":_vm.updateFields}}),_vm._v(" "),_c('sample-comp',{attrs:{"fieldfromblock":"sample","testtype":_vm.testType,"sample":_vm.view.sample,"runtime":_vm.view.runtime,"lockedfield":_vm.lockedField,"calculateprop":_vm.calculateProp,"enableedit":_vm.enabledMainInputs.sample,"isblockfocused":_vm.focusedBlock == 'sample'},on:{"update:runtime":function($event){_vm.$set(_vm.view, "runtime", $event);},"update:lockedfield":function($event){_vm.lockedField=$event;},"update:calculateprop":_vm.updateCalculateProp,"field:change":_vm.updateFields,"update:focus":_vm.updateFocus,"readonly:visitorsPerDay":_vm.updateVisitorsPerDay}}),_vm._v(" "),_c('impact-comp',{attrs:{"fieldfromblock":"impact","view":_vm.view,"isblockfocused":_vm.focusedBlock == 'impact',"testtype":_vm.testType,"enableedit":_vm.enabledMainInputs.impact,"calculateprop":_vm.calculateProp,"isnoninferiority":_vm.nonInferiority.enabled},on:{"update:calculateprop":_vm.updateCalculateProp,"field:change":_vm.updateFields,"update:focus":_vm.updateFocus}}),_vm._v(" "),_c('svg-graph',{attrs:{"power":_vm.view.power,"impact":_vm.view.impact,"base":_vm.view.base,"sample":_vm.view.sample,"sdrate":_vm.view.sdRate,"falseposrate":_vm.view.falsePosRate,"runtime":_vm.view.runtime,"noninferiority":_vm.nonInferiority,"testtype":_vm.testType}})],1)])])},staticRenderFns: [function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-title"},[_vm._v("Power Calculator "),_c('sup',{staticStyle:{"color":"#F00","font-size":"11px"}},[_vm._v("BETA")])])}],
-    mixins: [valueTransformationMixin],
+var powerCalculator = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"power-calculator"},[_c('form',{staticClass:"pc-form",attrs:{"action":"."}},[_c('div',{staticClass:"pc-main-header"},[_c('div',{staticClass:"pc-test-type"},[_c('pc-tooltip',{staticClass:"pc-test-type-tooltip-wrapper"},[_c('label',{staticClass:"pc-test-type-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.testType),expression:"testType"}],attrs:{"type":"radio","name":"test-mode","value":"gTest","checked":"checked"},domProps:{"checked":_vm._q(_vm.testType,"gTest")},on:{"change":function($event){_vm.testType="gTest";}}}),_vm._v(" Binary Metric ")]),_vm._v(" "),_c('span',{attrs:{"slot":"tooltip"},slot:"tooltip"},[_vm._v(" A binary metric is one that can be only two values like 0 or 1, yes or no, converted or not converted ")])]),_vm._v(" "),_c('pc-tooltip',{staticClass:"pc-test-type-tooltip-wrapper"},[_c('label',{staticClass:"pc-test-type-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.testType),expression:"testType"}],attrs:{"type":"radio","name":"test-mode","value":"tTest"},domProps:{"checked":_vm._q(_vm.testType,"tTest")},on:{"change":function($event){_vm.testType="tTest";}}}),_vm._v(" Continuous Metric ")]),_vm._v(" "),_c('span',{attrs:{"slot":"tooltip"},slot:"tooltip"},[_vm._v(" A continuous metric is one that can be any number like time on site or the number of rooms sold ")])])],1),_vm._v(" "),_c('non-inferiority',{attrs:{"readOnlyVisitorsPerDay":_vm.readOnlyVisitorsPerDay,"view":_vm.view,"extractValue":_vm.extractValue}}),_vm._v(" "),_vm._m(0),_vm._v(" "),_c('label',{staticClass:"pc-false-positive"},[_c('pc-block-field',{staticClass:"pc-false-positive-input",class:{ 'pc-top-fields-error': _vm.falsePosRate > 10 },attrs:{"suffix":"%","fieldProp":"falsePosRate","fieldValue":_vm.falsePosRate,"enableEdit":true}}),_vm._v(" false positive rate ")],1),_vm._v(" "),_c('label',{staticClass:"pc-power"},[_c('pc-block-field',{staticClass:"pc-power-input",class:{ 'pc-top-fields-error': _vm.power < 80 },attrs:{"suffix":"%","fieldProp":"power","fieldValue":_vm.power,"enableEdit":true}}),_vm._v(" power ")],1)],1),_vm._v(" "),_c('div',{staticClass:"pc-blocks-wrapper",class:{'pc-blocks-wrapper-ttest': _vm.testType == 'tTest'}},[_c('base-comp',{attrs:{"fieldFromBlock":"base","isBlockFocused":_vm.focusedBlock == 'base',"enableEdit":_vm.enabledMainInputs.base},on:{"update:focus":_vm.updateFocus}}),_vm._v(" "),_c('sample-comp',{attrs:{"fieldFromBlock":"sample","enableEdit":_vm.enabledMainInputs.sample,"isBlockFocused":_vm.focusedBlock == 'sample'},on:{"update:focus":_vm.updateFocus}}),_vm._v(" "),_c('impact-comp',{attrs:{"fieldFromBlock":"impact","enableEdit":_vm.enabledMainInputs.impact,"isBlockFocused":_vm.focusedBlock == 'impact'},on:{"update:focus":_vm.updateFocus}}),_vm._v(" "),_c('svg-graph')],1)])])},staticRenderFns: [function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-title"},[_vm._v("Power Calculator "),_c('sup',{staticStyle:{"color":"#F00","font-size":"11px"}},[_vm._v("BETA")])])}],
+    mounted () {
+        // start of application
+        this.$store.dispatch('init:calculator');
+    },
     props: ['parentmetricdata'],
     data () {
         // values if parent component sends them
         let importedData = this.parentmetricdata || {};
 
         let data = {
-            testType: 'gTest',
-            calculateProp: 'sample', // power, impact, base, sample
             focusedBlock: '',
-            view: {
-                sample: 561372,
-                base: 10,
-                impact: 2,
-                power: 80,
-                falsePosRate: 10,
-                sdRate: 10,
-
-                runtime: 14, //days
-
-                nonInfThreshold: 0
-            },
-
-            nonInferiority: {
-                enabled: false,
-                selected: 'relative',
-                mu: 0,
-                alternative: '',
-                opts: false,
-            },
-
-            // this is used for sample size but we also want to make it shareable
-            lockedField: 'days',
 
             // false means the editable ones are the secondary mode (metric totals, days&daily trials and absolute impact)
             enabledMainInputs: {
@@ -6786,9 +6299,6 @@ var powerCalculator$1 = {render: function(){var _vm=this;var _h=_vm.$createEleme
         return this.mergeComponentData(data, JSON.parse(JSON.stringify(importedData)));
     },
     computed: {
-        math () {
-            return statFormulas[this.testType]
-        },
         disableBaseSecondaryInput () {
             // only metric total is available and as it depends on sample this
             // creates a circular dependency
@@ -6798,7 +6308,7 @@ var powerCalculator$1 = {render: function(){var _vm=this;var _h=_vm.$createEleme
 
         // in case parent component needs this information
         metricData () {
-            let result =  {
+            let result = {
                     testType: this.testType,
                     calculateProp: this.calculateProp,
                     view: this.view,
@@ -6814,51 +6324,35 @@ var powerCalculator$1 = {render: function(){var _vm=this;var _h=_vm.$createEleme
 
         nonInferioritySelected () {
             return this.nonInferiority.selected;
+        },
+
+        falsePosRate () {
+            return this.$store.state.attributes.falsePosRate
+        },
+
+        power () {
+            return this.$store.state.attributes.power
+        },
+        testType: {
+            get () {
+                return this.$store.state.attributes.testType
+            },
+            set (newValue) {
+                this.$store.dispatch('field:change', {
+                    prop: 'testType',
+                    value: newValue || 0
+                });
+            }
         }
+
     },
     methods: {
-        updateFields ({prop, value}) {
-            this.view[prop] = value;
-
-            // will be a function for each maybe?
-            this.formulas();
-
-        },
-        formulas () {
-            // apply formulas
-            let {math, solveFor, calculateProp} = this,
-                result = 0;
-
-            result = math[calculateProp](this.convertDisplayedValues());
-            this.view[calculateProp] = this.displayValue(calculateProp, result);
-
-        },
-        convertDisplayedValues () {
-            let { view, extractValue, nonInferiority: nonInferiority$$1 } = this,
-                { sample, base, impact, falsePosRate, power, sdRate } = view,
-                { mu, opts, alternative } = nonInferiority$$1;
-
-            return {
-                mu,
-                opts,
-                alternative,
-                total_sample_size: extractValue('sample', sample),
-                base_rate: extractValue('base', base),
-                effect_size: extractValue('impact', impact),
-                alpha: extractValue('falsePosRate', falsePosRate),
-                beta: 1 - extractValue('power', power), // power of 80%, beta is actually 20%
-                sd_rate: extractValue('sdRate', sdRate)
-            }
-        },
         updateFocus ({fieldProp, value}) {
             if (this.focusedBlock == fieldProp && value === false) {
                 this.focusedBlock = '';
             } else if (value === true) {
                 this.focusedBlock = fieldProp;
             }
-        },
-        updateCalculateProp (newProp) {
-            this.calculateProp = newProp;
         },
         mergeComponentData (base, toClone) {
             // merges default data with imported one from parent component
@@ -6878,30 +6372,9 @@ var powerCalculator$1 = {render: function(){var _vm=this;var _h=_vm.$createEleme
             }
 
             return result;
-        },
-        updateVisitorsPerDay (newValue) {
-            this.readOnlyVisitorsPerDay = newValue;
-        },
-        updateNonInf ({ mu, alternative, opts }) {
-
-            this.nonInferiority.mu = mu;
-            this.nonInferiority.alternative = alternative;
-            this.nonInferiority.opts = opts;
-
-            this.formulas();
         }
     },
     watch: {
-        testType () {
-            this.formulas();
-        },
-        nonInferiorityEnabled () {
-            this.formulas();
-        },
-
-        nonInferioritySelected () {
-            this.formulas();
-        },
         // in case parent component needs this information
         metricData () {
             this.$emit('update:metricdata', this.metricData);
@@ -6919,6 +6392,561 @@ var powerCalculator$1 = {render: function(){var _vm=this;var _h=_vm.$createEleme
     }
 };
 
-return powerCalculator$1;
+var actions = {
+    'field:change' (context, { prop, value }) {
+        // add validations necessary here
+
+        switch (prop) {
+
+            // these 3 cases will call the same extra action
+            case 'sample':
+            case 'runtime':
+            case 'visitorsPerDay':
+                context.dispatch('sample:sideeffect', {prop, value});
+                context.dispatch('update:proptocalculate', context.getters.calculatedValues);
+            break;
+
+            case 'threshold':
+                context.dispatch('threshold:sideeffect', {prop, value});
+            break;
+
+            case 'impactByMetricValue':
+                context.dispatch('convert:absoluteimpact', {prop, value});
+            break;
+
+            case 'visitorsWithGoals':
+                context.dispatch('convert:visitorswithgoals', {prop, value});
+            break;
+
+            default:
+                context.commit('field:change', { prop, value });
+
+                // calculate new value for calculated prop
+                context.dispatch('update:proptocalculate', context.getters.calculatedValues);
+            break;
+        }
+    },
+    'change:noninferiority' (context, { prop, value }) {
+        // add validations necessary here
+        context.commit('change:noninferiority', { prop, value });
+
+        if (prop == 'enabled') {
+
+            context.dispatch('change:noninferiorityimpact');
+        } else {
+            // update values based on nonInferiority.selected
+            context.dispatch('update:proptocalculate', context.getters.calculatedValues);
+        }
+    },
+    'change:noninferiorityimpact' (context) {
+        let impactValue = 0;
+
+        if (context.state.nonInferiority.enabled === true) {
+            this.__impactBackup = context.state.attributes.impact;
+        } else {
+            impactValue = this.__impactBackup || 0;
+        }
+
+        context.dispatch('field:change', {
+            prop: 'impact',
+            value: impactValue
+        });
+    },
+    'switch:lockedfield' (context) {
+        let newLockedField = context.state.attributes.lockedField == 'days' ? 'visitorsPerDay' : 'days';
+        context.commit('switch:lockedfield', {
+            value: newLockedField
+        });
+    },
+    'sample:sideeffect' (context, { prop, value }) {
+        const isSampleCalculated = context.state.attributes.calculateProp == 'sample';
+        let lockedField = context.state.attributes.lockedField;
+
+        let stateMachine = {
+            calculated: {
+                sample: false,
+                runtime: lockedField == 'days',
+                visitorsPerDay: lockedField != 'days',
+            },
+            notCalculated: {
+                sample: true,
+                runtime: lockedField == 'days' && prop == 'sample',
+                visitorsPerDay: lockedField != 'days' && prop == 'sample',
+            }
+        };
+
+        let input = stateMachine[isSampleCalculated ? 'calculated' : 'notCalculated'];
+
+        let data = {
+            sample: context.state.attributes.sample,
+            visitorsPerDay: context.state.attributes.visitorsPerDay,
+            runtime: context.state.attributes.runtime
+        };
+
+        // override of the prop changed by the action change:fields with the new value
+        data[prop] = value;
+
+        context.commit('sample:sideeffect', {
+            prop: prop,
+            value: data[prop]
+        });
+
+        // looks throught the stat machine list and updates all values based on data
+        Object.keys(input).forEach((key) => {
+            if (input[key] == true) {
+                if (key != prop) {
+                    let result = 0;
+                    if (key == 'runtime') {
+                        result = Math.ceil(window.parseInt(data.sample) / data.visitorsPerDay);
+                        result = isNaN(result) ? '-' : result;
+
+                    } else if (key == 'visitorsPerDay') {
+                        let isInvalid = false;
+                        result = Math.floor(window.parseInt(data.sample) / data.runtime);
+                        isInvalid = isNaN(result);
+
+                        result = isNaN(result) || isInvalid ? '-' : result;
+
+                    } else if (key == 'sample') {
+                        let isInvalid = false;
+                        result = Math.ceil(data.runtime * data.visitorsPerDay);
+                        isInvalid = isNaN(result);
+
+                        result = isInvalid ? '-' : result;
+                    }
+
+                    context.commit('sample:sideeffect', {
+                        prop: key,
+                        value: result
+                    });
+                }
+            }
+        });
+    },
+    'threshold:sideeffect' (context, { prop, value }) {
+        context.commit('field:change', { prop, value });
+        if (context.state.attributes.calculateProp == 'sample') {
+            context.dispatch('sample:sideeffect', context.getters.calculatedValues);
+        }
+        context.dispatch('update:proptocalculate', context.getters.calculatedValues);
+    },
+    'update:calculateprop' (context, { value }) {
+        context.commit('update:calculateprop', { value });
+    },
+    'convert:absoluteimpact' (context, { prop, value }) {
+        let impactObj = {
+                prop: 'impact',
+                value: context.getters.displayValue('impact', context.getters.calculateImpactFromAbsoluteImpact(value))
+            };
+
+        context.dispatch('field:change', impactObj);
+    },
+    'convert:visitorswithgoals' (context, { prop, value }) {
+        let newValue = context.getters.baseFromVisitorsWithGoals(value);
+
+        context.dispatch('field:change', {
+            prop: 'base',
+            value: newValue
+        });
+    },
+    'update:proptocalculate' (context) {
+        let calculatedObj = context.getters.calculatedValues;
+        context.commit('update:proptocalculate', calculatedObj);
+
+        if (calculatedObj.prop == 'sample') {
+            // apply side effects
+            context.dispatch('sample:sideeffect', calculatedObj);
+        }
+    },
+    'init:calculator' (context) {
+        if (context.state.nonInferiority.enabled) {
+            context.dispatch('change:noninferiorityimpact');
+        }
+        context.dispatch('update:proptocalculate');
+    },
+    'test:reset' (context, stateObj) {
+        context.commit('test:reset', stateObj);
+        context.dispatch('init:calculator');
+    }
+};
+
+var mutations = {
+        'update:proptocalculate' (state, {prop, value}) {
+            state.attributes[prop] = value;
+        }
+};
+
+var attributes = {
+    state:{
+        testType: 'gTest',
+        calculateProp: 'sample', // power, impact, base, sample
+
+        sample: 561364,
+        base: 10,
+        impact: 2,
+        power: 80,
+        falsePosRate: 10,
+        sdRate: 10,
+
+        runtime: 14, //days
+
+        visitorsPerDay: Math.ceil(561364 / 14),
+        lockedField: 'days'
+    },
+
+    mutations: {
+        'field:change' (state, { prop, value }) {
+            if (typeof state[prop] != 'undefined') {
+                state[prop] = value;
+            }
+        },
+        'sample:sideeffect' (state, { prop, value }) {
+            state[prop] = value;
+        },
+        'switch:lockedfield' (state, { value }) {
+            state.lockedField = value;
+        },
+        'update:calculateprop' (state, { value }) {
+            state.calculateProp = value;
+        },
+        'test:reset' (state, stateObj) {
+            let props = Object.keys(state);
+            props.forEach((prop) => {
+                if (prop in stateObj) {
+                    state[prop] = stateObj[prop];
+                }
+            });
+        }
+    },
+
+    getters: {
+        visitorsPerDay (state, getters) {
+            return state.visitorsPerDay
+        },
+        lockedField (state, getters) {
+            return state.lockedField
+        },
+        runtime (state, getters) {
+            return state.runtime
+        },
+        visitorsWithGoals (state, getters) {
+            let result = statFormulas.getVisitorsWithGoals({
+                    total_sample_size: getters.extractValue('sample'),
+                    base_rate: getters.extractValue('base')
+                });
+
+            return getters.displayValue('metricTotals', result)
+        },
+        impactByMetric (state, getters) {
+            return function impactByMetricInner (prop = 'value') {
+                let impactByMetricObj = statFormulas.getAbsoluteImpactInMetricHash({
+                    base_rate: getters.extractValue('base', state.base),
+                    effect_size: getters.extractValue('impact', state.impact)
+                });
+
+                return impactByMetricObj[prop];
+            }
+        },
+        impactByVisitors (state, getters) {
+            return statFormulas.getAbsoluteImpactInVisitors({
+                total_sample_size: getters.extractValue('sample', state.sample),
+                base_rate: getters.extractValue('base', state.base),
+                effect_size: getters.extractValue('impact', state.impact)
+            })
+        },
+        impactByVisitorsPerDay (state, getters) {
+            return Math.floor(getters.impactByVisitors / state.runtime);
+        },
+        impactByMetricDisplay (state, getters) {
+            return getters.displayValue('impactByMetricValue', getters.impactByMetric());
+        },
+        impactByMetricMinDisplay (state, getters) {
+            return getters.displayValue('impactByMetricValue', getters.impactByMetric('min'));
+        },
+        impactByMetricMaxDisplay (state, getters) {
+            return getters.displayValue('impactByMetricValue', getters.impactByMetric('max'));
+        },
+        impactByVisitorsDisplay (state, getters) {
+            return getters.displayValue('impactByVisitors', getters.impactByVisitors)
+        },
+        impactByVisitorsPerDayDisplay (state, getters) {
+            return getters.displayValue('impactByVisitorsPerDay', getters.impactByVisitorsPerDay)
+        },
+        calculateImpactFromAbsoluteImpact (state, getters) {
+            return function calculateImpactFromAbsoluteImpactInner (absolute_effect_size) {
+
+                let absoluteImpact = getters.extractValue('impactByMetricValue', absolute_effect_size);
+                return statFormulas.getRelativeImpactFromAbsolute({
+                    absolute_effect_size: absoluteImpact,
+                    base_rate: getters.extractValue('base', state.base)
+                });
+            }
+        },
+        baseFromVisitorsWithGoals (state, getters) {
+            return function baseFromVisitorsWithGoalsInner (value) {
+                return getters.displayValue(
+                    'base',
+                    statFormulas.getBaseRate({
+                        total_sample_size: getters.extractValue('sample', state.sample),
+                        visitors_with_goals: value
+                    })
+                )
+            }
+        }
+
+    }
+};
+
+var nonInferiority$1 = {
+    state:{
+        threshold: 0,
+        selected: 'relative', // relative, absolutePerDay
+        enabled: false
+    },
+    mutations: {
+        'field:change' (state, { prop, value }) {
+            if (typeof state[prop] != 'undefined') {
+                state[prop] = value;
+            }
+        },
+        'change:noninferiority' (state, {prop, value}) {
+            state[prop] = value;
+        },
+        'test:reset' (state, stateObj) {
+            let props = Object.keys(state);
+            props.forEach((prop) => {
+                if (prop in stateObj) {
+                    state[prop] = stateObj[prop];
+                }
+            });
+        }
+    },
+    getters: {
+        mu (state, getters) {
+            let mu = 0;
+
+            if (state.enabled) {
+                let thresholdType = state.selected,
+                    data = {
+                        runtime: getters.runtime,
+                        threshold: -( getters.extractValue('nonInfThreshold', getters.thresholdCorrectedValue) ),
+                        visitors_per_day: getters.visitorsPerDay,
+                        base_rate: getters.extractValue('base'),
+                    };
+                mu = {
+                    absolutePerDay: statFormulas.getMuFromAbsolutePerDay,
+                    relative: statFormulas.getMuFromRelativeDifference
+                }[thresholdType](data);
+            }
+
+            return mu
+        },
+        opts (state, getters) {
+            if (!state.enabled) {
+                return false
+            }
+
+            let type = state.selected,
+                opts;
+
+            opts = {
+                type,
+                calculating: getters.lockedField,
+                threshold: -( getters.extractValue('nonInfThreshold', getters.thresholdCorrectedValue) ),
+            };
+
+            if (type == 'absolutePerDay') {
+                if (getters.lockedField == 'visitorsPerDay') {
+                    opts = Object.assign(
+                        opts,
+                        {
+                            days: getters.runtime
+                        }
+                    );
+                } else {
+                    opts = Object.assign(
+                        opts,
+                        {
+                            visitors_per_day: getters.extractValue('sample', getters.visitorsPerDay)
+                        }
+                    );
+                }
+            }
+
+            return opts
+        },
+        alternative (state, getters) {
+            if (!state.enabled) {
+                // in this case the test type would be 'comparative'
+                return false
+            }
+
+            return statFormulas.getAlternative({type: 'noninferiority'});
+        },
+        thresholdCorrectedValue (state) {
+            // when relative is selected the value we will convert it to
+            // percentage
+
+            let nonInfThreshold = state.threshold;
+            const isRelative = state.selected == 'relative';
+
+            let result = nonInfThreshold;
+            if (isRelative) {
+                result = result / 100;
+            }
+
+            return result;
+        }
+    }
+};
+
+// getters to present data and format for calculations
+let validations = {
+    sample: {type: 'int'},
+    base: {
+        gTest: {type: 'percentage'},
+        tTest: {type: 'float'}
+    },
+    impact: {type: 'percentage'},
+    runtime: {type: 'int'},
+    power: {type: 'percentage'},
+    falsePosRate: {type: 'percentage'},
+    impactByMetricValue: {
+        gTest: {type: 'percentage'},
+        tTest: {type: 'float'}
+    },
+    impactByVisitors: {type: 'int'},
+    impactByVisitorsPerDay: {type: 'int'},
+    metricTotals: {type: 'int'},
+    sdRate: {type: 'float'},
+    nonInfThreshold: {type: 'float'}
+};
+
+// add validation for component version of main data
+validations.totalSample = validations.sample;
+validations.relativeImpact = validations.impact;
+validations.baseRate = validations.base;
+
+
+
+var dataFormat = {
+    displayValue (state) {
+        return function displayValueInner (prop, value) {
+            let result = value,
+                type = getType(prop, 'displayValue', state.attributes.testType);
+
+            if (type == 'int') {
+                result = window.parseInt(result);
+            }
+
+            if (type == 'float') {
+                result = window.parseFloat(result);
+            }
+
+            if (type == 'percentage') {
+                result = (window.parseFloat(result) * 100).toFixed(2);
+                result = +result.toString();
+            }
+
+            return isNaN(result) || !isFinite(result) ? '-' : result;
+        }
+    },
+    extractValue (state) {
+        return function extractValueInner (prop, value) { // value is option and is used when we don't want to update the state
+            let result = typeof value == 'undefined' ? state.attributes[prop] : value,
+                type = getType(prop, 'extractValue', state.attributes.testType);
+
+            if (type == 'int') {
+                return window.parseInt(result);
+            }
+
+            if (type == 'float') {
+                return window.parseFloat(result);
+            }
+
+            if (type == 'percentage') {
+                return window.parseFloat(result) / 100;
+            }
+        }
+    }
+};
+
+function getType (prop, methodName, testType) {
+    let validationConfig = validations[prop],
+        result,
+        throwError = false;
+
+    if (validationConfig) {
+        if (validationConfig.type) {
+            result = validationConfig.type;
+        } else if (validationConfig[testType] && validationConfig[testType].type) {
+            result = validationConfig[testType].type;
+        } else {
+            throwError = true;
+        }
+    } else {
+        throwError = true;
+    }
+
+    if (throwError) {
+        throw new Error(`Type not found for "${prop}" when trying to call "${methodName}".`)
+    }
+
+    return result || ''
+}
+
+var math = {
+    calculatedValues (state, getters) {
+        let prop = state.attributes.calculateProp,
+            value = getters.formulaToSolve(getters.convertDisplayedValues);
+        return {
+            prop,
+            value: getters.displayValue(prop, value)
+        };
+    },
+    formulaToSolve (state, getters) {
+        let calculateProp = state.attributes.calculateProp;
+
+        return getters.formulaToSolveProp[calculateProp];
+    },
+    formulaToSolveProp (state, getters) {
+        // used for the graph as we need to pass many different values to dynamic attributes
+        let testType = state.attributes.testType;
+
+        return statFormulas[testType];
+    },
+    convertDisplayedValues (state, getters) {
+        let { mu, opts, alternative } = getters;
+
+        return {
+            mu,
+            opts,
+            alternative,
+            total_sample_size: getters.extractValue('sample'),
+            base_rate: getters.extractValue('base'),
+            effect_size: getters.extractValue('impact'),
+            alpha: getters.extractValue('falsePosRate'),
+            beta: 1 - getters.extractValue('power'), // power of 80%, beta is actually 20%
+            sd_rate: getters.extractValue('sdRate')
+        }
+    }
+};
+
+var store = {
+    modules: {
+        attributes,
+        nonInferiority: nonInferiority$1,
+    },
+    actions,
+    mutations,
+    getters: Object.assign({}, dataFormat, math)
+};
+
+var index = {
+    powerCalculator,
+    store
+};
+
+return index;
 
 })));

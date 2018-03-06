@@ -17,7 +17,7 @@ export default {
         return `${num}%`
     },
     updateClonedValues (clonedObj, value) {
-        clonedObj.effect_size = this.extractValue('impact', value);
+        clonedObj.effect_size = this.$store.getters.extractValue('impact', value);
 
         return clonedObj;
     },
@@ -25,10 +25,8 @@ export default {
         return this.impact
     },
     getGraphXTicksFormatted (x) {
-        let { displayValue } = this,
-            result = x;
+        let result = x;
 
-        result = result
         result += '%';
 
         return result
