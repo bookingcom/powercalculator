@@ -5,7 +5,7 @@
   "env": {
     "development": {
       "presets": [
-        "es2015",
+        "env",
       ]
     }
   }
