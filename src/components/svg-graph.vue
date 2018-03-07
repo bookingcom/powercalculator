@@ -36,6 +36,8 @@
 
 
 <script>
+/*global c3*/
+/*eslint no-undef: "error"*/
 
 import statFormulas from '../js/math.js'
 import valueTransformationMixin from '../js/value-transformation-mixin.js'
