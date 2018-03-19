@@ -12,33 +12,24 @@ export default {
             base = this.base,
 
             result = statFormulas.getAbsoluteImpactInVisitors({
-                total_sample_size: this.extractValue('sample', sample / this.runtime),
-                base_rate: this.extractValue('base', base),
-                effect_size: this.extractValue('impact', y)
+                total_sample_size: this.$store.getters.extractValue('sample', sample / this.runtime),
+                base_rate: this.$store.getters.extractValue('base', base),
+                effect_size: this.$store.getters.extractValue('impact', y)
             });
 
         if (isNaN(result)) {
             result = 0;
         }
 
-        return this.displayValue('impactByVisitors', result);
+        return this.$store.getters.displayValue('impactByVisitors', result);
     },
     updateClonedValues (clonedObj, value) {
-        clonedObj.effect_size = this.extractValue('impact', value);;
+        clonedObj.effect_size = this.$store.getters.extractValue('impact', value);
 
         return clonedObj;
     },
     getCurrentYValue () {
         return this.impact
-    },
-    getGraphXTicksFormatted (x) {
-        let { displayValue } = this,
-            result = x;
-
-        result = result
-        result += '%';
-
-        return result
     },
     getGraphXTicksFormatted (x) {
         let { displayValue } = this,
@@ -60,6 +51,6 @@ export default {
                 effect_size,
             });
 
-        return this.displayValue('impactByVisitors', impactByVisitor);
+        return this.$store.getters.displayValue('impactByVisitors', impactByVisitor);
     }
 };

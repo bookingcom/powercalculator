@@ -1,9 +1,8 @@
 export default {
     getGraphXTicksFormatted (x) {
-        let { displayValue } = this,
-            result = x;
+        let result = x;
 
-        result = displayValue('sample', result)
+        result = this.$store.getters.displayValue('sample', result)
         if (result >= 1000) {
             result = window.parseInt(result / 1000) + 'k'
         }

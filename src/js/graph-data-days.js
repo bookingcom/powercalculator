@@ -1,9 +1,8 @@
 export default {
     getGraphXTicksFormatted (x) {
-        let { displayValue } = this,
-            samplePerDay = this.sample / this.runtime,
+        let samplePerDay = this.sample / this.runtime,
             result = x / samplePerDay;
-        result = displayValue('sample', result)
+        result = this.$store.getters.displayValue('sample', result)
         if (result >= 1000) {
             result = window.parseInt(result / 1000) + 'k'
         }
@@ -12,6 +11,6 @@ export default {
     },
     getGraphXValueForClonedValues (clonedValues) {
         let graphX = 'sample';
-        return this.displayValue(graphX, (this.math[graphX](clonedValues)));
+        return this.$store.getters.displayValue(graphX, (this.math[graphX](clonedValues)));
     }
 };

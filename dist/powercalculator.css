@@ -259,7 +259,7 @@
     font-size: 14px;
 }
 .pc-block-to-calculate .pc-field-visitorsPerDay[data-v-297fe272],
-.pc-block-to-calculate .pc-field-days[data-v-297fe272] {
+.pc-block-to-calculate .pc-field-runtime[data-v-297fe272] {
     background: var(--white);
 }
 .pc-value-field--lockable.pc-value-field--locked .pc-value-field-wrapper[data-v-297fe272] {

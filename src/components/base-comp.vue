@@ -1,9 +1,9 @@
 <template id="base-comp">
     <div class="pc-block pc-block--base" :class="{'pc-block-focused': focusedblock == 'base'}">
 
-        <pc-svg-chain v-bind:calculateprop="calculateprop" v-bind:fieldfromblock="fieldfromblock"></pc-svg-chain>
+        <pc-svg-chain v-bind:fieldFromBlock="fieldFromBlock"></pc-svg-chain>
 
-        <div class="pc-header" v-if="testtype == 'gTest'">
+        <div class="pc-header" v-if="testType == 'gTest'">
             Base Rate
         </div>
         <div class="pc-header" v-else>
@@ -13,19 +13,17 @@
         <ul class="pc-inputs">
             <li class="pc-input-item pc-input-left">
                 <label>
-                    <span class="pc-input-title">{{testtype == 'gTest' ? 'Base Rate' : 'Base Average'}} <small class="pc-input-sub-title">conversion</small></span>
+                    <span class="pc-input-title">{{testType == 'gTest' ? 'Base Rate' : 'Base Average'}} <small class="pc-input-sub-title">conversion</small></span>
 
                     <pc-block-field
-                        fieldprop="baseRate"
-                        :suffix="testtype == 'gTest' ? '%' : ''"
+                        fieldProp="base"
+                        :suffix="testType == 'gTest' ? '%' : ''"
 
-                        v-bind:fieldvalue="baseRate"
-                        v-bind:testtype="testtype"
-                        v-bind:isreadonly="isReadOnly"
-                        v-bind:isblockfocused="isblockfocused"
-                        v-bind:enableedit="enableedit"
+                        v-bind:fieldValue="base"
+                        v-bind:isReadOnly="isReadOnly"
+                        v-bind:isBlockFocused="isBlockFocused"
+                        v-bind:enableEdit="enableEdit"
 
-                        v-on:field:change="updateFields"
                         v-on:update:focus="updateFocus"></pc-block-field>
                 </label>
             </li>
@@ -35,33 +33,29 @@
                     <span class="pc-input-title">Metric Totals<small class="pc-input-sub-title">visitors reached goal</small></span>
 
                     <pc-block-field
-                        fieldprop="visitorsWithGoals"
-                        v-bind:fieldvalue="visitorsWithGoals"
-                        v-bind:testtype="testtype"
-                        v-bind:fieldfromblock="fieldfromblock"
-                        v-bind:isblockfocused="isblockfocused"
-                        v-bind:isreadonly="isReadOnly"
-                        v-bind:enableedit="enableedit && this.calculateprop != 'sample'"
+                        fieldProp="visitorsWithGoals"
+                        v-bind:fieldValue="visitorsWithGoals"
+                        v-bind:fieldFromBlock="fieldFromBlock"
+                        v-bind:isBlockFocused="isBlockFocused"
+                        v-bind:isReadOnly="isReadOnly"
+                        v-bind:enableEdit="enableEdit && this.calculateProp != 'sample'"
 
-                        v-on:field:change="updateFields"
                         v-on:update:focus="updateFocus"></pc-block-field>
                 </label>
             </li>
 
-            <li class="pc-input-item pc-input-sd-rate" v-if="testtype == 'tTest'">
+            <li class="pc-input-item pc-input-sd-rate" v-if="testType == 'tTest'">
                 <label>
                     <pc-block-field
                         prefix="±"
-                        fieldprop="sdRate"
-                        fieldfromblock="base"
+                        fieldProp="sdRate"
+                        fieldFromBlock="base"
 
-                        v-bind:fieldvalue="view.sdRate"
-                        v-bind:testtype="testtype"
-                        v-bind:isreadonly="isReadOnly"
-                        v-bind:isblockfocused="isblockfocused"
-                        v-bind:enableedit="enableedit"
+                        v-bind:fieldValue="sdRate"
+                        v-bind:isReadOnly="isReadOnly"
+                        v-bind:isBlockFocused="isBlockFocused"
+                        v-bind:enableEdit="enableEdit"
 
-                        v-on:field:change="updateFields"
                         v-on:update:focus="updateFocus"></pc-block-field>
                     <span class="pc-input-details">Base Standard deviation</span>
                 </label>
@@ -72,88 +66,39 @@
 
 <script>
 import pcBlock from './pc-block.vue'
-import statFormulas from '../js/math.js'
 
 export default {
-    props: ['testtype', 'enableedit', 'view', 'calculateprop', 'fieldfromblock', 'isblockfocused'],
+    props: ['enableEdit', 'fieldFromBlock', 'isBlockFocused'],
     extends: pcBlock,
     template: '#base-comp',
     data () {
         return {
-            visitorsWithGoals: this.computeVisitors({init: true}),
-            enableEdit: false,
             focusedBlock: '',
-            baseRate: this.view.base
         }
     },
     computed: {
         isReadOnly () {
-            return this.calculateprop == 'base'
+            return this.calculateProp == 'base'
         },
         base () {
-            return this.view.base
+            return this.$store.state.attributes.base
+        },
+        sdRate () {
+            return this.$store.state.attributes.sdRate
         },
         sample () {
-            return this.view.sample
+            return this.$store.state.attributes.sample
+        },
+        testType () {
+            return this.$store.state.attributes.testType
+        },
+        visitorsWithGoals () {
+            return this.$store.getters.visitorsWithGoals
         }
     },
-    watch: {
-        base (newValue) {
-            this.baseRate = newValue;
-        },
-        sample () {
-            if (this.focusedBlock != this.fieldfromblock) {
-                this.visitorsWithGoals = this.computeVisitors();
-            }
-        },
-        baseRate () {
-            if (this.focusedBlock != this.fieldfromblock) {
-                this.visitorsWithGoals = this.computeVisitors();
-            }
-        },
-    },
     methods: {
-        computeVisitors (config) {
-            let result = statFormulas.getVisitorsWithGoals({
-                    total_sample_size: this.extractValue('sample', this.view.sample),
-                    base_rate: this.extractValue('base', config && config.init ? this.view.base : this.baseRate)
-                })
-
-            return this.displayValue('metricTotals', result)
-        },
         enableInput () {
             this.$emit('edit:update', {prop: 'base'})
-        },
-        updateFields ({prop, value}) {
-
-            let result = 0;
-            let shouldUpdateBaseRate = prop == 'baseRate' || prop == 'visitorsWithGoals';
-
-            if (prop == 'baseRate') {
-                result = value;
-            } else if (prop == 'visitorsWithGoals') {
-                result = this.displayValue(
-                    'base',
-                    statFormulas.getBaseRate({
-                        total_sample_size: this.extractValue('sample', this.sample),
-                        visitors_with_goals: value
-                    })
-                );
-            } else if (prop == 'sdRate') {
-                this.$emit('field:change', {
-                    prop: 'sdRate',
-                    value: value
-                })
-            }
-
-            if (shouldUpdateBaseRate) {
-                this.baseRate = window.parseInt(result || 0);
-
-                this.$emit('field:change', {
-                    prop: 'base',
-                    value: result
-                })
-            }
         },
         updateFocus ({fieldProp, value}) {
             if (this.focusedBlock == fieldProp && value === false) {
@@ -163,7 +108,7 @@ export default {
             }
 
             this.$emit('update:focus', {
-                fieldProp: this.fieldfromblock,
+                fieldProp: this.fieldFromBlock,
                 value: value
             })
         }

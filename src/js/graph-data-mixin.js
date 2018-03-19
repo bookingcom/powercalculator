@@ -53,7 +53,7 @@ var defaultConfig = {
         if (!this.math[this.graphX]) {
             throw Error (`getGraphXValueForClonedValues didn't find math formula for ${this.graphX}`)
         }
-        return this.displayValue(this.graphX, (this.math[this.graphX](clonedValues)));
+        return this.$store.getters.displayValue(this.graphX, (this.math[this.graphX](clonedValues)));
     }
 }
 

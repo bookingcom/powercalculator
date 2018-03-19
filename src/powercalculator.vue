@@ -28,33 +28,23 @@
                 </div>
 
                 <non-inferiority
-                    v-bind:thresholdProp="view.nonInfThreshold"
-                    v-bind:enabledProp.sync="nonInferiority.enabled"
-                    v-bind:selectedProp.sync="nonInferiority.selected"
-
                     v-bind:readOnlyVisitorsPerDay="readOnlyVisitorsPerDay"
 
                     v-bind:view="view"
-                    v-bind:extractValue="extractValue"
-                    v-bind:lockedField="lockedField"
-
-                    v-on:update:noninf="updateNonInf"
-                    v-on:field:change="updateFields"
-                >
+                    v-bind:extractValue="extractValue">
                 </non-inferiority>
+
 
                 <div class="pc-title">Power Calculator <sup style="color: #F00; font-size: 11px;">BETA</sup> </div>
 
                 <label class="pc-false-positive">
                     <pc-block-field
                         class="pc-false-positive-input"
-                        :class="{ 'pc-top-fields-error': view.falsePosRate > 10 }"
+                        :class="{ 'pc-top-fields-error': falsePosRate > 10 }"
                         suffix="%"
-                        fieldprop="falsePosRate"
-                        v-bind:fieldvalue="view.falsePosRate"
-                        v-bind:testtype="testType"
-                        v-bind:enableedit="true"
-                        v-on:field:change="updateFields"></pc-block-field>
+                        fieldProp="falsePosRate"
+                        v-bind:fieldValue="falsePosRate"
+                        v-bind:enableEdit="true"></pc-block-field>
                     false positive rate
                 </label>
 
@@ -62,74 +52,44 @@
                     <pc-block-field
                         class="pc-power-input"
                         suffix="%"
-                        :class="{ 'pc-top-fields-error': view.power < 80 }"
-                        fieldprop="power"
-                        v-bind:fieldvalue="view.power"
-                        v-bind:testtype="testType"
-                        v-bind:enableedit="true"
-                        v-on:field:change="updateFields"></pc-block-field>
+                        :class="{ 'pc-top-fields-error': power < 80 }"
+                        fieldProp="power"
+                        v-bind:fieldValue="power"
+                        v-bind:enableEdit="true"></pc-block-field>
                     power
                 </label>
             </div>
 
+
             <div class="pc-blocks-wrapper" :class="{'pc-blocks-wrapper-ttest': testType == 'tTest'}">
                 <base-comp
-                    fieldfromblock="base"
-
-                    v-bind:view="view"
-                    v-bind:calculateprop="calculateProp"
-                    v-bind:isblockfocused="focusedBlock == 'base'"
-                    v-bind:testtype="testType"
-                    v-bind:enableedit="enabledMainInputs.base"
+                    fieldFromBlock="base"
+                    v-bind:isBlockFocused="focusedBlock == 'base'"
+                    v-bind:enableEdit="enabledMainInputs.base"
 
                     v-on:update:focus="updateFocus"
-                    v-on:field:change="updateFields">
+                    >
                 </base-comp>
 
                 <sample-comp
-                    fieldfromblock="sample"
-                    v-bind:testtype="testType"
-                    v-bind:sample="view.sample"
-                    v-bind:runtime.sync="view.runtime"
-                    v-bind:lockedfield.sync="lockedField"
-                    v-bind:calculateprop="calculateProp"
-                    v-bind:enableedit="enabledMainInputs.sample"
-                    v-bind:isblockfocused="focusedBlock == 'sample'"
+                    fieldFromBlock="sample"
 
-                    v-on:update:calculateprop="updateCalculateProp"
-                    v-on:field:change="updateFields"
-                    v-on:update:focus="updateFocus"
-                    v-on:readonly:visitorsPerDay="updateVisitorsPerDay">
+                    v-bind:enableEdit="enabledMainInputs.sample"
+                    v-bind:isBlockFocused="focusedBlock == 'sample'"
+                    v-on:update:focus="updateFocus">
 
                 </sample-comp>
 
-
                 <impact-comp
-                    fieldfromblock="impact"
-                    v-bind:view="view"
-                    v-bind:isblockfocused="focusedBlock == 'impact'"
-                    v-bind:testtype="testType"
-                    v-bind:enableedit="enabledMainInputs.impact"
-                    v-bind:calculateprop="calculateProp"
+                    fieldFromBlock="impact"
 
-                    v-bind:isnoninferiority="nonInferiority.enabled"
-
-                    v-on:update:calculateprop="updateCalculateProp"
-                    v-on:field:change="updateFields"
+                    v-bind:enableEdit="enabledMainInputs.impact"
+                    v-bind:isBlockFocused="focusedBlock == 'impact'"
                     v-on:update:focus="updateFocus">
                 </impact-comp>
 
-                <svg-graph
-                    v-bind:power="view.power"
-                    v-bind:impact="view.impact"
-                    v-bind:base="view.base"
-                    v-bind:sample="view.sample"
-                    v-bind:sdrate="view.sdRate"
-                    v-bind:falseposrate="view.falsePosRate"
-                    v-bind:runtime="view.runtime"
+                <svg-graph></svg-graph>
 
-                    v-bind:noninferiority="nonInferiority"
-                    v-bind:testtype="testType"></svg-graph>
             </div>
         </form>
     </div>
@@ -144,44 +104,18 @@ import baseComp from './components/base-comp.vue'
 import pcTooltip from './components/pc-tooltip.vue'
 import nonInferiority from './components/non-inferiority.vue'
 
-import statFormulas from './js/math.js'
-import valueTransformationMixin from './js/value-transformation-mixin.js'
-
-
 export default {
-    mixins: [valueTransformationMixin],
+    mounted () {
+        // start of application
+        this.$store.dispatch('init:calculator')
+    },
     props: ['parentmetricdata'],
     data () {
         // values if parent component sends them
         let importedData = this.parentmetricdata || {};
 
         let data = {
-            testType: 'gTest',
-            calculateProp: 'sample', // power, impact, base, sample
             focusedBlock: '',
-            view: {
-                sample: 561372,
-                base: 10,
-                impact: 2,
-                power: 80,
-                falsePosRate: 10,
-                sdRate: 10,
-
-                runtime: 14, //days
-
-                nonInfThreshold: 0
-            },
-
-            nonInferiority: {
-                enabled: false,
-                selected: 'relative',
-                mu: 0,
-                alternative: '',
-                opts: false,
-            },
-
-            // this is used for sample size but we also want to make it shareable
-            lockedField: 'days',
 
             // false means the editable ones are the secondary mode (metric totals, days&daily trials and absolute impact)
             enabledMainInputs: {
@@ -197,9 +131,6 @@ export default {
         return this.mergeComponentData(data, JSON.parse(JSON.stringify(importedData)));
     },
     computed: {
-        math () {
-            return statFormulas[this.testType]
-        },
         disableBaseSecondaryInput () {
             // only metric total is available and as it depends on sample this
             // creates a circular dependency
@@ -209,7 +140,7 @@ export default {
 
         // in case parent component needs this information
         metricData () {
-            let result =  {
+            let result = {
                     testType: this.testType,
                     calculateProp: this.calculateProp,
                     view: this.view,
@@ -225,51 +156,35 @@ export default {
 
         nonInferioritySelected () {
             return this.nonInferiority.selected;
+        },
+
+        falsePosRate () {
+            return this.$store.state.attributes.falsePosRate
+        },
+
+        power () {
+            return this.$store.state.attributes.power
+        },
+        testType: {
+            get () {
+                return this.$store.state.attributes.testType
+            },
+            set (newValue) {
+                this.$store.dispatch('field:change', {
+                    prop: 'testType',
+                    value: newValue || 0
+                })
+            }
         }
+
     },
     methods: {
-        updateFields ({prop, value}) {
-            this.view[prop] = value;
-
-            // will be a function for each maybe?
-            this.formulas();
-
-        },
-        formulas () {
-            // apply formulas
-            let {math, solveFor, calculateProp} = this,
-                result = 0;
-
-            result = math[calculateProp](this.convertDisplayedValues());
-            this.view[calculateProp] = this.displayValue(calculateProp, result);
-
-        },
-        convertDisplayedValues () {
-            let { view, extractValue, nonInferiority } = this,
-                { sample, base, impact, falsePosRate, power, sdRate } = view,
-                { mu, opts, alternative } = nonInferiority;
-
-            return {
-                mu,
-                opts,
-                alternative,
-                total_sample_size: extractValue('sample', sample),
-                base_rate: extractValue('base', base),
-                effect_size: extractValue('impact', impact),
-                alpha: extractValue('falsePosRate', falsePosRate),
-                beta: 1 - extractValue('power', power), // power of 80%, beta is actually 20%
-                sd_rate: extractValue('sdRate', sdRate)
-            }
-        },
         updateFocus ({fieldProp, value}) {
             if (this.focusedBlock == fieldProp && value === false) {
                 this.focusedBlock = ''
             } else if (value === true) {
                 this.focusedBlock = fieldProp
             }
-        },
-        updateCalculateProp (newProp) {
-            this.calculateProp = newProp;
         },
         mergeComponentData (base, toClone) {
             // merges default data with imported one from parent component
@@ -289,30 +204,9 @@ export default {
             };
 
             return result;
-        },
-        updateVisitorsPerDay (newValue) {
-            this.readOnlyVisitorsPerDay = newValue;
-        },
-        updateNonInf ({ mu, alternative, opts }) {
-
-            this.nonInferiority.mu = mu;
-            this.nonInferiority.alternative = alternative;
-            this.nonInferiority.opts = opts;
-
-            this.formulas();
         }
     },
     watch: {
-        testType () {
-            this.formulas();
-        },
-        nonInferiorityEnabled () {
-            this.formulas();
-        },
-
-        nonInferioritySelected () {
-            this.formulas();
-        },
         // in case parent component needs this information
         metricData () {
             this.$emit('update:metricdata', this.metricData)
