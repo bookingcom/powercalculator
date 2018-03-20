@@ -80,6 +80,7 @@ export default {
     grid-template-rows: auto;
     grid-template-areas:
         "pc-input-left pc-input-right"
+        "pc-input-left-bottom pc-input-right-bottom"
     ;
     align-items: start;
     grid-gap: var(--row-gap) var(--columns-gap);
@@ -113,6 +114,14 @@ export default {
 
 .pc-input-right {
     grid-area: pc-input-right;
+}
+
+.pc-input-left-bottom {
+    grid-area: pc-input-left-bottom;
+}
+
+.pc-input-right-bottom {
+    grid-area: pc-input-right-bottom;
 }
 
 .pc-input-details {

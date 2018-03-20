@@ -27,12 +27,7 @@
 
                 </div>
 
-                <non-inferiority
-                    v-bind:readOnlyVisitorsPerDay="readOnlyVisitorsPerDay"
-
-                    v-bind:view="view"
-                    v-bind:extractValue="extractValue">
-                </non-inferiority>
+                <non-inferiority></non-inferiority>
 
 
                 <div class="pc-title">Power Calculator <sup style="color: #F00; font-size: 11px;">BETA</sup> </div>
@@ -81,12 +76,22 @@
                 </sample-comp>
 
                 <impact-comp
+                    v-if="!nonInferiorityEnabled"
                     fieldFromBlock="impact"
 
                     v-bind:enableEdit="enabledMainInputs.impact"
                     v-bind:isBlockFocused="focusedBlock == 'impact'"
                     v-on:update:focus="updateFocus">
                 </impact-comp>
+
+                <non-inferiority-comp
+                    v-if="nonInferiorityEnabled"
+                    fieldFromBlock="non-inferiority"
+
+                    v-bind:enableEdit="enabledMainInputs['non-inferiority']"
+                    v-bind:isBlockFocused="focusedBlock == 'non-inferiority'"
+                    v-on:update:focus="updateFocus">
+                </non-inferiority-comp>
 
                 <svg-graph></svg-graph>
 
@@ -103,6 +108,7 @@ import impactComp from './components/impact-comp.vue'
 import baseComp from './components/base-comp.vue'
 import pcTooltip from './components/pc-tooltip.vue'
 import nonInferiority from './components/non-inferiority.vue'
+import nonInferiorityComp from './components/non-inferiority-comp.vue'
 
 export default {
     mounted () {
@@ -122,9 +128,9 @@ export default {
                 base: true,
                 sample: true,
                 impact: true,
-                power: true
-            },
-            readOnlyVisitorsPerDay: 0
+                power: true,
+                'non-inferiority': true
+            }
         };
 
         // mergeComponentData has no array support for now
@@ -151,11 +157,11 @@ export default {
         },
 
         nonInferiorityEnabled () {
-            return this.nonInferiority.enabled;
+            return this.$store.state.nonInferiority.enabled
         },
 
         nonInferioritySelected () {
-            return this.nonInferiority.selected;
+            return this.$store.state.nonInferiority.selected
         },
 
         falsePosRate () {
@@ -219,7 +225,8 @@ export default {
         'sample-comp': sampleComp,
         'impact-comp' : impactComp,
         'base-comp': baseComp,
-        'non-inferiority': nonInferiority
+        'non-inferiority': nonInferiority,
+        'non-inferiority-comp': nonInferiorityComp
 
     }
 }

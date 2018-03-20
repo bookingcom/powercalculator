@@ -176,10 +176,5 @@ export default {
 </script>
 
 <style>
-.pc-inputs {
-    grid-template-areas:
-        "pc-input-left pc-input-right"
-    ;
-}
 
 </style>

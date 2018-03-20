@@ -4,7 +4,8 @@ export default {
     state:{
         threshold: 0,
         selected: 'relative', // relative, absolutePerDay
-        enabled: false
+        enabled: false,
+        expectedChange: 'nochange' // nochange, degradation, improvement
     },
     mutations: {
         'field:change' (state, { prop, value }) {
@@ -25,6 +26,32 @@ export default {
         }
     },
     getters: {
+        nonInferiorityImpact (state, getters, rootState) {
+            let { expectedChange, threshold, selected } = state,
+                newImpact = 0,
+                visitorsPerDay = rootState.attributes.visitorsPerDay,
+                base = getters.extractValue('base', rootState.attributes.base);
+
+            if (selected == 'absolutePerDay') {
+                threshold = threshold/(base*visitorsPerDay)*100
+            }
+            switch (expectedChange) {
+                case 'nochange':
+                default:
+                    // zero
+                break;
+
+                case 'degradation':
+                    newImpact = -threshold/2;
+                break;
+
+                case 'improvement':
+                    newImpact = threshold;
+                break;
+            }
+
+            return newImpact
+        },
         mu (state, getters) {
             let mu = 0;
 
