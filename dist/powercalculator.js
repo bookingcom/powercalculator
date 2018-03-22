@@ -4713,6 +4713,7 @@ jStat.models = (function(){
 });
 });
 
+// SOLVING FOR POWER
 function solveforpower_Gtest ({total_sample_size, base_rate, effect_size, alpha, alternative, mu}) {
     var sample_size = total_sample_size/2;
 
@@ -5227,6 +5228,65 @@ var _power = {
     },
 };
 
+var _threshold = {
+    getGraphYTicks () {
+        let threshold = isNaN(this.$store.state.nonInferiority.threshold) ? 0 : this.$store.state.nonInferiority.threshold,
+            arr = [threshold/1.50, threshold/1.25, threshold, threshold*1.25, threshold*1.50];
+        return arr
+    },
+    getGraphYTicksFormatted (y) {
+        let num = window.parseFloat(y);
+        if ((num % 1) !== 0) {
+            num = num.toFixed(2);
+        }
+
+        if (isNaN(num)) {
+            num = 0;
+        }
+
+        const suffix = this.$store.state.nonInferiority.selected == 'relative' ? '%' : '';
+
+        return `${num}${suffix}`
+    },
+    getCurrentYValue () {
+        return this.$store.state.nonInferiority.threshold
+    },
+    updateClonedValues (clonedObj, value) {
+        let { getters, state } = this.$store,
+            { customMu, customOpts, customAlternative, customThresholdCorrectedValue } = getters;
+
+        const thresholdCorrectedValue = customThresholdCorrectedValue({
+            threshold: value,
+            selected: state.nonInferiority.selected
+        });
+
+        const mu = customMu({
+            runtime: getters.runtime,
+            thresholdCorrectedValue: thresholdCorrectedValue,
+            visitors_per_day: getters.visitorsPerDay,
+            base_rate: getters.extractValue('base'),
+        });
+
+        const opts = customOpts({
+            selected: state.nonInferiority.selected,
+            lockedField: getters.lockedField,
+            thresholdCorrectedValue: thresholdCorrectedValue,
+            runtime: getters.runtime,
+            visitorsPerDay: getters.visitorsPerDay,
+        });
+
+        const alternative = customAlternative({ type: 'noninferiority' });
+
+        Object.assign(clonedObj, {
+            mu,
+            opts,
+            alternative
+        });
+
+        return clonedObj;
+    },
+};
+
 // name convention is the name used to set the graphY and graphX with a underscore before it
 
 var defaultConfig = {
@@ -5292,6 +5352,7 @@ var graphDataMixin = {
             _power:                     Object.assign({}, defaultConfig, _power),
             _incrementalTrialsPerDay:   Object.assign({}, defaultConfig, _incrementalTrialsPerDay),
             _days:                      Object.assign({}, defaultConfig, _days),
+            _threshold:                 Object.assign({}, defaultConfig, _threshold),
         });
     },
     methods: {
@@ -5337,6 +5398,37 @@ var graphDataMixin = {
     }
 };
 
+var svgGraphTabItem = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('label',{staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphTypeSynced),expression:"graphTypeSynced"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph"},domProps:{"value":_vm.value,"checked":_vm._q(_vm.graphTypeSynced,_vm.value)},on:{"change":function($event){_vm.graphTypeSynced=_vm.value;}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:_vm.spanClass},[_vm._v(_vm._s(_vm.graphName))])])},staticRenderFns: [],
+    props: ['graphType', 'graphX', 'graphY', 'getMetricDisplayName'],
+    data () {
+        return {
+        }
+    },
+    computed: {
+        graphName () {
+            const graphXDisplay = this.getMetricDisplayName(this.graphX);
+            const graphYDisplay = this.getMetricDisplayName(this.graphY);
+            return `${graphYDisplay} / ${graphXDisplay}`
+        },
+        value () {
+            return `${this.graphX}-${this.graphY}`
+        },
+        spanClass () {
+            return {
+                'pc-graph-radio-selected': this.graphType == this.value
+            }
+        },
+        graphTypeSynced: {
+            get () {
+                return this.graphType
+            },
+            set (newValue) {
+                this.$emit('update:graphType', newValue);
+            }
+        }
+    }
+};
+
 /*global c3*/
 /*eslint no-undef: "error"*/
 
@@ -5362,9 +5454,8 @@ document.querySelector('head').appendChild(style);
 
 
 
-var svgGraph = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-block pc-block--graph"},[_c('div',{staticClass:"pc-graph-controls"},[_c('label',{directives:[{name:"show",rawName:"v-show",value:(!_vm.isNonInferiorityEnabled),expression:"!isNonInferiorityEnabled"}],staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"days-incrementalTrialsPerDay"},domProps:{"checked":_vm._q(_vm.graphType,"days-incrementalTrialsPerDay")},on:{"change":function($event){_vm.graphType="days-incrementalTrialsPerDay";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'days-incrementalTrialsPerDay'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('incrementalTrialsPerDay'))+" / "+_vm._s(_vm.getMetricDisplayName('days')))])]),_vm._v(" "),_c('label',{directives:[{name:"show",rawName:"v-show",value:(!_vm.isNonInferiorityEnabled),expression:"!isNonInferiorityEnabled"}],staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"samplePerDay-incrementalTrials"},domProps:{"checked":_vm._q(_vm.graphType,"samplePerDay-incrementalTrials")},on:{"change":function($event){_vm.graphType="samplePerDay-incrementalTrials";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'samplePerDay-incrementalTrials'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('incrementalTrials'))+" / "+_vm._s(_vm.getMetricDisplayName('samplePerDay')))])]),_vm._v(" "),_c('label',{directives:[{name:"show",rawName:"v-show",value:(!_vm.isNonInferiorityEnabled),expression:"!isNonInferiorityEnabled"}],staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"sample-impact"},domProps:{"checked":_vm._q(_vm.graphType,"sample-impact")},on:{"change":function($event){_vm.graphType="sample-impact";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'sample-impact'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('impact'))+" / "+_vm._s(_vm.getMetricDisplayName('sample')))])]),_vm._v(" "),_c('label',{staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"sample-power"},domProps:{"checked":_vm._q(_vm.graphType,"sample-power")},on:{"change":function($event){_vm.graphType="sample-power";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'sample-power'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('power'))+" / "+_vm._s(_vm.getMetricDisplayName('sample')))])]),_vm._v(" "),_c('label',{staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"samplePerDay-power"},domProps:{"checked":_vm._q(_vm.graphType,"samplePerDay-power")},on:{"change":function($event){_vm.graphType="samplePerDay-power";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'samplePerDay-power'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('power'))+" / "+_vm._s(_vm.getMetricDisplayName('samplePerDay')))])]),_vm._v(" "),_c('label',{directives:[{name:"show",rawName:"v-show",value:(!_vm.isNonInferiorityEnabled),expression:"!isNonInferiorityEnabled"}],staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphType),expression:"graphType"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph-x","value":"impact-power"},domProps:{"checked":_vm._q(_vm.graphType,"impact-power")},on:{"change":function($event){_vm.graphType="impact-power";}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:{'pc-graph-radio-selected': _vm.graphType == 'impact-power'}},[_vm._v(_vm._s(_vm.getMetricDisplayName('power'))+" / "+_vm._s(_vm.getMetricDisplayName('impact')))])])]),_vm._v(" "),_c('div',{ref:"pc-graph-size",staticClass:"pc-graph"},[_c('div',{ref:"pc-graph-wrapper",style:(_vm.style)},[_c('div',{ref:"pc-graph"})])])])},staticRenderFns: [],
+var svgGraph = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-block pc-block--graph"},[_c('div',{staticClass:"pc-graph-controls"},_vm._l((_vm.graphList),function(graph){return _c('svgGraphTabItem',{key:graph.graphX + '-' + graph.graphY,attrs:{"graphX":graph.graphX,"graphY":graph.graphY,"getMetricDisplayName":_vm.getMetricDisplayName,"graphType":_vm.graphType},on:{"update:graphType":function($event){_vm.graphType=$event;}}})})),_vm._v(" "),_c('div',{ref:"pc-graph-size",staticClass:"pc-graph"},[_c('div',{ref:"pc-graph-wrapper",style:(_vm.style)},[_c('div',{ref:"pc-graph"})])])])},staticRenderFns: [],
     mixins: [graphDataMixin],
-    template: '#svg-graph',
     props: [],
     data () {
         return {
@@ -5419,13 +5510,54 @@ var svgGraph = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c
         },
         runtime () {
             return this.$store.state.attributes.runtime
+        },
+        graphList() {
+
+            let list = [
+                {
+                    name: 'days-incrementalTrialsPerDay',
+                    cond: !this.isNonInferiorityEnabled
+                },
+                {
+                    name: 'samplePerDay-incrementalTrials',
+                    cond: !this.isNonInferiorityEnabled
+                },
+                {
+                    name: 'sample-impact',
+                    cond: !this.isNonInferiorityEnabled
+                },
+                {
+                    name: 'sample-threshold',
+                    cond: this.isNonInferiorityEnabled
+                },
+                {
+                    name: 'sample-power',
+                    cond: true
+                },
+                {
+                    name: 'samplePerDay-power',
+                    cond: true
+                },
+                {
+                    name: 'impact-power',
+                    cond: !this.isNonInferiorityEnabled
+                },
+            ];
+
+            return list.filter((obj) => {return obj.cond == true}).map((obj) => {
+                    let [graphX, graphY] = obj.name.split('-');
+                    return {
+                        graphX,
+                        graphY
+                    }
+                })
         }
     },
     methods: {
         getDefaultGraphOption () {
             let result = 'days-incrementalTrialsPerDay';
             if (this.$store.state.nonInferiority.enabled) {
-                result = 'sample-power';
+                result = 'sample-threshold';
             }
             return result
         },
@@ -5558,6 +5690,7 @@ var svgGraph = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c
 
                 days: '# of days',
                 incrementalTrialsPerDay: 'Inc. Trials per day',
+                threshold: 'Non Inf. Threshold',
             }[metric] || ''
         }
     },
@@ -5581,8 +5714,9 @@ var svgGraph = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c
             this.updateGraphData();
         },
         isNonInferiorityEnabled (bool) {
-            if (bool) {
-                this.graphType = 'sample-power';
+            if (this.graphList.indexOf(this.graphType) == -1) {
+                let { graphX, graphY } = this.graphList[0];
+                this.graphType = `${graphX}-${graphY}`;
             }
         }
     },
@@ -5658,6 +5792,9 @@ var svgGraph = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c
         });
 
         this.updateGraphData();
+    },
+    components: {
+        svgGraphTabItem
     }
 };
 
@@ -6828,57 +6965,81 @@ var nonInferiority$1 = {
             return newImpact
         },
         mu (state, getters) {
-            let mu = 0;
+            return getters.customMu({
+                runtime: getters.runtime,
+                thresholdCorrectedValue: getters.thresholdCorrectedValue,
+                visitors_per_day: getters.visitorsPerDay,
+                base_rate: getters.extractValue('base'),
+            });
+        },
+        customMu (state, getters) {
+            return function customMuInner ({runtime, thresholdCorrectedValue, visitors_per_day, base_rate}) {
+                let mu = 0;
 
-            if (state.enabled) {
-                let thresholdType = state.selected,
-                    data = {
-                        runtime: getters.runtime,
-                        threshold: -( getters.extractValue('nonInfThreshold', getters.thresholdCorrectedValue) ),
-                        visitors_per_day: getters.visitorsPerDay,
-                        base_rate: getters.extractValue('base'),
-                    };
-                mu = {
-                    absolutePerDay: statFormulas.getMuFromAbsolutePerDay,
-                    relative: statFormulas.getMuFromRelativeDifference
-                }[thresholdType](data);
+                if (state.enabled) {
+                    let thresholdType = state.selected,
+                        data = {
+                            runtime,
+                            threshold: -( getters.extractValue('nonInfThreshold', thresholdCorrectedValue) ),
+                            visitors_per_day,
+                            base_rate
+                        };
+                    mu = {
+                        absolutePerDay: statFormulas.getMuFromAbsolutePerDay,
+                        relative: statFormulas.getMuFromRelativeDifference
+                    }[thresholdType](data);
+                }
+
+                return mu
             }
-
-            return mu
         },
         opts (state, getters) {
             if (!state.enabled) {
                 return false
             }
 
-            let type = state.selected,
-                opts;
-
-            opts = {
-                type,
-                calculating: getters.lockedField,
-                threshold: -( getters.extractValue('nonInfThreshold', getters.thresholdCorrectedValue) ),
+            let opts = {
+                selected: state.selected,
+                lockedField: getters.lockedField,
+                thresholdCorrectedValue: getters.thresholdCorrectedValue,
+                runtime: getters.runtime,
+                visitorsPerDay: getters.visitorsPerDay,
             };
 
-            if (type == 'absolutePerDay') {
-                if (getters.lockedField == 'visitorsPerDay') {
-                    opts = Object.assign(
-                        opts,
-                        {
-                            days: getters.runtime
-                        }
-                    );
-                } else {
-                    opts = Object.assign(
-                        opts,
-                        {
-                            visitors_per_day: getters.extractValue('sample', getters.visitorsPerDay)
-                        }
-                    );
+            return getters.customOpts(opts);
+        },
+        customOpts (state, getters) {
+            return function customOptsInner ({ selected, lockedField, thresholdCorrectedValue, runtime, visitorsPerDay }) {
+                let type = selected,
+                    opts;
+
+                opts = {
+                    type,
+                    calculating: lockedField,
+                    threshold: -( getters.extractValue('nonInfThreshold', thresholdCorrectedValue) ),
+                };
+
+                if (type == 'absolutePerDay') {
+                    if (lockedField == 'visitorsPerDay') {
+                        opts = Object.assign(
+                            opts,
+                            {
+                                days: runtime
+                            }
+                        );
+                    } else {
+                        opts = Object.assign(
+                            opts,
+                            {
+                                visitors_per_day: getters.extractValue('sample', visitorsPerDay)
+                            }
+                        );
+                    }
                 }
+
+                return opts
             }
 
-            return opts
         },
         alternative (state, getters) {
             if (!state.enabled) {
@@ -6886,21 +7047,33 @@ var nonInferiority$1 = {
                 return false
             }
 
-            return statFormulas.getAlternative({type: 'noninferiority'});
+            return getters.customAlternative({type: 'noninferiority'});
         },
-        thresholdCorrectedValue (state) {
-            // when relative is selected the value we will convert it to
-            // percentage
-
-            let nonInfThreshold = state.threshold;
-            const isRelative = state.selected == 'relative';
-
-            let result = nonInfThreshold;
-            if (isRelative) {
-                result = result / 100;
+        customAlternative (state, getters) {
+            return function customAlternativeInner ({type}) {
+                return statFormulas.getAlternative({type});
             }
+        },
+        thresholdCorrectedValue (state, getters) {
+            let { threshold, selected } = state;
 
-            return result;
+            return getters.customThresholdCorrectedValue({ threshold, selected });
+        },
+        customThresholdCorrectedValue (state) {
+            return function customThresholdCorrectedValueInner ({ threshold, selected }) {
+                // when relative is selected the value we will convert it to
+                // percentage
+
+                let nonInfThreshold = threshold;
+                const isRelative = selected == 'relative';
+
+                let result = nonInfThreshold;
+                if (isRelative) {
+                    result = result / 100;
+                }
+
+                return result;
+            }
         }
     }
 };

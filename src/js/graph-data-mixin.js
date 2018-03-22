@@ -7,6 +7,7 @@ import _days from './graph-data-days.js'
 import _sample from './graph-data-sample.js'
 import _samplePerDay from './graph-data-sample-per-day.js'
 import _power from './graph-data-power.js'
+import _threshold from './graph-data-threshold.js'
 
 
 var defaultConfig = {
@@ -72,6 +73,7 @@ export default {
             _power:                     Object.assign({}, defaultConfig, _power),
             _incrementalTrialsPerDay:   Object.assign({}, defaultConfig, _incrementalTrialsPerDay),
             _days:                      Object.assign({}, defaultConfig, _days),
+            _threshold:                 Object.assign({}, defaultConfig, _threshold),
         })
     },
     methods: {

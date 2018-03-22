@@ -53,57 +53,81 @@ export default {
             return newImpact
         },
         mu (state, getters) {
-            let mu = 0;
+            return getters.customMu({
+                runtime: getters.runtime,
+                thresholdCorrectedValue: getters.thresholdCorrectedValue,
+                visitors_per_day: getters.visitorsPerDay,
+                base_rate: getters.extractValue('base'),
+            });
+        },
+        customMu (state, getters) {
+            return function customMuInner ({runtime, thresholdCorrectedValue, visitors_per_day, base_rate}) {
+                let mu = 0;
 
-            if (state.enabled) {
-                let thresholdType = state.selected,
-                    data = {
-                        runtime: getters.runtime,
-                        threshold: -( getters.extractValue('nonInfThreshold', getters.thresholdCorrectedValue) ),
-                        visitors_per_day: getters.visitorsPerDay,
-                        base_rate: getters.extractValue('base'),
-                    };
-                mu = {
-                    absolutePerDay: statFormulas.getMuFromAbsolutePerDay,
-                    relative: statFormulas.getMuFromRelativeDifference
-                }[thresholdType](data)
+                if (state.enabled) {
+                    let thresholdType = state.selected,
+                        data = {
+                            runtime,
+                            threshold: -( getters.extractValue('nonInfThreshold', thresholdCorrectedValue) ),
+                            visitors_per_day,
+                            base_rate
+                        };
+                    mu = {
+                        absolutePerDay: statFormulas.getMuFromAbsolutePerDay,
+                        relative: statFormulas.getMuFromRelativeDifference
+                    }[thresholdType](data)
+                }
+
+                return mu
             }
-
-            return mu
         },
         opts (state, getters) {
             if (!state.enabled) {
                 return false
             }
 
-            let type = state.selected,
-                opts;
-
-            opts = {
-                type,
-                calculating: getters.lockedField,
-                threshold: -( getters.extractValue('nonInfThreshold', getters.thresholdCorrectedValue) ),
+            let opts = {
+                selected: state.selected,
+                lockedField: getters.lockedField,
+                thresholdCorrectedValue: getters.thresholdCorrectedValue,
+                runtime: getters.runtime,
+                visitorsPerDay: getters.visitorsPerDay,
             };
 
-            if (type == 'absolutePerDay') {
-                if (getters.lockedField == 'visitorsPerDay') {
-                    opts = Object.assign(
-                        opts,
-                        {
-                            days: getters.runtime
-                        }
-                    );
-                } else {
-                    opts = Object.assign(
-                        opts,
-                        {
-                            visitors_per_day: getters.extractValue('sample', getters.visitorsPerDay)
-                        }
-                    );
+            return getters.customOpts(opts);
+        },
+        customOpts (state, getters) {
+            return function customOptsInner ({ selected, lockedField, thresholdCorrectedValue, runtime, visitorsPerDay }) {
+                let type = selected,
+                    opts;
+
+                opts = {
+                    type,
+                    calculating: lockedField,
+                    threshold: -( getters.extractValue('nonInfThreshold', thresholdCorrectedValue) ),
+                };
+
+                if (type == 'absolutePerDay') {
+                    if (lockedField == 'visitorsPerDay') {
+                        opts = Object.assign(
+                            opts,
+                            {
+                                days: runtime
+                            }
+                        );
+                    } else {
+                        opts = Object.assign(
+                            opts,
+                            {
+                                visitors_per_day: getters.extractValue('sample', visitorsPerDay)
+                            }
+                        );
+                    }
                 }
+
+                return opts
             }
 
-            return opts
         },
         alternative (state, getters) {
             if (!state.enabled) {
@@ -111,21 +135,33 @@ export default {
                 return false
             }
 
-            return statFormulas.getAlternative({type: 'noninferiority'});
+            return getters.customAlternative({type: 'noninferiority'});
         },
-        thresholdCorrectedValue (state) {
-            // when relative is selected the value we will convert it to
-            // percentage
-
-            let nonInfThreshold = state.threshold;
-            const isRelative = state.selected == 'relative';
-
-            let result = nonInfThreshold;
-            if (isRelative) {
-                result = result / 100
+        customAlternative (state, getters) {
+            return function customAlternativeInner ({type}) {
+                return statFormulas.getAlternative({type});
             }
+        },
+        thresholdCorrectedValue (state, getters) {
+            let { threshold, selected } = state;
 
-            return result;
+            return getters.customThresholdCorrectedValue({ threshold, selected });
+        },
+        customThresholdCorrectedValue (state) {
+            return function customThresholdCorrectedValueInner ({ threshold, selected }) {
+                // when relative is selected the value we will convert it to
+                // percentage
+
+                let nonInfThreshold = threshold;
+                const isRelative = selected == 'relative';
+
+                let result = nonInfThreshold;
+                if (isRelative) {
+                    result = result / 100
+                }
+
+                return result;
+            }
         }
     }
 }
