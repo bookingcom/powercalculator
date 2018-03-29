@@ -168,6 +168,14 @@ export default {
         if (context.state.nonInferiority.enabled) {
             context.dispatch('change:noninferiorityimpact');
         }
+
+        if (context.state.attributes.calculateProp != 'sample') {
+            context.dispatch('field:change', {
+                prop: 'sample',
+                value: context.state.attributes.sample
+            })
+        }
+
         context.dispatch('update:proptocalculate');
     },
     'test:reset' (context, stateObj) {

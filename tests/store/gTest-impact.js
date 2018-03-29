@@ -8,7 +8,7 @@ Vue.use(Vuex);
 
 let store = new Vuex.Store(Store)
 
-function resetStore() {
+function resetStore(obj= {}) {
     let resetObj = {
         testType: 'gTest',
         calculateProp: 'impact',
@@ -26,11 +26,80 @@ function resetStore() {
         lockedField: 'days'
     };
 
+    Object.assign(resetObj, obj)
+
     store.dispatch('test:reset', resetObj)
 }
 
 
 function init () {
+    test('Expected initial visitedPerDay when diff sample and runtime on init', () => {
+
+        /*
+            Init action needs to adjust sample manually in this case
+            as calculate prop will not guarantee that sample, runtime and
+            visitorsPerDay are linked when calculating impact
+        */
+
+        resetStore({
+            sample: 100000,
+            runtime: 10,
+            lockedField: 'visitorsPerDay'
+        });
+
+        store.dispatch('update:proptocalculate');
+
+        // base
+        expect(store.getters.visitorsWithGoals).toBe(10000);
+
+        // sample
+        expect(store.state.attributes.sample).toBe(100000);
+        expect(store.state.attributes.visitorsPerDay).toBe(10000);
+        expect(store.state.attributes.runtime).toBe(10);
+
+        // impact block
+        expect(store.state.attributes.impact).toBe(4.77);
+        expect(store.getters.impactByMetricDisplay).toBe(0.48);
+        expect(store.getters.impactByMetricMinDisplay).toBe(9.52);
+        expect(store.getters.impactByMetricMaxDisplay).toBe(10.48);
+        expect(store.getters.impactByVisitorsDisplay).toBe(477);
+        expect(store.getters.impactByVisitorsPerDayDisplay).toBe(47);
+
+    });
+    test('Expected initial runtime when diff sample and visitorsPerDay on init', () => {
+
+        /*
+            Init action needs to adjust sample manually in this case
+            as calculate prop will not guarantee that sample, runtime and
+            visitorsPerDay are linked when calculating impact
+        */
+
+        resetStore({
+            sample: 100000,
+            visitorsPerDay: 10000,
+            lockedField: 'days'
+        });
+
+        store.dispatch('update:proptocalculate');
+
+        // base
+        expect(store.getters.visitorsWithGoals).toBe(10000);
+
+        // sample
+        expect(store.state.attributes.sample).toBe(100000);
+        expect(store.state.attributes.visitorsPerDay).toBe(10000);
+        expect(store.state.attributes.runtime).toBe(10);
+
+        // impact block
+        expect(store.state.attributes.impact).toBe(4.77);
+        expect(store.getters.impactByMetricDisplay).toBe(0.48);
+        expect(store.getters.impactByMetricMinDisplay).toBe(9.52);
+        expect(store.getters.impactByMetricMaxDisplay).toBe(10.48);
+        expect(store.getters.impactByVisitorsDisplay).toBe(477);
+        expect(store.getters.impactByVisitorsPerDayDisplay).toBe(47);
+
+    });
+
     test('Expected initial calculated value of sample', () => {
         resetStore();
 
