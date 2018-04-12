@@ -5,6 +5,15 @@ export default {
         switch (prop) {
 
             // these 3 cases will call the same extra action
+            case 'base':
+                context.commit('field:change', { prop, value })
+                if (context.state.nonInferiority.enabled === true && context.state.nonInferiority.selected == 'absolutePerDay') {
+                    context.dispatch('change:noninferiorityimpact')
+                }
+
+                context.dispatch('update:proptocalculate', context.getters.calculatedValues)
+            break;
+
             case 'sample':
             case 'runtime':
             case 'visitorsPerDay':
@@ -14,10 +23,16 @@ export default {
 
             case 'threshold':
                 context.dispatch('threshold:sideeffect', {prop, value})
+                context.dispatch('change:noninferiorityimpact')
             break;
 
             case 'impactByMetricValue':
                 context.dispatch('convert:absoluteimpact', {prop, value})
+            break;
+
+            case 'expectedChange':
+                context.commit('field:change', { prop, value })
+                context.dispatch('change:noninferiorityimpact')
             break;
 
             case 'visitorsWithGoals':
@@ -35,17 +50,23 @@ export default {
     'change:noninferiority' (context, { prop, value }) {
         // add validations necessary here
         context.commit('change:noninferiority', { prop, value })
+        context.dispatch('change:noninferiorityimpact')
 
         if (prop == 'enabled') {
 
-            context.dispatch('change:noninferiorityimpact')
+            if (value === true) {
+                context.dispatch('field:change', {
+                    prop: 'lockedField',
+                    value: 'days'
+                });
+            }
         } else {
             // update values based on nonInferiority.selected
             context.dispatch('update:proptocalculate', context.getters.calculatedValues)
         }
     },
     'change:noninferiorityimpact' (context) {
-        let impactValue = 0;
+        let impactValue = context.getters.nonInferiorityImpact;
 
         if (context.state.nonInferiority.enabled === true) {
             this.__impactBackup = context.state.attributes.impact;
@@ -60,6 +81,11 @@ export default {
     },
     'switch:lockedfield' (context) {
         let newLockedField = context.state.attributes.lockedField == 'days' ? 'visitorsPerDay' : 'days';
+
+        if (context.state.nonInferiority.enabled === true) {
+            newLockedField = 'days';
+        }
+
         context.commit('switch:lockedfield', {
             value: newLockedField
         })

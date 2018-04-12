@@ -328,6 +328,7 @@
     grid-template-rows: auto;
     grid-template-areas:
         "pc-input-left pc-input-right"
+        "pc-input-left-bottom pc-input-right-bottom"
     ;
     align-items: start;
     grid-gap: var(--row-gap) var(--columns-gap);
@@ -354,6 +355,12 @@
 }
 .pc-input-right {
     grid-area: pc-input-right;
+}
+.pc-input-left-bottom {
+    grid-area: pc-input-left-bottom;
+}
+.pc-input-right-bottom {
+    grid-area: pc-input-right-bottom;
 }
 .pc-input-details {
     font-size: 10px;
@@ -383,12 +390,7 @@
 
 /* components/impact-comp.vue */
 
-.pc-inputs {
-    grid-template-areas:
-        "pc-input-left pc-input-right"
-    ;
-}
-
+/*# sourceMappingURL=impact-comp.vue.map */
 
 /* components/base-comp.vue */
 
@@ -455,5 +457,48 @@
 }
 .pc-non-inf-treshold-input {
     margin-left: 5px;
+}
+
+
+/* components/non-inferiority-comp.vue */
+
+.pc-non-inf-select {
+    --base-padding: 5px;
+    font-size: inherit;
+    line-height: 28px;
+    border: none;
+    display: block;
+    position: relative;
+    box-sizing: border-box;
+    width: 100%;
+    filter: drop-shadow(0 4px 2px rgba(0,0,0,0.1));
+    border-radius: 5px;
+    background: var(--white);
+    padding: var(--base-padding);
+    overflow: hidden;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+.pc-non-inf-select:focus {
+    outline: 0;
+    box-shadow: inset 0 0 0 1px var(--dark-blue);
+}
+.pc-non-inf-select-wrapper {
+    position: relative;
+}
+.pc-non-inf-select-wrapper:after {
+    --border-size: 7px;
+    content: '';
+    position: absolute;
+    right: 5px;
+    bottom: 0;
+    pointer-events: none;
+    border: var(--border-size) solid transparent;
+    border-top: var(--border-size) solid var(--gray);
+    transform: translateY(calc(-50% - var(--border-size)/2));
+}
+.no-sub-title {
+    margin: 15px 0 10px 0;
 }
 

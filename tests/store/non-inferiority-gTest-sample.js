@@ -28,7 +28,8 @@ function resetStore(obj = {}) {
         // non inferiority
         threshold: 0,
         selected: 'relative',
-        enabled: true
+        enabled: true,
+        expectedChange: 'nochange'
     }, obj);
 
     store.dispatch('test:reset', resetObj)
@@ -123,6 +124,17 @@ function init () {
         expect(store.getters.impactByMetricMaxDisplay).toBe(10);
         expect(store.getters.impactByVisitorsDisplay).toBe(0);
         expect(store.getters.impactByVisitorsPerDayDisplay).toBe(0);
+
+
+        store.dispatch('change:noninferiority', {prop: 'selected', value: 'relative'});
+        store.dispatch('field:change', {prop: 'expectedChange', value: 'improvement'});
+        store.dispatch('change:noninferiority', {prop: 'selected', value: 'absolutePerDay'});
+
+        // extra tests to be sure this is updating impact correcly
+
+        // sample
+        expect(store.state.attributes.sample).toBe(65954);
+
     });
 
     test('Expected changes (none) for Relative Threshold when Runtime changes', () => {
@@ -143,8 +155,8 @@ function init () {
 
         // sample
         expect(store.state.attributes.sample).toBe(16230);
-        expect(store.state.attributes.visitorsPerDay).toBe(1082);
-        expect(store.state.attributes.runtime).toBe(15);
+        expect(store.state.attributes.visitorsPerDay).toBe(40098);
+        expect(store.state.attributes.runtime).toBe(1);
 
         // impact block
         expect(store.state.attributes.impact).toBe(0);
@@ -153,6 +165,66 @@ function init () {
         expect(store.getters.impactByMetricMaxDisplay).toBe(10);
         expect(store.getters.impactByVisitorsDisplay).toBe(0);
         expect(store.getters.impactByVisitorsPerDayDisplay).toBe(0);
+    });
+
+    test('Expected changes for Relative Threshold when Expected Change degradation', () => {
+        resetStore();
+
+        store.dispatch('field:change', {prop: 'threshold', value: 10});
+        store.dispatch('field:change', {prop: 'expectedChange', value: 'degradation'});
+
+        // non inferiority
+        expect(store.state.nonInferiority.threshold).toBe(10);
+        expect(store.state.nonInferiority.enabled).toBe(true);
+        expect(store.state.nonInferiority.selected).toBe('relative');
+        expect(store.state.nonInferiority.expectedChange).toBe('degradation');
+        expect(store.getters.thresholdCorrectedValue).toBe(0.10);
+
+        // base block
+        expect(store.getters.visitorsWithGoals).toBe(6346);
+
+        // sample
+        expect(store.state.attributes.sample).toBe(63462);
+        expect(store.state.attributes.visitorsPerDay).toBe(40098);
+        expect(store.state.attributes.runtime).toBe(2);
+
+        // impact block
+        expect(store.state.attributes.impact).toBe(-5);
+        expect(store.getters.impactByMetricDisplay).toBe(-0.5);
+        expect(store.getters.impactByMetricMinDisplay).toBe(10.5);
+        expect(store.getters.impactByMetricMaxDisplay).toBe(9.5);
+        expect(store.getters.impactByVisitorsDisplay).toBe(-317);
+        expect(store.getters.impactByVisitorsPerDayDisplay).toBe(-159);
+    });
+
+    test('Expected changes for Relative Threshold when Expected Change improvement', () => {
+        resetStore();
+
+        store.dispatch('field:change', {prop: 'threshold', value: 10});
+        store.dispatch('field:change', {prop: 'expectedChange', value: 'improvement'});
+
+        // non inferiority
+        expect(store.state.nonInferiority.threshold).toBe(10);
+        expect(store.state.nonInferiority.enabled).toBe(true);
+        expect(store.state.nonInferiority.selected).toBe('relative');
+        expect(store.state.nonInferiority.expectedChange).toBe('improvement');
+        expect(store.getters.thresholdCorrectedValue).toBe(0.10);
+
+        // base block
+        expect(store.getters.visitorsWithGoals).toBe(423);
+
+        // sample
+        expect(store.state.attributes.sample).toBe(4236);
+        expect(store.state.attributes.visitorsPerDay).toBe(40098);
+        expect(store.state.attributes.runtime).toBe(1);
+
+        // impact block
+        expect(store.state.attributes.impact).toBe(10);
+        expect(store.getters.impactByMetricDisplay).toBe(1);
+        expect(store.getters.impactByMetricMinDisplay).toBe(9);
+        expect(store.getters.impactByMetricMaxDisplay).toBe(11);
+        expect(store.getters.impactByVisitorsDisplay).toBe(42);
+        expect(store.getters.impactByVisitorsPerDayDisplay).toBe(42);
     });
 
     test('Expected changes (sample) for Absolute Threshold per Day when Runtime changes', () => {
@@ -170,12 +242,12 @@ function init () {
         expect(store.getters.thresholdCorrectedValue).toBe(100);
 
         // base block
-        expect(store.getters.visitorsWithGoals).toBe(138646);
+        expect(store.getters.visitorsWithGoals).toBe(26092);
 
         // sample
-        expect(store.state.attributes.sample).toBe(1386468);
-        expect(store.state.attributes.visitorsPerDay).toBe(92431);
-        expect(store.state.attributes.runtime).toBe(15);
+        expect(store.state.attributes.sample).toBe(260928);
+        expect(store.state.attributes.visitorsPerDay).toBe(40098);
+        expect(store.state.attributes.runtime).toBe(7);
 
         // impact block
         expect(store.state.attributes.impact).toBe(0);
@@ -205,12 +277,12 @@ function init () {
         expect(store.getters.thresholdCorrectedValue).toBe(100);
 
         // base block
-        expect(store.getters.visitorsWithGoals).toBe(138646);
+        expect(store.getters.visitorsWithGoals).toBe(26092);
 
         // sample
-        expect(store.state.attributes.sample).toBe(1386468);
-        expect(store.state.attributes.visitorsPerDay).toBe(92431);
-        expect(store.state.attributes.runtime).toBe(15);
+        expect(store.state.attributes.sample).toBe(260928);
+        expect(store.state.attributes.visitorsPerDay).toBe(40098);
+        expect(store.state.attributes.runtime).toBe(7);
 
         // impact block
         expect(store.state.attributes.impact).toBe(0);
@@ -219,6 +291,66 @@ function init () {
         expect(store.getters.impactByMetricMaxDisplay).toBe(10);
         expect(store.getters.impactByVisitorsDisplay).toBe(0);
         expect(store.getters.impactByVisitorsPerDayDisplay).toBe(0);
+    });
+
+    test('Expected changes (sample) for Absolute Threshold per Day when Expected Change degradation', () => {
+        resetStore();
+
+        store.dispatch('field:change', {prop: 'threshold', value: 100});
+        store.dispatch('change:noninferiority', {prop: 'selected', value: 'absolutePerDay'});
+        store.dispatch('field:change', {prop: 'expectedChange', value: 'degradation'});
+
+        // non inferiority
+        expect(store.state.nonInferiority.threshold).toBe(100);
+        expect(store.state.nonInferiority.enabled).toBe(true);
+        expect(store.state.nonInferiority.selected).toBe('absolutePerDay');
+        expect(store.getters.thresholdCorrectedValue).toBe(100);
+
+        // base block
+        expect(store.getters.visitorsWithGoals).toBe(103791);
+
+        // sample
+        expect(store.state.attributes.sample).toBe(1037914);
+        expect(store.state.attributes.visitorsPerDay).toBe(40098);
+        expect(store.state.attributes.runtime).toBe(26);
+
+        // impact block
+        expect(store.state.attributes.impact).toBe(-1.2469449847872711);
+        expect(store.getters.impactByMetricDisplay).toBe(-0.12);
+        expect(store.getters.impactByMetricMinDisplay).toBe(10.12);
+        expect(store.getters.impactByMetricMaxDisplay).toBe(9.88);
+        expect(store.getters.impactByVisitorsDisplay).toBe(-1294);
+        expect(store.getters.impactByVisitorsPerDayDisplay).toBe(-50);
+    });
+
+    test('Expected changes (sample) for Absolute Threshold per Day when Expected Change improvement', () => {
+        resetStore();
+
+        store.dispatch('field:change', {prop: 'threshold', value: 100});
+        store.dispatch('change:noninferiority', {prop: 'selected', value: 'absolutePerDay'});
+        store.dispatch('field:change', {prop: 'expectedChange', value: 'improvement'});
+
+        // non inferiority
+        expect(store.state.nonInferiority.threshold).toBe(100);
+        expect(store.state.nonInferiority.enabled).toBe(true);
+        expect(store.state.nonInferiority.selected).toBe('absolutePerDay');
+        expect(store.getters.thresholdCorrectedValue).toBe(100);
+
+        // base block
+        expect(store.getters.visitorsWithGoals).toBe(6595);
+
+        // sample
+        expect(store.state.attributes.sample).toBe(65954);
+        expect(store.state.attributes.visitorsPerDay).toBe(40098);
+        expect(store.state.attributes.runtime).toBe(2);
+
+        // impact block
+        expect(store.state.attributes.impact).toBe(2.4938899695745422);
+        expect(store.getters.impactByMetricDisplay).toBe(0.25);
+        expect(store.getters.impactByMetricMinDisplay).toBe(9.75);
+        expect(store.getters.impactByMetricMaxDisplay).toBe(10.25);
+        expect(store.getters.impactByVisitorsDisplay).toBe(164);
+        expect(store.getters.impactByVisitorsPerDayDisplay).toBe(82);
     });
 }
 
