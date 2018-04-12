@@ -1,30 +1,17 @@
 <template id="svg-graph">
     <div class="pc-block pc-block--graph">
         <div class="pc-graph-controls">
-            <label class="pc-graph-radio-label" v-show="!isNonInferiorityEnabled">
-                <input type="radio" class="pc-graph-radio-input" name="graph-x" value="days-incrementalTrialsPerDay" v-model="graphType">
-                <span class="pc-graph-radio-text" :class="{'pc-graph-radio-selected': graphType == 'days-incrementalTrialsPerDay'}">{{getMetricDisplayName('incrementalTrialsPerDay')}} / {{getMetricDisplayName('days')}}</span>
-            </label>
-            <label class="pc-graph-radio-label" v-show="!isNonInferiorityEnabled">
-                <input type="radio" class="pc-graph-radio-input" name="graph-x" value="samplePerDay-incrementalTrials" v-model="graphType">
-                <span class="pc-graph-radio-text" :class="{'pc-graph-radio-selected': graphType == 'samplePerDay-incrementalTrials'}">{{getMetricDisplayName('incrementalTrials')}} / {{getMetricDisplayName('samplePerDay')}}</span>
-            </label>
-            <label class="pc-graph-radio-label" v-show="!isNonInferiorityEnabled">
-                <input type="radio" class="pc-graph-radio-input" name="graph-x" value="sample-impact" v-model="graphType">
-                <span class="pc-graph-radio-text" :class="{'pc-graph-radio-selected': graphType == 'sample-impact'}">{{getMetricDisplayName('impact')}} / {{getMetricDisplayName('sample')}}</span>
-            </label>
-            <label class="pc-graph-radio-label">
-                <input type="radio" class="pc-graph-radio-input" name="graph-x" value="sample-power" v-model="graphType">
-                <span class="pc-graph-radio-text" :class="{'pc-graph-radio-selected': graphType == 'sample-power'}">{{getMetricDisplayName('power')}} / {{getMetricDisplayName('sample')}}</span>
-            </label>
-            <label class="pc-graph-radio-label">
-                <input type="radio" class="pc-graph-radio-input" name="graph-x" value="samplePerDay-power" v-model="graphType">
-                <span class="pc-graph-radio-text" :class="{'pc-graph-radio-selected': graphType == 'samplePerDay-power'}">{{getMetricDisplayName('power')}} / {{getMetricDisplayName('samplePerDay')}}</span>
-            </label>
-            <label class="pc-graph-radio-label" v-show="!isNonInferiorityEnabled">
-                <input type="radio" class="pc-graph-radio-input" name="graph-x" value="impact-power" v-model="graphType">
-                <span class="pc-graph-radio-text" :class="{'pc-graph-radio-selected': graphType == 'impact-power'}">{{getMetricDisplayName('power')}} / {{getMetricDisplayName('impact')}}</span>
-            </label>
+
+            <svgGraphTabItem
+                v-for="graph in graphList"
+                v-bind:key="graph.graphX + '-' + graph.graphY"
+                v-bind:graphX="graph.graphX"
+                v-bind:graphY="graph.graphY"
+                v-bind:getMetricDisplayName="getMetricDisplayName"
+                v-bind:graphType.sync="graphType"
+            >
+            </svgGraphTabItem>
+
         </div>
         <div class="pc-graph" ref="pc-graph-size">
             <div v-bind:style="style" ref="pc-graph-wrapper">
@@ -40,6 +27,7 @@
 /*eslint no-undef: "error"*/
 
 import graphDataMixin from '../js/graph-data-mixin.js'
+import svgGraphTabItem from './svg-graph-tab-item.vue'
 
 let dataDefault = [
         ['x', 0, 0, 0, 0, 0, 0],
@@ -65,7 +53,6 @@ document.querySelector('head').appendChild(style);
 
 export default {
     mixins: [graphDataMixin],
-    template: '#svg-graph',
     props: [],
     data () {
         return {
@@ -120,13 +107,54 @@ export default {
         },
         runtime () {
             return this.$store.state.attributes.runtime
+        },
+        graphList() {
+
+            let list = [
+                {
+                    name: 'days-incrementalTrialsPerDay',
+                    cond: !this.isNonInferiorityEnabled
+                },
+                {
+                    name: 'samplePerDay-incrementalTrials',
+                    cond: !this.isNonInferiorityEnabled
+                },
+                {
+                    name: 'sample-impact',
+                    cond: !this.isNonInferiorityEnabled
+                },
+                {
+                    name: 'sample-threshold',
+                    cond: this.isNonInferiorityEnabled
+                },
+                {
+                    name: 'sample-power',
+                    cond: true
+                },
+                {
+                    name: 'samplePerDay-power',
+                    cond: true
+                },
+                {
+                    name: 'impact-power',
+                    cond: !this.isNonInferiorityEnabled
+                },
+            ];
+
+            return list.filter((obj) => {return obj.cond == true}).map((obj) => {
+                    let [graphX, graphY] = obj.name.split('-');
+                    return {
+                        graphX,
+                        graphY
+                    }
+                })
         }
     },
     methods: {
         getDefaultGraphOption () {
             let result = 'days-incrementalTrialsPerDay';
             if (this.$store.state.nonInferiority.enabled) {
-                result = 'sample-power'
+                result = 'sample-threshold'
             }
             return result
         },
@@ -259,6 +287,7 @@ export default {
 
                 days: '# of days',
                 incrementalTrialsPerDay: 'Inc. Trials per day',
+                threshold: 'Non Inf. Threshold',
             }[metric] || ''
         }
     },
@@ -282,8 +311,9 @@ export default {
             this.updateGraphData();
         },
         isNonInferiorityEnabled (bool) {
-            if (bool) {
-                this.graphType = 'sample-power'
+            if (this.graphList.indexOf(this.graphType) == -1) {
+                let { graphX, graphY } = this.graphList[0];
+                this.graphType = `${graphX}-${graphY}`;
             }
         }
     },
@@ -359,6 +389,9 @@ export default {
         });
 
         this.updateGraphData()
+    },
+    components: {
+        svgGraphTabItem
     }
 }
 
