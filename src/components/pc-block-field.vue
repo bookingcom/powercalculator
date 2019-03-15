@@ -61,6 +61,12 @@ let validateFunctions = {
                     return value > 0
                 },
                 defaultVal: 0
+            },
+            variants: {
+                fn (value) {
+                    return Number.isInteger(value) && value > 1
+                },
+                defaultVal: 1
             }
         },
         gTest: {
@@ -376,7 +382,8 @@ export default {
 
 .pc-non-inf-treshold-input,
 .pc-power-input,
-.pc-false-positive-input {
+.pc-false-positive-input,
+.pc-variants-input {
     display: inline-block;
     vertical-align: middle;
     padding: 4px 8px;
@@ -385,6 +392,10 @@ export default {
     border: 2px solid var(--gray);
     border-radius: 8px;
     font-size: inherit;
+}
+
+.pc-variants-input {
+    width: 6.5em;
 }
 
 .pc-top-fields-error {

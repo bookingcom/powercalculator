@@ -7,8 +7,11 @@ export default {
             // these 3 cases will call the same extra action
             case 'base':
                 context.commit('field:change', { prop, value })
-                if (context.state.nonInferiority.enabled === true && context.state.nonInferiority.selected == 'absolutePerDay') {
-                    context.dispatch('change:noninferiorityimpact')
+                if (context.state.nonInferiority.enabled === true) {
+                    if (context.state.nonInferiority.selected == 'absolutePerDay') {
+                        context.dispatch('change:noninferiorityimpact')
+                    }
+                    context.dispatch('convert:noninferioritythreshold', { prop, value })
                 }
 
                 context.dispatch('update:proptocalculate', context.getters.calculatedValues)
@@ -19,11 +22,17 @@ export default {
             case 'visitorsPerDay':
                 context.dispatch('sample:sideeffect', {prop, value})
                 context.dispatch('update:proptocalculate', context.getters.calculatedValues)
+
+                if (context.state.nonInferiority.enabled === true && prop == 'visitorsPerDay') {
+                    context.dispatch('convert:noninferioritythreshold', { prop, value })
+                }
             break;
 
-            case 'threshold':
+            case 'thresholdRelative':
+            case 'thresholdAbsolute':
                 context.dispatch('threshold:sideeffect', {prop, value})
                 context.dispatch('change:noninferiorityimpact')
+                context.dispatch('convert:noninferioritythreshold', { prop, value })
             break;
 
             case 'impactByMetricValue':
@@ -42,6 +51,10 @@ export default {
             default:
                 context.commit('field:change', { prop, value })
 
+                if (context.state.nonInferiority.enabled === true) {
+                    context.dispatch('convert:noninferioritythreshold', { prop, value })
+                }
+
                 // calculate new value for calculated prop
                 context.dispatch('update:proptocalculate', context.getters.calculatedValues)
             break;
@@ -59,6 +72,11 @@ export default {
                     prop: 'lockedField',
                     value: 'days'
                 });
+                context.dispatch('field:change', {
+                    prop: 'onlyTotalVisitors',
+                    value: false
+                });
+                context.dispatch('update:calculateprop', {value: 'sample'})
             }
         } else {
             // update values based on nonInferiority.selected
@@ -70,6 +88,10 @@ export default {
 
         if (context.state.nonInferiority.enabled === true) {
             this.__impactBackup = context.state.attributes.impact;
+            context.dispatch('convert:noninferioritythreshold', {
+                prop: 'impact',
+                value: impactValue
+            });
         } else {
             impactValue = this.__impactBackup || 0;
         }
@@ -180,6 +202,46 @@ export default {
             prop: 'base',
             value: newValue
         })
+    },
+    'convert:noninferioritythreshold' (context, { prop, value }) {
+        let valueToCalculate,
+            currentValue,
+            propToUpdate,
+            calculatedValue = 0;
+
+        switch (prop) {
+            case 'thresholdRelative':
+                valueToCalculate = 'absolute';
+                currentValue = value;
+            break;
+
+            case 'thresholdAbsolute':
+                valueToCalculate = 'relative';
+                currentValue = value;
+            break;
+            default:
+                if (context.state.nonInferiority.selected == 'absolutePerDay') {
+                    valueToCalculate = 'relative';
+                } else {
+                    valueToCalculate = 'absolute';
+                }
+                currentValue = context.state.nonInferiority.threshold;
+            break;
+        }
+
+        if (valueToCalculate == 'absolute') {
+            calculatedValue = context.getters.displayValue('nonInfThresholdAbsolute', context.getters.calculateAbsoluteFromRelative(currentValue));
+            calculatedValue = Math.round(calculatedValue * 100) / 100;
+            propToUpdate = 'thresholdAbsolute';
+        } else if (valueToCalculate == 'relative') {
+            calculatedValue = context.getters.displayValue('nonInfThresholdRelative', context.getters.calculateRelativeFromAbsolute(currentValue));
+            propToUpdate = 'thresholdRelative';
+        }
+
+        context.commit('change:noninferiority', {
+            prop: propToUpdate,
+            value: calculatedValue
+        });
     },
     'update:proptocalculate' (context) {
         let calculatedObj = context.getters.calculatedValues;

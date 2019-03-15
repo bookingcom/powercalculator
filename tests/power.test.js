@@ -24,9 +24,15 @@ var lower = [{control_rate: 0.01, change: -0.001,  mu: 0     },
              {control_rate: 0.8,  change: -0.08,   mu: 0     },
              {control_rate: 0.8,  change: -0.1,    mu: -0.08 }];
 
-var configs = [{alternative: "two-sided", data: greater.concat(lower)},
-               {alternative: "greater",   data: greater},
-               {alternative: "lower",     data: lower}];
+var configs = [{alternative: "two-sided", data: greater.concat(lower),  variants: 1},
+               {alternative: "greater",   data: greater,                variants: 1},
+               {alternative: "lower",     data: lower,                  variants: 1},
+               {alternative: "two-sided", data: greater.concat(lower),  variants: 2},
+               {alternative: "greater",   data: greater,                variants: 2},
+               {alternative: "lower",     data: lower,                  variants: 2},
+               {alternative: "two-sided", data: greater.concat(lower),  variants: 3},
+               {alternative: "greater",   data: greater,                variants: 3},
+               {alternative: "lower",     data: lower,                  variants: 3}];
 
 var sample_size = util.sample_size();
 var replications = util.replications_power();
@@ -36,6 +42,7 @@ var margin = util.margin();
 configs.forEach(function(config) {
     var cases = config.data;
     cases.forEach(function(test_case) {
+        test_case.variants = config.variants;
         test("solveforpower yield the expected power with parameters: " + util.serialize(test_case), () => {
             var dataset = util.simulate_binary({
                 "control_rate": test_case.control_rate,
@@ -45,12 +52,13 @@ configs.forEach(function(config) {
             });
         
             var target = statFormula.gTest.power({
-                "total_sample_size": 2*sample_size,
+                "total_sample_size": (test_case.variants+1)*sample_size,
                 "base_rate": test_case.control_rate,
                 "effect_size": test_case.change/test_case.control_rate,
                 "mu": test_case.mu,
                 "alternative": config.alternative,
-                "alpha": default_fpr
+                "alpha": default_fpr,
+                "variants": test_case.variants,
             });
         
             expect(util.check({

@@ -2,57 +2,94 @@
     <div class="power-calculator">
         <form action="." class="pc-form">
             <div class="pc-main-header">
-                <div class="pc-test-type">
 
-                    <pc-tooltip class="pc-test-type-tooltip-wrapper">
-                        <label class="pc-test-type-labels" slot="text">
-                            <input type="radio" name="test-mode" v-model="testType" value="gTest" checked>
-                            Binary Metric
+                <div class="pc-controls-left">
+
+                    <div class="pc-test-type">
+
+                        <pc-tooltip class="pc-test-type-tooltip-wrapper">
+                            <label class="pc-test-type-labels" slot="text">
+                                <input type="radio" name="test-mode" v-model="testType" value="gTest" checked>
+                                Binomial Metric
+                            </label>
+                            <span slot="tooltip">
+                                A binomial metric is one that can be only two values like 0 or 1, yes or no, converted or not converted
+                            </span>
+                        </pc-tooltip>
+
+
+                        <pc-tooltip class="pc-test-type-tooltip-wrapper">
+                            <label class="pc-test-type-labels" slot="text">
+                                <input type="radio" name="test-mode" v-model="testType" value="tTest">
+                                Continuous Metric
+                            </label>
+                            <span slot="tooltip">
+                                A continuous metric is one that can be any number like time on site or the number of rooms sold
+                            </span>
+                        </pc-tooltip>
+
+                    </div>
+
+                    <div class="pc-traffic-mode">
+                        <label class="pc-traffic-mode-labels" slot="text">
+                            <input type="radio" name="traffic-mode" v-model="trafficMode" value="daily" checked :disabled="nonInferiorityEnabled">
+                            Daily traffic
                         </label>
-                        <span slot="tooltip">
-                            A binary metric is one that can be only two values like 0 or 1, yes or no, converted or not converted
-                        </span>
-                    </pc-tooltip>
-
-
-                    <pc-tooltip class="pc-test-type-tooltip-wrapper">
-                        <label class="pc-test-type-labels" slot="text">
-                            <input type="radio" name="test-mode" v-model="testType" value="tTest">
-                            Continuous Metric
+                        <label class="pc-traffic-mode-labels" slot="text">
+                            <input type="radio" name="traffic-mode" v-model="trafficMode" value="total" :disabled="nonInferiorityEnabled">
+                            Total traffic
                         </label>
-                        <span slot="tooltip">
-                            A continuous metric is one that can be any number like time on site or the number of rooms sold
-                        </span>
-                    </pc-tooltip>
+                    </div>
 
+                    <non-inferiority></non-inferiority>
+
+                    <div class="pc-comparison-mode">
+                        <label class="pc-comparison-mode-labels" slot="text">
+                            <input type="radio" name="comparison-mode" v-model="comparisonMode" value="all" checked>
+                            Base vs All variants
+                        </label>
+                        <label class="pc-traffic-mode-labels" slot="text">
+                            <input type="radio" name="comparison-mode" v-model="comparisonMode" value="one">
+                            Base vs One variant
+                        </label>
+                    </div>
                 </div>
-
-                <non-inferiority></non-inferiority>
-
 
                 <div class="pc-title">Power Calculator <sup style="color: #F00; font-size: 11px;">BETA</sup> </div>
 
-                <label class="pc-false-positive">
-                    <pc-block-field
-                        class="pc-false-positive-input"
-                        :class="{ 'pc-top-fields-error': falsePosRate > 10 }"
-                        suffix="%"
-                        fieldProp="falsePosRate"
-                        v-bind:fieldValue="falsePosRate"
-                        v-bind:enableEdit="true"></pc-block-field>
-                    false positive rate
-                </label>
+                <div class="pc-controls-right">
+                    <label class="pc-variants">
+                        <pc-block-field
+                            class="pc-variants-input"
+                            fieldProp="variants"
+                            prefix="base + "
+                            v-bind:fieldValue="variants"
+                            v-bind:enableEdit="true"></pc-block-field>
+                        variant{{ variants > 1 ? 's' : '' }}
+                    </label>
 
-                <label class="pc-power">
-                    <pc-block-field
-                        class="pc-power-input"
-                        suffix="%"
-                        :class="{ 'pc-top-fields-error': power < 80 }"
-                        fieldProp="power"
-                        v-bind:fieldValue="power"
-                        v-bind:enableEdit="true"></pc-block-field>
-                    power
-                </label>
+                    <label class="pc-false-positive">
+                        <pc-block-field
+                            class="pc-false-positive-input"
+                            :class="{ 'pc-top-fields-error': falsePosRate > 10 }"
+                            suffix="%"
+                            fieldProp="falsePosRate"
+                            v-bind:fieldValue="falsePosRate"
+                            v-bind:enableEdit="true"></pc-block-field>
+                        false positive rate
+                    </label>
+
+                    <label class="pc-power">
+                        <pc-block-field
+                            class="pc-power-input"
+                            suffix="%"
+                            :class="{ 'pc-top-fields-error': power < 80 }"
+                            fieldProp="power"
+                            v-bind:fieldValue="power"
+                            v-bind:enableEdit="true"></pc-block-field>
+                        power
+                    </label>
+                </div>
             </div>
 
 
@@ -151,7 +188,8 @@ export default {
                     calculateProp: this.calculateProp,
                     view: this.view,
                     lockedField: this.lockedField,
-                    nonInferiority: this.nonInferiority
+                    nonInferiority: this.nonInferiority,
+                    comparisonMode: this.comparisonMode,
                 };
             return JSON.parse(JSON.stringify(result))
         },
@@ -167,9 +205,22 @@ export default {
         falsePosRate () {
             return this.$store.state.attributes.falsePosRate
         },
-
         power () {
             return this.$store.state.attributes.power
+        },
+        variants () {
+            return this.$store.state.attributes.variants
+        },
+        comparisonMode: {
+            get () {
+                return this.$store.state.attributes.comparisonMode
+            },
+            set (newValue) {
+                this.$store.dispatch('field:change', {
+                    prop: 'comparisonMode',
+                    value: newValue
+                })
+            }
         },
         testType: {
             get () {
@@ -181,8 +232,22 @@ export default {
                     value: newValue || 0
                 })
             }
-        }
+        },
+        trafficMode: {
+            get () {
+                if (this.$store.state.attributes.onlyTotalVisitors) {
+                    return 'total';
+                }
 
+                return 'daily';
+            },
+            set (newValue) {
+                this.$store.dispatch('field:change', {
+                    prop: 'onlyTotalVisitors',
+                    value: newValue == 'total'
+                })
+            }
+        }
     },
     methods: {
         updateFocus ({fieldProp, value}) {
@@ -263,13 +328,34 @@ export default {
 
 .pc-main-header {
     display: grid;
-    grid-template-columns: min-content  min-content auto min-content min-content;
+    grid-template-columns: 33.33% 33.33% 33.33%;
     grid-template-rows: auto;
     grid-template-areas:
-        "test-type calc-options title false-positive power";
+        "controls-left title controls-right";
     align-items: center;
 
-    margin: 25px 0 25px 10px;
+    margin: 25px 10px;
+}
+
+.pc-controls-left {
+    grid-area: controls-left;
+    display: grid;
+    grid-template-columns: min-content min-content min-content min-content;
+    grid-template-rows: auto;
+    grid-template-areas:
+        "test-type traffic comparison calc-options";
+    align-items: center;
+}
+
+.pc-controls-right {
+    grid-area: controls-right;
+    display: grid;
+    grid-template-columns: auto min-content min-content;
+    grid-template-rows: auto;
+    grid-template-areas:
+        "variants false-positive power";
+    align-items: center;
+    justify-items: end;
 }
 
 .pc-title {
@@ -278,10 +364,17 @@ export default {
     text-align: center;
 }
 
+.pc-traffic-mode {
+    grid-area: traffic;
+}
+
 .pc-non-inf-label,
 .pc-test-type,
 .pc-false-positive,
-.pc-power {
+.pc-power,
+.pc-traffic-mode,
+.pc-variants,
+.pc-comparison-mode {
     font-size: 0.8em;
 }
 
@@ -293,24 +386,47 @@ export default {
     grid-area: calc-options;
 }
 
+.pc-comparison-mode {
+    grid-area: comparison;
+}
+
+.pc-test-type-labels,
+.pc-traffic-mode-labels,
+.pc-non-inf-label,
+.pc-comparison-mode-label {
+    white-space: nowrap;
+}
+
+.pc-non-inferiority ,
+.pc-test-type,
+.pc-traffic-mode,
+.pc-comparison-mode {
+    margin-left: 15px;
+}
+
 .pc-test-type-tooltip-wrapper {
     display: inline-block;
 }
 
-.pc-test-type-labels {
-    margin: 0 20px;
+.pc-variants {
+    grid-area: variants;
     white-space: nowrap;
+    align-self: end;
 }
 
 .pc-false-positive {
     grid-area: false-positive;
+    margin-left: 15px;
     white-space: nowrap;
+    align-self: end;
 }
 
 .pc-power {
     grid-area: power;
-    margin-left: 10px;
+    margin-left: 15px;
+    margin-right: 15px;
     white-space: nowrap;
+    align-self: end;
 }
 
 .pc-blocks-wrapper {
@@ -381,5 +497,9 @@ export default {
 
 .pc-block-to-calculate .pc-header {
     background: var(--dark-yellow);
+}
+
+.pc-hidden {
+    display: none!important;
 }
 </style>

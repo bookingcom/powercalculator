@@ -3,12 +3,42 @@ import statFormulas from '../../js/math.js'
 export default {
     state:{
         threshold: 0,
+        thresholdRelative: 0,
+        thresholdAbsolute: 0,
         selected: 'relative', // relative, absolutePerDay
         enabled: false,
         expectedChange: 'nochange' // nochange, degradation, improvement
     },
     mutations: {
         'field:change' (state, { prop, value }) {
+            switch (prop) {
+                case 'thresholdRelative':
+                    state.threshold = value;
+                    state.selected = 'relative';
+                break;
+                case 'thresholdAbsolute':
+                    state.threshold = value;
+                    state.selected = 'absolutePerDay';
+                break;
+                case 'threshold':
+                    if (state.selected == 'absolutePerDay') {
+                        state.thresholdAbsolute = value;
+                    } else {
+                        state.thresholdRelative = value;
+                    }
+                break;
+                case 'selected':
+                    if (value == 'absolutePerDay') {
+                        state.thresholdAbsolute = state.threshold;
+                    } else {
+                        state.thresholdRelative = state.threshold;
+                    }
+                break;
+                default:
+
+                break;
+            }
+
             if (typeof state[prop] != 'undefined') {
                 state[prop] = value;
             }
@@ -161,6 +191,22 @@ export default {
                 }
 
                 return result;
+            }
+        },
+        calculateRelativeFromAbsolute (state, getters, rootState) {
+            return function caclulateRelativeFromAbsoluteInner(absoluteThreshold) {
+                let visitorsPerDay = rootState.attributes.visitorsPerDay,
+                base = getters.extractValue('base', rootState.attributes.base);
+
+                return absoluteThreshold/(base*visitorsPerDay);
+            }
+        },
+        calculateAbsoluteFromRelative (state, getters, rootState) {
+            return function calculateAbsoluteFromRelativeInner(relativeThreshold) {
+                let visitorsPerDay = rootState.attributes.visitorsPerDay,
+                base = getters.extractValue('base', rootState.attributes.base);
+
+                return (relativeThreshold*base*visitorsPerDay)/100;
             }
         }
     }
