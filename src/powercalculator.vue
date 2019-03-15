@@ -340,10 +340,11 @@ export default {
 .pc-controls-left {
     grid-area: controls-left;
     display: grid;
-    grid-template-columns: min-content min-content min-content min-content;
-    grid-template-rows: auto;
+    grid-template-columns: min-content min-content min-content;
+    grid-template-rows: 2;
     grid-template-areas:
-        "test-type traffic comparison calc-options";
+        "calc-options calc-options calc-options"
+        "test-type traffic comparison";
     align-items: center;
 }
 
@@ -384,6 +385,7 @@ export default {
 
 .pc-non-inferiority {
     grid-area: calc-options;
+    margin-bottom: 8px;
 }
 
 .pc-comparison-mode {
