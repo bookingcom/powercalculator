@@ -36,6 +36,7 @@ export default {
     })
   ],
   output: {
+    banner: banner,
     name: 'powercalculator',
     file: 'dist/powercalculator.js',
     format: 'umd',
