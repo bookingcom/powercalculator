@@ -27,10 +27,11 @@ export default {
             mu,
             opts,
             alternative,
+            variants: getters.extractValue('variants'),
             total_sample_size: getters.extractValue('sample'),
             base_rate: getters.extractValue('base'),
             effect_size: getters.extractValue('impact'),
-            alpha: getters.extractValue('falsePosRate'),
+            alpha: state.attributes.comparisonMode === 'all' ? statFormulas.getCorrectedAlpha(getters.extractValue('falsePosRate'), getters.extractValue('variants')) : getters.extractValue('falsePosRate'),
             beta: 1 - getters.extractValue('power'), // power of 80%, beta is actually 20%
             sd_rate: getters.extractValue('sdRate')
         }

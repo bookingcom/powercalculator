@@ -19,11 +19,13 @@ function resetStore() {
         power: 80,
         falsePosRate: 10,
         sdRate: 10,
+        variants: 1,
 
         runtime: 14,
 
         visitorsPerDay: Math.ceil(561364 / 14),
-        lockedField: 'days'
+        lockedField: 'days',
+        comparisonMode: 'all'
     };
 
     store.dispatch('test:reset', resetObj)

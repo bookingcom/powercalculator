@@ -13,10 +13,10 @@
         </div>
 
 
-        <ul class="pc-inputs">
+        <ul class="pc-inputs" :class="{'pc-inputs-no-grid': onlyTotalVisitors}">
             <li class="pc-input-item pc-input-left">
                 <label>
-                    <span class="pc-input-title">Total # <small class="pc-input-sub-title">of visitors</small></span>
+                    <span class="pc-input-title">Total # <small class="pc-input-sub-title">of new visitors</small></span>
 
                     <pc-block-field
                         fieldProp="sample"
@@ -28,9 +28,9 @@
                         v-on:update:focus="updateFocus"></pc-block-field>
                 </label>
             </li>
-            <li class="pc-input-item pc-input-right pc-value-field--lockable" :class="getLockedStateClass('visitorsPerDay')">
+            <li class="pc-input-item pc-input-right pc-value-field--lockable" :class="[getLockedStateClass('visitorsPerDay'), {'pc-hidden': onlyTotalVisitors}]">
                 <label>
-                    <span class="pc-input-title">Daily # <small class="pc-input-sub-title">of visitors</small></span>
+                    <span class="pc-input-title">Daily # <small class="pc-input-sub-title">of new visitors</small></span>
 
                     <pc-block-field
                         fieldProp="visitorsPerDay"
@@ -74,7 +74,7 @@
                 </button>
 
             </li>
-            <li class="pc-input-item pc-input-right-swap pc-value-field--lockable" :class="getLockedStateClass('days')">
+            <li class="pc-input-item pc-input-right-swap pc-value-field--lockable" :class="[getLockedStateClass('days'), {'pc-hidden': onlyTotalVisitors}]">
                 <label>
                     <pc-block-field
                         fieldProp="runtime"
@@ -104,7 +104,6 @@ export default {
     extends: pcBlock,
     data () {
         return {
-            variants: 2,
             focusedBlock: ''
         }
     },
@@ -120,7 +119,10 @@ export default {
         },
         lockedField () {
             return this.$store.state.attributes.lockedField
-        }
+        },
+        onlyTotalVisitors () {
+            return this.$store.state.attributes.onlyTotalVisitors
+        },
     },
     methods: {
         updateFocus ({fieldProp, value}) {
@@ -207,6 +209,10 @@ export default {
 
 .pc-value-field--lockable.pc-value-field--locked .pc-value-field-wrapper {
     background: linear-gradient(0deg, var(--light-gray) 0%, var(--white) 100%);
+}
+
+.pc-inputs-no-grid {
+    display: block;
 }
 
 </style>

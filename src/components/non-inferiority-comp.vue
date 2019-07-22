@@ -10,20 +10,13 @@
         <ul class="pc-inputs">
             <li class="pc-input-item pc-input-left">
                 <label>
-                    <span class="pc-input-title">Acceptable Cost
-                        <small class="pc-input-sub-title">
-                            {{isRelative ?
-                                'relative difference of' :
-                                'absolute impact per day of'
-                            }}
-                        </small>
-                    </span>
+                    <span class="pc-input-title">Relative <small class="pc-input-sub-title">change</small></span>
 
                     <pc-block-field
-                        fieldProp="threshold"
-                        :suffix="isRelative ? '%' : ''"
+                        fieldProp="thresholdRelative"
+                        suffix="%"
 
-                        v-bind:fieldValue="threshold"
+                        v-bind:fieldValue="thresholdRelative"
                         v-bind:fieldFromBlock="fieldFromBlock"
                         v-bind:isBlockFocused="isBlockFocused"
                         v-bind:isReadOnly="isReadOnly"
@@ -35,22 +28,18 @@
 
             <li class="pc-input-item pc-input-right">
                 <label>
-                    <span class="pc-input-title">
-                        Type {{ isRelative ?
-                                '' :
-                                '(per day)'
-                            }}
-                        <small class="pc-input-sub-title">
-                        </small>
-                    </span>
+                    <span class="pc-input-title">Absolute <small class="pc-input-sub-title">impact per day</small></span>
 
-                    <div class="pc-non-inf-select-wrapper">
-                        <select v-model="selected" class="pc-non-inf-select">
-                            <option v-for="(option, index) in options" v-bind:key="index" v-bind:value="option.value">
-                                {{option.text}}
-                            </option>
-                        </select>
-                    </div>
+                    <pc-block-field
+                        fieldProp="thresholdAbsolute"
+                        suffix=""
+                        v-bind:fieldValue="thresholdAbsolute"
+                        v-bind:fieldFromBlock="fieldFromBlock"
+                        v-bind:isBlockFocused="isBlockFocused"
+                        v-bind:isReadOnly="isReadOnly"
+                        v-bind:enableEdit="true"
+
+                        v-on:update:focus="updateFocus"></pc-block-field>
                 </label>
             </li>
 
@@ -113,6 +102,12 @@ export default {
         },
         threshold () {
             return this.$store.state.nonInferiority.threshold
+        },
+        thresholdRelative () {
+            return this.$store.state.nonInferiority.thresholdRelative
+        },
+        thresholdAbsolute () {
+            return this.$store.state.nonInferiority.thresholdAbsolute
         },
         isRelative () {
             return this.$store.state.nonInferiority.selected == 'relative'

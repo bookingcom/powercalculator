@@ -21,22 +21,48 @@
 /* layout */
 .pc-main-header {
     display: grid;
-    grid-template-columns: min-content  min-content auto min-content min-content;
+    grid-template-columns: 33.33% 33.33% 33.33%;
     grid-template-rows: auto;
     grid-template-areas:
-        "test-type calc-options title false-positive power";
+        "controls-left title controls-right";
     align-items: center;
-    margin: 25px 0 25px 10px;
+    margin: 25px 10px;
+}
+.pc-controls-left {
+    grid-area: controls-left;
+    display: grid;
+    grid-template-columns: min-content min-content min-content;
+    grid-template-rows: 2;
+    grid-template-areas:
+        "calc-options calc-options calc-options"
+        "test-type traffic comparison";
+    align-items: center;
+}
+.pc-controls-right {
+    grid-area: controls-right;
+    display: grid;
+    grid-template-columns: auto min-content min-content;
+    grid-template-rows: auto;
+    grid-template-areas:
+        "variants false-positive power";
+    align-items: center;
+    justify-items: end;
 }
 .pc-title {
     grid-area: title;
     font-size: 30px;
     text-align: center;
 }
+.pc-traffic-mode {
+    grid-area: traffic;
+}
 .pc-non-inf-label,
 .pc-test-type,
 .pc-false-positive,
-.pc-power {
+.pc-power,
+.pc-traffic-mode,
+.pc-variants,
+.pc-comparison-mode {
     font-size: 0.8em;
 }
 .pc-test-type {
@@ -44,22 +70,43 @@
 }
 .pc-non-inferiority {
     grid-area: calc-options;
+    margin-bottom: 8px;
+}
+.pc-comparison-mode {
+    grid-area: comparison;
+}
+.pc-test-type-labels,
+.pc-traffic-mode-labels,
+.pc-non-inf-label,
+.pc-comparison-mode-label {
+    white-space: nowrap;
+}
+.pc-non-inferiority ,
+.pc-test-type,
+.pc-traffic-mode,
+.pc-comparison-mode {
+    margin-left: 15px;
 }
 .pc-test-type-tooltip-wrapper {
     display: inline-block;
 }
-.pc-test-type-labels {
-    margin: 0 20px;
+.pc-variants {
+    grid-area: variants;
     white-space: nowrap;
+    align-self: end;
 }
 .pc-false-positive {
     grid-area: false-positive;
+    margin-left: 15px;
     white-space: nowrap;
+    align-self: end;
 }
 .pc-power {
     grid-area: power;
-    margin-left: 10px;
+    margin-left: 15px;
+    margin-right: 15px;
     white-space: nowrap;
+    align-self: end;
 }
 .pc-blocks-wrapper {
     grid-area: pc-blocks-wrapper;
@@ -117,6 +164,9 @@
 .pc-block-to-calculate .pc-header {
     background: var(--dark-yellow);
 }
+.pc-hidden {
+    display: none!important;
+}
 
 
 /* components/svg-graph.vue */
@@ -161,10 +211,6 @@
 }
 
 
-/* components/svg-graph-tab-item.vue */
-
-/*# sourceMappingURL=svg-graph-tab-item.vue.map */
-
 /* components/pc-block-field.vue */
 
 .pc-value-field-wrapper {
@@ -203,7 +249,8 @@
 }
 .pc-non-inf-treshold-input,
 .pc-power-input,
-.pc-false-positive-input {
+.pc-false-positive-input,
+.pc-variants-input {
     display: inline-block;
     vertical-align: middle;
     padding: 4px 8px;
@@ -212,6 +259,9 @@
     border: 2px solid var(--gray);
     border-radius: 8px;
     font-size: inherit;
+}
+.pc-variants-input {
+    width: 6.5em;
 }
 .pc-top-fields-error {
     color: var(--red);
@@ -236,6 +286,99 @@
 }
 .pc-block-to-calculate .pc-value-formatting:after {
     color: var(--black);
+}
+
+
+/* components/impact-comp.vue */
+
+/*# sourceMappingURL=impact-comp.vue.map */
+
+/* components/pc-tooltip.vue */
+
+.pc-tooltip {
+    --tooltip-background-color: var(--black);
+    position: relative;
+}
+.tooltip-wrapper {
+    position: absolute;
+    left: 0;
+    top: calc(100% + 10px);
+    background: var(--tooltip-background-color);
+    color: var(--light-gray);
+    padding: 5px;
+    border-radius: 4px;
+    z-index: 10;
+    width: 400px;
+    white-space: normal;
+    pointer-events: none;
+}
+.tooltip-wrapper:after {
+    --size: 5px;
+    content: '';
+    position: absolute;
+    left: 50px;
+    bottom: calc(100% - var(--size));
+    transform: translate(-50%, 0) rotateZ(45deg);
+    border: var(--size) solid var(--tooltip-background-color);
+    border-right-color: transparent;
+    border-bottom-color: transparent;
+}
+
+
+/* components/non-inferiority.vue */
+
+.pc-non-inf-label {
+    white-space: nowrap;
+}
+.pc-non-inf-treshold {
+    display: flex;
+    align-items: center;
+}
+.pc-non-inf-treshold-input {
+    margin-left: 5px;
+}
+
+
+/* components/non-inferiority-comp.vue */
+
+.pc-non-inf-select {
+    --base-padding: 5px;
+    font-size: inherit;
+    line-height: 28px;
+    border: none;
+    display: block;
+    position: relative;
+    box-sizing: border-box;
+    width: 100%;
+    filter: drop-shadow(0 4px 2px rgba(0,0,0,0.1));
+    border-radius: 5px;
+    background: var(--white);
+    padding: var(--base-padding);
+    overflow: hidden;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+.pc-non-inf-select:focus {
+    outline: 0;
+    box-shadow: inset 0 0 0 1px var(--dark-blue);
+}
+.pc-non-inf-select-wrapper {
+    position: relative;
+}
+.pc-non-inf-select-wrapper:after {
+    --border-size: 7px;
+    content: '';
+    position: absolute;
+    right: 5px;
+    bottom: 0;
+    pointer-events: none;
+    border: var(--border-size) solid transparent;
+    border-top: var(--border-size) solid var(--gray);
+    transform: translateY(calc(-50% - var(--border-size)/2));
+}
+.no-sub-title {
+    margin: 15px 0 10px 0;
 }
 
 
@@ -269,6 +412,9 @@
 .pc-value-field--lockable.pc-value-field--locked .pc-value-field-wrapper[data-v-297fe272] {
     background: linear-gradient(0deg, var(--light-gray) 0%, var(--white) 100%);
 }
+.pc-inputs-no-grid[data-v-297fe272] {
+    display: block;
+}
 
 
 /* components/sample-comp.vue */
@@ -295,6 +441,32 @@
     color: var(--dark-gray);
 }
 
+
+/* components/base-comp.vue */
+
+.pc-input-left[data-v-0d0bef2b] {
+    position: relative;
+    z-index: 2;
+}
+
+
+/* components/base-comp.vue */
+
+.pc-input-sd-rate {
+    margin-top: -10px;
+    z-index: 1;
+    position: relative;
+    text-align: center;
+}
+.pc-field-sdRate {
+    width: 90%;
+    display: inline-block;
+}
+
+
+/* components/svg-graph-tab-item.vue */
+
+/*# sourceMappingURL=svg-graph-tab-item.vue.map */
 
 /* components/pc-block.vue */
 
@@ -389,120 +561,5 @@
     top: 138px;
     pointer-events: none;
     z-index: 0;
-}
-
-
-/* components/impact-comp.vue */
-
-/*# sourceMappingURL=impact-comp.vue.map */
-
-/* components/base-comp.vue */
-
-.pc-input-left[data-v-0d0bef2b] {
-    position: relative;
-    z-index: 2;
-}
-
-
-/* components/base-comp.vue */
-
-.pc-input-sd-rate {
-    margin-top: -10px;
-    z-index: 1;
-    position: relative;
-    text-align: center;
-}
-.pc-field-sdRate {
-    width: 90%;
-    display: inline-block;
-}
-
-
-/* components/pc-tooltip.vue */
-
-.pc-tooltip {
-    --tooltip-background-color: var(--black);
-    position: relative;
-}
-.tooltip-wrapper {
-    position: absolute;
-    left: 0;
-    top: calc(100% + 10px);
-    background: var(--tooltip-background-color);
-    color: var(--light-gray);
-    padding: 5px;
-    border-radius: 4px;
-    z-index: 10;
-    width: 400px;
-    white-space: normal;
-    pointer-events: none;
-}
-.tooltip-wrapper:after {
-    --size: 5px;
-    content: '';
-    position: absolute;
-    left: 50px;
-    bottom: calc(100% - var(--size));
-    transform: translate(-50%, 0) rotateZ(45deg);
-    border: var(--size) solid var(--tooltip-background-color);
-    border-right-color: transparent;
-    border-bottom-color: transparent;
-}
-
-
-/* components/non-inferiority.vue */
-
-.pc-non-inf-label {
-    white-space: nowrap;
-}
-.pc-non-inf-treshold {
-    display: flex;
-    align-items: center;
-}
-.pc-non-inf-treshold-input {
-    margin-left: 5px;
-}
-
-
-/* components/non-inferiority-comp.vue */
-
-.pc-non-inf-select {
-    --base-padding: 5px;
-    font-size: inherit;
-    line-height: 28px;
-    border: none;
-    display: block;
-    position: relative;
-    box-sizing: border-box;
-    width: 100%;
-    filter: drop-shadow(0 4px 2px rgba(0,0,0,0.1));
-    border-radius: 5px;
-    background: var(--white);
-    padding: var(--base-padding);
-    overflow: hidden;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-}
-.pc-non-inf-select:focus {
-    outline: 0;
-    box-shadow: inset 0 0 0 1px var(--dark-blue);
-}
-.pc-non-inf-select-wrapper {
-    position: relative;
-}
-.pc-non-inf-select-wrapper:after {
-    --border-size: 7px;
-    content: '';
-    position: absolute;
-    right: 5px;
-    bottom: 0;
-    pointer-events: none;
-    border: var(--border-size) solid transparent;
-    border-top: var(--border-size) solid var(--gray);
-    transform: translateY(calc(-50% - var(--border-size)/2));
-}
-.no-sub-title {
-    margin: 15px 0 10px 0;
 }
 

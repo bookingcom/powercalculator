@@ -19,6 +19,7 @@ function resetStore(obj = {}) {
         power: 80,
         falsePosRate: 10,
         sdRate: 10,
+        variants: 1,
 
         runtime: 14,
 
@@ -29,7 +30,8 @@ function resetStore(obj = {}) {
         threshold: 0,
         selected: 'relative',
         enabled: true,
-        expectedChange: 'nochange'
+        expectedChange: 'nochange',
+        comparisonMode: 'all'
     }, obj);
 
     store.dispatch('test:reset', resetObj)

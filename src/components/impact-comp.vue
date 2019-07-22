@@ -93,6 +93,7 @@
                     <span class="pc-input-details">
                         {{ testType == 'gTest' ? ' Incremental trials per day': ' Incremental change in the metric per day' }}
                     </span>
+                </label>
             </li>
         </ul>
     </div>

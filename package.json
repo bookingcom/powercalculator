@@ -39,5 +39,8 @@
     "babel-core": "^6.26.0",
     "babel-jest": "^22.4.1",
     "regenerator-runtime": "^0.11.1"
+  },
+  "jest": {
+    "testURL": "http://localhost/"
   }
 }
