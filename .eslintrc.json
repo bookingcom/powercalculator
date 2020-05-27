@@ -288,6 +288,7 @@
             "error",
             "never"
         ],
+        "vue/no-unused-components": "warn",
         "valid-jsdoc": "error",
         "vars-on-top": "off",
         "wrap-iife": "error",

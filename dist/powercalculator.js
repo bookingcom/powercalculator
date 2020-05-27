@@ -6,7 +6,7 @@
     typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
     typeof define === 'function' && define.amd ? define('powercalculator', factory) :
     (global = global || self, global.powercalculator = factory());
-}(this, function () { 'use strict';
+}(this, (function () { 'use strict';
 
     var _impact = {
         getGraphYTicks () {
@@ -43,7 +43,7 @@
         },
     };
 
-    var commonjsGlobal = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
+    var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
     function createCommonjsModule(fn, module) {
     	return module = { exports: {} }, fn(module, module.exports), module.exports;
@@ -81,8 +81,8 @@
     }
 
 
-    function isNumber(arg) {
-      return typeof arg === 'number' && arg === arg;
+    function isNumber(num) {
+      return (typeof num === 'number') ? num - num === 0 : false;
     }
 
 
@@ -105,8 +105,6 @@
     // By separating the initializer from the constructor it's easier to handle
     // always returning a new instance whether "new" was used or not.
     jStat._init = function _init(args) {
-      var i;
-
       // If first argument is an array, must be vector or matrix.
       if (isArray(args[0])) {
         // Check if matrix.
@@ -160,6 +158,14 @@
     };
 
 
+    jStat._random_fn = Math.random;
+    jStat.setRandom = function setRandom(fn) {
+      if (typeof fn !== 'function')
+        throw new TypeError('fn is not a function');
+      jStat._random_fn = fn;
+    };
+
+
     // Easily extend the jStat object.
     // TODO: is this seriously necessary?
     jStat.extend = function extend(obj) {
@@ -171,7 +177,7 @@
         return this;
       }
 
-      for (var i = 1; i < arguments.length; i++) {
+      for (i = 1; i < arguments.length; i++) {
         for (j in arguments[i])
           obj[j] = arguments[i][j];
       }
@@ -223,7 +229,7 @@
     // columns
     jStat.col = function col(arr, index) {
       if (isArray(index)) {
-        var submat = jStat.arange(arr.length).map(function(i) {
+        var submat = jStat.arange(arr.length).map(function() {
           return new Array(index.length);
         });
         index.forEach(function(ind, i){
@@ -278,7 +284,7 @@
       rows = arr.length;
       cols = arr[0].length;
 
-      for (var i = 0; i < cols; i++) {
+      for (i = 0; i < cols; i++) {
         objArr = new Array(rows);
         for (j = 0; j < rows; j++)
           objArr[j] = arr[j][i];
@@ -354,7 +360,7 @@
         cols = rows;
       }
 
-      for (var i = 0; i < rows; i++) {
+      for (i = 0; i < rows; i++) {
         res[i] = new Array(cols);
         for (j = 0; j < cols; j++)
           res[i][j] = func(i, j);
@@ -390,7 +396,7 @@
     jStat.rand = function rand(rows, cols) {
       if (!isNumber(cols))
         cols = rows;
-      return jStat.create(rows, cols, Math.random);
+      return jStat.create(rows, cols, jStat._random_fn);
     };
 
 
@@ -457,6 +463,7 @@
     // arange(5,1,-1) -> [5,4,3,2]
     jStat.arange = function arange(start, end, step) {
       var rl = [];
+      var i;
       step = step || 1;
       if (end === undefined$1) {
         end = start;
@@ -525,23 +532,24 @@
       }
 
       function slice(list, rcSlice) {
+        var colSlice, rowSlice;
         rcSlice = rcSlice || {};
         if (isNumber(rcSlice.row)) {
           if (isNumber(rcSlice.col))
             return list[rcSlice.row][rcSlice.col];
           var row = jStat.rowa(list, rcSlice.row);
-          var colSlice = rcSlice.col || {};
+          colSlice = rcSlice.col || {};
           return _slice(row, colSlice.start, colSlice.end, colSlice.step);
         }
 
         if (isNumber(rcSlice.col)) {
           var col = jStat.cola(list, rcSlice.col);
-          var rowSlice = rcSlice.row || {};
+          rowSlice = rcSlice.row || {};
           return _slice(col, rowSlice.start, rowSlice.end, rowSlice.step);
         }
 
-        var rowSlice = rcSlice.row || {};
-        var colSlice = rcSlice.col || {};
+        rowSlice = rcSlice.row || {};
+        colSlice = rcSlice.col || {};
         var rows = _slice(list, rowSlice.start, rowSlice.end, rowSlice.step);
         return rows.map(function(row) {
           return _slice(row, colSlice.start, colSlice.end, colSlice.step);
@@ -556,6 +564,7 @@
     // sliceAssign(A,{row:{start:1},col:{start:1}},[[0,0],[0,0]])
     // A=[[1,2,3],[4,0,0],[7,0,0]]
     jStat.sliceAssign = function sliceAssign(A, rcSlice, B) {
+      var nl, ml;
       if (isNumber(rcSlice.row)) {
         if (isNumber(rcSlice.col))
           return A[rcSlice.row][rcSlice.col] = B;
@@ -563,7 +572,7 @@
         rcSlice.col.start = rcSlice.col.start || 0;
         rcSlice.col.end = rcSlice.col.end || A[0].length;
         rcSlice.col.step = rcSlice.col.step || 1;
-        var nl = jStat.arange(rcSlice.col.start,
+        nl = jStat.arange(rcSlice.col.start,
                               Math.min(A.length, rcSlice.col.end),
                               rcSlice.col.step);
         var m = rcSlice.row;
@@ -578,7 +587,7 @@
         rcSlice.row.start = rcSlice.row.start || 0;
         rcSlice.row.end = rcSlice.row.end || A.length;
         rcSlice.row.step = rcSlice.row.step || 1;
-        var ml = jStat.arange(rcSlice.row.start,
+        ml = jStat.arange(rcSlice.row.start,
                               Math.min(A[0].length, rcSlice.row.end),
                               rcSlice.row.step);
         var n = rcSlice.col;
@@ -597,10 +606,10 @@
       rcSlice.col.start = rcSlice.col.start || 0;
       rcSlice.col.end = rcSlice.col.end || A[0].length;
       rcSlice.col.step = rcSlice.col.step || 1;
-      var ml = jStat.arange(rcSlice.row.start,
+      ml = jStat.arange(rcSlice.row.start,
                             Math.min(A.length, rcSlice.row.end),
                             rcSlice.row.step);
-      var nl = jStat.arange(rcSlice.col.start,
+      nl = jStat.arange(rcSlice.col.start,
                             Math.min(A[0].length, rcSlice.col.end),
                             rcSlice.col.step);
       ml.forEach(function(m, i) {
@@ -720,8 +729,9 @@
     // Extend prototype with simple shortcut methods.
     (function(funcs) {
       for (var i = 0; i < funcs.length; i++) (function(passfunc) {
-        jProto[passfunc] = new Function(
-            'return jStat(jStat.' + passfunc + '.apply(null, arguments));');
+        jProto[passfunc] = function() {
+          return jStat(jStat[passfunc].apply(null, arguments));
+        };
       })(funcs[i]);
     })('create zeros ones rand identity'.split(' '));
 
@@ -875,7 +885,7 @@
       var diffs = [];
       var arrLen = arr.length;
       var i;
-      for (var i = 1; i < arrLen; i++)
+      for (i = 1; i < arrLen; i++)
         diffs.push(arr[i] - arr[i - 1]);
       return diffs;
     };
@@ -883,20 +893,35 @@
 
     // ranks of an array
     jStat.rank = function (arr) {
-      var arrlen = arr.length;
-      var sorted = arr.slice().sort(ascNum);
-      var ranks = new Array(arrlen);
-      for (var i = 0; i < arrlen; i++) {
-        var first = sorted.indexOf(arr[i]);
-        var last = sorted.lastIndexOf(arr[i]);
-        if (first === last) {
-          var val = first;
+      var i;
+      var distinctNumbers = [];
+      var numberCounts = {};
+      for (i = 0; i < arr.length; i++) {
+        var number = arr[i];
+        if (numberCounts[number]) {
+          numberCounts[number]++;
         } else {
-          var val = (first + last) / 2;
+          numberCounts[number] = 1;
+          distinctNumbers.push(number);
         }
-        ranks[i] = val + 1;
       }
-      return ranks;
+
+      var sortedDistinctNumbers = distinctNumbers.sort(ascNum);
+      var numberRanks = {};
+      var currentRank = 1;
+      for (i = 0; i < sortedDistinctNumbers.length; i++) {
+        var number = sortedDistinctNumbers[i];
+        var count = numberCounts[number];
+        var first = currentRank;
+        var last = currentRank + count - 1;
+        var rank = (first + last) / 2;
+        numberRanks[number] = rank;
+        currentRank += count;
+      }
+
+      return arr.map(function (number) {
+        return numberRanks[number];
+      });
     };
 
 
@@ -912,7 +937,7 @@
       var mode_arr = [];
       var i;
 
-      for (var i = 0; i < arrLen; i++) {
+      for (i = 0; i < arrLen; i++) {
         if (_arr[i] === _arr[i + 1]) {
           count++;
         } else {
@@ -1028,7 +1053,7 @@
       if (typeof betap === 'undefined')
         betap = 3 / 8;
 
-      for (var i = 0; i < quantilesArray.length; i++) {
+      for (i = 0; i < quantilesArray.length; i++) {
         p = quantilesArray[i];
         m = alphap + p * (1 - alphap - betap);
         aleph = n * p + m;
@@ -1040,21 +1065,19 @@
       return quantileVals;
     };
 
-    // Returns the k-th percentile of values in a range, where k is in the
-    // range 0..1, exclusive.
-    jStat.percentile = function percentile(arr, k) {
+    // Return the k-th percentile of values in a range, where k is in the range 0..1, inclusive.
+    // Passing true for the exclusive parameter excludes both endpoints of the range.
+    jStat.percentile = function percentile(arr, k, exclusive) {
       var _arr = arr.slice().sort(ascNum);
-      var realIndex = k * (_arr.length - 1);
+      var realIndex = k * (_arr.length + (exclusive ? 1 : -1)) + (exclusive ? 0 : 1);
       var index = parseInt(realIndex);
       var frac = realIndex - index;
-
       if (index + 1 < _arr.length) {
-        return _arr[index] * (1 - frac) + _arr[index + 1] * frac;
+        return _arr[index - 1] + frac * (_arr[index] - _arr[index - 1]);
       } else {
-        return _arr[index];
+        return _arr[index - 1];
       }
     };
-
 
     // The percentile rank of score in a given array. Returns the percentage
     // of all values in the input array that are less than (kind='strict') or
@@ -1068,7 +1091,7 @@
       if (kind === 'strict')
         strict = true;
 
-      for (var i = 0; i < len; i++) {
+      for (i = 0; i < len; i++) {
         value = arr[i];
         if ((strict && value < score) ||
             (!strict && value <= score)) {
@@ -1081,17 +1104,17 @@
 
 
     // Histogram (bin count) data
-    jStat.histogram = function histogram(arr, bins) {
+    jStat.histogram = function histogram(arr, binCnt) {
+      binCnt = binCnt || 4;
       var first = jStat.min(arr);
-      var binCnt = bins || 4;
       var binWidth = (jStat.max(arr) - first) / binCnt;
       var len = arr.length;
       var bins = [];
       var i;
 
-      for (var i = 0; i < binCnt; i++)
+      for (i = 0; i < binCnt; i++)
         bins[i] = 0;
-      for (var i = 0; i < len; i++)
+      for (i = 0; i < len; i++)
         bins[Math.min(Math.floor(((arr[i] - first) / binWidth)), binCnt - 1)] += 1;
 
       return bins;
@@ -1106,7 +1129,7 @@
       var sq_dev = new Array(arr1Len);
       var i;
 
-      for (var i = 0; i < arr1Len; i++)
+      for (i = 0; i < arr1Len; i++)
         sq_dev[i] = (arr1[i] - u) * (arr2[i] - v);
 
       return jStat.sum(sq_dev) / (arr1Len - 1);
@@ -1244,11 +1267,12 @@
           var i = 0;
           var tmpthis = this;
           var args = Array.prototype.slice.call(arguments);
+          var callbackFunction;
 
           // If the last argument is a function, we assume it's a callback; we
           // strip the callback out and call the function again.
           if (isFunction(args[args.length - 1])) {
-            var callbackFunction = args[args.length - 1];
+            callbackFunction = args[args.length - 1];
             var argsToPass = args.slice(0, args.length - 1);
 
             setTimeout(function() {
@@ -1259,7 +1283,7 @@
 
           // Otherwise we curry the function args and call normally.
           } else {
-            var callbackFunction = undefined;
+            callbackFunction = undefined;
             var curriedFunction = function curriedFunction(vector) {
               return jStat[passfunc].apply(tmpthis, [vector].concat(args));
             };
@@ -1299,6 +1323,45 @@
       return Math.log(2.5066282746310005 * ser / xx) - tmp;
     };
 
+    /*
+     * log-gamma function to support poisson distribution sampling. The
+     * algorithm comes from SPECFUN by Shanjie Zhang and Jianming Jin and their
+     * book "Computation of Special Functions", 1996, John Wiley & Sons, Inc.
+     */
+    jStat.loggam = function loggam(x) {
+      var x0, x2, xp, gl, gl0;
+      var k, n;
+
+      var a = [8.333333333333333e-02, -2.777777777777778e-03,
+              7.936507936507937e-04, -5.952380952380952e-04,
+              8.417508417508418e-04, -1.917526917526918e-03,
+              6.410256410256410e-03, -2.955065359477124e-02,
+              1.796443723688307e-01, -1.39243221690590e+00];
+      x0 = x;
+      n = 0;
+      if ((x == 1.0) || (x == 2.0)) {
+          return 0.0;
+      }
+      if (x <= 7.0) {
+          n = Math.floor(7 - x);
+          x0 = x + n;
+      }
+      x2 = 1.0 / (x0 * x0);
+      xp = 2 * Math.PI;
+      gl0 = a[9];
+      for (k = 8; k >= 0; k--) {
+          gl0 *= x2;
+          gl0 += a[k];
+      }
+      gl = gl0 / x0 + 0.5 * Math.log(xp) + (x0 - 0.5) * Math.log(x0) - x0;
+      if (x <= 7.0) {
+          for (k = 1; k <= n; k++) {
+              gl -= Math.log(x0 - 1.0);
+              x0 -= 1.0;
+          }
+      }
+      return gl;
+    };
 
     // gamma of x
     jStat.gammafn = function gammafn(x) {
@@ -1315,6 +1378,9 @@
       var xnum = 0;
       var y = x;
       var i, z, yi, res;
+      if (x > 171.6243769536076) {
+        return Infinity;
+      }
       if (y <= 0) {
         res = y % 1 + 3.6e-16;
         if (res) {
@@ -1330,7 +1396,7 @@
       } else {
         z = (y -= n = (y | 0) - 1) - 1;
       }
-      for (var i = 0; i < 8; ++i) {
+      for (i = 0; i < 8; ++i) {
         xnum = (xnum + p[i]) * z;
         xden = xden * z + q[i];
       }
@@ -1338,7 +1404,7 @@
       if (yi < y) {
         res /= yi;
       } else if (yi > y) {
-        for (var i = 0; i < n; ++i) {
+        for (i = 0; i < n; ++i) {
           res *= y;
           y++;
         }
@@ -1681,8 +1747,8 @@
       if (n)
         return jStat.create(n, m, function() { return jStat.randn(); });
       do {
-        u = Math.random();
-        v = 1.7156 * (Math.random() - 0.5);
+        u = jStat._random_fn();
+        v = 1.7156 * (jStat._random_fn() - 0.5);
         x = u - 0.449871;
         y = Math.abs(v) + 0.386595;
         q = x * x + y * (0.19600 * y - 0.25472 * x);
@@ -1714,7 +1780,7 @@
           v = 1 + a2 * x;
         } while(v <= 0);
         v = v * v * v;
-        u = Math.random();
+        u = jStat._random_fn();
       } while(u > 1 - 0.331 * Math.pow(x, 4) &&
               Math.log(u) > 0.5 * x*x + a1 * (1 - v + Math.log(v)));
       // alpha > 1
@@ -1722,7 +1788,7 @@
         return a1 * v;
       // alpha < 1
       do {
-        u = Math.random();
+        u = jStat._random_fn();
       } while(u === 0);
       return Math.pow(u, 1 / oalph) * a1 * v;
     };
@@ -1946,11 +2012,11 @@
         return local + scale * Math.tan(Math.PI * (p - 0.5));
       },
 
-      median: function median(local, scale) {
+      median: function median(local/*, scale*/) {
         return local;
       },
 
-      mode: function mode(local, scale) {
+      mode: function mode(local/*, scale*/) {
         return local;
       },
 
@@ -2028,12 +2094,12 @@
         return (1 / rate) * Math.log(2);
       },
 
-      mode: function mode(rate) {
+      mode: function mode(/*rate*/) {
         return 0;
       },
 
       sample: function sample(rate) {
-        return -1 / rate * Math.log(Math.random());
+        return -1 / rate * Math.log(jStat._random_fn());
       },
 
       variance : function(rate) {
@@ -2159,7 +2225,7 @@
         return Math.pow((alpha - 1) / (alpha * beta - 1), 1 / alpha);
       },
 
-      variance: function variance(alpha, beta) {
+      variance: function variance(/*alpha, beta*/) {
         throw new Error('variance not yet implemented');
         // TODO: complete this
       }
@@ -2192,7 +2258,7 @@
         return Math.exp(mu + sigma * sigma / 2);
       },
 
-      median: function median(mu, sigma) {
+      median: function median(mu/*, sigma*/) {
         return Math.exp(mu);
       },
 
@@ -2284,15 +2350,15 @@
         return -1.41421356237309505 * std * jStat.erfcinv(2 * p) + mean;
       },
 
-      mean : function(mean, std) {
+      mean : function(mean/*, std*/) {
         return mean;
       },
 
-      median: function median(mean, std) {
+      median: function median(mean/*, std*/) {
         return mean;
       },
 
-      mode: function (mean, std) {
+      mode: function (mean/*, std*/) {
         return mean;
       },
 
@@ -2335,7 +2401,7 @@
         return scale * (shape * Math.SQRT2);
       },
 
-      mode: function mode(scale, shape) {
+      mode: function mode(scale/*, shape*/) {
         return scale;
       },
 
@@ -2372,11 +2438,11 @@
         return (dof > 1) ? 0 : undefined;
       },
 
-      median: function median(dof) {
+      median: function median(/*dof*/) {
         return 0;
       },
 
-      mode: function mode(dof) {
+      mode: function mode(/*dof*/) {
         return 0;
       },
 
@@ -2423,7 +2489,7 @@
       },
 
       sample: function sample(scale, shape) {
-        return scale * Math.pow(-Math.log(Math.random()), 1 / shape);
+        return scale * Math.pow(-Math.log(jStat._random_fn()), 1 / shape);
       },
 
       variance: function variance(scale, shape) {
@@ -2460,12 +2526,12 @@
         return jStat.mean(a, b);
       },
 
-      mode: function mode(a, b) {
+      mode: function mode(/*a, b*/) {
         throw new Error('mode is not yet implemented');
       },
 
       sample: function sample(a, b) {
-        return (a / 2 + b / 2) + (b / 2 - a / 2) * (2 * Math.random() - 1);
+        return (a / 2 + b / 2) + (b / 2 - a / 2) * (2 * jStat._random_fn() - 1);
       },
 
       variance: function variance(a, b) {
@@ -2473,6 +2539,34 @@
       }
     });
 
+
+    // Got this from http://www.math.ucla.edu/~tom/distributions/binomial.html
+    function betinc(x, a, b, eps) {
+      var a0 = 0;
+      var b0 = 1;
+      var a1 = 1;
+      var b1 = 1;
+      var m9 = 0;
+      var a2 = 0;
+      var c9;
+
+      while (Math.abs((a1 - a2) / a1) > eps) {
+        a2 = a1;
+        c9 = -(a + m9) * (a + b + m9) * x / (a + 2 * m9) / (a + 2 * m9 + 1);
+        a0 = a1 + c9 * a0;
+        b0 = b1 + c9 * b0;
+        m9 = m9 + 1;
+        c9 = m9 * (b - m9) * x / (a + 2 * m9 - 1) / (a + 2 * m9);
+        a1 = a0 + c9 * a1;
+        b1 = b0 + c9 * b1;
+        a0 = a0 / b1;
+        b0 = b0 / b1;
+        a1 = a1 / b1;
+        b1 = 1;
+      }
+
+      return a1 / a;
+    }
 
 
     // extend uniform function with static methods
@@ -2484,18 +2578,30 @@
       },
 
       cdf: function cdf(x, n, p) {
-        var binomarr = [],
-        k = 0;
-        if (x < 0) {
+        var betacdf;
+        var eps = 1e-10;
+
+        if (x < 0)
           return 0;
-        }
-        if (x < n) {
-          for (; k <= x; k++) {
-            binomarr[ k ] = jStat.binomial.pdf(k, n, p);
-          }
-          return jStat.sum(binomarr);
-        }
-        return 1;
+        if (x >= n)
+          return 1;
+        if (p < 0 || p > 1 || n <= 0)
+          return NaN;
+
+        x = Math.floor(x);
+        var z = p;
+        var a = x + 1;
+        var b = n - x;
+        var s = a + b;
+        var bt = Math.exp(jStat.gammaln(s) - jStat.gammaln(b) -
+                          jStat.gammaln(a) + a * Math.log(z) + b * Math.log(1 - z));
+
+        if (z < (a + 1) / (s + 2))
+          betacdf = bt * betinc(z, a, b, eps);
+        else
+          betacdf = 1 - bt * betinc(1 - z, b, a, eps);
+
+        return Math.round((1 - betacdf) * (1 / eps)) / (1 / eps);
       }
     });
 
@@ -2737,13 +2843,51 @@
         return l;
       },
 
-      sample: function sample(l) {
+      sampleSmall: function sampleSmall(l) {
         var p = 1, k = 0, L = Math.exp(-l);
         do {
           k++;
-          p *= Math.random();
+          p *= jStat._random_fn();
         } while (p > L);
         return k - 1;
+      },
+
+      sampleLarge: function sampleLarge(l) {
+        var lam = l;
+        var k;
+        var U, V, slam, loglam, a, b, invalpha, vr, us;
+
+        slam = Math.sqrt(lam);
+        loglam = Math.log(lam);
+        b = 0.931 + 2.53 * slam;
+        a = -0.059 + 0.02483 * b;
+        invalpha = 1.1239 + 1.1328 / (b - 3.4);
+        vr = 0.9277 - 3.6224 / (b - 2);
+
+        while (1) {
+          U = Math.random() - 0.5;
+          V = Math.random();
+          us = 0.5 - Math.abs(U);
+          k = Math.floor((2 * a / us + b) * U + lam + 0.43);
+          if ((us >= 0.07) && (V <= vr)) {
+              return k;
+          }
+          if ((k < 0) || ((us < 0.013) && (V > us))) {
+              continue;
+          }
+          /* log(V) == log(0.0) ok here */
+          /* if U==0.0 so that us==0.0, log is ok since always returns */
+          if ((Math.log(V) + Math.log(invalpha) - Math.log(a / (us * us) + b)) <= (-lam + k * loglam - jStat.loggam(k + 1))) {
+              return k;
+          }
+        }
+      },
+
+      sample: function sample(l) {
+        if (l < 10)
+          return this.sampleSmall(l);
+        else
+          return this.sampleLarge(l);
       }
     });
 
@@ -2807,7 +2951,7 @@
       },
 
       sample: function sample(a, b, c) {
-        var u = Math.random();
+        var u = jStat._random_fn();
         if (u < ((c - a) / (b - a)))
           return a + Math.sqrt(u * (b - a) * (c - a))
         return b - Math.sqrt((1 - u) * (b - a) * (b - c));
@@ -2852,7 +2996,7 @@
         return (a + b) / 2;
       },
 
-      mode: function mode(a, b) {
+      mode: function mode(/*a, b*/) {
         throw new Error('mode is not yet implemented');
       },
 
@@ -2885,15 +3029,15 @@
         }
       },
 
-      mean: function(mu, b) {
+      mean: function(mu/*, b*/) {
         return mu;
       },
 
-      median: function(mu, b) {
+      median: function(mu/*, b*/) {
         return mu;
       },
 
-      mode: function(mu, b) {
+      mode: function(mu/*, b*/) {
         return mu;
       },
 
@@ -2902,7 +3046,7 @@
       },
 
       sample: function sample(mu, b) {
-        var u = Math.random() - 0.5;
+        var u = jStat._random_fn() - 0.5;
 
         return mu - (b * laplaceSign(u) * Math.log(1 - (2 * Math.abs(u))));
       }
@@ -3416,10 +3560,11 @@
       // Note: this function returns a matrix, not a jStat object
       aug: function aug(a, b) {
         var newarr = [];
-        for (var i = 0; i < a.length; i++) {
+        var i;
+        for (i = 0; i < a.length; i++) {
           newarr.push(a[i].slice());
         }
-        for (var i = 0; i < newarr.length; i++) {
+        for (i = 0; i < newarr.length; i++) {
           push.apply(newarr[i], b[i]);
         }
         return newarr;
@@ -3465,7 +3610,7 @@
         for (; i < alend; i++) {
           vals[i] = 1;
         }
-        for (var i = 0; i < alen; i++) {
+        for (i = 0; i < alen; i++) {
           for (j = 0; j < alen; j++) {
             vals[(mrow < 0) ? mrow + alen : mrow ] *= a[i][j];
             vals[(mcol < alen) ? mcol + alen : mcol ] *= a[i][j];
@@ -3475,7 +3620,7 @@
           mrow = --rowshift - alen + 1;
           mcol = --colshift;
         }
-        for (var i = 0; i < alen; i++) {
+        for (i = 0; i < alen; i++) {
           result += vals[i];
         }
         for (; i < alend; i++) {
@@ -3495,7 +3640,7 @@
         maug, pivot, temp, k;
         a = jStat.aug(a, b);
         maug = a[0].length;
-        for(var i = 0; i < n; i++) {
+        for(i = 0; i < n; i++) {
           pivot = a[i][i];
           j = i;
           for (k = i + 1; k < m; k++) {
@@ -3518,7 +3663,7 @@
             }
           }
         }
-        for (var i = n - 1; i >= 0; i--) {
+        for (i = n - 1; i >= 0; i--) {
           sum = 0;
           for (j = i + 1; j<= n - 1; j++) {
             sum = sum + x[j] * a[i][j];
@@ -3529,37 +3674,38 @@
       },
 
       gauss_jordan: function gauss_jordan(a, b) {
-        var m = jStat.aug(a, b),
-        h = m.length,
-        w = m[0].length;
+        var m = jStat.aug(a, b);
+        var h = m.length;
+        var w = m[0].length;
         var c = 0;
+        var x, y, y2;
         // find max pivot
-        for (var y = 0; y < h; y++) {
+        for (y = 0; y < h; y++) {
           var maxrow = y;
-          for (var y2 = y+1; y2 < h; y2++) {
+          for (y2 = y+1; y2 < h; y2++) {
             if (Math.abs(m[y2][y]) > Math.abs(m[maxrow][y]))
               maxrow = y2;
           }
           var tmp = m[y];
           m[y] = m[maxrow];
           m[maxrow] = tmp;
-          for (var y2 = y+1; y2 < h; y2++) {
+          for (y2 = y+1; y2 < h; y2++) {
             c = m[y2][y] / m[y][y];
-            for (var x = y; x < w; x++) {
+            for (x = y; x < w; x++) {
               m[y2][x] -= m[y][x] * c;
             }
           }
         }
         // backsubstitute
-        for (var y = h-1; y >= 0; y--) {
+        for (y = h-1; y >= 0; y--) {
           c = m[y][y];
-          for (var y2 = 0; y2 < y; y2++) {
-            for (var x = w-1; x > y-1; x--) {
+          for (y2 = 0; y2 < y; y2++) {
+            for (x = w-1; x > y-1; x--) {
               m[y2][x] -= m[y][x] * m[y2][y] / c;
             }
           }
           m[y][y] /= c;
-          for (var x = h; x < w; x++) {
+          for (x = h; x < w; x++) {
             m[y][x] /= c;
           }
         }
@@ -3648,7 +3794,7 @@
             parts = jStat.arange(l).map(function(jj) {
               return L[l][jj] * R[jj][j];
             });
-            R[l][j] = A[i][j] - jStat.sum(parts);
+            R[l][j] = A[parts.length][j] - jStat.sum(parts);
           });
         });
         return [L, R];
@@ -3836,8 +3982,8 @@
           var n = x.length;
           var p = x[0].length;
 
+          var r = jStat.zeros(p, p);
           x = jStat.copy(x);
-          r = jStat.zeros(p, p);
 
           var i,j,k;
           for(j = 0; j < p; j++){
@@ -3862,7 +4008,7 @@
         return qr2;
       }()),
 
-      lstsq: (function(A, b) {
+      lstsq: (function() {
         // solve least squard problem for Ax=b as QR decomposition way if b is
         // [[b1],[b2],[b3]] form will return [[x1],[x2],[x3]] array form solution
         // else b is [b1,b2,b3] form will return [x1,x2,x3] array form solution
@@ -3902,17 +4048,17 @@
           var Q1 = jStat.slice(Q,{col:{end:attrs}});
           var R1 = jStat.slice(R,{row:{end:attrs}});
           var RI = R_I(R1);
-    	  var Q2 = jStat.transpose(Q1);
+          var Q2 = jStat.transpose(Q1);
 
-    	  if(Q2[0].length === undefined){
-    		  Q2 = [Q2]; // The confusing jStat.multifly implementation threat nature process again.
-    	  }
+          if(Q2[0].length === undefined){
+            Q2 = [Q2]; // The confusing jStat.multifly implementation threat nature process again.
+          }
 
           var x = jStat.multiply(jStat.multiply(RI, Q2), b);
 
-    	  if(x.length === undefined){
-    		  x = [[x]]; // The confusing jStat.multifly implementation threat nature process again.
-    	  }
+          if(x.length === undefined){
+            x = [[x]]; // The confusing jStat.multifly implementation threat nature process again.
+          }
 
 
           if (array_mode)
@@ -3934,7 +4080,7 @@
           maxim = a[0][1];
           p = 0;
           q = 1;
-          for (var i = 0; i < n; i++) {
+          for (i = 0; i < n; i++) {
             for (j = 0; j < n; j++) {
               if (i != j) {
                 if (maxim < Math.abs(a[i][j])) {
@@ -3959,7 +4105,7 @@
           b = jStat.multiply(jStat.multiply(jStat.inv(s), a), s);
           a = b;
           condition = 0;
-          for (var i = 1; i < n; i++) {
+          for (i = 1; i < n; i++) {
             for (j = 1; j < n; j++) {
               if (i != j && Math.abs(a[i][j]) > 0.001) {
                 condition = 1;
@@ -3967,7 +4113,7 @@
             }
           }
         }
-        for (var i = 0; i < n; i++) ev.push(a[i][i]);
+        for (i = 0; i < n; i++) ev.push(a[i][i]);
         //returns both the eigenvalue and eigenmatrix
         return [e, ev];
       },
@@ -4038,12 +4184,11 @@
             if (X[i] === x) p = i;
           return p;
         }
-        var n = X.length,
-        h_min = Math.abs(x - X[pos(X, x) + 1]),
-        i = 0,
-        g = [],
-        h1 = [],
-        y1, y2, m, a, j;
+        var h_min = Math.abs(x - X[pos(X, x) + 1]);
+        var i = 0;
+        var g = [];
+        var h1 = [];
+        var y1, y2, m, a, j;
         while (h >= h_min) {
           y1 = pos(X, x + h);
           y2 = pos(X, x);
@@ -4055,7 +4200,7 @@
         m = 1;
         while (a != 1) {
           for (j = 0; j < a - 1; j++)
-          h1[j] = ((Math.pow(4, m)) * g[j + 1] - g[j]) / (Math.pow(4, m) - 1);
+            h1[j] = ((Math.pow(4, m)) * g[j + 1] - g[j]) / (Math.pow(4, m) - 1);
           a = h1.length;
           g = h1;
           h1 = [];
@@ -4136,11 +4281,11 @@
         for (; i < n - 1; i++)
           h[i] = X[i + 1] - X[i];
         alpha[0] = 0;
-        for (var i = 1; i < n - 1; i++) {
+        for (i = 1; i < n - 1; i++) {
           alpha[i] = (3 / h[i]) * (F[i + 1] - F[i]) -
               (3 / h[i-1]) * (F[i] - F[i-1]);
         }
-        for (var i = 1; i < n - 1; i++) {
+        for (i = 1; i < n - 1; i++) {
           A[i] = [];
           B[i] = [];
           A[i][i-1] = h[i-1];
@@ -4180,17 +4325,17 @@
         var C = [];
         var V = [];
         var Vt = [];
-        for (var i = 0; i < m; i++) {
+        for (i = 0; i < m; i++) {
           u[i] = jStat.sum(X[i]) / n;
         }
-        for (var i = 0; i < n; i++) {
+        for (i = 0; i < n; i++) {
           B[i] = [];
           for(j = 0; j < m; j++) {
             B[i][j] = X[j][i] - u[j];
           }
         }
         B = jStat.transpose(B);
-        for (var i = 0; i < m; i++) {
+        for (i = 0; i < m; i++) {
           C[i] = [];
           for (j = 0; j < m; j++) {
             C[i][j] = (jStat.dot([B[i]], [B[j]])) / (n - 1);
@@ -4200,7 +4345,7 @@
         V = result[0];
         D = result[1];
         Vt = jStat.transpose(V);
-        for (var i = 0; i < D.length; i++) {
+        for (i = 0; i < D.length; i++) {
           for (j = i; j < D.length; j++) {
             if(D[i] < D[j])  {
               temp1 = D[i];
@@ -4213,7 +4358,7 @@
           }
         }
         Bt = jStat.transpose(B);
-        for (var i = 0; i < m; i++) {
+        for (i = 0; i < m; i++) {
           Y[i] = [];
           for (j = 0; j < Bt.length; j++) {
             Y[i][j] = jStat.dot([Vt[i]], [Bt[j]]);
@@ -4370,30 +4515,26 @@
         expVar, sample, sampMean, sampSampMean, tmpargs, unexpVar, i, j;
         if (args.length === 1) {
           tmpargs = new Array(args[0].length);
-          for (var i = 0; i < args[0].length; i++) {
+          for (i = 0; i < args[0].length; i++) {
             tmpargs[i] = args[0][i];
           }
           args = tmpargs;
         }
-        // 2 sample case
-        if (args.length === 2) {
-          return jStat.variance(args[0]) / jStat.variance(args[1]);
-        }
         // Builds sample array
         sample = new Array();
-        for (var i = 0; i < args.length; i++) {
+        for (i = 0; i < args.length; i++) {
           sample = sample.concat(args[i]);
         }
         sampMean = jStat.mean(sample);
         // Computes the explained variance
         expVar = 0;
-        for (var i = 0; i < args.length; i++) {
+        for (i = 0; i < args.length; i++) {
           expVar = expVar + args[i].length * Math.pow(jStat.mean(args[i]) - sampMean, 2);
         }
         expVar /= (args.length - 1);
         // Computes unexplained variance
         unexpVar = 0;
-        for (var i = 0; i < args.length; i++) {
+        for (i = 0; i < args.length; i++) {
           sampSampMean = jStat.mean(args[i]);
           for (j = 0; j < args[i].length; j++) {
             unexpVar += Math.pow(args[i][j] - sampSampMean, 2);
@@ -4412,10 +4553,10 @@
         if (isNumber(args[0])) {
           return 1 - jStat.centralF.cdf(args[0], args[1], args[2]);
         }
-        anovafscore = jStat.anovafscore(args);
+        var anovafscore = jStat.anovafscore(args);
         df1 = args.length - 1;
         n = 0;
-        for (var i = 0; i < args.length; i++) {
+        for (i = 0; i < args.length; i++) {
           n = n + args[i].length;
         }
         df2 = n - df1 - 1;
@@ -4435,7 +4576,7 @@
       anovaftes: function anovaftes() {
         var n = 0;
         var i;
-        for (var i = 0; i < this.length; i++) {
+        for (i = 0; i < this.length; i++) {
           n = n + this[i].length;
         }
         return jStat.ftest(this.anovafscore(), this.length - 1, n - this.length);
@@ -4588,11 +4729,6 @@
 
     }(jStat, Math));
     jStat.models = (function(){
-
-      function sub_regress(endog, exog) {
-        return ols(endog, exog);
-      }
-
       function sub_regress(exog) {
         var var_count = exog[0].length;
         var modelList = jStat.arange(var_count).map(function(endog_index) {
@@ -4705,6 +4841,212 @@
 
       return { ols: ols_wrap };
     })();
+    //To regress, simply build X matrix
+    //(append column of 1's) using
+    //buildxmatrix and build the Y
+    //matrix using buildymatrix
+    //(simply the transpose)
+    //and run regress.
+
+
+
+    //Regressions
+
+    jStat.extend({
+      buildxmatrix: function buildxmatrix(){
+        //Parameters will be passed in as such
+        //(array1,array2,array3,...)
+        //as (x1,x2,x3,...)
+        //needs to be (1,x1,x2,x3,...)
+        var matrixRows = new Array(arguments.length);
+        for(var i=0;i<arguments.length;i++){
+          var array = [1];
+          matrixRows[i]= array.concat(arguments[i]);
+        }
+        return jStat(matrixRows);
+
+      },
+
+      builddxmatrix: function builddxmatrix() {
+        //Paramters will be passed in as such
+        //([array1,array2,...]
+        var matrixRows = new Array(arguments[0].length);
+        for(var i=0;i<arguments[0].length;i++){
+          var array = [1];
+          matrixRows[i]= array.concat(arguments[0][i]);
+        }
+        return jStat(matrixRows);
+
+      },
+
+      buildjxmatrix: function buildjxmatrix(jMat) {
+        //Builds from jStat Matrix
+        var pass = new Array(jMat.length);
+        for(var i=0;i<jMat.length;i++){
+          pass[i] = jMat[i];
+        }
+        return jStat.builddxmatrix(pass);
+
+      },
+
+      buildymatrix: function buildymatrix(array){
+        return jStat(array).transpose();
+      },
+
+      buildjymatrix: function buildjymatrix(jMat){
+        return jMat.transpose();
+      },
+
+      matrixmult: function matrixmult(A,B){
+        var i, j, k, result, sum;
+        if (A.cols() == B.rows()) {
+          if(B.rows()>1){
+            result = [];
+            for (i = 0; i < A.rows(); i++) {
+              result[i] = [];
+              for (j = 0; j < B.cols(); j++) {
+                sum = 0;
+                for (k = 0; k < A.cols(); k++) {
+                  sum += A.toArray()[i][k] * B.toArray()[k][j];
+                }
+                result[i][j] = sum;
+              }
+            }
+            return jStat(result);
+          }
+          result = [];
+          for (i = 0; i < A.rows(); i++) {
+            result[i] = [];
+            for (j = 0; j < B.cols(); j++) {
+              sum = 0;
+              for (k = 0; k < A.cols(); k++) {
+                sum += A.toArray()[i][k] * B.toArray()[j];
+              }
+              result[i][j] = sum;
+            }
+          }
+          return jStat(result);
+        }
+      },
+
+      //regress and regresst to be fixed
+
+      regress: function regress(jMatX,jMatY){
+        //print("regressin!");
+        //print(jMatX.toArray());
+        var innerinv = jStat.xtranspxinv(jMatX);
+        //print(innerinv);
+        var xtransp = jMatX.transpose();
+        var next = jStat.matrixmult(jStat(innerinv),xtransp);
+        return jStat.matrixmult(next,jMatY);
+
+      },
+
+      regresst: function regresst(jMatX,jMatY,sides){
+        var beta = jStat.regress(jMatX,jMatY);
+
+        var compile = {};
+        compile.anova = {};
+        var jMatYBar = jStat.jMatYBar(jMatX, beta);
+        compile.yBar = jMatYBar;
+        var yAverage = jMatY.mean();
+        compile.anova.residuals = jStat.residuals(jMatY, jMatYBar);
+
+        compile.anova.ssr = jStat.ssr(jMatYBar, yAverage);
+        compile.anova.msr = compile.anova.ssr / (jMatX[0].length - 1);
+
+        compile.anova.sse = jStat.sse(jMatY, jMatYBar);
+        compile.anova.mse =
+            compile.anova.sse / (jMatY.length - (jMatX[0].length - 1) - 1);
+
+        compile.anova.sst = jStat.sst(jMatY, yAverage);
+        compile.anova.mst = compile.anova.sst / (jMatY.length - 1);
+
+        compile.anova.r2 = 1 - (compile.anova.sse / compile.anova.sst);
+        if (compile.anova.r2 < 0) compile.anova.r2 = 0;
+
+        compile.anova.fratio = compile.anova.msr / compile.anova.mse;
+        compile.anova.pvalue =
+            jStat.anovaftest(compile.anova.fratio,
+                             jMatX[0].length - 1,
+                             jMatY.length - (jMatX[0].length - 1) - 1);
+
+        compile.anova.rmse = Math.sqrt(compile.anova.mse);
+
+        compile.anova.r2adj = 1 - (compile.anova.mse / compile.anova.mst);
+        if (compile.anova.r2adj < 0) compile.anova.r2adj = 0;
+
+        compile.stats = new Array(jMatX[0].length);
+        var covar = jStat.xtranspxinv(jMatX);
+        var sds, ts, ps;
+
+        for(var i=0; i<beta.length;i++){
+          sds=Math.sqrt(compile.anova.mse * Math.abs(covar[i][i]));
+          ts= Math.abs(beta[i] / sds);
+          ps= jStat.ttest(ts, jMatY.length - jMatX[0].length - 1, sides);
+
+          compile.stats[i]=[beta[i], sds, ts, ps];
+        }
+
+        compile.regress = beta;
+        return compile;
+      },
+
+      xtranspx: function xtranspx(jMatX){
+        return jStat.matrixmult(jMatX.transpose(),jMatX);
+      },
+
+
+      xtranspxinv: function xtranspxinv(jMatX){
+        var inner = jStat.matrixmult(jMatX.transpose(),jMatX);
+        var innerinv = jStat.inv(inner);
+        return innerinv;
+      },
+
+      jMatYBar: function jMatYBar(jMatX, beta) {
+        var yBar = jStat.matrixmult(jMatX, beta);
+        return new jStat(yBar);
+      },
+
+      residuals: function residuals(jMatY, jMatYBar) {
+        return jStat.matrixsubtract(jMatY, jMatYBar);
+      },
+
+      ssr: function ssr(jMatYBar, yAverage) {
+        var ssr = 0;
+        for(var i = 0; i < jMatYBar.length; i++) {
+          ssr += Math.pow(jMatYBar[i] - yAverage, 2);
+        }
+        return ssr;
+      },
+
+      sse: function sse(jMatY, jMatYBar) {
+        var sse = 0;
+        for(var i = 0; i < jMatY.length; i++) {
+          sse += Math.pow(jMatY[i] - jMatYBar[i], 2);
+        }
+        return sse;
+      },
+
+      sst: function sst(jMatY, yAverage) {
+        var sst = 0;
+        for(var i = 0; i < jMatY.length; i++) {
+          sst += Math.pow(jMatY[i] - yAverage, 2);
+        }
+        return sst;
+      },
+
+      matrixsubtract: function matrixsubtract(A,B){
+        var ans = new Array(A.length);
+        for(var i=0;i<A.length;i++){
+          ans[i] = new Array(A[i].length);
+          for(var j=0;j<A[i].length;j++){
+            ans[i][j]=A[i][j]-B[i][j];
+          }
+        }
+        return jStat(ans);
+      }
+    });
       // Make it compatible with previous version.
       jStat.jStat = jStat;
 
@@ -5359,7 +5701,16 @@
         }
     };
 
-    var svgGraphTabItem = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('label',{staticClass:"pc-graph-radio-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.graphTypeSynced),expression:"graphTypeSynced"}],staticClass:"pc-graph-radio-input",attrs:{"type":"radio","name":"graph"},domProps:{"value":_vm.value,"checked":_vm._q(_vm.graphTypeSynced,_vm.value)},on:{"change":function($event){_vm.graphTypeSynced=_vm.value;}}}),_vm._v(" "),_c('span',{staticClass:"pc-graph-radio-text",class:_vm.spanClass},[_vm._v(_vm._s(_vm.graphName))])])},staticRenderFns: [],
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+
+    var script = {
         props: ['graphType', 'graphX', 'graphY', 'getMetricDisplayName'],
         data () {
             return {
@@ -5390,6 +5741,206 @@
         }
     };
 
+    function normalizeComponent(template, style, script, scopeId, isFunctionalTemplate, moduleIdentifier /* server only */, shadowMode, createInjector, createInjectorSSR, createInjectorShadow) {
+        if (typeof shadowMode !== 'boolean') {
+            createInjectorSSR = createInjector;
+            createInjector = shadowMode;
+            shadowMode = false;
+        }
+        // Vue.extend constructor export interop.
+        const options = typeof script === 'function' ? script.options : script;
+        // render functions
+        if (template && template.render) {
+            options.render = template.render;
+            options.staticRenderFns = template.staticRenderFns;
+            options._compiled = true;
+            // functional template
+            if (isFunctionalTemplate) {
+                options.functional = true;
+            }
+        }
+        // scopedId
+        if (scopeId) {
+            options._scopeId = scopeId;
+        }
+        let hook;
+        if (moduleIdentifier) {
+            // server build
+            hook = function (context) {
+                // 2.3 injection
+                context =
+                    context || // cached call
+                        (this.$vnode && this.$vnode.ssrContext) || // stateful
+                        (this.parent && this.parent.$vnode && this.parent.$vnode.ssrContext); // functional
+                // 2.2 with runInNewContext: true
+                if (!context && typeof __VUE_SSR_CONTEXT__ !== 'undefined') {
+                    context = __VUE_SSR_CONTEXT__;
+                }
+                // inject component styles
+                if (style) {
+                    style.call(this, createInjectorSSR(context));
+                }
+                // register component module identifier for async chunk inference
+                if (context && context._registeredComponents) {
+                    context._registeredComponents.add(moduleIdentifier);
+                }
+            };
+            // used by ssr in case component is cached and beforeCreate
+            // never gets called
+            options._ssrRegister = hook;
+        }
+        else if (style) {
+            hook = shadowMode
+                ? function (context) {
+                    style.call(this, createInjectorShadow(context, this.$root.$options.shadowRoot));
+                }
+                : function (context) {
+                    style.call(this, createInjector(context));
+                };
+        }
+        if (hook) {
+            if (options.functional) {
+                // register for functional component in vue file
+                const originalRender = options.render;
+                options.render = function renderWithStyleInjection(h, context) {
+                    hook.call(context);
+                    return originalRender(h, context);
+                };
+            }
+            else {
+                // inject component registration as beforeCreate hook
+                const existing = options.beforeCreate;
+                options.beforeCreate = existing ? [].concat(existing, hook) : [hook];
+            }
+        }
+        return script;
+    }
+
+    const isOldIE = typeof navigator !== 'undefined' &&
+        /msie [6-9]\\b/.test(navigator.userAgent.toLowerCase());
+    function createInjector(context) {
+        return (id, style) => addStyle(id, style);
+    }
+    let HEAD;
+    const styles = {};
+    function addStyle(id, css) {
+        const group = isOldIE ? css.media || 'default' : id;
+        const style = styles[group] || (styles[group] = { ids: new Set(), styles: [] });
+        if (!style.ids.has(id)) {
+            style.ids.add(id);
+            let code = css.source;
+            if (css.map) {
+                // https://developer.chrome.com/devtools/docs/javascript-debugging
+                // this makes source maps inside style tags work properly in Chrome
+                code += '\n/*# sourceURL=' + css.map.sources[0] + ' */';
+                // http://stackoverflow.com/a/26603875
+                code +=
+                    '\n/*# sourceMappingURL=data:application/json;base64,' +
+                        btoa(unescape(encodeURIComponent(JSON.stringify(css.map)))) +
+                        ' */';
+            }
+            if (!style.element) {
+                style.element = document.createElement('style');
+                style.element.type = 'text/css';
+                if (css.media)
+                    style.element.setAttribute('media', css.media);
+                if (HEAD === undefined) {
+                    HEAD = document.head || document.getElementsByTagName('head')[0];
+                }
+                HEAD.appendChild(style.element);
+            }
+            if ('styleSheet' in style.element) {
+                style.styles.push(code);
+                style.element.styleSheet.cssText = style.styles
+                    .filter(Boolean)
+                    .join('\n');
+            }
+            else {
+                const index = style.ids.size - 1;
+                const textNode = document.createTextNode(code);
+                const nodes = style.element.childNodes;
+                if (nodes[index])
+                    style.element.removeChild(nodes[index]);
+                if (nodes.length)
+                    style.element.insertBefore(textNode, nodes[index]);
+                else
+                    style.element.appendChild(textNode);
+            }
+        }
+    }
+
+    /* script */
+    const __vue_script__ = script;
+
+    /* template */
+    var __vue_render__ = function() {
+      var _vm = this;
+      var _h = _vm.$createElement;
+      var _c = _vm._self._c || _h;
+      return _c("label", { staticClass: "pc-graph-radio-label" }, [
+        _c("input", {
+          directives: [
+            {
+              name: "model",
+              rawName: "v-model",
+              value: _vm.graphTypeSynced,
+              expression: "graphTypeSynced"
+            }
+          ],
+          staticClass: "pc-graph-radio-input",
+          attrs: { type: "radio", name: "graph" },
+          domProps: {
+            value: _vm.value,
+            checked: _vm._q(_vm.graphTypeSynced, _vm.value)
+          },
+          on: {
+            change: function($event) {
+              _vm.graphTypeSynced = _vm.value;
+            }
+          }
+        }),
+        _vm._v(" "),
+        _c("span", { staticClass: "pc-graph-radio-text", class: _vm.spanClass }, [
+          _vm._v(_vm._s(_vm.graphName))
+        ])
+      ])
+    };
+    var __vue_staticRenderFns__ = [];
+    __vue_render__._withStripped = true;
+
+      /* style */
+      const __vue_inject_styles__ = function (inject) {
+        if (!inject) return
+        inject("data-v-00ec026a_0", { source: "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", map: {"version":3,"sources":[],"names":[],"mappings":"","file":"svg-graph-tab-item.vue"}, media: undefined });
+
+      };
+      /* scoped */
+      const __vue_scope_id__ = undefined;
+      /* module identifier */
+      const __vue_module_identifier__ = undefined;
+      /* functional template */
+      const __vue_is_functional_template__ = false;
+      /* style inject SSR */
+      
+      /* style inject shadow dom */
+      
+
+      
+      const __vue_component__ = /*#__PURE__*/normalizeComponent(
+        { render: __vue_render__, staticRenderFns: __vue_staticRenderFns__ },
+        __vue_inject_styles__,
+        __vue_script__,
+        __vue_scope_id__,
+        __vue_is_functional_template__,
+        __vue_module_identifier__,
+        false,
+        createInjector,
+        undefined,
+        undefined
+      );
+
+    //
+
     let dataDefault = [
             ['x', 0, 0, 0, 0, 0, 0],
             ['Sample', 0, 0, 0, 0, 0],
@@ -5412,7 +5963,7 @@
 
 
 
-    var svgGraph = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-block pc-block--graph"},[_c('div',{staticClass:"pc-graph-controls"},_vm._l((_vm.graphList),function(graph){return _c('svgGraphTabItem',{key:graph.graphX + '-' + graph.graphY,attrs:{"graphX":graph.graphX,"graphY":graph.graphY,"getMetricDisplayName":_vm.getMetricDisplayName,"graphType":_vm.graphType},on:{"update:graphType":function($event){_vm.graphType=$event;},"update:graph-type":function($event){_vm.graphType=$event;}}})}),1),_vm._v(" "),_c('div',{ref:"pc-graph-size",staticClass:"pc-graph"},[_c('div',{ref:"pc-graph-wrapper",style:(_vm.style)},[_c('div',{ref:"pc-graph"})])])])},staticRenderFns: [],
+    var script$1 = {
         mixins: [graphDataMixin],
         props: [],
         data () {
@@ -5752,9 +6303,120 @@
             this.updateGraphData();
         },
         components: {
-            svgGraphTabItem
+            svgGraphTabItem: __vue_component__
         }
     };
+
+    /* script */
+    const __vue_script__$1 = script$1;
+
+    /* template */
+    var __vue_render__$1 = function() {
+      var _vm = this;
+      var _h = _vm.$createElement;
+      var _c = _vm._self._c || _h;
+      return _c("div", { staticClass: "pc-block pc-block--graph" }, [
+        _c(
+          "div",
+          { staticClass: "pc-graph-controls" },
+          _vm._l(_vm.graphList, function(graph) {
+            return _c("svgGraphTabItem", {
+              key: graph.graphX + "-" + graph.graphY,
+              attrs: {
+                graphX: graph.graphX,
+                graphY: graph.graphY,
+                getMetricDisplayName: _vm.getMetricDisplayName,
+                graphType: _vm.graphType
+              },
+              on: {
+                "update:graphType": function($event) {
+                  _vm.graphType = $event;
+                },
+                "update:graph-type": function($event) {
+                  _vm.graphType = $event;
+                }
+              }
+            })
+          }),
+          1
+        ),
+        _vm._v(" "),
+        _c("div", { ref: "pc-graph-size", staticClass: "pc-graph" }, [
+          _c("div", { ref: "pc-graph-wrapper", style: _vm.style }, [
+            _c("div", { ref: "pc-graph" })
+          ])
+        ])
+      ])
+    };
+    var __vue_staticRenderFns__$1 = [];
+    __vue_render__$1._withStripped = true;
+
+      /* style */
+      const __vue_inject_styles__$1 = function (inject) {
+        if (!inject) return
+        inject("data-v-28a2d8b2_0", { source: "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/* graph radio styles */\n.pc-graph-controls {\n    display: flex;\n    flex-direction: row;\n    padding: 30px 0 0 60px;\n    margin-bottom: 5px;\n    border-bottom: 1px solid var(--blue);\n}\n.pc-graph-radio-label {\n    position: relative;\n    font-size: 13px;\n    color: var(--blue);\n    margin-right: 20px;\n}\n.pc-graph-radio-input {\n    position: absolute;\n    visibility: hidden;\n}\n.pc-graph-radio-text {\n    display: block;\n    padding: 0 5px 15px;\n    position: relative;\n}\n.pc-graph-radio-input:checked + .pc-graph-radio-text::after {\n    content: '';\n    position: absolute;\n    left: 0;\n    bottom: 0;\n    width: 100%;\n    height: 4px;\n    background: var(--blue);\n}\n\n/* graph layout */\n.pc-graph {\n    padding: 10px;\n    width: 100%;\n    box-sizing: border-box;\n}\n", map: {"version":3,"sources":["/Users/ssastoqueher/projects/booking/powercalculator/src/components/svg-graph.vue"],"names":[],"mappings":";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;AAiZA,uBAAA;AACA;IACA,aAAA;IACA,mBAAA;IACA,sBAAA;IACA,kBAAA;IACA,oCAAA;AACA;AAEA;IACA,kBAAA;IACA,eAAA;IACA,kBAAA;IACA,kBAAA;AACA;AAEA;IACA,kBAAA;IACA,kBAAA;AACA;AAEA;IACA,cAAA;IACA,mBAAA;IACA,kBAAA;AACA;AAEA;IACA,WAAA;IACA,kBAAA;IACA,OAAA;IACA,SAAA;IACA,WAAA;IACA,WAAA;IACA,uBAAA;AACA;;AAEA,iBAAA;AAEA;IACA,aAAA;IACA,WAAA;IACA,sBAAA;AACA","file":"svg-graph.vue","sourcesContent":["<template id=\"svg-graph\">\n    <div class=\"pc-block pc-block--graph\">\n        <div class=\"pc-graph-controls\">\n\n            <svgGraphTabItem\n                v-for=\"graph in graphList\"\n                v-bind:key=\"graph.graphX + '-' + graph.graphY\"\n                v-bind:graphX=\"graph.graphX\"\n                v-bind:graphY=\"graph.graphY\"\n                v-bind:getMetricDisplayName=\"getMetricDisplayName\"\n                v-bind:graphType.sync=\"graphType\"\n            >\n            </svgGraphTabItem>\n\n        </div>\n        <div class=\"pc-graph\" ref=\"pc-graph-size\">\n            <div v-bind:style=\"style\" ref=\"pc-graph-wrapper\">\n                <div ref=\"pc-graph\"></div>\n            </div>\n        </div>\n    </div>\n</template>\n\n\n<script>\n/*global c3*/\n/*eslint no-undef: \"error\"*/\n\nimport graphDataMixin from '../js/graph-data-mixin.js'\nimport svgGraphTabItem from './svg-graph-tab-item.vue'\n\nlet dataDefault = [\n        ['x', 0, 0, 0, 0, 0, 0],\n        ['Sample', 0, 0, 0, 0, 0],\n        ['Current', null, null, 50]\n    ];\n\nlet style = document.createElement('style');\n\nstyle.innerHTML = `\n    .pc-graph .c3-axis-y-label {\n        pointer-events: none;\n    }\n\n    .pc-graph .c3-axis {\n        font-size: 16px;\n    }\n`;\n\ndocument.querySelector('head').appendChild(style);\n\n\n\nexport default {\n    mixins: [graphDataMixin],\n    props: [],\n    data () {\n        return {\n            width: 100,\n            height: 100,\n            data:  this.dataDefault,\n            graphType: this.getDefaultGraphOption() // x, y\n            // graphX: 'sample' // computed\n            // graphY: 'power' // computed\n        }\n    },\n    computed: {\n        style () {\n            let { width, height } = this;\n\n            return {\n                width: `${width}px`,\n                height: `${height}px`\n            }\n        },\n        graphX () {\n            // 'sample'\n            return this.graphType.split('-')[0]\n        },\n        graphY () {\n            // 'power'\n            return this.graphType.split('-')[1]\n        },\n        math () {\n            return this.$store.getters.formulaToSolveProp\n        },\n        isNonInferiorityEnabled () {\n            return this.$store.state.nonInferiority.enabled\n        },\n        sample () {\n            return this.$store.state.attributes.sample\n        },\n        impact () {\n            return this.$store.state.attributes.impact\n        },\n        power () {\n            return this.$store.state.attributes.power\n        },\n        base () {\n            return this.$store.state.attributes.base\n        },\n        falsePosRate () {\n            return this.$store.state.attributes.falsePosRate\n        },\n        sdRate () {\n            return this.$store.state.attributes.sdRate\n        },\n        runtime () {\n            return this.$store.state.attributes.runtime\n        },\n        graphList() {\n\n            let list = [\n                {\n                    name: 'days-incrementalTrialsPerDay',\n                    cond: !this.isNonInferiorityEnabled\n                },\n                {\n                    name: 'samplePerDay-incrementalTrials',\n                    cond: !this.isNonInferiorityEnabled\n                },\n                {\n                    name: 'sample-impact',\n                    cond: !this.isNonInferiorityEnabled\n                },\n                {\n                    name: 'sample-threshold',\n                    cond: this.isNonInferiorityEnabled\n                },\n                {\n                    name: 'sample-power',\n                    cond: true\n                },\n                {\n                    name: 'samplePerDay-power',\n                    cond: true\n                },\n                {\n                    name: 'impact-power',\n                    cond: !this.isNonInferiorityEnabled\n                },\n            ];\n\n            return list.filter((obj) => {return obj.cond == true}).map((obj) => {\n                    let [graphX, graphY] = obj.name.split('-');\n                    return {\n                        graphX,\n                        graphY\n                    }\n                })\n        }\n    },\n    methods: {\n        getDefaultGraphOption () {\n            let result = 'days-incrementalTrialsPerDay';\n            if (this.$store.state.nonInferiority.enabled) {\n                result = 'sample-threshold'\n            }\n            return result\n        },\n        resize () {\n            let {width, paddingLeft, paddingRight} = window.getComputedStyle(this.$refs['pc-graph-size']);\n\n            // update svg size\n            this.width = window.parseInt(width) - window.parseInt(paddingLeft) - window.parseInt(paddingRight);\n            this.height = 220;\n        },\n        createYList ({ amount, rate = 10, cur }) { //rate of 10 and amount of 10 will reach from 0 to 100\n            let result = [];\n\n            for (let i = 0; i <= amount; i += 1) {\n                let y = rate * i,\n                    nextY = rate * (i + 1);\n\n                result.push(y);\n\n                if (cur > y && cur < nextY) {\n                    result.push(cur);\n                }\n            }\n\n            return result;\n        },\n        trimInvalidSamples (newData) {\n            let result = newData[0].reduce((prevArr, xValue, i) => {\n\n                if (i == 0) {\n                    prevArr[0] = [];\n                    prevArr[1] = [];\n                    prevArr[2] = [];\n                }\n\n                // i == 0 is the name of the dataset\n                if (i == 0 || (!isNaN(xValue) && isFinite(xValue))) {\n                    prevArr[0].push(newData[0][i]);\n                    prevArr[1].push(newData[1][i]);\n                    prevArr[2].push(newData[2][i]);\n                }\n\n                return prevArr;\n            }, [])\n            return result;\n        },\n        updateGraphData () {\n\n            let clonedValues = this.deepCloneObject(this.$store.getters.convertDisplayedValues),\n                newData = this.deepCloneObject(dataDefault),\n                yList = this.getGraphYDataSet({amount: 10}),\n                curY = this.getCurrentYValue();\n\n            // erase previous values but keep names of datasets\n            newData[0].length = 1;\n            newData[1].length = 1;\n            newData[2].length = 1;\n\n            yList.forEach((yValue, i) => {\n\n                clonedValues = this.updateClonedValues(clonedValues, yValue);\n\n                let xValues = this.getGraphXValueForClonedValues(clonedValues, yValue);\n\n                 newData[0][i + 1] = xValues; // x\n                 newData[1][i + 1] = yValue; // line\n                 newData[2][i + 1] = yValue == curY ? yValue : null; // current power dot\n            })\n\n            newData = this.trimInvalidSamples(newData);\n\n            this.chart.axis.labels({x: this.updateXLabel(), y: this.updateYLabel()});\n\n            this.chart.load({\n                columns: newData\n            })\n        },\n        deepCloneObject (obj) {\n            return JSON.parse(JSON.stringify(obj))\n        },\n        createTooltip (V) {\n\n            return {\n                grouped: false,\n                contents ([{x = 0, value = 0, id = ''}]) {\n\n                    let {graphX, graphY, getMetricDisplayName, getGraphXTicksFormatted, getGraphYTicksFormatted} = V,\n                        th = getMetricDisplayName(graphX),\n                        name = getMetricDisplayName(graphY),\n                        xFormatted = getGraphXTicksFormatted(x),\n                        yFormatted = getGraphYTicksFormatted(value);\n\n                    return `\n                        <table class=\"c3-tooltip\">\n                            <tbody>\n                                <tr>\n                                    <th colspan=\"2\">${th}: ${xFormatted}</th>\n                                </tr>\n                                <tr class=\"c3-tooltip-name--Current\">\n                                    <td class=\"name\">\n                                        <span style=\"background-color:#ff7f0e\">\n                                        </span>\n                                        ${name}\n                                    </td>\n                                    <td class=\"value\">${yFormatted}</td>\n                                </tr>\n                            </tbody>\n                        </table>\n                    `\n                }\n            }\n        },\n        updateYLabel () {\n            return this.getMetricDisplayName(this.graphY)\n        },\n        updateXLabel () {\n            return this.getMetricDisplayName(this.graphX)\n        },\n        getMetricDisplayName (metric) {\n            return {\n                sample: 'Sample',\n                impact: 'Impact',\n                power: 'Power',\n                base: 'Base',\n                falseposrate: 'False Positive Rate',\n                sdrate: 'Base Standard deviation',\n\n                samplePerDay: 'Daily Visitors',\n                incrementalTrials: 'Incremental Trials',\n\n                days: '# of days',\n                incrementalTrialsPerDay: 'Inc. Trials per day',\n                threshold: 'Non Inf. Threshold',\n            }[metric] || ''\n        }\n    },\n    watch: {\n        sample () {\n            this.updateGraphData();\n        },\n        impact () {\n            this.updateGraphData();\n        },\n        power () {\n            this.updateGraphData();\n        },\n        graphY () {\n            this.updateGraphData();\n        },\n        graphX () {\n            this.updateGraphData();\n        },\n        runtime () {\n            this.updateGraphData();\n        },\n        isNonInferiorityEnabled (bool) {\n            if (this.graphList.indexOf(this.graphType) == -1) {\n                let { graphX, graphY } = this.graphList[0];\n                this.graphType = `${graphX}-${graphY}`;\n            }\n        }\n    },\n    mounted () {\n        let {resize, createTooltip} = this,\n            vueInstance = this;\n        resize();\n\n        this.dataDefault = dataDefault;\n\n        this.chart = c3.generate({\n            bindto: this.$refs['pc-graph'],\n            size: {\n                width: this.width,\n                height: this.height\n            },\n            legend: {\n                show: false\n            },\n            data: {\n                x: 'x',\n                columns: this.dataDefault,\n                type: 'area'\n            },\n            grid: {\n                x: {\n                    show: true\n                },\n                y: {\n                    show: true\n                }\n            },\n            axis: {\n                x: {\n                    label:  this.updateXLabel(),\n                    tick: {\n                        values (minMax) {\n                            let [min, max] = minMax.map((num) => {return window.parseInt(num)}),\n                                amount = 7,\n                                ratio = (max - min) / amount,\n                                result = new Array(amount + 1);\n\n                            // create the values\n                            result = Array.from(result).map((undef, i) => {\n                                return (min + (ratio * i)).toFixed(2)\n                            })\n\n                            return result\n                        },\n                        format (x) {\n                            return vueInstance.getGraphXTicksFormatted(x)\n                        }\n                    }\n                },\n                y: {\n                    label: this.updateYLabel(),\n                    tick: {\n                        values () {\n                            return vueInstance.getGraphYTicks()\n                        },\n                        format (y) {\n                            return vueInstance.getGraphYTicksFormatted(y)\n                        }\n                    }\n                }\n            },\n            padding: {\n                top: 20,\n                left: 70,\n                right: 20\n            },\n            tooltip: createTooltip(this)\n        });\n\n        this.updateGraphData()\n    },\n    components: {\n        svgGraphTabItem\n    }\n}\n\n</script>\n\n<style>\n\n/* graph radio styles */\n.pc-graph-controls {\n    display: flex;\n    flex-direction: row;\n    padding: 30px 0 0 60px;\n    margin-bottom: 5px;\n    border-bottom: 1px solid var(--blue);\n}\n\n.pc-graph-radio-label {\n    position: relative;\n    font-size: 13px;\n    color: var(--blue);\n    margin-right: 20px;\n}\n\n.pc-graph-radio-input {\n    position: absolute;\n    visibility: hidden;\n}\n\n.pc-graph-radio-text {\n    display: block;\n    padding: 0 5px 15px;\n    position: relative;\n}\n\n.pc-graph-radio-input:checked + .pc-graph-radio-text::after {\n    content: '';\n    position: absolute;\n    left: 0;\n    bottom: 0;\n    width: 100%;\n    height: 4px;\n    background: var(--blue);\n}\n\n/* graph layout */\n\n.pc-graph {\n    padding: 10px;\n    width: 100%;\n    box-sizing: border-box;\n}\n</style>\n"]}, media: undefined });
+
+      };
+      /* scoped */
+      const __vue_scope_id__$1 = undefined;
+      /* module identifier */
+      const __vue_module_identifier__$1 = undefined;
+      /* functional template */
+      const __vue_is_functional_template__$1 = false;
+      /* style inject SSR */
+      
+      /* style inject shadow dom */
+      
+
+      
+      const __vue_component__$1 = /*#__PURE__*/normalizeComponent(
+        { render: __vue_render__$1, staticRenderFns: __vue_staticRenderFns__$1 },
+        __vue_inject_styles__$1,
+        __vue_script__$1,
+        __vue_scope_id__$1,
+        __vue_is_functional_template__$1,
+        __vue_module_identifier__$1,
+        false,
+        createInjector,
+        undefined,
+        undefined
+      );
+
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+
 
     let validateFunctions = {
             '*': {
@@ -5811,7 +6473,7 @@
         },
         validationCache = {};
 
-    var pcBlockField = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return (_vm.enableEdit)?_c('span',{staticClass:"pc-value-field-wrapper",class:_vm.fieldWrapperClasses,on:{"click":function($event){return _vm.setFocus()}}},[_c('span',{staticClass:"pc-value-formatting pc-value--formatted",class:'pc-value-formatting-' + _vm.fieldProp,style:(_vm.fieldFormattedStyle),attrs:{"aria-hidden":"true","data-prefix":_vm.prefix,"data-suffix":_vm.suffix}},[_c('span',{ref:"pc-formatted-value",staticClass:"pc-value-display"},[_vm._v(_vm._s(_vm.formattedVal))])]),_vm._v(" "),_c('span',{staticClass:"pc-value-formatting",class:'pc-value-formatting-' + _vm.fieldProp,style:(_vm.fieldEditableStyle),attrs:{"data-prefix":_vm.prefix,"data-suffix":_vm.suffix}},[_c('span',{directives:[{name:"initialvalue",rawName:"v-initialvalue"}],ref:"pc-value",staticClass:"pc-value-display",attrs:{"data-test":_vm.isFocused,"contenteditable":!_vm.isReadOnly},on:{"focus":function($event){return _vm.setFocusStyle(true)},"blur":_vm.blur,"input":_vm.updateVal}})])]):_c('span',{staticClass:"pc-value-display pc-field-not-editable"},[_vm._v(" "+_vm._s(_vm.prefix)+" "),_c('strong',[_vm._v(_vm._s(_vm.formattedVal))]),_vm._v(" "+_vm._s(_vm.suffix)+" ")])},staticRenderFns: [],
+    var script$2 = {
         template: '#pc-block-field',
         props: [
             'lockedField',
@@ -6058,7 +6720,134 @@
         }
     };
 
-    var pcSvgChain = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('svg',{staticClass:"pc-svg-chain-icon",style:(_vm.svgBgLine),attrs:{"width":"100%","height":"59px","viewBox":`0 0 ${_vm.svgBoxWidth} 59`,"version":"1.1","xmlns":"http://www.w3.org/2000/svg","xmlns:xlink":"http://www.w3.org/1999/xlink","aria-hidden":"true"}},[_c('g',{attrs:{"id":"Power-Calculator","transform":"translate(-811.000000, -485.000000)"}},[_c('g',{attrs:{"transform":"translate(676.000000, 327.000000)"}},[_c('g',{attrs:{"id":"Chain","transform":"translate(132.000000, 158.000000)"}},[_c('path',{attrs:{"d":"M12.1680332,24.5 L14.5,24.5 C16.709139,24.5 18.5,26.290861 18.5,28.5 L18.5,29.5 C18.5,31.709139 16.709139,33.5 14.5,33.5 L9.5,33.5 C7.290861,33.5 5.5,31.709139 5.5,29.5 L5.5,28.5 C6.20701437,28.5 6.87368104,28.5 7.5,28.5 L7.5,29.5 C7.5,30.6045695 8.3954305,31.5 9.5,31.5 L14.5,31.5 C15.6045695,31.5 16.5,30.6045695 16.5,29.5 L16.5,28.5 C16.5,27.3954305 15.6045695,26.5 14.5,26.5 L13.7237764,26.5 C13.463452,25.7924504 12.944871,25.1257837 12.1680332,24.5 Z","id":"Rectangle-5","fill":_vm.svgFillColor,"fill-rule":"nonzero","transform":"translate(12.000000, 29.000000) scale(-1, -1) translate(-12.000000, -29.000000) "}}),_vm._v(" "),_c('path',{attrs:{"d":"M18.1680332,24.5 L20.5,24.5 C22.709139,24.5 24.5,26.290861 24.5,28.5 L24.5,29.5 C24.5,31.709139 22.709139,33.5 20.5,33.5 L15.5,33.5 C13.290861,33.5 11.5,31.709139 11.5,29.5 L11.5,28.5 C12.2070144,28.5 12.873681,28.5 13.5,28.5 L13.5,29.5 C13.5,30.6045695 14.3954305,31.5 15.5,31.5 L20.5,31.5 C21.6045695,31.5 22.5,30.6045695 22.5,29.5 L22.5,28.5 C22.5,27.3954305 21.6045695,26.5 20.5,26.5 L19.7237764,26.5 C19.463452,25.7924504 18.944871,25.1257837 18.1680332,24.5 Z","id":"Rectangle-5","fill":_vm.svgFillColor,"fill-rule":"nonzero"}})])])])])},staticRenderFns: [],
+    /* script */
+    const __vue_script__$2 = script$2;
+
+    /* template */
+    var __vue_render__$2 = function() {
+      var _vm = this;
+      var _h = _vm.$createElement;
+      var _c = _vm._self._c || _h;
+      return _vm.enableEdit
+        ? _c(
+            "span",
+            {
+              staticClass: "pc-value-field-wrapper",
+              class: _vm.fieldWrapperClasses,
+              on: {
+                click: function($event) {
+                  return _vm.setFocus()
+                }
+              }
+            },
+            [
+              _c(
+                "span",
+                {
+                  staticClass: "pc-value-formatting pc-value--formatted",
+                  class: "pc-value-formatting-" + _vm.fieldProp,
+                  style: _vm.fieldFormattedStyle,
+                  attrs: {
+                    "aria-hidden": "true",
+                    "data-prefix": _vm.prefix,
+                    "data-suffix": _vm.suffix
+                  }
+                },
+                [
+                  _c(
+                    "span",
+                    { ref: "pc-formatted-value", staticClass: "pc-value-display" },
+                    [_vm._v(_vm._s(_vm.formattedVal))]
+                  )
+                ]
+              ),
+              _vm._v(" "),
+              _c(
+                "span",
+                {
+                  staticClass: "pc-value-formatting",
+                  class: "pc-value-formatting-" + _vm.fieldProp,
+                  style: _vm.fieldEditableStyle,
+                  attrs: { "data-prefix": _vm.prefix, "data-suffix": _vm.suffix }
+                },
+                [
+                  _c("span", {
+                    directives: [
+                      { name: "initialvalue", rawName: "v-initialvalue" }
+                    ],
+                    ref: "pc-value",
+                    staticClass: "pc-value-display",
+                    attrs: {
+                      "data-test": _vm.isFocused,
+                      contenteditable: !_vm.isReadOnly
+                    },
+                    on: {
+                      focus: function($event) {
+                        return _vm.setFocusStyle(true)
+                      },
+                      blur: _vm.blur,
+                      input: _vm.updateVal
+                    }
+                  })
+                ]
+              )
+            ]
+          )
+        : _c("span", { staticClass: "pc-value-display pc-field-not-editable" }, [
+            _vm._v("\n    " + _vm._s(_vm.prefix) + " "),
+            _c("strong", [_vm._v(_vm._s(_vm.formattedVal))]),
+            _vm._v(" " + _vm._s(_vm.suffix) + "\n")
+          ])
+    };
+    var __vue_staticRenderFns__$2 = [];
+    __vue_render__$2._withStripped = true;
+
+      /* style */
+      const __vue_inject_styles__$2 = function (inject) {
+        if (!inject) return
+        inject("data-v-2300a621_0", { source: "\n.pc-value-field-wrapper {\n    --base-padding: 5px;\n\n    display: block;\n    position: relative;\n    box-sizing: border-box;\n    width: 100%;\n    filter: drop-shadow(0 4px 2px rgba(0,0,0,0.1));\n    border-radius: 5px;\n    background: var(--white);\n    padding: var(--base-padding);\n\n    overflow: hidden;\n}\n.pc-field--focused {\n    box-shadow: inset 0 0 0 1px var(--dark-blue);\n}\n.pc-value--formatted {\n    position: absolute;\n    left: 50%;\n    top: 50%;\n    transform: translate(-50%, -50%);\n    pointer-events: none;\n    width: 100%;\n}\n.pc-value-display {\n    box-sizing: border-box;\n    font-size: 1em;\n    line-height: 1.8em;\n    align-self: center;\n    min-height: 1em;\n    display: inline-block;\n}\n.pc-value-display:focus {\n    outline: 0;\n}\n.pc-non-inf-treshold-input,\n.pc-power-input,\n.pc-false-positive-input,\n.pc-variants-input {\n    display: inline-block;\n    vertical-align: middle;\n    padding: 4px 8px;\n    text-align: center;\n    width: 4em;\n    border: 2px solid var(--gray);\n    border-radius: 8px;\n    font-size: inherit;\n}\n.pc-variants-input {\n    width: 6.5em;\n}\n.pc-top-fields-error {\n    color: var(--red);\n}\n\n/* prefixes and suffixes */\n.pc-value-formatting:before {\n    color: var(--gray);\n    content: attr(data-prefix);\n}\n.pc-value-formatting:after {\n    color: var(--gray);\n    content: attr(data-suffix);\n}\n\n/* block to calculate override rules*/\n.pc-block-to-calculate .pc-value-field-wrapper:not(.pc-value-display) {\n    background: var(--light-yellow);\n    outline: 2px solid var(--dark-yellow);\n}\n.pc-block-to-calculate .pc-value .pc-value-formatting:before {\n    content: \"=\" attr(data-prefix);\n    color: var(--black);\n}\n.pc-block-to-calculate .pc-value-formatting:after {\n    color: var(--black);\n}\n", map: {"version":3,"sources":["/Users/ssastoqueher/projects/booking/powercalculator/src/components/pc-block-field.vue"],"names":[],"mappings":";AAqVA;IACA,mBAAA;;IAEA,cAAA;IACA,kBAAA;IACA,sBAAA;IACA,WAAA;IACA,8CAAA;IACA,kBAAA;IACA,wBAAA;IACA,4BAAA;;IAEA,gBAAA;AACA;AAEA;IACA,4CAAA;AACA;AAEA;IACA,kBAAA;IACA,SAAA;IACA,QAAA;IACA,gCAAA;IACA,oBAAA;IACA,WAAA;AACA;AAEA;IACA,sBAAA;IACA,cAAA;IACA,kBAAA;IACA,kBAAA;IACA,eAAA;IACA,qBAAA;AACA;AAEA;IACA,UAAA;AACA;AAEA;;;;IAIA,qBAAA;IACA,sBAAA;IACA,gBAAA;IACA,kBAAA;IACA,UAAA;IACA,6BAAA;IACA,kBAAA;IACA,kBAAA;AACA;AAEA;IACA,YAAA;AACA;AAEA;IACA,iBAAA;AACA;;AAEA,0BAAA;AAEA;IACA,kBAAA;IACA,0BAAA;AACA;AAEA;IACA,kBAAA;IACA,0BAAA;AACA;;AAEA,qCAAA;AAEA;IACA,+BAAA;IACA,qCAAA;AACA;AAEA;IACA,8BAAA;IACA,mBAAA;AACA;AAEA;IACA,mBAAA;AACA","file":"pc-block-field.vue","sourcesContent":["<template id=\"pc-block-field\">\n    <span v-if=\"enableEdit\" class=\"pc-value-field-wrapper\" :class=\"fieldWrapperClasses\" v-on:click=\"setFocus()\">\n\n        <span class=\"pc-value-formatting pc-value--formatted\" aria-hidden=\"true\"\n            :class=\"'pc-value-formatting-' + fieldProp\"\n            :data-prefix=\"prefix\"\n            :data-suffix=\"suffix\"\n            :style=\"fieldFormattedStyle\"\n        >\n            <span class=\"pc-value-display\" ref=\"pc-formatted-value\">{{formattedVal}}</span>\n        </span>\n\n        <span class=\"pc-value-formatting\"\n            :class=\"'pc-value-formatting-' + fieldProp\"\n            :data-prefix=\"prefix\"\n            :data-suffix=\"suffix\"\n            :style=\"fieldEditableStyle\"\n        >\n            <span class=\"pc-value-display\" :data-test=\"isFocused\"\n                :contenteditable=\"!isReadOnly\"\n\n                v-on:focus=\"setFocusStyle(true)\"\n                v-on:blur=\"blur\"\n                v-on:input=\"updateVal\"\n                v-initialvalue\n\n                ref=\"pc-value\"></span>\n        </span>\n    </span>\n    <span v-else class=\"pc-value-display pc-field-not-editable\">\n        {{prefix}} <strong>{{formattedVal}}</strong> {{suffix}}\n    </span>\n</template>\n\n<script>\n\nlet validateFunctions = {\n        '*': {\n            // Base rate > 0\n            base: {\n                fn (value) {\n                    return value > 0\n                },\n                defaultVal: 10\n            },\n            // Power be between 0 and 100%(incl)\n            power: {\n                fn (value) {\n                    return value >= 0 && value <= 100\n                },\n                defaultVal: 80\n            },\n            days: {\n                fn (value) {\n                    return value > 0\n                },\n                defaultVal: 14\n            },\n            nonInfThreshold: {\n                fn (value) {\n                    return value > 0\n                },\n                defaultVal: 0\n            },\n            variants: {\n                fn (value) {\n                    return Number.isInteger(value) && value > 1\n                },\n                defaultVal: 1\n            }\n        },\n        gTest: {\n            // Limit Gtest rate input to be between 0.0001% and 99.999%\n            base: {\n                fn (value) {\n                    return value >= 0.01 && value <= 99.9\n                }\n            }\n        },\n        tTest: {\n            // Standard deviation > 0\n            sdRate: {\n                fn (value) {\n                    return value > 0\n                },\n                defaultVal: 10\n            }\n        }\n    },\n    validationCache = {};\n\nexport default {\n    template: '#pc-block-field',\n    props: [\n        'lockedField',\n        'enableEdit',\n        'isReadOnly',\n        'fieldProp',\n        'fieldValue',\n        'prefix',\n        'suffix',\n        'fieldFromBlock'\n    ],\n    data () {\n        return {\n            islockedFieldSet: (this.lockedField || '').length > 0,\n            val: parseFloat(this.fieldValue),\n            isFocused: false,\n        }\n    },\n    computed: {\n        isLocked () {\n            return this.lockedField && this.lockedField == this.fieldProp\n        },\n        formattedVal () {\n            let result = this.val;\n            let sep = ',';\n\n            if (result / 1000 >= 1) {\n                let [integer, decimal] = (result + '').split('.');\n\n                result = integer.split('').reduceRight((prev, cur, i, arr) => {\n                    let resultStr = cur + prev,\n                        iFromLeft = arr.length - i;\n\n                    if (iFromLeft % 3 == 0 && iFromLeft != 0 && i != 0) {\n                        resultStr = sep + resultStr;\n                    }\n\n                    return resultStr;\n                }, '')\n\n                if (decimal) {\n                    result += '.' + decimal;\n\n                }\n\n            }\n\n            return result;\n        },\n        fieldWrapperClasses () {\n            let obj = {};\n\n            obj['pc-field--read-only'] = this.isReadOnly;\n            obj['pc-field--focused'] = this.isFocused;\n            obj['pc-field-' + this.fieldProp] = true;\n\n            return obj\n        },\n        fieldFormattedStyle () {\n            let result = {};\n            if (this.isFocused) {\n                result.display = 'none';\n            }\n\n            return result\n        },\n        fieldEditableStyle () {\n            let result = {};\n            if (!this.isFocused) {\n                result.opacity = 0;\n            }\n\n            return result\n        },\n        testType () {\n            return this.$store.state.attributes.testType\n        }\n    },\n    methods: {\n        getSanitizedPcValue () {\n            // People will use copy paste. We need some data sanitization\n\n            // remove markup\n            let oldValue = this.$refs['pc-value'].textContent + '',\n                newValue;\n\n            // remove commas\n            newValue = oldValue.replace(/,/g, '');\n\n            // try to extract numbers from it\n            newValue = parseFloat(newValue);\n\n            newValue = this.validateField(newValue);\n\n            return newValue\n\n        },\n        updateVal () {\n            if (this.enableEdit) {\n                let value = this.getSanitizedPcValue();\n\n                if (value != this.val) {\n                    this.val = value;\n                }\n            }\n        },\n        formatDisplay () {\n            if (this.enableEdit) {\n                this.$refs['pc-value'].textContent = this.formatNumberFields(this.getSanitizedPcValue());\n            } else {\n                this.val = this.formatNumberFields(this.val);\n            }\n        },\n        formatNumberFields (value) {\n            let result = parseFloat(value);\n\n            result = this.validateField(result);\n\n            return result || 0\n        },\n\n        blur () {\n            this.formatDisplay();\n            this.setFocusStyle(false);\n        },\n        setFocusStyle (bool) {\n            this.isFocused = bool;\n        },\n        setFocus () {\n            let el = this.$refs['pc-value'];\n            el.focus();\n        },\n        validateField (value) {\n            let validateConfigList = this.getValidationConfig(),\n                isValid = true,\n                result = value;\n\n            if (isNaN(result) || !isFinite(result)) {\n                result = validateConfigList.defaultVal;\n            }\n\n            if (validateConfigList.fns.length > 0) {\n                validateConfigList.fns.forEach((fn) => {\n                    if (!fn(result)) {\n                        isValid = false;\n                    }\n                })\n            }\n\n            if (!isValid) {\n                result = validateConfigList.defaultVal;\n            }\n\n            return result\n        },\n        getValidationConfig () {\n            let {fieldProp, testtype} = this,\n                validationTypeCategories,\n                result;\n\n            if (validationCache[testtype] && validationCache[testtype][fieldProp]) {\n                return validationCache[testtype][fieldProp]\n            }\n\n            validationTypeCategories = [validateFunctions['*'], validateFunctions[testtype]].filter(Boolean);\n\n            result = validationTypeCategories.reduce((prev, cur) => {\n                let {fn, defaultVal} = cur[fieldProp] || {};\n\n                if (typeof fn != 'undefined') {\n                    prev.fns.push(fn);\n                }\n                if (typeof defaultVal != 'undefined') {\n                    prev.defaultVal = defaultVal;\n                }\n                return prev\n            }, {fns: [], defaultVal: 0})\n\n            //cacheing\n            validationCache[testtype] = validationCache[testtype] || {};\n            validationCache[testtype][fieldProp] = result;\n\n            return result\n        },\n        placeCaretAtEnd (el) {\n            if (typeof window.getSelection != \"undefined\"\n                    && typeof document.createRange != \"undefined\") {\n                var range = document.createRange();\n                range.selectNodeContents(el);\n                range.collapse(false);\n                var sel = window.getSelection();\n                sel.removeAllRanges();\n                sel.addRange(range);\n            } else if (typeof document.body.createTextRange != \"undefined\") {\n                var textRange = document.body.createTextRange();\n                textRange.moveToElementText(el);\n                textRange.collapse(false);\n                textRange.select();\n            }\n        }\n\n    },\n    watch: {\n        val (newValue, oldValue) {\n            let newVal = parseFloat(this.formatNumberFields(newValue)),\n                oldVal = parseFloat(this.formatNumberFields(oldValue));\n\n            if (this.isReadOnly || !this.isFocused || (newVal == oldVal)) {\n                return;\n            }\n\n            // updating calculations\n            this.$store.dispatch('field:change', {\n                prop: this.fieldProp,\n                value: newVal || 0\n            })\n        },\n        fieldValue () {\n            // in case some input field on the same block changes the main math values\n            // we need to update the input fiel\n            let anotherFieldInBlockIsUpdating = !this.isFocused;\n            if (!this.isReadOnly && !anotherFieldInBlockIsUpdating) {\n                return\n            }\n\n            this.val = this.fieldValue;\n            if (this.enableEdit) {\n                this.$refs['pc-value'].textContent = this.val;\n            }\n        },\n        isFocused (newValue) {\n            this.$emit('update:focus', {\n                fieldProp: this.fieldFromBlock || this.fieldProp,\n                value: newValue\n            })\n        }\n    },\n    directives: {\n        initialvalue: {\n            inserted (el, directive, vnode) {\n                el.textContent = vnode.context.val\n            }\n        }\n    }\n}\n\n</script>\n\n<style>\n.pc-value-field-wrapper {\n    --base-padding: 5px;\n\n    display: block;\n    position: relative;\n    box-sizing: border-box;\n    width: 100%;\n    filter: drop-shadow(0 4px 2px rgba(0,0,0,0.1));\n    border-radius: 5px;\n    background: var(--white);\n    padding: var(--base-padding);\n\n    overflow: hidden;\n}\n\n.pc-field--focused {\n    box-shadow: inset 0 0 0 1px var(--dark-blue);\n}\n\n.pc-value--formatted {\n    position: absolute;\n    left: 50%;\n    top: 50%;\n    transform: translate(-50%, -50%);\n    pointer-events: none;\n    width: 100%;\n}\n\n.pc-value-display {\n    box-sizing: border-box;\n    font-size: 1em;\n    line-height: 1.8em;\n    align-self: center;\n    min-height: 1em;\n    display: inline-block;\n}\n\n.pc-value-display:focus {\n    outline: 0;\n}\n\n.pc-non-inf-treshold-input,\n.pc-power-input,\n.pc-false-positive-input,\n.pc-variants-input {\n    display: inline-block;\n    vertical-align: middle;\n    padding: 4px 8px;\n    text-align: center;\n    width: 4em;\n    border: 2px solid var(--gray);\n    border-radius: 8px;\n    font-size: inherit;\n}\n\n.pc-variants-input {\n    width: 6.5em;\n}\n\n.pc-top-fields-error {\n    color: var(--red);\n}\n\n/* prefixes and suffixes */\n\n.pc-value-formatting:before {\n    color: var(--gray);\n    content: attr(data-prefix);\n}\n\n.pc-value-formatting:after {\n    color: var(--gray);\n    content: attr(data-suffix);\n}\n\n/* block to calculate override rules*/\n\n.pc-block-to-calculate .pc-value-field-wrapper:not(.pc-value-display) {\n    background: var(--light-yellow);\n    outline: 2px solid var(--dark-yellow);\n}\n\n.pc-block-to-calculate .pc-value .pc-value-formatting:before {\n    content: \"=\" attr(data-prefix);\n    color: var(--black);\n}\n\n.pc-block-to-calculate .pc-value-formatting:after {\n    color: var(--black);\n}\n</style>\n"]}, media: undefined });
+
+      };
+      /* scoped */
+      const __vue_scope_id__$2 = undefined;
+      /* module identifier */
+      const __vue_module_identifier__$2 = undefined;
+      /* functional template */
+      const __vue_is_functional_template__$2 = false;
+      /* style inject SSR */
+      
+      /* style inject shadow dom */
+      
+
+      
+      const __vue_component__$2 = /*#__PURE__*/normalizeComponent(
+        { render: __vue_render__$2, staticRenderFns: __vue_staticRenderFns__$2 },
+        __vue_inject_styles__$2,
+        __vue_script__$2,
+        __vue_scope_id__$2,
+        __vue_is_functional_template__$2,
+        __vue_module_identifier__$2,
+        false,
+        createInjector,
+        undefined,
+        undefined
+      );
+
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+
+    var script$3 = {
         props: ['fieldFromBlock'],
         data () {
             return {
@@ -6103,7 +6892,119 @@
         }
     };
 
-    var pcBlock = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div')},staticRenderFns: [],
+    /* script */
+    const __vue_script__$3 = script$3;
+
+    /* template */
+    var __vue_render__$3 = function() {
+      var _vm = this;
+      var _h = _vm.$createElement;
+      var _c = _vm._self._c || _h;
+      return _c(
+        "svg",
+        {
+          staticClass: "pc-svg-chain-icon",
+          style: _vm.svgBgLine,
+          attrs: {
+            width: "100%",
+            height: "59px",
+            viewBox: "0 0 " + _vm.svgBoxWidth + " 59",
+            version: "1.1",
+            xmlns: "http://www.w3.org/2000/svg",
+            "xmlns:xlink": "http://www.w3.org/1999/xlink",
+            "aria-hidden": "true"
+          }
+        },
+        [
+          _c(
+            "g",
+            {
+              attrs: {
+                id: "Power-Calculator",
+                transform: "translate(-811.000000, -485.000000)"
+              }
+            },
+            [
+              _c(
+                "g",
+                { attrs: { transform: "translate(676.000000, 327.000000)" } },
+                [
+                  _c(
+                    "g",
+                    {
+                      attrs: {
+                        id: "Chain",
+                        transform: "translate(132.000000, 158.000000)"
+                      }
+                    },
+                    [
+                      _c("path", {
+                        attrs: {
+                          d:
+                            "M12.1680332,24.5 L14.5,24.5 C16.709139,24.5 18.5,26.290861 18.5,28.5 L18.5,29.5 C18.5,31.709139 16.709139,33.5 14.5,33.5 L9.5,33.5 C7.290861,33.5 5.5,31.709139 5.5,29.5 L5.5,28.5 C6.20701437,28.5 6.87368104,28.5 7.5,28.5 L7.5,29.5 C7.5,30.6045695 8.3954305,31.5 9.5,31.5 L14.5,31.5 C15.6045695,31.5 16.5,30.6045695 16.5,29.5 L16.5,28.5 C16.5,27.3954305 15.6045695,26.5 14.5,26.5 L13.7237764,26.5 C13.463452,25.7924504 12.944871,25.1257837 12.1680332,24.5 Z",
+                          id: "Rectangle-5",
+                          fill: _vm.svgFillColor,
+                          "fill-rule": "nonzero",
+                          transform:
+                            "translate(12.000000, 29.000000) scale(-1, -1) translate(-12.000000, -29.000000) "
+                        }
+                      }),
+                      _vm._v(" "),
+                      _c("path", {
+                        attrs: {
+                          d:
+                            "M18.1680332,24.5 L20.5,24.5 C22.709139,24.5 24.5,26.290861 24.5,28.5 L24.5,29.5 C24.5,31.709139 22.709139,33.5 20.5,33.5 L15.5,33.5 C13.290861,33.5 11.5,31.709139 11.5,29.5 L11.5,28.5 C12.2070144,28.5 12.873681,28.5 13.5,28.5 L13.5,29.5 C13.5,30.6045695 14.3954305,31.5 15.5,31.5 L20.5,31.5 C21.6045695,31.5 22.5,30.6045695 22.5,29.5 L22.5,28.5 C22.5,27.3954305 21.6045695,26.5 20.5,26.5 L19.7237764,26.5 C19.463452,25.7924504 18.944871,25.1257837 18.1680332,24.5 Z",
+                          id: "Rectangle-5",
+                          fill: _vm.svgFillColor,
+                          "fill-rule": "nonzero"
+                        }
+                      })
+                    ]
+                  )
+                ]
+              )
+            ]
+          )
+        ]
+      )
+    };
+    var __vue_staticRenderFns__$3 = [];
+    __vue_render__$3._withStripped = true;
+
+      /* style */
+      const __vue_inject_styles__$3 = function (inject) {
+        if (!inject) return
+        inject("data-v-009c2378_0", { source: "\n.pc-svg-chain-icon {\n    position: absolute;\n    top: 138px;\n    pointer-events: none;\n    z-index: 0;\n}\n\n", map: {"version":3,"sources":["/Users/ssastoqueher/projects/booking/powercalculator/src/components/pc-svg-chain.vue"],"names":[],"mappings":";AA6DA;IACA,kBAAA;IACA,UAAA;IACA,oBAAA;IACA,UAAA;AACA","file":"pc-svg-chain.vue","sourcesContent":["<template>\n    <svg width=\"100%\" height=\"59px\" :viewBox=\"`0 0 ${svgBoxWidth} 59`\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" aria-hidden=\"true\" class=\"pc-svg-chain-icon\" :style=\"svgBgLine\">\n        <g id=\"Power-Calculator\" transform=\"translate(-811.000000, -485.000000)\">\n            <g transform=\"translate(676.000000, 327.000000)\">\n                <g id=\"Chain\" transform=\"translate(132.000000, 158.000000)\">\n                    <path d=\"M12.1680332,24.5 L14.5,24.5 C16.709139,24.5 18.5,26.290861 18.5,28.5 L18.5,29.5 C18.5,31.709139 16.709139,33.5 14.5,33.5 L9.5,33.5 C7.290861,33.5 5.5,31.709139 5.5,29.5 L5.5,28.5 C6.20701437,28.5 6.87368104,28.5 7.5,28.5 L7.5,29.5 C7.5,30.6045695 8.3954305,31.5 9.5,31.5 L14.5,31.5 C15.6045695,31.5 16.5,30.6045695 16.5,29.5 L16.5,28.5 C16.5,27.3954305 15.6045695,26.5 14.5,26.5 L13.7237764,26.5 C13.463452,25.7924504 12.944871,25.1257837 12.1680332,24.5 Z\" id=\"Rectangle-5\" :fill=\"svgFillColor\" fill-rule=\"nonzero\" transform=\"translate(12.000000, 29.000000) scale(-1, -1) translate(-12.000000, -29.000000) \"></path>\n                    <path d=\"M18.1680332,24.5 L20.5,24.5 C22.709139,24.5 24.5,26.290861 24.5,28.5 L24.5,29.5 C24.5,31.709139 22.709139,33.5 20.5,33.5 L15.5,33.5 C13.290861,33.5 11.5,31.709139 11.5,29.5 L11.5,28.5 C12.2070144,28.5 12.873681,28.5 13.5,28.5 L13.5,29.5 C13.5,30.6045695 14.3954305,31.5 15.5,31.5 L20.5,31.5 C21.6045695,31.5 22.5,30.6045695 22.5,29.5 L22.5,28.5 C22.5,27.3954305 21.6045695,26.5 20.5,26.5 L19.7237764,26.5 C19.463452,25.7924504 18.944871,25.1257837 18.1680332,24.5 Z\" id=\"Rectangle-5\" :fill=\"svgFillColor\" fill-rule=\"nonzero\"></path>\n                </g>\n            </g>\n        </g>\n    </svg>\n</template>\n\n<script>\nexport default {\n    props: ['fieldFromBlock'],\n    data () {\n        return {\n            svgBoxWidth: 26\n        }\n    },\n    computed: {\n        calculateProp () {\n            return this.$store.state.attributes.calculateProp\n        },\n        svgFillColor () {\n            return this.calculateProp == this.fieldFromBlock ? '#E2B634' : '#C1CFD8'\n        },\n        svgBgColor () {\n            return this.calculateProp == this.fieldFromBlock ? '#FEF1CB' : '#F0F0F0'\n        },\n        svgBgLine () {\n            let { svgFillColor, svgBgColor, svgBoxWidth } = this,\n                strokeWidth = 2,\n                stokeStyle = `linear-gradient(\n                    0deg,\n                    transparent,\n                    transparent calc(50% - ${strokeWidth/2}px - 1px),\n                    ${svgFillColor} calc(50% - ${strokeWidth/2}px),\n                    ${svgFillColor} calc(50% + ${strokeWidth/2}px),\n                    transparent calc(50% + ${strokeWidth/2}px + 1px),\n                    transparent 100%\n                )`,\n                strokeMask = `linear-gradient(\n                    90deg,\n                    transparent,\n                    transparent calc(50% - ${svgBoxWidth/2}px - 1px),\n                    ${svgBgColor} calc(50% - ${svgBoxWidth/2}px),\n                    ${svgBgColor} calc(50% + ${svgBoxWidth/2}px),\n                    transparent calc(50% + ${svgBoxWidth/2}px + 1px),\n                    transparent 100%\n                )`;\n\n\n            return `background: ${strokeMask}, ${stokeStyle};`.replace(/\\n/g, '');\n        }\n    }\n}\n</script>\n<style>\n\n.pc-svg-chain-icon {\n    position: absolute;\n    top: 138px;\n    pointer-events: none;\n    z-index: 0;\n}\n\n</style>\n"]}, media: undefined });
+
+      };
+      /* scoped */
+      const __vue_scope_id__$3 = undefined;
+      /* module identifier */
+      const __vue_module_identifier__$3 = undefined;
+      /* functional template */
+      const __vue_is_functional_template__$3 = false;
+      /* style inject SSR */
+      
+      /* style inject shadow dom */
+      
+
+      
+      const __vue_component__$3 = /*#__PURE__*/normalizeComponent(
+        { render: __vue_render__$3, staticRenderFns: __vue_staticRenderFns__$3 },
+        __vue_inject_styles__$3,
+        __vue_script__$3,
+        __vue_scope_id__$3,
+        __vue_is_functional_template__$3,
+        __vue_module_identifier__$3,
+        false,
+        createInjector,
+        undefined,
+        undefined
+      );
+
+    //
+
+    var script$4 = {
         props: ['fieldFromBlock'],
         data () {
             return {
@@ -6128,15 +7029,61 @@
             }
         },
         components: {
-            'pc-block-field': pcBlockField,
-            'pc-svg-chain': pcSvgChain,
+            'pc-block-field': __vue_component__$2,
+            'pc-svg-chain': __vue_component__$3,
         }
     };
 
-    var sampleComp = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-block pc-block--sample",class:{'pc-block-focused': _vm.isBlockFocused == 'sample', 'pc-block-to-calculate': _vm.calculateProp == 'sample'}},[_c('pc-svg-chain',{attrs:{"calculateProp":_vm.calculateProp,"fieldFromBlock":_vm.fieldFromBlock}}),_vm._v(" "),_c('label',{staticClass:"pc-calc-radio pc-calc-radio--sample",class:{'pc-calc-radio--active': _vm.isCalculated},attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.isCalculated),expression:"isCalculated"}],attrs:{"type":"radio"},domProps:{"value":true,"checked":_vm._q(_vm.isCalculated,true)},on:{"change":function($event){_vm.isCalculated=true;}}}),_vm._v(" "+_vm._s(_vm.isCalculated ? 'Calculating' : 'Calculate')+" ")]),_vm._v(" "),_c('div',{staticClass:"pc-header"},[_vm._v(" Sample Size ")]),_vm._v(" "),_c('ul',{staticClass:"pc-inputs",class:{'pc-inputs-no-grid': _vm.onlyTotalVisitors}},[_c('li',{staticClass:"pc-input-item pc-input-left"},[_c('label',[_vm._m(0),_vm._v(" "),_c('pc-block-field',{attrs:{"fieldProp":"sample","fieldValue":_vm.sample,"isReadOnly":_vm.calculateProp == 'sample',"enableEdit":_vm.enableEdit},on:{"update:focus":_vm.updateFocus}})],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right pc-value-field--lockable",class:[_vm.getLockedStateClass('visitorsPerDay'), {'pc-hidden': _vm.onlyTotalVisitors}]},[_c('label',[_vm._m(1),_vm._v(" "),_c('pc-block-field',{attrs:{"fieldProp":"visitorsPerDay","fieldValue":_vm.visitorsPerDay,"isReadOnly":_vm.lockedField == 'visitorsPerDay',"isBlockFocused":_vm.isBlockFocused,"enableEdit":_vm.enableEdit,"lockedField":_vm.lockedField},on:{"update:focus":_vm.updateFocus}})],1),_vm._v(" "),_c('button',{staticClass:"pc-swap-button",attrs:{"type":"button"},on:{"click":_vm.switchLockedField}},[_c('svg',{attrs:{"width":"20px","height":"20px","viewBox":"0 0 20 20","version":"1.1","xmlns":"http://www.w3.org/2000/svg","xmlns:xlink":"http://www.w3.org/1999/xlink"}},[_c('desc',[_vm._v("Lock "+_vm._s(_vm.lockedField == 'days' ? 'number of days' : 'visitors per day'))]),_vm._v(" "),_c('defs',[_c('circle',{attrs:{"id":"path-1","cx":"13","cy":"13","r":"10"}}),_vm._v(" "),_c('filter',{attrs:{"x":"-5.0%","y":"-5.0%","width":"110.0%","height":"110.0%","filterUnits":"objectBoundingBox","id":"filter-2"}},[_c('feGaussianBlur',{attrs:{"stdDeviation":"0.5","in":"SourceAlpha","result":"shadowBlurInner1"}}),_vm._v(" "),_c('feOffset',{attrs:{"dx":"0","dy":"1","in":"shadowBlurInner1","result":"shadowOffsetInner1"}}),_vm._v(" "),_c('feComposite',{attrs:{"in":"shadowOffsetInner1","in2":"SourceAlpha","operator":"arithmetic","k2":"-1","k3":"1","result":"shadowInnerInner1"}}),_vm._v(" "),_c('feColorMatrix',{attrs:{"values":"0 0 0 0 0.489716199   0 0 0 0 0.489716199   0 0 0 0 0.489716199  0 0 0 0.5 0","type":"matrix","in":"shadowInnerInner1"}})],1)]),_vm._v(" "),_c('g',{attrs:{"id":"Page-1","stroke":"none","stroke-width":"1","fill":"none","fill-rule":"evenodd"}},[_c('g',{attrs:{"id":"Power-Calculator","transform":"translate(-550.000000, -522.000000)"}},[_c('g',{attrs:{"id":"Switcher","transform":"translate(547.000000, 519.000000)"}},[_c('g',{attrs:{"id":"Oval-3"}},[_c('use',{attrs:{"fill":"#EFEFEF","fill-rule":"evenodd","xlink:href":"#path-1"}}),_vm._v(" "),_c('use',{attrs:{"fill":"black","fill-opacity":"1","filter":"url(#filter-2)","xlink:href":"#path-1"}})]),_vm._v(" "),_c('g',{attrs:{"id":"Group","stroke-width":"1","fill-rule":"evenodd","transform":"translate(7.000000, 7.000000)","fill":"#155EAB"}},[_c('path',{attrs:{"d":"M4.5,4.20404051 L4.5,9.9127641 L2.5,9.9127641 L2.5,4.20404051 L0.5,4.20404051 L3.5,0.70872359 L6.5,4.20404051 L4.5,4.20404051 Z","id":"Combined-Shape"}}),_vm._v(" "),_c('path',{attrs:{"d":"M9.5,5.49531692 L9.5,11.2040405 L7.5,11.2040405 L7.5,5.49531692 L5.5,5.49531692 L8.5,2 L11.5,5.49531692 L9.5,5.49531692 Z","id":"Combined-Shape","transform":"translate(8.500000, 6.602020) scale(1, -1) translate(-8.500000, -6.602020) "}})])])])])])])]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right-swap pc-value-field--lockable",class:[_vm.getLockedStateClass('days'), {'pc-hidden': _vm.onlyTotalVisitors}]},[_c('label',[_c('pc-block-field',{attrs:{"fieldProp":"runtime","prefix":"","suffix":" days","fieldValue":_vm.runtime,"isReadOnly":_vm.lockedField == 'days',"isBlockFocused":_vm.isBlockFocused,"enableEdit":_vm.enableEdit,"lockedField":_vm.lockedField,"aria-label":"Days"},on:{"update:focus":_vm.updateFocus}})],1)])])],1)},staticRenderFns: [function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('span',{staticClass:"pc-input-title"},[_vm._v("Total # "),_c('small',{staticClass:"pc-input-sub-title"},[_vm._v("of new visitors")])])},function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('span',{staticClass:"pc-input-title"},[_vm._v("Daily # "),_c('small',{staticClass:"pc-input-sub-title"},[_vm._v("of new visitors")])])}],_scopeId: 'data-v-297fe272',
+    /* script */
+    const __vue_script__$4 = script$4;
+
+    /* template */
+    var __vue_render__$4 = function() {
+      var _vm = this;
+      var _h = _vm.$createElement;
+      var _c = _vm._self._c || _h;
+      return _c("div")
+    };
+    var __vue_staticRenderFns__$4 = [];
+    __vue_render__$4._withStripped = true;
+
+      /* style */
+      const __vue_inject_styles__$4 = function (inject) {
+        if (!inject) return
+        inject("data-v-5f1d7dec_0", { source: "\n.pc-block {\n    position: relative;\n    padding-bottom: 25px;\n    border-bottom: 3px solid var(--pale-blue);\n}\n.pc-block-to-calculate {\n    border-bottom-color: var(--dark-yellow);\n}\n.pc-calc-radio {\n    position: absolute;\n    top: 0;\n    left: 50%;\n    transform: translate(-50%, -50%);\n    background: var(--light-gray);\n    border-radius: 25% / 100%;\n    padding: 7px 15px;\n}\n.pc-calc-radio--active {\n    background: var(--white);\n}\n.pc-inputs {\n    display: block;\n    list-style-type: none;\n    margin: 0;\n    padding: 0;\n\n    --row-gap: 10px;\n    --padding: 25px;\n    --columns-gap: 70px;\n    --grid-column-width: calc(50% - (var(--columns-gap) / 2));\n\n    display: grid;\n    grid-template-columns: var(--grid-column-width) var(--grid-column-width);\n    grid-template-rows: auto;\n    grid-template-areas:\n        \"pc-input-left pc-input-right\"\n        \"pc-input-left-bottom pc-input-right-bottom\"\n    ;\n    align-items: start;\n    grid-gap: var(--row-gap) var(--columns-gap);\n    padding: 0 var(--padding);\n}\n.pc-input-item {\n    text-align: center;\n}\n.pc-input-title {\n    position: relative;\n    display: block;\n    margin-bottom: 25px;\n}\n.pc-input-sub-title {\n    position: absolute;\n    top: 100%;\n    left: 0;\n    right: 0;\n    text-align: center;\n    font-size: 9px;\n}\n.pc-input-left {\n    grid-area: pc-input-left;\n}\n.pc-input-right {\n    grid-area: pc-input-right;\n}\n.pc-input-left-bottom {\n    grid-area: pc-input-left-bottom;\n}\n.pc-input-right-bottom {\n    grid-area: pc-input-right-bottom;\n}\n.pc-input-details {\n    font-size: 10px;\n    color: var(--dark-gray);\n}\n.pc-field-not-editable {\n    position: relative;\n    padding: 5px;\n    display: block;\n}\n.pc-input-left .pc-field-not-editable,\n.pc-input-right .pc-field-not-editable {\n    background: var(--light-gray);\n    outline: 2px solid var(--light-blue);\n}\n\n", map: {"version":3,"sources":["/Users/ssastoqueher/projects/booking/powercalculator/src/components/pc-block.vue"],"names":[],"mappings":";AA0CA;IACA,kBAAA;IACA,oBAAA;IACA,yCAAA;AACA;AAEA;IACA,uCAAA;AACA;AAEA;IACA,kBAAA;IACA,MAAA;IACA,SAAA;IACA,gCAAA;IACA,6BAAA;IACA,yBAAA;IACA,iBAAA;AACA;AAEA;IACA,wBAAA;AACA;AAEA;IACA,cAAA;IACA,qBAAA;IACA,SAAA;IACA,UAAA;;IAEA,eAAA;IACA,eAAA;IACA,mBAAA;IACA,yDAAA;;IAEA,aAAA;IACA,wEAAA;IACA,wBAAA;IACA;;;IAGA;IACA,kBAAA;IACA,2CAAA;IACA,yBAAA;AAEA;AAEA;IACA,kBAAA;AACA;AAEA;IACA,kBAAA;IACA,cAAA;IACA,mBAAA;AACA;AAEA;IACA,kBAAA;IACA,SAAA;IACA,OAAA;IACA,QAAA;IACA,kBAAA;IACA,cAAA;AACA;AAEA;IACA,wBAAA;AAEA;AAEA;IACA,yBAAA;AACA;AAEA;IACA,+BAAA;AACA;AAEA;IACA,gCAAA;AACA;AAEA;IACA,eAAA;IACA,uBAAA;AACA;AAEA;IACA,kBAAA;IACA,YAAA;IACA,cAAA;AACA;AAEA;;IAEA,6BAAA;IACA,oCAAA;AACA","file":"pc-block.vue","sourcesContent":["<template>\n    <div></div>\n</template>\n\n<script>\n\nimport pcBlockField from './pc-block-field.vue'\nimport pcSvgChain from './pc-svg-chain.vue'\n\nexport default {\n    props: ['fieldFromBlock'],\n    data () {\n        return {\n            // isCalculated: this.calculateProp == this.fieldFromBlock,\n        }\n    },\n    computed: {\n        isCalculated: {\n            get () {\n                return this.$store.state.attributes.calculateProp == this.fieldFromBlock\n            },\n            set () {\n                this.$store.dispatch('update:calculateprop', {value: this.fieldFromBlock})\n            }\n        },\n\n        calculateProp () {\n            return this.$store.state.attributes.calculateProp\n        },\n        testType () {\n            return this.$store.state.attributes.testType\n        }\n    },\n    components: {\n        'pc-block-field': pcBlockField,\n        'pc-svg-chain': pcSvgChain,\n    }\n}\n\n</script>\n\n<style>\n.pc-block {\n    position: relative;\n    padding-bottom: 25px;\n    border-bottom: 3px solid var(--pale-blue);\n}\n\n.pc-block-to-calculate {\n    border-bottom-color: var(--dark-yellow);\n}\n\n.pc-calc-radio {\n    position: absolute;\n    top: 0;\n    left: 50%;\n    transform: translate(-50%, -50%);\n    background: var(--light-gray);\n    border-radius: 25% / 100%;\n    padding: 7px 15px;\n}\n\n.pc-calc-radio--active {\n    background: var(--white);\n}\n\n.pc-inputs {\n    display: block;\n    list-style-type: none;\n    margin: 0;\n    padding: 0;\n\n    --row-gap: 10px;\n    --padding: 25px;\n    --columns-gap: 70px;\n    --grid-column-width: calc(50% - (var(--columns-gap) / 2));\n\n    display: grid;\n    grid-template-columns: var(--grid-column-width) var(--grid-column-width);\n    grid-template-rows: auto;\n    grid-template-areas:\n        \"pc-input-left pc-input-right\"\n        \"pc-input-left-bottom pc-input-right-bottom\"\n    ;\n    align-items: start;\n    grid-gap: var(--row-gap) var(--columns-gap);\n    padding: 0 var(--padding);\n\n}\n\n.pc-input-item {\n    text-align: center;\n}\n\n.pc-input-title {\n    position: relative;\n    display: block;\n    margin-bottom: 25px;\n}\n\n.pc-input-sub-title {\n    position: absolute;\n    top: 100%;\n    left: 0;\n    right: 0;\n    text-align: center;\n    font-size: 9px;\n}\n\n.pc-input-left {\n    grid-area: pc-input-left;\n\n}\n\n.pc-input-right {\n    grid-area: pc-input-right;\n}\n\n.pc-input-left-bottom {\n    grid-area: pc-input-left-bottom;\n}\n\n.pc-input-right-bottom {\n    grid-area: pc-input-right-bottom;\n}\n\n.pc-input-details {\n    font-size: 10px;\n    color: var(--dark-gray);\n}\n\n.pc-field-not-editable {\n    position: relative;\n    padding: 5px;\n    display: block;\n}\n\n.pc-input-left .pc-field-not-editable,\n.pc-input-right .pc-field-not-editable {\n    background: var(--light-gray);\n    outline: 2px solid var(--light-blue);\n}\n\n</style>\n"]}, media: undefined });
+
+      };
+      /* scoped */
+      const __vue_scope_id__$4 = undefined;
+      /* module identifier */
+      const __vue_module_identifier__$4 = undefined;
+      /* functional template */
+      const __vue_is_functional_template__$4 = false;
+      /* style inject SSR */
+      
+      /* style inject shadow dom */
+      
+
+      
+      const __vue_component__$4 = /*#__PURE__*/normalizeComponent(
+        { render: __vue_render__$4, staticRenderFns: __vue_staticRenderFns__$4 },
+        __vue_inject_styles__$4,
+        __vue_script__$4,
+        __vue_scope_id__$4,
+        __vue_is_functional_template__$4,
+        __vue_module_identifier__$4,
+        false,
+        createInjector,
+        undefined,
+        undefined
+      );
+
+    //
+
+    var script$5 = {
         props: ['enableEdit', 'isBlockFocused', 'fieldFromBlock'],
         template: '#sample-comp',
-        extends: pcBlock,
+        extends: __vue_component__$4,
         data () {
             return {
                 focusedBlock: ''
@@ -6182,8 +7129,414 @@
         }
     };
 
-    var impactComp = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-block pc-block--impact",class:{'pc-block-focused': _vm.isBlockFocused, 'pc-block-to-calculate': _vm.calculateProp == 'impact'}},[_c('pc-svg-chain',{attrs:{"calculateProp":_vm.calculateProp,"fieldFromBlock":_vm.fieldFromBlock}}),_vm._v(" "),_c('label',{staticClass:"pc-calc-radio pc-calc-radio--impact",class:{'pc-calc-radio--active': _vm.isCalculated},attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.isCalculated),expression:"isCalculated"}],attrs:{"type":"radio"},domProps:{"value":true,"checked":_vm._q(_vm.isCalculated,true)},on:{"change":function($event){_vm.isCalculated=true;}}}),_vm._v(" "+_vm._s(_vm.isCalculated ? 'Calculating' : 'Calculate')+" ")]),_vm._v(" "),_c('div',{staticClass:"pc-header"},[_vm._v(" Impact ")]),_vm._v(" "),_c('ul',{staticClass:"pc-inputs"},[_c('li',{staticClass:"pc-input-item pc-input-left"},[_c('label',[_c('span',{staticClass:"pc-input-title"},[_vm._v("Relative")]),_vm._v(" "),_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"prefix":_vm.isnoninferiority ? '' : '±',"suffix":"%","fieldProp":"impact","fieldValue":_vm.impact,"testType":_vm.testType,"isReadOnly":_vm.calculateProp == 'impact',"isBlockFocused":_vm.isBlockFocused,"enableEdit":_vm.enableEdit},on:{"update:focus":_vm.updateFocus}})],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right"},[_c('label',[_c('span',{staticClass:"pc-input-title"},[_vm._v("Absolute")]),_vm._v(" "),_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"fieldProp":"impactByMetricValue","suffix":_vm.testType == 'gTest' ? '%' : '',"fieldValue":_vm.impactByMetricDisplay,"testType":_vm.testType,"isReadOnly":_vm.isReadOnly,"isBlockFocused":_vm.isBlockFocused,"enableEdit":_vm.enableEdit,"aria-label":"visitors with goals"},on:{"update:focus":_vm.updateFocus}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v(" going from "+_vm._s(_vm.addPercentToString(_vm.base))+" to either "+_vm._s(_vm.addPercentToString(_vm.impactByMetricMinDisplay))+" or "+_vm._s(_vm.addPercentToString(_vm.impactByMetricMaxDisplay))+" ")])],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-bottom-left"},[_c('label',[_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"fieldProp":"impactByVisitors","fieldValue":_vm.impactByVisitorsDisplay,"testType":_vm.testType,"isReadOnly":_vm.isReadOnly,"isBlockFocused":_vm.isBlockFocused,"enableEdit":_vm.enableEdit && _vm.calculateProp != 'sample'},on:{"update:focus":_vm.updateFocus}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v(" "+_vm._s(_vm.testType == 'gTest' ? ' Incremental trials': ' Incremental change in the metric')+" ")])],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-bottom-right"},[_c('label',[_c('pc-block-field',{attrs:{"fieldProp":"impactByVisitorsPerDay","fieldValue":_vm.impactByVisitorsPerDayDisplay,"testType":_vm.testType,"isReadOnly":_vm.isReadOnly,"isBlockFocused":_vm.isBlockFocused,"enableEdit":_vm.enableEdit && _vm.calculateProp != 'sample'},on:{"update:focus":_vm.updateFocus}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v(" "+_vm._s(_vm.testType == 'gTest' ? ' Incremental trials per day': ' Incremental change in the metric per day')+" ")])],1)])])],1)},staticRenderFns: [],
-        extends: pcBlock,
+    /* script */
+    const __vue_script__$5 = script$5;
+
+    /* template */
+    var __vue_render__$5 = function() {
+      var _vm = this;
+      var _h = _vm.$createElement;
+      var _c = _vm._self._c || _h;
+      return _c(
+        "div",
+        {
+          staticClass: "pc-block pc-block--sample",
+          class: {
+            "pc-block-focused": _vm.isBlockFocused == "sample",
+            "pc-block-to-calculate": _vm.calculateProp == "sample"
+          }
+        },
+        [
+          _c("pc-svg-chain", {
+            attrs: {
+              calculateProp: _vm.calculateProp,
+              fieldFromBlock: _vm.fieldFromBlock
+            }
+          }),
+          _vm._v(" "),
+          _c(
+            "label",
+            {
+              staticClass: "pc-calc-radio pc-calc-radio--sample",
+              class: { "pc-calc-radio--active": _vm.isCalculated },
+              attrs: { slot: "text" },
+              slot: "text"
+            },
+            [
+              _c("input", {
+                directives: [
+                  {
+                    name: "model",
+                    rawName: "v-model",
+                    value: _vm.isCalculated,
+                    expression: "isCalculated"
+                  }
+                ],
+                attrs: { type: "radio" },
+                domProps: { value: true, checked: _vm._q(_vm.isCalculated, true) },
+                on: {
+                  change: function($event) {
+                    _vm.isCalculated = true;
+                  }
+                }
+              }),
+              _vm._v(
+                "\n            " +
+                  _vm._s(_vm.isCalculated ? "Calculating" : "Calculate") +
+                  "\n    "
+              )
+            ]
+          ),
+          _vm._v(" "),
+          _c("div", { staticClass: "pc-header" }, [
+            _vm._v("\n        Sample Size\n    ")
+          ]),
+          _vm._v(" "),
+          _c(
+            "ul",
+            {
+              staticClass: "pc-inputs",
+              class: { "pc-inputs-no-grid": _vm.onlyTotalVisitors }
+            },
+            [
+              _c("li", { staticClass: "pc-input-item pc-input-left" }, [
+                _c(
+                  "label",
+                  [
+                    _vm._m(0),
+                    _vm._v(" "),
+                    _c("pc-block-field", {
+                      attrs: {
+                        fieldProp: "sample",
+                        fieldValue: _vm.sample,
+                        isReadOnly: _vm.calculateProp == "sample",
+                        enableEdit: _vm.enableEdit
+                      },
+                      on: { "update:focus": _vm.updateFocus }
+                    })
+                  ],
+                  1
+                )
+              ]),
+              _vm._v(" "),
+              _c(
+                "li",
+                {
+                  staticClass:
+                    "pc-input-item pc-input-right pc-value-field--lockable",
+                  class: [
+                    _vm.getLockedStateClass("visitorsPerDay"),
+                    { "pc-hidden": _vm.onlyTotalVisitors }
+                  ]
+                },
+                [
+                  _c(
+                    "label",
+                    [
+                      _vm._m(1),
+                      _vm._v(" "),
+                      _c("pc-block-field", {
+                        attrs: {
+                          fieldProp: "visitorsPerDay",
+                          fieldValue: _vm.visitorsPerDay,
+                          isReadOnly: _vm.lockedField == "visitorsPerDay",
+                          isBlockFocused: _vm.isBlockFocused,
+                          enableEdit: _vm.enableEdit,
+                          lockedField: _vm.lockedField
+                        },
+                        on: { "update:focus": _vm.updateFocus }
+                      })
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "button",
+                    {
+                      staticClass: "pc-swap-button",
+                      attrs: { type: "button" },
+                      on: { click: _vm.switchLockedField }
+                    },
+                    [
+                      _c(
+                        "svg",
+                        {
+                          attrs: {
+                            width: "20px",
+                            height: "20px",
+                            viewBox: "0 0 20 20",
+                            version: "1.1",
+                            xmlns: "http://www.w3.org/2000/svg",
+                            "xmlns:xlink": "http://www.w3.org/1999/xlink"
+                          }
+                        },
+                        [
+                          _c("desc", [
+                            _vm._v(
+                              "Lock " +
+                                _vm._s(
+                                  _vm.lockedField == "days"
+                                    ? "number of days"
+                                    : "visitors per day"
+                                )
+                            )
+                          ]),
+                          _vm._v(" "),
+                          _c("defs", [
+                            _c("circle", {
+                              attrs: { id: "path-1", cx: "13", cy: "13", r: "10" }
+                            }),
+                            _vm._v(" "),
+                            _c(
+                              "filter",
+                              {
+                                attrs: {
+                                  x: "-5.0%",
+                                  y: "-5.0%",
+                                  width: "110.0%",
+                                  height: "110.0%",
+                                  filterUnits: "objectBoundingBox",
+                                  id: "filter-2"
+                                }
+                              },
+                              [
+                                _c("feGaussianBlur", {
+                                  attrs: {
+                                    stdDeviation: "0.5",
+                                    in: "SourceAlpha",
+                                    result: "shadowBlurInner1"
+                                  }
+                                }),
+                                _vm._v(" "),
+                                _c("feOffset", {
+                                  attrs: {
+                                    dx: "0",
+                                    dy: "1",
+                                    in: "shadowBlurInner1",
+                                    result: "shadowOffsetInner1"
+                                  }
+                                }),
+                                _vm._v(" "),
+                                _c("feComposite", {
+                                  attrs: {
+                                    in: "shadowOffsetInner1",
+                                    in2: "SourceAlpha",
+                                    operator: "arithmetic",
+                                    k2: "-1",
+                                    k3: "1",
+                                    result: "shadowInnerInner1"
+                                  }
+                                }),
+                                _vm._v(" "),
+                                _c("feColorMatrix", {
+                                  attrs: {
+                                    values:
+                                      "0 0 0 0 0.489716199   0 0 0 0 0.489716199   0 0 0 0 0.489716199  0 0 0 0.5 0",
+                                    type: "matrix",
+                                    in: "shadowInnerInner1"
+                                  }
+                                })
+                              ],
+                              1
+                            )
+                          ]),
+                          _vm._v(" "),
+                          _c(
+                            "g",
+                            {
+                              attrs: {
+                                id: "Page-1",
+                                stroke: "none",
+                                "stroke-width": "1",
+                                fill: "none",
+                                "fill-rule": "evenodd"
+                              }
+                            },
+                            [
+                              _c(
+                                "g",
+                                {
+                                  attrs: {
+                                    id: "Power-Calculator",
+                                    transform: "translate(-550.000000, -522.000000)"
+                                  }
+                                },
+                                [
+                                  _c(
+                                    "g",
+                                    {
+                                      attrs: {
+                                        id: "Switcher",
+                                        transform:
+                                          "translate(547.000000, 519.000000)"
+                                      }
+                                    },
+                                    [
+                                      _c("g", { attrs: { id: "Oval-3" } }, [
+                                        _c("use", {
+                                          attrs: {
+                                            fill: "#EFEFEF",
+                                            "fill-rule": "evenodd",
+                                            "xlink:href": "#path-1"
+                                          }
+                                        }),
+                                        _vm._v(" "),
+                                        _c("use", {
+                                          attrs: {
+                                            fill: "black",
+                                            "fill-opacity": "1",
+                                            filter: "url(#filter-2)",
+                                            "xlink:href": "#path-1"
+                                          }
+                                        })
+                                      ]),
+                                      _vm._v(" "),
+                                      _c(
+                                        "g",
+                                        {
+                                          attrs: {
+                                            id: "Group",
+                                            "stroke-width": "1",
+                                            "fill-rule": "evenodd",
+                                            transform:
+                                              "translate(7.000000, 7.000000)",
+                                            fill: "#155EAB"
+                                          }
+                                        },
+                                        [
+                                          _c("path", {
+                                            attrs: {
+                                              d:
+                                                "M4.5,4.20404051 L4.5,9.9127641 L2.5,9.9127641 L2.5,4.20404051 L0.5,4.20404051 L3.5,0.70872359 L6.5,4.20404051 L4.5,4.20404051 Z",
+                                              id: "Combined-Shape"
+                                            }
+                                          }),
+                                          _vm._v(" "),
+                                          _c("path", {
+                                            attrs: {
+                                              d:
+                                                "M9.5,5.49531692 L9.5,11.2040405 L7.5,11.2040405 L7.5,5.49531692 L5.5,5.49531692 L8.5,2 L11.5,5.49531692 L9.5,5.49531692 Z",
+                                              id: "Combined-Shape",
+                                              transform:
+                                                "translate(8.500000, 6.602020) scale(1, -1) translate(-8.500000, -6.602020) "
+                                            }
+                                          })
+                                        ]
+                                      )
+                                    ]
+                                  )
+                                ]
+                              )
+                            ]
+                          )
+                        ]
+                      )
+                    ]
+                  )
+                ]
+              ),
+              _vm._v(" "),
+              _c(
+                "li",
+                {
+                  staticClass:
+                    "pc-input-item pc-input-right-swap pc-value-field--lockable",
+                  class: [
+                    _vm.getLockedStateClass("days"),
+                    { "pc-hidden": _vm.onlyTotalVisitors }
+                  ]
+                },
+                [
+                  _c(
+                    "label",
+                    [
+                      _c("pc-block-field", {
+                        attrs: {
+                          fieldProp: "runtime",
+                          prefix: "",
+                          suffix: " days",
+                          fieldValue: _vm.runtime,
+                          isReadOnly: _vm.lockedField == "days",
+                          isBlockFocused: _vm.isBlockFocused,
+                          enableEdit: _vm.enableEdit,
+                          lockedField: _vm.lockedField,
+                          "aria-label": "Days"
+                        },
+                        on: { "update:focus": _vm.updateFocus }
+                      })
+                    ],
+                    1
+                  )
+                ]
+              )
+            ]
+          )
+        ],
+        1
+      )
+    };
+    var __vue_staticRenderFns__$5 = [
+      function() {
+        var _vm = this;
+        var _h = _vm.$createElement;
+        var _c = _vm._self._c || _h;
+        return _c("span", { staticClass: "pc-input-title" }, [
+          _vm._v("Total # "),
+          _c("small", { staticClass: "pc-input-sub-title" }, [
+            _vm._v("of new visitors")
+          ])
+        ])
+      },
+      function() {
+        var _vm = this;
+        var _h = _vm.$createElement;
+        var _c = _vm._self._c || _h;
+        return _c("span", { staticClass: "pc-input-title" }, [
+          _vm._v("Daily # "),
+          _c("small", { staticClass: "pc-input-sub-title" }, [
+            _vm._v("of new visitors")
+          ])
+        ])
+      }
+    ];
+    __vue_render__$5._withStripped = true;
+
+      /* style */
+      const __vue_inject_styles__$5 = function (inject) {
+        if (!inject) return
+        inject("data-v-d4c748a8_0", { source: "\n.pc-swap-button {\n    -webkit-appearance: none;\n    background: none;\n    border: 0;\n    margin: 0;\n    padding: 0;\n    position: absolute;\n    top: calc(100% - 10px);\n    left: 5px;\n    z-index: 5;\n}\n.pc-value-field--unlocked .pc-value-field-wrapper {\n    z-index: 1;\n}\n.pc-block-to-calculate  .pc-value-field--locked .pc-value-formatting:before,\n.pc-block-to-calculate  .pc-value-field--locked .pc-value-formatting:after,\n.pc-value-field--locked .pc-value-formatting:before,\n.pc-value-field--locked .pc-value-formatting:after,\n.pc-value-field--locked .pc-value-field-wrapper {\n    color: var(--dark-gray);\n}\n", map: {"version":3,"sources":["/Users/ssastoqueher/projects/booking/powercalculator/src/components/sample-comp.vue"],"names":[],"mappings":";AAwJA;IACA,wBAAA;IACA,gBAAA;IACA,SAAA;IACA,SAAA;IACA,UAAA;IACA,kBAAA;IACA,sBAAA;IACA,SAAA;IACA,UAAA;AACA;AAEA;IACA,UAAA;AACA;AAEA;;;;;IAKA,uBAAA;AACA","file":"sample-comp.vue","sourcesContent":["<template id=\"sample-comp\">\n    <div class=\"pc-block pc-block--sample\" :class=\"{'pc-block-focused': isBlockFocused == 'sample', 'pc-block-to-calculate': calculateProp == 'sample'}\">\n\n        <pc-svg-chain v-bind:calculateProp=\"calculateProp\" v-bind:fieldFromBlock=\"fieldFromBlock\"></pc-svg-chain>\n\n        <label slot=\"text\" class=\"pc-calc-radio pc-calc-radio--sample\" :class=\"{'pc-calc-radio--active': isCalculated}\">\n            <input type=\"radio\" v-model=\"isCalculated\" :value=\"true\" >\n                {{ isCalculated ? 'Calculating' : 'Calculate' }}\n        </label>\n\n        <div class=\"pc-header\">\n            Sample Size\n        </div>\n\n\n        <ul class=\"pc-inputs\" :class=\"{'pc-inputs-no-grid': onlyTotalVisitors}\">\n            <li class=\"pc-input-item pc-input-left\">\n                <label>\n                    <span class=\"pc-input-title\">Total # <small class=\"pc-input-sub-title\">of new visitors</small></span>\n\n                    <pc-block-field\n                        fieldProp=\"sample\"\n\n                        v-bind:fieldValue=\"sample\"\n                        v-bind:isReadOnly=\"calculateProp == 'sample'\"\n                        v-bind:enableEdit=\"enableEdit\"\n\n                        v-on:update:focus=\"updateFocus\"></pc-block-field>\n                </label>\n            </li>\n            <li class=\"pc-input-item pc-input-right pc-value-field--lockable\" :class=\"[getLockedStateClass('visitorsPerDay'), {'pc-hidden': onlyTotalVisitors}]\">\n                <label>\n                    <span class=\"pc-input-title\">Daily # <small class=\"pc-input-sub-title\">of new visitors</small></span>\n\n                    <pc-block-field\n                        fieldProp=\"visitorsPerDay\"\n                        v-bind:fieldValue=\"visitorsPerDay\"\n                        v-bind:isReadOnly=\"lockedField == 'visitorsPerDay'\"\n                        v-bind:isBlockFocused=\"isBlockFocused\"\n                        v-bind:enableEdit=\"enableEdit\"\n\n                        v-bind:lockedField=\"lockedField\"\n\n                        v-on:update:focus=\"updateFocus\"></pc-block-field>\n                </label>\n\n                <button type=\"button\" class=\"pc-swap-button\" v-on:click=\"switchLockedField\">\n                    <svg width=\"20px\" height=\"20px\" viewBox=\"0 0 20 20\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n                        <desc>Lock {{ lockedField == 'days' ? 'number of days' : 'visitors per day' }}</desc>\n                        <defs>\n                            <circle id=\"path-1\" cx=\"13\" cy=\"13\" r=\"10\"></circle>\n                            <filter x=\"-5.0%\" y=\"-5.0%\" width=\"110.0%\" height=\"110.0%\" filterUnits=\"objectBoundingBox\" id=\"filter-2\">\n                                <feGaussianBlur stdDeviation=\"0.5\" in=\"SourceAlpha\" result=\"shadowBlurInner1\"></feGaussianBlur>\n                                <feOffset dx=\"0\" dy=\"1\" in=\"shadowBlurInner1\" result=\"shadowOffsetInner1\"></feOffset>\n                                <feComposite in=\"shadowOffsetInner1\" in2=\"SourceAlpha\" operator=\"arithmetic\" k2=\"-1\" k3=\"1\" result=\"shadowInnerInner1\"></feComposite>\n                                <feColorMatrix values=\"0 0 0 0 0.489716199   0 0 0 0 0.489716199   0 0 0 0 0.489716199  0 0 0 0.5 0\" type=\"matrix\" in=\"shadowInnerInner1\"></feColorMatrix>\n                            </filter>\n                        </defs>\n                        <g id=\"Page-1\" stroke=\"none\" stroke-width=\"1\" fill=\"none\" fill-rule=\"evenodd\">\n                            <g id=\"Power-Calculator\" transform=\"translate(-550.000000, -522.000000)\">\n                                <g id=\"Switcher\" transform=\"translate(547.000000, 519.000000)\">\n                                    <g id=\"Oval-3\">\n                                        <use fill=\"#EFEFEF\" fill-rule=\"evenodd\" xlink:href=\"#path-1\"></use>\n                                        <use fill=\"black\" fill-opacity=\"1\" filter=\"url(#filter-2)\" xlink:href=\"#path-1\"></use>\n                                    </g>\n                                    <g id=\"Group\" stroke-width=\"1\" fill-rule=\"evenodd\" transform=\"translate(7.000000, 7.000000)\" fill=\"#155EAB\">\n                                        <path d=\"M4.5,4.20404051 L4.5,9.9127641 L2.5,9.9127641 L2.5,4.20404051 L0.5,4.20404051 L3.5,0.70872359 L6.5,4.20404051 L4.5,4.20404051 Z\" id=\"Combined-Shape\"></path>\n                                        <path d=\"M9.5,5.49531692 L9.5,11.2040405 L7.5,11.2040405 L7.5,5.49531692 L5.5,5.49531692 L8.5,2 L11.5,5.49531692 L9.5,5.49531692 Z\" id=\"Combined-Shape\" transform=\"translate(8.500000, 6.602020) scale(1, -1) translate(-8.500000, -6.602020) \"></path>\n                                    </g>\n                                </g>\n                            </g>\n                        </g>\n                    </svg>\n                </button>\n\n            </li>\n            <li class=\"pc-input-item pc-input-right-swap pc-value-field--lockable\" :class=\"[getLockedStateClass('days'), {'pc-hidden': onlyTotalVisitors}]\">\n                <label>\n                    <pc-block-field\n                        fieldProp=\"runtime\"\n                        prefix=\"\"\n                        suffix=\" days\"\n                        v-bind:fieldValue=\"runtime\"\n                        v-bind:isReadOnly=\"lockedField == 'days'\"\n                        v-bind:isBlockFocused=\"isBlockFocused\"\n                        v-bind:enableEdit=\"enableEdit\"\n\n                        v-bind:lockedField=\"lockedField\"\n\n                        v-on:update:focus=\"updateFocus\"\n                        aria-label=\"Days\"></pc-block-field>\n                </label>\n            </li>\n        </ul>\n    </div>\n</template>\n\n<script>\nimport pcBlock from './pc-block.vue'\n\nexport default {\n    props: ['enableEdit', 'isBlockFocused', 'fieldFromBlock'],\n    template: '#sample-comp',\n    extends: pcBlock,\n    data () {\n        return {\n            focusedBlock: ''\n        }\n    },\n    computed: {\n        sample () {\n            return this.$store.state.attributes.sample\n        },\n        visitorsPerDay () {\n            return this.$store.state.attributes.visitorsPerDay\n        },\n        runtime () {\n            return this.$store.state.attributes.runtime\n        },\n        lockedField () {\n            return this.$store.state.attributes.lockedField\n        },\n        onlyTotalVisitors () {\n            return this.$store.state.attributes.onlyTotalVisitors\n        },\n    },\n    methods: {\n        updateFocus ({fieldProp, value}) {\n\n            if (this.focusedBlock == fieldProp && value === false) {\n                this.focusedBlock = ''\n            } else if (value === true) {\n                this.focusedBlock = fieldProp\n            }\n\n            this.$emit('update:focus', {\n                fieldProp: this.fieldFromBlock,\n                value: value\n            })\n        },\n        switchLockedField () {\n            this.$store.dispatch('switch:lockedfield');\n        },\n        getLockedStateClass (param) {\n            return this.lockedField == param ? 'pc-value-field--locked' : 'pc-value-field--unlocked'\n        }\n    }\n}\n\n</script>\n\n<style>\n.pc-swap-button {\n    -webkit-appearance: none;\n    background: none;\n    border: 0;\n    margin: 0;\n    padding: 0;\n    position: absolute;\n    top: calc(100% - 10px);\n    left: 5px;\n    z-index: 5;\n}\n\n.pc-value-field--unlocked .pc-value-field-wrapper {\n    z-index: 1;\n}\n\n.pc-block-to-calculate  .pc-value-field--locked .pc-value-formatting:before,\n.pc-block-to-calculate  .pc-value-field--locked .pc-value-formatting:after,\n.pc-value-field--locked .pc-value-formatting:before,\n.pc-value-field--locked .pc-value-formatting:after,\n.pc-value-field--locked .pc-value-field-wrapper {\n    color: var(--dark-gray);\n}\n</style>\n\n<style scoped>\n.pc-inputs {\n    grid-template-areas:\n        \"pc-input-left pc-input-right\"\n        \"pc-input-left-swap pc-input-right-swap\"\n    ;\n}\n\n.pc-input-right-swap,\n.pc-input-right {\n    position: relative;\n}\n\n.pc-input-right-swap {\n    grid-area: pc-input-right-swap;\n    margin-top: -10px;\n    filter: drop-shadow(0 4px 2px rgba(0,0,0,0.1)) drop-shadow(0 -4px 2px rgba(0,0,0,0.1));\n}\n\n.pc-input-right-swap .pc-value-field-wrapper {\n    filter: none;\n}\n\n.pc-value-formatting:after {\n    font-size: 14px;\n}\n\n.pc-block-to-calculate .pc-field-visitorsPerDay,\n.pc-block-to-calculate .pc-field-runtime {\n    background: var(--white);\n}\n\n.pc-value-field--lockable.pc-value-field--locked .pc-value-field-wrapper {\n    background: linear-gradient(0deg, var(--light-gray) 0%, var(--white) 100%);\n}\n\n.pc-inputs-no-grid {\n    display: block;\n}\n\n</style>\n"]}, media: undefined })
+    ,inject("data-v-d4c748a8_1", { source: "\n.pc-inputs[data-v-d4c748a8] {\n    grid-template-areas:\n        \"pc-input-left pc-input-right\"\n        \"pc-input-left-swap pc-input-right-swap\"\n    ;\n}\n.pc-input-right-swap[data-v-d4c748a8],\n.pc-input-right[data-v-d4c748a8] {\n    position: relative;\n}\n.pc-input-right-swap[data-v-d4c748a8] {\n    grid-area: pc-input-right-swap;\n    margin-top: -10px;\n    filter: drop-shadow(0 4px 2px rgba(0,0,0,0.1)) drop-shadow(0 -4px 2px rgba(0,0,0,0.1));\n}\n.pc-input-right-swap .pc-value-field-wrapper[data-v-d4c748a8] {\n    filter: none;\n}\n.pc-value-formatting[data-v-d4c748a8]:after {\n    font-size: 14px;\n}\n.pc-block-to-calculate .pc-field-visitorsPerDay[data-v-d4c748a8],\n.pc-block-to-calculate .pc-field-runtime[data-v-d4c748a8] {\n    background: var(--white);\n}\n.pc-value-field--lockable.pc-value-field--locked .pc-value-field-wrapper[data-v-d4c748a8] {\n    background: linear-gradient(0deg, var(--light-gray) 0%, var(--white) 100%);\n}\n.pc-inputs-no-grid[data-v-d4c748a8] {\n    display: block;\n}\n\n", map: {"version":3,"sources":["/Users/ssastoqueher/projects/booking/powercalculator/src/components/sample-comp.vue"],"names":[],"mappings":";AAkLA;IACA;;;IAGA;AACA;AAEA;;IAEA,kBAAA;AACA;AAEA;IACA,8BAAA;IACA,iBAAA;IACA,sFAAA;AACA;AAEA;IACA,YAAA;AACA;AAEA;IACA,eAAA;AACA;AAEA;;IAEA,wBAAA;AACA;AAEA;IACA,0EAAA;AACA;AAEA;IACA,cAAA;AACA","file":"sample-comp.vue","sourcesContent":["<template id=\"sample-comp\">\n    <div class=\"pc-block pc-block--sample\" :class=\"{'pc-block-focused': isBlockFocused == 'sample', 'pc-block-to-calculate': calculateProp == 'sample'}\">\n\n        <pc-svg-chain v-bind:calculateProp=\"calculateProp\" v-bind:fieldFromBlock=\"fieldFromBlock\"></pc-svg-chain>\n\n        <label slot=\"text\" class=\"pc-calc-radio pc-calc-radio--sample\" :class=\"{'pc-calc-radio--active': isCalculated}\">\n            <input type=\"radio\" v-model=\"isCalculated\" :value=\"true\" >\n                {{ isCalculated ? 'Calculating' : 'Calculate' }}\n        </label>\n\n        <div class=\"pc-header\">\n            Sample Size\n        </div>\n\n\n        <ul class=\"pc-inputs\" :class=\"{'pc-inputs-no-grid': onlyTotalVisitors}\">\n            <li class=\"pc-input-item pc-input-left\">\n                <label>\n                    <span class=\"pc-input-title\">Total # <small class=\"pc-input-sub-title\">of new visitors</small></span>\n\n                    <pc-block-field\n                        fieldProp=\"sample\"\n\n                        v-bind:fieldValue=\"sample\"\n                        v-bind:isReadOnly=\"calculateProp == 'sample'\"\n                        v-bind:enableEdit=\"enableEdit\"\n\n                        v-on:update:focus=\"updateFocus\"></pc-block-field>\n                </label>\n            </li>\n            <li class=\"pc-input-item pc-input-right pc-value-field--lockable\" :class=\"[getLockedStateClass('visitorsPerDay'), {'pc-hidden': onlyTotalVisitors}]\">\n                <label>\n                    <span class=\"pc-input-title\">Daily # <small class=\"pc-input-sub-title\">of new visitors</small></span>\n\n                    <pc-block-field\n                        fieldProp=\"visitorsPerDay\"\n                        v-bind:fieldValue=\"visitorsPerDay\"\n                        v-bind:isReadOnly=\"lockedField == 'visitorsPerDay'\"\n                        v-bind:isBlockFocused=\"isBlockFocused\"\n                        v-bind:enableEdit=\"enableEdit\"\n\n                        v-bind:lockedField=\"lockedField\"\n\n                        v-on:update:focus=\"updateFocus\"></pc-block-field>\n                </label>\n\n                <button type=\"button\" class=\"pc-swap-button\" v-on:click=\"switchLockedField\">\n                    <svg width=\"20px\" height=\"20px\" viewBox=\"0 0 20 20\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n                        <desc>Lock {{ lockedField == 'days' ? 'number of days' : 'visitors per day' }}</desc>\n                        <defs>\n                            <circle id=\"path-1\" cx=\"13\" cy=\"13\" r=\"10\"></circle>\n                            <filter x=\"-5.0%\" y=\"-5.0%\" width=\"110.0%\" height=\"110.0%\" filterUnits=\"objectBoundingBox\" id=\"filter-2\">\n                                <feGaussianBlur stdDeviation=\"0.5\" in=\"SourceAlpha\" result=\"shadowBlurInner1\"></feGaussianBlur>\n                                <feOffset dx=\"0\" dy=\"1\" in=\"shadowBlurInner1\" result=\"shadowOffsetInner1\"></feOffset>\n                                <feComposite in=\"shadowOffsetInner1\" in2=\"SourceAlpha\" operator=\"arithmetic\" k2=\"-1\" k3=\"1\" result=\"shadowInnerInner1\"></feComposite>\n                                <feColorMatrix values=\"0 0 0 0 0.489716199   0 0 0 0 0.489716199   0 0 0 0 0.489716199  0 0 0 0.5 0\" type=\"matrix\" in=\"shadowInnerInner1\"></feColorMatrix>\n                            </filter>\n                        </defs>\n                        <g id=\"Page-1\" stroke=\"none\" stroke-width=\"1\" fill=\"none\" fill-rule=\"evenodd\">\n                            <g id=\"Power-Calculator\" transform=\"translate(-550.000000, -522.000000)\">\n                                <g id=\"Switcher\" transform=\"translate(547.000000, 519.000000)\">\n                                    <g id=\"Oval-3\">\n                                        <use fill=\"#EFEFEF\" fill-rule=\"evenodd\" xlink:href=\"#path-1\"></use>\n                                        <use fill=\"black\" fill-opacity=\"1\" filter=\"url(#filter-2)\" xlink:href=\"#path-1\"></use>\n                                    </g>\n                                    <g id=\"Group\" stroke-width=\"1\" fill-rule=\"evenodd\" transform=\"translate(7.000000, 7.000000)\" fill=\"#155EAB\">\n                                        <path d=\"M4.5,4.20404051 L4.5,9.9127641 L2.5,9.9127641 L2.5,4.20404051 L0.5,4.20404051 L3.5,0.70872359 L6.5,4.20404051 L4.5,4.20404051 Z\" id=\"Combined-Shape\"></path>\n                                        <path d=\"M9.5,5.49531692 L9.5,11.2040405 L7.5,11.2040405 L7.5,5.49531692 L5.5,5.49531692 L8.5,2 L11.5,5.49531692 L9.5,5.49531692 Z\" id=\"Combined-Shape\" transform=\"translate(8.500000, 6.602020) scale(1, -1) translate(-8.500000, -6.602020) \"></path>\n                                    </g>\n                                </g>\n                            </g>\n                        </g>\n                    </svg>\n                </button>\n\n            </li>\n            <li class=\"pc-input-item pc-input-right-swap pc-value-field--lockable\" :class=\"[getLockedStateClass('days'), {'pc-hidden': onlyTotalVisitors}]\">\n                <label>\n                    <pc-block-field\n                        fieldProp=\"runtime\"\n                        prefix=\"\"\n                        suffix=\" days\"\n                        v-bind:fieldValue=\"runtime\"\n                        v-bind:isReadOnly=\"lockedField == 'days'\"\n                        v-bind:isBlockFocused=\"isBlockFocused\"\n                        v-bind:enableEdit=\"enableEdit\"\n\n                        v-bind:lockedField=\"lockedField\"\n\n                        v-on:update:focus=\"updateFocus\"\n                        aria-label=\"Days\"></pc-block-field>\n                </label>\n            </li>\n        </ul>\n    </div>\n</template>\n\n<script>\nimport pcBlock from './pc-block.vue'\n\nexport default {\n    props: ['enableEdit', 'isBlockFocused', 'fieldFromBlock'],\n    template: '#sample-comp',\n    extends: pcBlock,\n    data () {\n        return {\n            focusedBlock: ''\n        }\n    },\n    computed: {\n        sample () {\n            return this.$store.state.attributes.sample\n        },\n        visitorsPerDay () {\n            return this.$store.state.attributes.visitorsPerDay\n        },\n        runtime () {\n            return this.$store.state.attributes.runtime\n        },\n        lockedField () {\n            return this.$store.state.attributes.lockedField\n        },\n        onlyTotalVisitors () {\n            return this.$store.state.attributes.onlyTotalVisitors\n        },\n    },\n    methods: {\n        updateFocus ({fieldProp, value}) {\n\n            if (this.focusedBlock == fieldProp && value === false) {\n                this.focusedBlock = ''\n            } else if (value === true) {\n                this.focusedBlock = fieldProp\n            }\n\n            this.$emit('update:focus', {\n                fieldProp: this.fieldFromBlock,\n                value: value\n            })\n        },\n        switchLockedField () {\n            this.$store.dispatch('switch:lockedfield');\n        },\n        getLockedStateClass (param) {\n            return this.lockedField == param ? 'pc-value-field--locked' : 'pc-value-field--unlocked'\n        }\n    }\n}\n\n</script>\n\n<style>\n.pc-swap-button {\n    -webkit-appearance: none;\n    background: none;\n    border: 0;\n    margin: 0;\n    padding: 0;\n    position: absolute;\n    top: calc(100% - 10px);\n    left: 5px;\n    z-index: 5;\n}\n\n.pc-value-field--unlocked .pc-value-field-wrapper {\n    z-index: 1;\n}\n\n.pc-block-to-calculate  .pc-value-field--locked .pc-value-formatting:before,\n.pc-block-to-calculate  .pc-value-field--locked .pc-value-formatting:after,\n.pc-value-field--locked .pc-value-formatting:before,\n.pc-value-field--locked .pc-value-formatting:after,\n.pc-value-field--locked .pc-value-field-wrapper {\n    color: var(--dark-gray);\n}\n</style>\n\n<style scoped>\n.pc-inputs {\n    grid-template-areas:\n        \"pc-input-left pc-input-right\"\n        \"pc-input-left-swap pc-input-right-swap\"\n    ;\n}\n\n.pc-input-right-swap,\n.pc-input-right {\n    position: relative;\n}\n\n.pc-input-right-swap {\n    grid-area: pc-input-right-swap;\n    margin-top: -10px;\n    filter: drop-shadow(0 4px 2px rgba(0,0,0,0.1)) drop-shadow(0 -4px 2px rgba(0,0,0,0.1));\n}\n\n.pc-input-right-swap .pc-value-field-wrapper {\n    filter: none;\n}\n\n.pc-value-formatting:after {\n    font-size: 14px;\n}\n\n.pc-block-to-calculate .pc-field-visitorsPerDay,\n.pc-block-to-calculate .pc-field-runtime {\n    background: var(--white);\n}\n\n.pc-value-field--lockable.pc-value-field--locked .pc-value-field-wrapper {\n    background: linear-gradient(0deg, var(--light-gray) 0%, var(--white) 100%);\n}\n\n.pc-inputs-no-grid {\n    display: block;\n}\n\n</style>\n"]}, media: undefined });
+
+      };
+      /* scoped */
+      const __vue_scope_id__$5 = "data-v-d4c748a8";
+      /* module identifier */
+      const __vue_module_identifier__$5 = undefined;
+      /* functional template */
+      const __vue_is_functional_template__$5 = false;
+      /* style inject SSR */
+      
+      /* style inject shadow dom */
+      
+
+      
+      const __vue_component__$5 = /*#__PURE__*/normalizeComponent(
+        { render: __vue_render__$5, staticRenderFns: __vue_staticRenderFns__$5 },
+        __vue_inject_styles__$5,
+        __vue_script__$5,
+        __vue_scope_id__$5,
+        __vue_is_functional_template__$5,
+        __vue_module_identifier__$5,
+        false,
+        createInjector,
+        undefined,
+        undefined
+      );
+
+    //
+
+    var script$6 = {
+        extends: __vue_component__$4,
         template: '#impact-comp',
         props: ['enableEdit', 'fieldFromBlock', 'isBlockFocused', 'isnoninferiority'],
         data () {
@@ -6255,9 +7608,248 @@
         }
     };
 
-    var baseComp = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-block pc-block--base",class:{'pc-block-focused': _vm.focusedblock == 'base'}},[_c('pc-svg-chain',{attrs:{"fieldFromBlock":_vm.fieldFromBlock}}),_vm._v(" "),(_vm.testType == 'gTest')?_c('div',{staticClass:"pc-header"},[_vm._v(" Base Rate ")]):_c('div',{staticClass:"pc-header"},[_vm._v(" Base Average ")]),_vm._v(" "),_c('ul',{staticClass:"pc-inputs"},[_c('li',{staticClass:"pc-input-item pc-input-left"},[_c('label',[_c('span',{staticClass:"pc-input-title"},[_vm._v(_vm._s(_vm.testType == 'gTest' ? 'Base Rate' : 'Base Average')+" "),_c('small',{staticClass:"pc-input-sub-title"},[_vm._v("conversion")])]),_vm._v(" "),_c('pc-block-field',{attrs:{"fieldProp":"base","suffix":_vm.testType == 'gTest' ? '%' : '',"fieldValue":_vm.base,"isReadOnly":_vm.isReadOnly,"isBlockFocused":_vm.isBlockFocused,"enableEdit":_vm.enableEdit},on:{"update:focus":_vm.updateFocus}})],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right"},[_c('label',[_vm._m(0),_vm._v(" "),_c('pc-block-field',{attrs:{"fieldProp":"visitorsWithGoals","fieldValue":_vm.visitorsWithGoals,"fieldFromBlock":_vm.fieldFromBlock,"isBlockFocused":_vm.isBlockFocused,"isReadOnly":_vm.isReadOnly,"enableEdit":_vm.enableEdit && this.calculateProp != 'sample'},on:{"update:focus":_vm.updateFocus}})],1)]),_vm._v(" "),(_vm.testType == 'tTest')?_c('li',{staticClass:"pc-input-item pc-input-sd-rate"},[_c('label',[_c('pc-block-field',{attrs:{"prefix":"±","fieldProp":"sdRate","fieldFromBlock":"base","fieldValue":_vm.sdRate,"isReadOnly":_vm.isReadOnly,"isBlockFocused":_vm.isBlockFocused,"enableEdit":_vm.enableEdit},on:{"update:focus":_vm.updateFocus}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v("Base Standard deviation")])],1)]):_vm._e()])],1)},staticRenderFns: [function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('span',{staticClass:"pc-input-title"},[_vm._v("Metric Totals"),_c('small',{staticClass:"pc-input-sub-title"},[_vm._v("visitors reached goal")])])}],_scopeId: 'data-v-0d0bef2b',
+    /* script */
+    const __vue_script__$6 = script$6;
+
+    /* template */
+    var __vue_render__$6 = function() {
+      var _vm = this;
+      var _h = _vm.$createElement;
+      var _c = _vm._self._c || _h;
+      return _c(
+        "div",
+        {
+          staticClass: "pc-block pc-block--impact",
+          class: {
+            "pc-block-focused": _vm.isBlockFocused,
+            "pc-block-to-calculate": _vm.calculateProp == "impact"
+          }
+        },
+        [
+          _c("pc-svg-chain", {
+            attrs: {
+              calculateProp: _vm.calculateProp,
+              fieldFromBlock: _vm.fieldFromBlock
+            }
+          }),
+          _vm._v(" "),
+          _c(
+            "label",
+            {
+              staticClass: "pc-calc-radio pc-calc-radio--impact",
+              class: { "pc-calc-radio--active": _vm.isCalculated },
+              attrs: { slot: "text" },
+              slot: "text"
+            },
+            [
+              _c("input", {
+                directives: [
+                  {
+                    name: "model",
+                    rawName: "v-model",
+                    value: _vm.isCalculated,
+                    expression: "isCalculated"
+                  }
+                ],
+                attrs: { type: "radio" },
+                domProps: { value: true, checked: _vm._q(_vm.isCalculated, true) },
+                on: {
+                  change: function($event) {
+                    _vm.isCalculated = true;
+                  }
+                }
+              }),
+              _vm._v(
+                "\n            " +
+                  _vm._s(_vm.isCalculated ? "Calculating" : "Calculate") +
+                  "\n    "
+              )
+            ]
+          ),
+          _vm._v(" "),
+          _c("div", { staticClass: "pc-header" }, [
+            _vm._v("\n        Impact\n    ")
+          ]),
+          _vm._v(" "),
+          _c("ul", { staticClass: "pc-inputs" }, [
+            _c("li", { staticClass: "pc-input-item pc-input-left" }, [
+              _c(
+                "label",
+                [
+                  _c("span", { staticClass: "pc-input-title" }, [
+                    _vm._v("Relative")
+                  ]),
+                  _vm._v(" "),
+                  _c("pc-block-field", {
+                    staticClass: "pc-input-field",
+                    attrs: {
+                      prefix: _vm.isnoninferiority ? "" : "±",
+                      suffix: "%",
+                      fieldProp: "impact",
+                      fieldValue: _vm.impact,
+                      testType: _vm.testType,
+                      isReadOnly: _vm.calculateProp == "impact",
+                      isBlockFocused: _vm.isBlockFocused,
+                      enableEdit: _vm.enableEdit
+                    },
+                    on: { "update:focus": _vm.updateFocus }
+                  })
+                ],
+                1
+              )
+            ]),
+            _vm._v(" "),
+            _c("li", { staticClass: "pc-input-item pc-input-right" }, [
+              _c(
+                "label",
+                [
+                  _c("span", { staticClass: "pc-input-title" }, [
+                    _vm._v("Absolute")
+                  ]),
+                  _vm._v(" "),
+                  _c("pc-block-field", {
+                    staticClass: "pc-input-field",
+                    attrs: {
+                      fieldProp: "impactByMetricValue",
+                      suffix: _vm.testType == "gTest" ? "%" : "",
+                      fieldValue: _vm.impactByMetricDisplay,
+                      testType: _vm.testType,
+                      isReadOnly: _vm.isReadOnly,
+                      isBlockFocused: _vm.isBlockFocused,
+                      enableEdit: _vm.enableEdit,
+                      "aria-label": "visitors with goals"
+                    },
+                    on: { "update:focus": _vm.updateFocus }
+                  }),
+                  _vm._v(" "),
+                  _c("span", { staticClass: "pc-input-details" }, [
+                    _vm._v(
+                      "\n                        going from " +
+                        _vm._s(_vm.addPercentToString(_vm.base)) +
+                        " to\n                        either " +
+                        _vm._s(
+                          _vm.addPercentToString(_vm.impactByMetricMinDisplay)
+                        ) +
+                        " or\n                        " +
+                        _vm._s(
+                          _vm.addPercentToString(_vm.impactByMetricMaxDisplay)
+                        ) +
+                        "\n                    "
+                    )
+                  ])
+                ],
+                1
+              )
+            ]),
+            _vm._v(" "),
+            _c("li", { staticClass: "pc-input-item pc-input-bottom-left" }, [
+              _c(
+                "label",
+                [
+                  _c("pc-block-field", {
+                    staticClass: "pc-input-field",
+                    attrs: {
+                      fieldProp: "impactByVisitors",
+                      fieldValue: _vm.impactByVisitorsDisplay,
+                      testType: _vm.testType,
+                      isReadOnly: _vm.isReadOnly,
+                      isBlockFocused: _vm.isBlockFocused,
+                      enableEdit: _vm.enableEdit && _vm.calculateProp != "sample"
+                    },
+                    on: { "update:focus": _vm.updateFocus }
+                  }),
+                  _vm._v(" "),
+                  _c("span", { staticClass: "pc-input-details" }, [
+                    _vm._v(
+                      "\n                    " +
+                        _vm._s(
+                          _vm.testType == "gTest"
+                            ? " Incremental trials"
+                            : " Incremental change in the metric"
+                        ) +
+                        "\n                "
+                    )
+                  ])
+                ],
+                1
+              )
+            ]),
+            _vm._v(" "),
+            _c("li", { staticClass: "pc-input-item pc-input-bottom-right" }, [
+              _c(
+                "label",
+                [
+                  _c("pc-block-field", {
+                    attrs: {
+                      fieldProp: "impactByVisitorsPerDay",
+                      fieldValue: _vm.impactByVisitorsPerDayDisplay,
+                      testType: _vm.testType,
+                      isReadOnly: _vm.isReadOnly,
+                      isBlockFocused: _vm.isBlockFocused,
+                      enableEdit: _vm.enableEdit && _vm.calculateProp != "sample"
+                    },
+                    on: { "update:focus": _vm.updateFocus }
+                  }),
+                  _vm._v(" "),
+                  _c("span", { staticClass: "pc-input-details" }, [
+                    _vm._v(
+                      "\n                    " +
+                        _vm._s(
+                          _vm.testType == "gTest"
+                            ? " Incremental trials per day"
+                            : " Incremental change in the metric per day"
+                        ) +
+                        "\n                "
+                    )
+                  ])
+                ],
+                1
+              )
+            ])
+          ])
+        ],
+        1
+      )
+    };
+    var __vue_staticRenderFns__$6 = [];
+    __vue_render__$6._withStripped = true;
+
+      /* style */
+      const __vue_inject_styles__$6 = function (inject) {
+        if (!inject) return
+        inject("data-v-076874de_0", { source: "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", map: {"version":3,"sources":[],"names":[],"mappings":"","file":"impact-comp.vue"}, media: undefined });
+
+      };
+      /* scoped */
+      const __vue_scope_id__$6 = undefined;
+      /* module identifier */
+      const __vue_module_identifier__$6 = undefined;
+      /* functional template */
+      const __vue_is_functional_template__$6 = false;
+      /* style inject SSR */
+      
+      /* style inject shadow dom */
+      
+
+      
+      const __vue_component__$6 = /*#__PURE__*/normalizeComponent(
+        { render: __vue_render__$6, staticRenderFns: __vue_staticRenderFns__$6 },
+        __vue_inject_styles__$6,
+        __vue_script__$6,
+        __vue_scope_id__$6,
+        __vue_is_functional_template__$6,
+        __vue_module_identifier__$6,
+        false,
+        createInjector,
+        undefined,
+        undefined
+      );
+
+    //
+
+    var script$7 = {
         props: ['enableEdit', 'fieldFromBlock', 'isBlockFocused'],
-        extends: pcBlock,
+        extends: __vue_component__$4,
         template: '#base-comp',
         data () {
             return {
@@ -6304,7 +7896,177 @@
         }
     };
 
-    var pcTooltip = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-tooltip"},[_c('div',{on:{"mouseover":function($event){return _vm.showTooltip(true)},"mouseout":function($event){return _vm.showTooltip(false)}}},[_vm._t("text")],2),_vm._v(" "),_c('div',{directives:[{name:"show",rawName:"v-show",value:(_vm.isTooltipShown),expression:"isTooltipShown"}],staticClass:"tooltip-wrapper"},[_vm._t("tooltip")],2)])},staticRenderFns: [],
+    /* script */
+    const __vue_script__$7 = script$7;
+
+    /* template */
+    var __vue_render__$7 = function() {
+      var _vm = this;
+      var _h = _vm.$createElement;
+      var _c = _vm._self._c || _h;
+      return _c(
+        "div",
+        {
+          staticClass: "pc-block pc-block--base",
+          class: { "pc-block-focused": _vm.focusedblock == "base" }
+        },
+        [
+          _c("pc-svg-chain", { attrs: { fieldFromBlock: _vm.fieldFromBlock } }),
+          _vm._v(" "),
+          _vm.testType == "gTest"
+            ? _c("div", { staticClass: "pc-header" }, [
+                _vm._v("\n        Base Rate\n    ")
+              ])
+            : _c("div", { staticClass: "pc-header" }, [
+                _vm._v("\n        Base Average\n    ")
+              ]),
+          _vm._v(" "),
+          _c("ul", { staticClass: "pc-inputs" }, [
+            _c("li", { staticClass: "pc-input-item pc-input-left" }, [
+              _c(
+                "label",
+                [
+                  _c("span", { staticClass: "pc-input-title" }, [
+                    _vm._v(
+                      _vm._s(
+                        _vm.testType == "gTest" ? "Base Rate" : "Base Average"
+                      ) + " "
+                    ),
+                    _c("small", { staticClass: "pc-input-sub-title" }, [
+                      _vm._v("conversion")
+                    ])
+                  ]),
+                  _vm._v(" "),
+                  _c("pc-block-field", {
+                    attrs: {
+                      fieldProp: "base",
+                      suffix: _vm.testType == "gTest" ? "%" : "",
+                      fieldValue: _vm.base,
+                      isReadOnly: _vm.isReadOnly,
+                      isBlockFocused: _vm.isBlockFocused,
+                      enableEdit: _vm.enableEdit
+                    },
+                    on: { "update:focus": _vm.updateFocus }
+                  })
+                ],
+                1
+              )
+            ]),
+            _vm._v(" "),
+            _c("li", { staticClass: "pc-input-item pc-input-right" }, [
+              _c(
+                "label",
+                [
+                  _vm._m(0),
+                  _vm._v(" "),
+                  _c("pc-block-field", {
+                    attrs: {
+                      fieldProp: "visitorsWithGoals",
+                      fieldValue: _vm.visitorsWithGoals,
+                      fieldFromBlock: _vm.fieldFromBlock,
+                      isBlockFocused: _vm.isBlockFocused,
+                      isReadOnly: _vm.isReadOnly,
+                      enableEdit: _vm.enableEdit && this.calculateProp != "sample"
+                    },
+                    on: { "update:focus": _vm.updateFocus }
+                  })
+                ],
+                1
+              )
+            ]),
+            _vm._v(" "),
+            _vm.testType == "tTest"
+              ? _c("li", { staticClass: "pc-input-item pc-input-sd-rate" }, [
+                  _c(
+                    "label",
+                    [
+                      _c("pc-block-field", {
+                        attrs: {
+                          prefix: "±",
+                          fieldProp: "sdRate",
+                          fieldFromBlock: "base",
+                          fieldValue: _vm.sdRate,
+                          isReadOnly: _vm.isReadOnly,
+                          isBlockFocused: _vm.isBlockFocused,
+                          enableEdit: _vm.enableEdit
+                        },
+                        on: { "update:focus": _vm.updateFocus }
+                      }),
+                      _vm._v(" "),
+                      _c("span", { staticClass: "pc-input-details" }, [
+                        _vm._v("Base Standard deviation")
+                      ])
+                    ],
+                    1
+                  )
+                ])
+              : _vm._e()
+          ])
+        ],
+        1
+      )
+    };
+    var __vue_staticRenderFns__$7 = [
+      function() {
+        var _vm = this;
+        var _h = _vm.$createElement;
+        var _c = _vm._self._c || _h;
+        return _c("span", { staticClass: "pc-input-title" }, [
+          _vm._v("Metric Totals"),
+          _c("small", { staticClass: "pc-input-sub-title" }, [
+            _vm._v("visitors reached goal")
+          ])
+        ])
+      }
+    ];
+    __vue_render__$7._withStripped = true;
+
+      /* style */
+      const __vue_inject_styles__$7 = function (inject) {
+        if (!inject) return
+        inject("data-v-33128dbf_0", { source: "\n.pc-input-sd-rate {\n    margin-top: -10px;\n    z-index: 1;\n    position: relative;\n    text-align: center;\n}\n.pc-field-sdRate {\n    width: 90%;\n    display: inline-block;\n}\n", map: {"version":3,"sources":["/Users/ssastoqueher/projects/booking/powercalculator/src/components/base-comp.vue"],"names":[],"mappings":";AAyHA;IACA,iBAAA;IACA,UAAA;IACA,kBAAA;IACA,kBAAA;AACA;AAEA;IACA,UAAA;IACA,qBAAA;AACA","file":"base-comp.vue","sourcesContent":["<template id=\"base-comp\">\n    <div class=\"pc-block pc-block--base\" :class=\"{'pc-block-focused': focusedblock == 'base'}\">\n\n        <pc-svg-chain v-bind:fieldFromBlock=\"fieldFromBlock\"></pc-svg-chain>\n\n        <div class=\"pc-header\" v-if=\"testType == 'gTest'\">\n            Base Rate\n        </div>\n        <div class=\"pc-header\" v-else>\n            Base Average\n        </div>\n\n        <ul class=\"pc-inputs\">\n            <li class=\"pc-input-item pc-input-left\">\n                <label>\n                    <span class=\"pc-input-title\">{{testType == 'gTest' ? 'Base Rate' : 'Base Average'}} <small class=\"pc-input-sub-title\">conversion</small></span>\n\n                    <pc-block-field\n                        fieldProp=\"base\"\n                        :suffix=\"testType == 'gTest' ? '%' : ''\"\n\n                        v-bind:fieldValue=\"base\"\n                        v-bind:isReadOnly=\"isReadOnly\"\n                        v-bind:isBlockFocused=\"isBlockFocused\"\n                        v-bind:enableEdit=\"enableEdit\"\n\n                        v-on:update:focus=\"updateFocus\"></pc-block-field>\n                </label>\n            </li>\n\n            <li class=\"pc-input-item pc-input-right\">\n                <label>\n                    <span class=\"pc-input-title\">Metric Totals<small class=\"pc-input-sub-title\">visitors reached goal</small></span>\n\n                    <pc-block-field\n                        fieldProp=\"visitorsWithGoals\"\n                        v-bind:fieldValue=\"visitorsWithGoals\"\n                        v-bind:fieldFromBlock=\"fieldFromBlock\"\n                        v-bind:isBlockFocused=\"isBlockFocused\"\n                        v-bind:isReadOnly=\"isReadOnly\"\n                        v-bind:enableEdit=\"enableEdit && this.calculateProp != 'sample'\"\n\n                        v-on:update:focus=\"updateFocus\"></pc-block-field>\n                </label>\n            </li>\n\n            <li class=\"pc-input-item pc-input-sd-rate\" v-if=\"testType == 'tTest'\">\n                <label>\n                    <pc-block-field\n                        prefix=\"±\"\n                        fieldProp=\"sdRate\"\n                        fieldFromBlock=\"base\"\n\n                        v-bind:fieldValue=\"sdRate\"\n                        v-bind:isReadOnly=\"isReadOnly\"\n                        v-bind:isBlockFocused=\"isBlockFocused\"\n                        v-bind:enableEdit=\"enableEdit\"\n\n                        v-on:update:focus=\"updateFocus\"></pc-block-field>\n                    <span class=\"pc-input-details\">Base Standard deviation</span>\n                </label>\n            </li>\n        </ul>\n    </div>\n</template>\n\n<script>\nimport pcBlock from './pc-block.vue'\n\nexport default {\n    props: ['enableEdit', 'fieldFromBlock', 'isBlockFocused'],\n    extends: pcBlock,\n    template: '#base-comp',\n    data () {\n        return {\n            focusedBlock: '',\n        }\n    },\n    computed: {\n        isReadOnly () {\n            return this.calculateProp == 'base'\n        },\n        base () {\n            return this.$store.state.attributes.base\n        },\n        sdRate () {\n            return this.$store.state.attributes.sdRate\n        },\n        sample () {\n            return this.$store.state.attributes.sample\n        },\n        testType () {\n            return this.$store.state.attributes.testType\n        },\n        visitorsWithGoals () {\n            return this.$store.getters.visitorsWithGoals\n        }\n    },\n    methods: {\n        enableInput () {\n            this.$emit('edit:update', {prop: 'base'})\n        },\n        updateFocus ({fieldProp, value}) {\n            if (this.focusedBlock == fieldProp && value === false) {\n                this.focusedBlock = ''\n            } else if (value === true) {\n                this.focusedBlock = fieldProp\n            }\n\n            this.$emit('update:focus', {\n                fieldProp: this.fieldFromBlock,\n                value: value\n            })\n        }\n\n    }\n}\n</script>\n\n\n<style>\n.pc-input-sd-rate {\n    margin-top: -10px;\n    z-index: 1;\n    position: relative;\n    text-align: center;\n}\n\n.pc-field-sdRate {\n    width: 90%;\n    display: inline-block;\n}\n</style>\n\n<style scoped>\n    .pc-input-left {\n        position: relative;\n        z-index: 2;\n    }\n</style>\n"]}, media: undefined })
+    ,inject("data-v-33128dbf_1", { source: "\n.pc-input-left[data-v-33128dbf] {\n    position: relative;\n    z-index: 2;\n}\n", map: {"version":3,"sources":["/Users/ssastoqueher/projects/booking/powercalculator/src/components/base-comp.vue"],"names":[],"mappings":";AAuIA;IACA,kBAAA;IACA,UAAA;AACA","file":"base-comp.vue","sourcesContent":["<template id=\"base-comp\">\n    <div class=\"pc-block pc-block--base\" :class=\"{'pc-block-focused': focusedblock == 'base'}\">\n\n        <pc-svg-chain v-bind:fieldFromBlock=\"fieldFromBlock\"></pc-svg-chain>\n\n        <div class=\"pc-header\" v-if=\"testType == 'gTest'\">\n            Base Rate\n        </div>\n        <div class=\"pc-header\" v-else>\n            Base Average\n        </div>\n\n        <ul class=\"pc-inputs\">\n            <li class=\"pc-input-item pc-input-left\">\n                <label>\n                    <span class=\"pc-input-title\">{{testType == 'gTest' ? 'Base Rate' : 'Base Average'}} <small class=\"pc-input-sub-title\">conversion</small></span>\n\n                    <pc-block-field\n                        fieldProp=\"base\"\n                        :suffix=\"testType == 'gTest' ? '%' : ''\"\n\n                        v-bind:fieldValue=\"base\"\n                        v-bind:isReadOnly=\"isReadOnly\"\n                        v-bind:isBlockFocused=\"isBlockFocused\"\n                        v-bind:enableEdit=\"enableEdit\"\n\n                        v-on:update:focus=\"updateFocus\"></pc-block-field>\n                </label>\n            </li>\n\n            <li class=\"pc-input-item pc-input-right\">\n                <label>\n                    <span class=\"pc-input-title\">Metric Totals<small class=\"pc-input-sub-title\">visitors reached goal</small></span>\n\n                    <pc-block-field\n                        fieldProp=\"visitorsWithGoals\"\n                        v-bind:fieldValue=\"visitorsWithGoals\"\n                        v-bind:fieldFromBlock=\"fieldFromBlock\"\n                        v-bind:isBlockFocused=\"isBlockFocused\"\n                        v-bind:isReadOnly=\"isReadOnly\"\n                        v-bind:enableEdit=\"enableEdit && this.calculateProp != 'sample'\"\n\n                        v-on:update:focus=\"updateFocus\"></pc-block-field>\n                </label>\n            </li>\n\n            <li class=\"pc-input-item pc-input-sd-rate\" v-if=\"testType == 'tTest'\">\n                <label>\n                    <pc-block-field\n                        prefix=\"±\"\n                        fieldProp=\"sdRate\"\n                        fieldFromBlock=\"base\"\n\n                        v-bind:fieldValue=\"sdRate\"\n                        v-bind:isReadOnly=\"isReadOnly\"\n                        v-bind:isBlockFocused=\"isBlockFocused\"\n                        v-bind:enableEdit=\"enableEdit\"\n\n                        v-on:update:focus=\"updateFocus\"></pc-block-field>\n                    <span class=\"pc-input-details\">Base Standard deviation</span>\n                </label>\n            </li>\n        </ul>\n    </div>\n</template>\n\n<script>\nimport pcBlock from './pc-block.vue'\n\nexport default {\n    props: ['enableEdit', 'fieldFromBlock', 'isBlockFocused'],\n    extends: pcBlock,\n    template: '#base-comp',\n    data () {\n        return {\n            focusedBlock: '',\n        }\n    },\n    computed: {\n        isReadOnly () {\n            return this.calculateProp == 'base'\n        },\n        base () {\n            return this.$store.state.attributes.base\n        },\n        sdRate () {\n            return this.$store.state.attributes.sdRate\n        },\n        sample () {\n            return this.$store.state.attributes.sample\n        },\n        testType () {\n            return this.$store.state.attributes.testType\n        },\n        visitorsWithGoals () {\n            return this.$store.getters.visitorsWithGoals\n        }\n    },\n    methods: {\n        enableInput () {\n            this.$emit('edit:update', {prop: 'base'})\n        },\n        updateFocus ({fieldProp, value}) {\n            if (this.focusedBlock == fieldProp && value === false) {\n                this.focusedBlock = ''\n            } else if (value === true) {\n                this.focusedBlock = fieldProp\n            }\n\n            this.$emit('update:focus', {\n                fieldProp: this.fieldFromBlock,\n                value: value\n            })\n        }\n\n    }\n}\n</script>\n\n\n<style>\n.pc-input-sd-rate {\n    margin-top: -10px;\n    z-index: 1;\n    position: relative;\n    text-align: center;\n}\n\n.pc-field-sdRate {\n    width: 90%;\n    display: inline-block;\n}\n</style>\n\n<style scoped>\n    .pc-input-left {\n        position: relative;\n        z-index: 2;\n    }\n</style>\n"]}, media: undefined });
+
+      };
+      /* scoped */
+      const __vue_scope_id__$7 = "data-v-33128dbf";
+      /* module identifier */
+      const __vue_module_identifier__$7 = undefined;
+      /* functional template */
+      const __vue_is_functional_template__$7 = false;
+      /* style inject SSR */
+      
+      /* style inject shadow dom */
+      
+
+      
+      const __vue_component__$7 = /*#__PURE__*/normalizeComponent(
+        { render: __vue_render__$7, staticRenderFns: __vue_staticRenderFns__$7 },
+        __vue_inject_styles__$7,
+        __vue_script__$7,
+        __vue_scope_id__$7,
+        __vue_is_functional_template__$7,
+        __vue_module_identifier__$7,
+        false,
+        createInjector,
+        undefined,
+        undefined
+      );
+
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+
+    var script$8 = {
         template: '#pc-tooltip',
         data () {
             return {
@@ -6319,7 +8081,94 @@
 
     };
 
-    var nonInferiority = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-non-inferiority"},[_c('label',{staticClass:"pc-non-inf-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.enabled),expression:"enabled"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.enabled)?_vm._i(_vm.enabled,null)>-1:(_vm.enabled)},on:{"change":function($event){var $$a=_vm.enabled,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.enabled=$$a.concat([$$v]));}else{$$i>-1&&(_vm.enabled=$$a.slice(0,$$i).concat($$a.slice($$i+1)));}}else{_vm.enabled=$$c;}}}}),_vm._v(" Use non inferiority test ")])])},staticRenderFns: [],
+    /* script */
+    const __vue_script__$8 = script$8;
+
+    /* template */
+    var __vue_render__$8 = function() {
+      var _vm = this;
+      var _h = _vm.$createElement;
+      var _c = _vm._self._c || _h;
+      return _c("div", { staticClass: "pc-tooltip" }, [
+        _c(
+          "div",
+          {
+            on: {
+              mouseover: function($event) {
+                return _vm.showTooltip(true)
+              },
+              mouseout: function($event) {
+                return _vm.showTooltip(false)
+              }
+            }
+          },
+          [_vm._t("text")],
+          2
+        ),
+        _vm._v(" "),
+        _c(
+          "div",
+          {
+            directives: [
+              {
+                name: "show",
+                rawName: "v-show",
+                value: _vm.isTooltipShown,
+                expression: "isTooltipShown"
+              }
+            ],
+            staticClass: "tooltip-wrapper"
+          },
+          [_vm._t("tooltip")],
+          2
+        )
+      ])
+    };
+    var __vue_staticRenderFns__$8 = [];
+    __vue_render__$8._withStripped = true;
+
+      /* style */
+      const __vue_inject_styles__$8 = function (inject) {
+        if (!inject) return
+        inject("data-v-e872aba4_0", { source: "\n.pc-tooltip {\n    --tooltip-background-color: var(--black);\n    position: relative;\n}\n.tooltip-wrapper {\n    position: absolute;\n    left: 0;\n    top: calc(100% + 10px);\n    background: var(--tooltip-background-color);\n    color: var(--light-gray);\n    padding: 5px;\n    border-radius: 4px;\n    z-index: 10;\n    width: 400px;\n    white-space: normal;\n    pointer-events: none;\n}\n.tooltip-wrapper:after {\n    --size: 5px;\n\n    content: '';\n    position: absolute;\n    left: 50px;\n    bottom: calc(100% - var(--size));\n    transform: translate(-50%, 0) rotateZ(45deg);\n\n    border: var(--size) solid var(--tooltip-background-color);\n    border-right-color: transparent;\n    border-bottom-color: transparent;\n}\n", map: {"version":3,"sources":["/Users/ssastoqueher/projects/booking/powercalculator/src/components/pc-tooltip.vue"],"names":[],"mappings":";AA8BA;IACA,wCAAA;IACA,kBAAA;AACA;AAEA;IACA,kBAAA;IACA,OAAA;IACA,sBAAA;IACA,2CAAA;IACA,wBAAA;IACA,YAAA;IACA,kBAAA;IACA,WAAA;IACA,YAAA;IACA,mBAAA;IACA,oBAAA;AACA;AAEA;IACA,WAAA;;IAEA,WAAA;IACA,kBAAA;IACA,UAAA;IACA,gCAAA;IACA,4CAAA;;IAEA,yDAAA;IACA,+BAAA;IACA,gCAAA;AACA","file":"pc-tooltip.vue","sourcesContent":["<template id=\"pc-tooltip\">\n    <div class=\"pc-tooltip\">\n        <div v-on:mouseover=\"showTooltip(true)\" v-on:mouseout=\"showTooltip(false)\">\n            <slot name=\"text\"></slot>\n        </div>\n\n        <div class=\"tooltip-wrapper\" v-show=\"isTooltipShown\">\n            <slot name=\"tooltip\"></slot>\n        </div>\n    </div>\n</template>\n\n<script>\nexport default {\n    template: '#pc-tooltip',\n    data () {\n        return {\n            isTooltipShown: false\n        }\n    },\n    methods: {\n        showTooltip (bool) {\n            this.isTooltipShown = bool;\n        }\n    }\n\n}\n</script>\n\n<style>\n.pc-tooltip {\n    --tooltip-background-color: var(--black);\n    position: relative;\n}\n\n.tooltip-wrapper {\n    position: absolute;\n    left: 0;\n    top: calc(100% + 10px);\n    background: var(--tooltip-background-color);\n    color: var(--light-gray);\n    padding: 5px;\n    border-radius: 4px;\n    z-index: 10;\n    width: 400px;\n    white-space: normal;\n    pointer-events: none;\n}\n\n.tooltip-wrapper:after {\n    --size: 5px;\n\n    content: '';\n    position: absolute;\n    left: 50px;\n    bottom: calc(100% - var(--size));\n    transform: translate(-50%, 0) rotateZ(45deg);\n\n    border: var(--size) solid var(--tooltip-background-color);\n    border-right-color: transparent;\n    border-bottom-color: transparent;\n}\n</style>\n"]}, media: undefined });
+
+      };
+      /* scoped */
+      const __vue_scope_id__$8 = undefined;
+      /* module identifier */
+      const __vue_module_identifier__$8 = undefined;
+      /* functional template */
+      const __vue_is_functional_template__$8 = false;
+      /* style inject SSR */
+      
+      /* style inject shadow dom */
+      
+
+      
+      const __vue_component__$8 = /*#__PURE__*/normalizeComponent(
+        { render: __vue_render__$8, staticRenderFns: __vue_staticRenderFns__$8 },
+        __vue_inject_styles__$8,
+        __vue_script__$8,
+        __vue_scope_id__$8,
+        __vue_is_functional_template__$8,
+        __vue_module_identifier__$8,
+        false,
+        createInjector,
+        undefined,
+        undefined
+      );
+
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+
+    var script$9 = {
         props: [ 'lockedField' ],
         data () {
             return {
@@ -6343,9 +8192,94 @@
         }
     };
 
-    var nonInferiorityComp = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-block pc-block--noninferiority",class:{'pc-block-focused': _vm.focusedblock == 'noninferiority'}},[_c('pc-svg-chain',{attrs:{"fieldFromBlock":_vm.fieldFromBlock}}),_vm._v(" "),_c('div',{staticClass:"pc-header"},[_vm._v(" Non Inferiority ")]),_vm._v(" "),_c('ul',{staticClass:"pc-inputs"},[_c('li',{staticClass:"pc-input-item pc-input-left"},[_c('label',[_vm._m(0),_vm._v(" "),_c('pc-block-field',{attrs:{"fieldProp":"thresholdRelative","suffix":"%","fieldValue":_vm.thresholdRelative,"fieldFromBlock":_vm.fieldFromBlock,"isBlockFocused":_vm.isBlockFocused,"isReadOnly":_vm.isReadOnly,"enableEdit":true},on:{"update:focus":_vm.updateFocus}})],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right"},[_c('label',[_vm._m(1),_vm._v(" "),_c('pc-block-field',{attrs:{"fieldProp":"thresholdAbsolute","suffix":"","fieldValue":_vm.thresholdAbsolute,"fieldFromBlock":_vm.fieldFromBlock,"isBlockFocused":_vm.isBlockFocused,"isReadOnly":_vm.isReadOnly,"enableEdit":true},on:{"update:focus":_vm.updateFocus}})],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-left-bottom"},[_c('label',[_vm._m(2),_vm._v(" "),_c('div',{staticClass:"pc-non-inf-select-wrapper"},[_c('select',{directives:[{name:"model",rawName:"v-model",value:(_vm.expectedChange),expression:"expectedChange"}],staticClass:"pc-non-inf-select",on:{"change":function($event){var $$selectedVal = Array.prototype.filter.call($event.target.options,function(o){return o.selected}).map(function(o){var val = "_value" in o ? o._value : o.value;return val}); _vm.expectedChange=$event.target.multiple ? $$selectedVal : $$selectedVal[0];}}},[_c('option',{attrs:{"value":"nochange"}},[_vm._v(" No Change ")]),_vm._v(" "),_c('option',{attrs:{"value":"degradation"}},[_vm._v(" Degradation ")]),_vm._v(" "),_c('option',{attrs:{"value":"improvement"}},[_vm._v(" Improvement ")])])])])])])],1)},staticRenderFns: [function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('span',{staticClass:"pc-input-title"},[_vm._v("Relative "),_c('small',{staticClass:"pc-input-sub-title"},[_vm._v("change")])])},function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('span',{staticClass:"pc-input-title"},[_vm._v("Absolute "),_c('small',{staticClass:"pc-input-sub-title"},[_vm._v("impact per day")])])},function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('span',{staticClass:"pc-input-title no-sub-title"},[_vm._v(" Expected Change "),_c('small',{staticClass:"pc-input-sub-title"})])}],
+    /* script */
+    const __vue_script__$9 = script$9;
+
+    /* template */
+    var __vue_render__$9 = function() {
+      var _vm = this;
+      var _h = _vm.$createElement;
+      var _c = _vm._self._c || _h;
+      return _c("div", { staticClass: "pc-non-inferiority" }, [
+        _c("label", { staticClass: "pc-non-inf-label" }, [
+          _c("input", {
+            directives: [
+              {
+                name: "model",
+                rawName: "v-model",
+                value: _vm.enabled,
+                expression: "enabled"
+              }
+            ],
+            attrs: { type: "checkbox" },
+            domProps: {
+              checked: Array.isArray(_vm.enabled)
+                ? _vm._i(_vm.enabled, null) > -1
+                : _vm.enabled
+            },
+            on: {
+              change: function($event) {
+                var $$a = _vm.enabled,
+                  $$el = $event.target,
+                  $$c = $$el.checked ? true : false;
+                if (Array.isArray($$a)) {
+                  var $$v = null,
+                    $$i = _vm._i($$a, $$v);
+                  if ($$el.checked) {
+                    $$i < 0 && (_vm.enabled = $$a.concat([$$v]));
+                  } else {
+                    $$i > -1 &&
+                      (_vm.enabled = $$a.slice(0, $$i).concat($$a.slice($$i + 1)));
+                  }
+                } else {
+                  _vm.enabled = $$c;
+                }
+              }
+            }
+          }),
+          _vm._v("\n        Use non inferiority test\n    ")
+        ])
+      ])
+    };
+    var __vue_staticRenderFns__$9 = [];
+    __vue_render__$9._withStripped = true;
+
+      /* style */
+      const __vue_inject_styles__$9 = function (inject) {
+        if (!inject) return
+        inject("data-v-8b12c14c_0", { source: "\n.pc-non-inf-label {\n    white-space: nowrap;\n}\n.pc-non-inf-treshold {\n    display: flex;\n    align-items: center;\n}\n.pc-non-inf-treshold-input {\n    margin-left: 5px;\n}\n\n", map: {"version":3,"sources":["/Users/ssastoqueher/projects/booking/powercalculator/src/components/non-inferiority.vue"],"names":[],"mappings":";AAsCA;IACA,mBAAA;AACA;AAEA;IACA,aAAA;IACA,mBAAA;AACA;AAEA;IACA,gBAAA;AACA","file":"non-inferiority.vue","sourcesContent":["<template>\n    <div class=\"pc-non-inferiority\">\n        <label class=\"pc-non-inf-label\">\n            <input type=\"checkbox\" v-model=\"enabled\">\n            Use non inferiority test\n        </label>\n    </div>\n</template>\n\n<script>\nexport default {\n    props: [ 'lockedField' ],\n    data () {\n        return {\n        }\n    },\n    computed: {\n        enabled: {\n            get () {\n                return this.$store.state.nonInferiority.enabled\n            },\n            set (newValue) {\n                this.$store.dispatch('change:noninferiority', {\n                    prop: 'enabled',\n                    value: newValue\n                })\n            }\n        },\n        isRelative () {\n            return this.$store.state.nonInferiority.selected == 'relative'\n        }\n    }\n}\n\n</script>\n\n<style>\n\n.pc-non-inf-label {\n    white-space: nowrap;\n}\n\n.pc-non-inf-treshold {\n    display: flex;\n    align-items: center;\n}\n\n.pc-non-inf-treshold-input {\n    margin-left: 5px;\n}\n\n</style>\n"]}, media: undefined });
+
+      };
+      /* scoped */
+      const __vue_scope_id__$9 = undefined;
+      /* module identifier */
+      const __vue_module_identifier__$9 = undefined;
+      /* functional template */
+      const __vue_is_functional_template__$9 = false;
+      /* style inject SSR */
+      
+      /* style inject shadow dom */
+      
+
+      
+      const __vue_component__$9 = /*#__PURE__*/normalizeComponent(
+        { render: __vue_render__$9, staticRenderFns: __vue_staticRenderFns__$9 },
+        __vue_inject_styles__$9,
+        __vue_script__$9,
+        __vue_scope_id__$9,
+        __vue_is_functional_template__$9,
+        __vue_module_identifier__$9,
+        false,
+        createInjector,
+        undefined,
+        undefined
+      );
+
+    //
+
+    var script$a = {
         props: ['enableEdit', 'fieldFromBlock', 'isBlockFocused'],
-        extends: pcBlock,
+        extends: __vue_component__$4,
         template: '#base-comp',
         data () {
             return {
@@ -6424,7 +8358,202 @@
         }
     };
 
-    var powerCalculator = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"power-calculator"},[_c('form',{staticClass:"pc-form",attrs:{"action":"."}},[_c('div',{staticClass:"pc-main-header"},[_c('div',{staticClass:"pc-controls-left"},[_c('div',{staticClass:"pc-test-type"},[_c('pc-tooltip',{staticClass:"pc-test-type-tooltip-wrapper"},[_c('label',{staticClass:"pc-test-type-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.testType),expression:"testType"}],attrs:{"type":"radio","name":"test-mode","value":"gTest","checked":"checked"},domProps:{"checked":_vm._q(_vm.testType,"gTest")},on:{"change":function($event){_vm.testType="gTest";}}}),_vm._v(" Binomial Metric ")]),_vm._v(" "),_c('span',{attrs:{"slot":"tooltip"},slot:"tooltip"},[_vm._v(" A binomial metric is one that can be only two values like 0 or 1, yes or no, converted or not converted ")])]),_vm._v(" "),_c('pc-tooltip',{staticClass:"pc-test-type-tooltip-wrapper"},[_c('label',{staticClass:"pc-test-type-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.testType),expression:"testType"}],attrs:{"type":"radio","name":"test-mode","value":"tTest"},domProps:{"checked":_vm._q(_vm.testType,"tTest")},on:{"change":function($event){_vm.testType="tTest";}}}),_vm._v(" Continuous Metric ")]),_vm._v(" "),_c('span',{attrs:{"slot":"tooltip"},slot:"tooltip"},[_vm._v(" A continuous metric is one that can be any number like time on site or the number of rooms sold ")])])],1),_vm._v(" "),_c('div',{staticClass:"pc-traffic-mode"},[_c('label',{staticClass:"pc-traffic-mode-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.trafficMode),expression:"trafficMode"}],attrs:{"type":"radio","name":"traffic-mode","value":"daily","checked":"checked","disabled":_vm.nonInferiorityEnabled},domProps:{"checked":_vm._q(_vm.trafficMode,"daily")},on:{"change":function($event){_vm.trafficMode="daily";}}}),_vm._v(" Daily traffic ")]),_vm._v(" "),_c('label',{staticClass:"pc-traffic-mode-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.trafficMode),expression:"trafficMode"}],attrs:{"type":"radio","name":"traffic-mode","value":"total","disabled":_vm.nonInferiorityEnabled},domProps:{"checked":_vm._q(_vm.trafficMode,"total")},on:{"change":function($event){_vm.trafficMode="total";}}}),_vm._v(" Total traffic ")])]),_vm._v(" "),_c('non-inferiority'),_vm._v(" "),_c('div',{staticClass:"pc-comparison-mode"},[_c('label',{staticClass:"pc-comparison-mode-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.comparisonMode),expression:"comparisonMode"}],attrs:{"type":"radio","name":"comparison-mode","value":"all","checked":"checked"},domProps:{"checked":_vm._q(_vm.comparisonMode,"all")},on:{"change":function($event){_vm.comparisonMode="all";}}}),_vm._v(" Base vs All variants ")]),_vm._v(" "),_c('label',{staticClass:"pc-traffic-mode-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.comparisonMode),expression:"comparisonMode"}],attrs:{"type":"radio","name":"comparison-mode","value":"one"},domProps:{"checked":_vm._q(_vm.comparisonMode,"one")},on:{"change":function($event){_vm.comparisonMode="one";}}}),_vm._v(" Base vs One variant ")])])],1),_vm._v(" "),_vm._m(0),_vm._v(" "),_c('div',{staticClass:"pc-controls-right"},[_c('label',{staticClass:"pc-variants"},[_c('pc-block-field',{staticClass:"pc-variants-input",attrs:{"fieldProp":"variants","prefix":"base + ","fieldValue":_vm.variants,"enableEdit":true}}),_vm._v(" variant"+_vm._s(_vm.variants > 1 ? 's' : '')+" ")],1),_vm._v(" "),_c('label',{staticClass:"pc-false-positive"},[_c('pc-block-field',{staticClass:"pc-false-positive-input",class:{ 'pc-top-fields-error': _vm.falsePosRate > 10 },attrs:{"suffix":"%","fieldProp":"falsePosRate","fieldValue":_vm.falsePosRate,"enableEdit":true}}),_vm._v(" false positive rate ")],1),_vm._v(" "),_c('label',{staticClass:"pc-power"},[_c('pc-block-field',{staticClass:"pc-power-input",class:{ 'pc-top-fields-error': _vm.power < 80 },attrs:{"suffix":"%","fieldProp":"power","fieldValue":_vm.power,"enableEdit":true}}),_vm._v(" power ")],1)])]),_vm._v(" "),_c('div',{staticClass:"pc-blocks-wrapper",class:{'pc-blocks-wrapper-ttest': _vm.testType == 'tTest'}},[_c('base-comp',{attrs:{"fieldFromBlock":"base","isBlockFocused":_vm.focusedBlock == 'base',"enableEdit":_vm.enabledMainInputs.base},on:{"update:focus":_vm.updateFocus}}),_vm._v(" "),_c('sample-comp',{attrs:{"fieldFromBlock":"sample","enableEdit":_vm.enabledMainInputs.sample,"isBlockFocused":_vm.focusedBlock == 'sample'},on:{"update:focus":_vm.updateFocus}}),_vm._v(" "),(!_vm.nonInferiorityEnabled)?_c('impact-comp',{attrs:{"fieldFromBlock":"impact","enableEdit":_vm.enabledMainInputs.impact,"isBlockFocused":_vm.focusedBlock == 'impact'},on:{"update:focus":_vm.updateFocus}}):_vm._e(),_vm._v(" "),(_vm.nonInferiorityEnabled)?_c('non-inferiority-comp',{attrs:{"fieldFromBlock":"non-inferiority","enableEdit":_vm.enabledMainInputs['non-inferiority'],"isBlockFocused":_vm.focusedBlock == 'non-inferiority'},on:{"update:focus":_vm.updateFocus}}):_vm._e(),_vm._v(" "),_c('svg-graph')],1)])])},staticRenderFns: [function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-title"},[_vm._v("Power Calculator "),_c('sup',{staticStyle:{"color":"#F00","font-size":"11px"}},[_vm._v("BETA")])])}],
+    /* script */
+    const __vue_script__$a = script$a;
+
+    /* template */
+    var __vue_render__$a = function() {
+      var _vm = this;
+      var _h = _vm.$createElement;
+      var _c = _vm._self._c || _h;
+      return _c(
+        "div",
+        {
+          staticClass: "pc-block pc-block--noninferiority",
+          class: { "pc-block-focused": _vm.focusedblock == "noninferiority" }
+        },
+        [
+          _c("pc-svg-chain", { attrs: { fieldFromBlock: _vm.fieldFromBlock } }),
+          _vm._v(" "),
+          _c("div", { staticClass: "pc-header" }, [
+            _vm._v("\n        Non Inferiority\n    ")
+          ]),
+          _vm._v(" "),
+          _c("ul", { staticClass: "pc-inputs" }, [
+            _c("li", { staticClass: "pc-input-item pc-input-left" }, [
+              _c(
+                "label",
+                [
+                  _vm._m(0),
+                  _vm._v(" "),
+                  _c("pc-block-field", {
+                    attrs: {
+                      fieldProp: "thresholdRelative",
+                      suffix: "%",
+                      fieldValue: _vm.thresholdRelative,
+                      fieldFromBlock: _vm.fieldFromBlock,
+                      isBlockFocused: _vm.isBlockFocused,
+                      isReadOnly: _vm.isReadOnly,
+                      enableEdit: true
+                    },
+                    on: { "update:focus": _vm.updateFocus }
+                  })
+                ],
+                1
+              )
+            ]),
+            _vm._v(" "),
+            _c("li", { staticClass: "pc-input-item pc-input-right" }, [
+              _c(
+                "label",
+                [
+                  _vm._m(1),
+                  _vm._v(" "),
+                  _c("pc-block-field", {
+                    attrs: {
+                      fieldProp: "thresholdAbsolute",
+                      suffix: "",
+                      fieldValue: _vm.thresholdAbsolute,
+                      fieldFromBlock: _vm.fieldFromBlock,
+                      isBlockFocused: _vm.isBlockFocused,
+                      isReadOnly: _vm.isReadOnly,
+                      enableEdit: true
+                    },
+                    on: { "update:focus": _vm.updateFocus }
+                  })
+                ],
+                1
+              )
+            ]),
+            _vm._v(" "),
+            _c("li", { staticClass: "pc-input-item pc-input-left-bottom" }, [
+              _c("label", [
+                _vm._m(2),
+                _vm._v(" "),
+                _c("div", { staticClass: "pc-non-inf-select-wrapper" }, [
+                  _c(
+                    "select",
+                    {
+                      directives: [
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.expectedChange,
+                          expression: "expectedChange"
+                        }
+                      ],
+                      staticClass: "pc-non-inf-select",
+                      on: {
+                        change: function($event) {
+                          var $$selectedVal = Array.prototype.filter
+                            .call($event.target.options, function(o) {
+                              return o.selected
+                            })
+                            .map(function(o) {
+                              var val = "_value" in o ? o._value : o.value;
+                              return val
+                            });
+                          _vm.expectedChange = $event.target.multiple
+                            ? $$selectedVal
+                            : $$selectedVal[0];
+                        }
+                      }
+                    },
+                    [
+                      _c("option", { attrs: { value: "nochange" } }, [
+                        _vm._v(
+                          "\n                            No Change\n                        "
+                        )
+                      ]),
+                      _vm._v(" "),
+                      _c("option", { attrs: { value: "degradation" } }, [
+                        _vm._v(
+                          "\n                            Degradation\n                        "
+                        )
+                      ]),
+                      _vm._v(" "),
+                      _c("option", { attrs: { value: "improvement" } }, [
+                        _vm._v(
+                          "\n                            Improvement\n                        "
+                        )
+                      ])
+                    ]
+                  )
+                ])
+              ])
+            ])
+          ])
+        ],
+        1
+      )
+    };
+    var __vue_staticRenderFns__$a = [
+      function() {
+        var _vm = this;
+        var _h = _vm.$createElement;
+        var _c = _vm._self._c || _h;
+        return _c("span", { staticClass: "pc-input-title" }, [
+          _vm._v("Relative "),
+          _c("small", { staticClass: "pc-input-sub-title" }, [_vm._v("change")])
+        ])
+      },
+      function() {
+        var _vm = this;
+        var _h = _vm.$createElement;
+        var _c = _vm._self._c || _h;
+        return _c("span", { staticClass: "pc-input-title" }, [
+          _vm._v("Absolute "),
+          _c("small", { staticClass: "pc-input-sub-title" }, [
+            _vm._v("impact per day")
+          ])
+        ])
+      },
+      function() {
+        var _vm = this;
+        var _h = _vm.$createElement;
+        var _c = _vm._self._c || _h;
+        return _c("span", { staticClass: "pc-input-title no-sub-title" }, [
+          _vm._v("\n                        Expected Change\n                    "),
+          _c("small", { staticClass: "pc-input-sub-title" })
+        ])
+      }
+    ];
+    __vue_render__$a._withStripped = true;
+
+      /* style */
+      const __vue_inject_styles__$a = function (inject) {
+        if (!inject) return
+        inject("data-v-91096212_0", { source: "\n.pc-non-inf-select {\n    --base-padding: 5px;\n    font-size: inherit;\n    line-height: 28px;\n    border: none;\n    display: block;\n    position: relative;\n    box-sizing: border-box;\n    width: 100%;\n    filter: drop-shadow(0 4px 2px rgba(0,0,0,0.1));\n    border-radius: 5px;\n    background: var(--white);\n    padding: var(--base-padding);\n\n    overflow: hidden;\n    -webkit-appearance: none;\n    -moz-appearance: none;\n    appearance: none;\n}\n.pc-non-inf-select:focus {\n    outline: 0;\n    box-shadow: inset 0 0 0 1px var(--dark-blue);\n}\n.pc-non-inf-select-wrapper {\n    position: relative;\n}\n.pc-non-inf-select-wrapper:after {\n    --border-size: 7px;\n    content: '';\n    position: absolute;\n    right: 5px;\n    bottom: 0;\n    pointer-events: none;\n    border: var(--border-size) solid transparent;\n    border-top: var(--border-size) solid var(--gray);\n    transform: translateY(calc(-50% - var(--border-size)/2));\n}\n.no-sub-title {\n    margin: 15px 0 10px 0;\n}\n", map: {"version":3,"sources":["/Users/ssastoqueher/projects/booking/powercalculator/src/components/non-inferiority-comp.vue"],"names":[],"mappings":";AA+JA;IACA,mBAAA;IACA,kBAAA;IACA,iBAAA;IACA,YAAA;IACA,cAAA;IACA,kBAAA;IACA,sBAAA;IACA,WAAA;IACA,8CAAA;IACA,kBAAA;IACA,wBAAA;IACA,4BAAA;;IAEA,gBAAA;IACA,wBAAA;IACA,qBAAA;IACA,gBAAA;AACA;AAEA;IACA,UAAA;IACA,4CAAA;AACA;AAEA;IACA,kBAAA;AACA;AAEA;IACA,kBAAA;IACA,WAAA;IACA,kBAAA;IACA,UAAA;IACA,SAAA;IACA,oBAAA;IACA,4CAAA;IACA,gDAAA;IACA,wDAAA;AACA;AAEA;IACA,qBAAA;AACA","file":"non-inferiority-comp.vue","sourcesContent":["<template id=\"noninferiority-comp\">\n    <div class=\"pc-block pc-block--noninferiority\" :class=\"{'pc-block-focused': focusedblock == 'noninferiority'}\">\n\n        <pc-svg-chain v-bind:fieldFromBlock=\"fieldFromBlock\"></pc-svg-chain>\n\n        <div class=\"pc-header\">\n            Non Inferiority\n        </div>\n\n        <ul class=\"pc-inputs\">\n            <li class=\"pc-input-item pc-input-left\">\n                <label>\n                    <span class=\"pc-input-title\">Relative <small class=\"pc-input-sub-title\">change</small></span>\n\n                    <pc-block-field\n                        fieldProp=\"thresholdRelative\"\n                        suffix=\"%\"\n\n                        v-bind:fieldValue=\"thresholdRelative\"\n                        v-bind:fieldFromBlock=\"fieldFromBlock\"\n                        v-bind:isBlockFocused=\"isBlockFocused\"\n                        v-bind:isReadOnly=\"isReadOnly\"\n                        v-bind:enableEdit=\"true\"\n\n                        v-on:update:focus=\"updateFocus\"></pc-block-field>\n                </label>\n            </li>\n\n            <li class=\"pc-input-item pc-input-right\">\n                <label>\n                    <span class=\"pc-input-title\">Absolute <small class=\"pc-input-sub-title\">impact per day</small></span>\n\n                    <pc-block-field\n                        fieldProp=\"thresholdAbsolute\"\n                        suffix=\"\"\n                        v-bind:fieldValue=\"thresholdAbsolute\"\n                        v-bind:fieldFromBlock=\"fieldFromBlock\"\n                        v-bind:isBlockFocused=\"isBlockFocused\"\n                        v-bind:isReadOnly=\"isReadOnly\"\n                        v-bind:enableEdit=\"true\"\n\n                        v-on:update:focus=\"updateFocus\"></pc-block-field>\n                </label>\n            </li>\n\n            <li class=\"pc-input-item pc-input-left-bottom\">\n                <label>\n                    <span class=\"pc-input-title no-sub-title\">\n                            Expected Change\n                        <small class=\"pc-input-sub-title\">\n\n                        </small>\n                    </span>\n\n                    <div class=\"pc-non-inf-select-wrapper\">\n                        <select v-model=\"expectedChange\" class=\"pc-non-inf-select\">\n                            <option value=\"nochange\">\n                                No Change\n                            </option>\n                            <option value=\"degradation\">\n                                Degradation\n                            </option>\n                            <option value=\"improvement\">\n                                Improvement\n                            </option>\n                        </select>\n                    </div>\n                </label>\n            </li>\n        </ul>\n    </div>\n</template>\n\n<script>\nimport pcBlock from './pc-block.vue'\n\nexport default {\n    props: ['enableEdit', 'fieldFromBlock', 'isBlockFocused'],\n    extends: pcBlock,\n    template: '#base-comp',\n    data () {\n        return {\n            focusedBlock: '',\n            options: [\n                {\n                    text: 'relative',\n                    value: 'relative'\n                },\n                {\n                    text: 'absolute',\n                    value: 'absolutePerDay'\n                }\n            ]\n        }\n    },\n    computed: {\n        isReadOnly () {\n            return this.calculateProp == 'base'\n        },\n        enabled () {\n            return this.$store.state.nonInferiority.enabled\n        },\n        threshold () {\n            return this.$store.state.nonInferiority.threshold\n        },\n        thresholdRelative () {\n            return this.$store.state.nonInferiority.thresholdRelative\n        },\n        thresholdAbsolute () {\n            return this.$store.state.nonInferiority.thresholdAbsolute\n        },\n        isRelative () {\n            return this.$store.state.nonInferiority.selected == 'relative'\n        },\n        selected: {\n            get () {\n                return this.$store.state.nonInferiority.selected\n            },\n            set (newValue) {\n                this.$store.dispatch('change:noninferiority', {\n                    prop: 'selected',\n                    value: newValue\n                })\n            }\n        },\n        expectedChange: {\n            get () {\n                return this.$store.state.nonInferiority.expectedChange\n            },\n            set (newValue) {\n                this.$store.dispatch('field:change', {\n                    prop: 'expectedChange',\n                    value: newValue\n                })\n            }\n        },\n    },\n    methods: {\n        enableInput () {\n            this.$emit('edit:update', {prop: 'base'})\n        },\n        updateFocus ({fieldProp, value}) {\n            if (this.focusedBlock == fieldProp && value === false) {\n                this.focusedBlock = ''\n            } else if (value === true) {\n                this.focusedBlock = fieldProp\n            }\n\n            this.$emit('update:focus', {\n                fieldProp: this.fieldFromBlock,\n                value: value\n            })\n        }\n\n    }\n}\n</script>\n\n<style>\n.pc-non-inf-select {\n    --base-padding: 5px;\n    font-size: inherit;\n    line-height: 28px;\n    border: none;\n    display: block;\n    position: relative;\n    box-sizing: border-box;\n    width: 100%;\n    filter: drop-shadow(0 4px 2px rgba(0,0,0,0.1));\n    border-radius: 5px;\n    background: var(--white);\n    padding: var(--base-padding);\n\n    overflow: hidden;\n    -webkit-appearance: none;\n    -moz-appearance: none;\n    appearance: none;\n}\n\n.pc-non-inf-select:focus {\n    outline: 0;\n    box-shadow: inset 0 0 0 1px var(--dark-blue);\n}\n\n.pc-non-inf-select-wrapper {\n    position: relative;\n}\n\n.pc-non-inf-select-wrapper:after {\n    --border-size: 7px;\n    content: '';\n    position: absolute;\n    right: 5px;\n    bottom: 0;\n    pointer-events: none;\n    border: var(--border-size) solid transparent;\n    border-top: var(--border-size) solid var(--gray);\n    transform: translateY(calc(-50% - var(--border-size)/2));\n}\n\n.no-sub-title {\n    margin: 15px 0 10px 0;\n}\n</style>\n"]}, media: undefined });
+
+      };
+      /* scoped */
+      const __vue_scope_id__$a = undefined;
+      /* module identifier */
+      const __vue_module_identifier__$a = undefined;
+      /* functional template */
+      const __vue_is_functional_template__$a = false;
+      /* style inject SSR */
+      
+      /* style inject shadow dom */
+      
+
+      
+      const __vue_component__$a = /*#__PURE__*/normalizeComponent(
+        { render: __vue_render__$a, staticRenderFns: __vue_staticRenderFns__$a },
+        __vue_inject_styles__$a,
+        __vue_script__$a,
+        __vue_scope_id__$a,
+        __vue_is_functional_template__$a,
+        __vue_module_identifier__$a,
+        false,
+        createInjector,
+        undefined,
+        undefined
+      );
+
+    //
+
+    var script$b = {
         mounted () {
             // start of application
             this.$store.dispatch('init:calculator');
@@ -6560,17 +8689,462 @@
             }
         },
         components: {
-            'svg-graph': svgGraph,
-            'pc-block-field': pcBlockField,
-            'pc-tooltip': pcTooltip,
-            'sample-comp': sampleComp,
-            'impact-comp' : impactComp,
-            'base-comp': baseComp,
-            'non-inferiority': nonInferiority,
-            'non-inferiority-comp': nonInferiorityComp
+            'svg-graph': __vue_component__$1,
+            'pc-block-field': __vue_component__$2,
+            'pc-tooltip': __vue_component__$8,
+            'sample-comp': __vue_component__$5,
+            'impact-comp' : __vue_component__$6,
+            'base-comp': __vue_component__$7,
+            'non-inferiority': __vue_component__$9,
+            'non-inferiority-comp': __vue_component__$a
 
         }
     };
+
+    /* script */
+    const __vue_script__$b = script$b;
+
+    /* template */
+    var __vue_render__$b = function() {
+      var _vm = this;
+      var _h = _vm.$createElement;
+      var _c = _vm._self._c || _h;
+      return _c("div", { staticClass: "power-calculator" }, [
+        _c("form", { staticClass: "pc-form", attrs: { action: "." } }, [
+          _c("div", { staticClass: "pc-main-header" }, [
+            _c(
+              "div",
+              { staticClass: "pc-controls-left" },
+              [
+                _c(
+                  "div",
+                  { staticClass: "pc-test-type" },
+                  [
+                    _c(
+                      "pc-tooltip",
+                      { staticClass: "pc-test-type-tooltip-wrapper" },
+                      [
+                        _c(
+                          "label",
+                          {
+                            staticClass: "pc-test-type-labels",
+                            attrs: { slot: "text" },
+                            slot: "text"
+                          },
+                          [
+                            _c("input", {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model",
+                                  value: _vm.testType,
+                                  expression: "testType"
+                                }
+                              ],
+                              attrs: {
+                                type: "radio",
+                                name: "test-mode",
+                                value: "gTest",
+                                checked: ""
+                              },
+                              domProps: { checked: _vm._q(_vm.testType, "gTest") },
+                              on: {
+                                change: function($event) {
+                                  _vm.testType = "gTest";
+                                }
+                              }
+                            }),
+                            _vm._v(
+                              "\n                            Binomial Metric\n                        "
+                            )
+                          ]
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "span",
+                          { attrs: { slot: "tooltip" }, slot: "tooltip" },
+                          [
+                            _vm._v(
+                              "\n                            A binomial metric is one that can be only two values like 0 or 1, yes or no, converted or not converted\n                        "
+                            )
+                          ]
+                        )
+                      ]
+                    ),
+                    _vm._v(" "),
+                    _c(
+                      "pc-tooltip",
+                      { staticClass: "pc-test-type-tooltip-wrapper" },
+                      [
+                        _c(
+                          "label",
+                          {
+                            staticClass: "pc-test-type-labels",
+                            attrs: { slot: "text" },
+                            slot: "text"
+                          },
+                          [
+                            _c("input", {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model",
+                                  value: _vm.testType,
+                                  expression: "testType"
+                                }
+                              ],
+                              attrs: {
+                                type: "radio",
+                                name: "test-mode",
+                                value: "tTest"
+                              },
+                              domProps: { checked: _vm._q(_vm.testType, "tTest") },
+                              on: {
+                                change: function($event) {
+                                  _vm.testType = "tTest";
+                                }
+                              }
+                            }),
+                            _vm._v(
+                              "\n                            Continuous Metric\n                        "
+                            )
+                          ]
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "span",
+                          { attrs: { slot: "tooltip" }, slot: "tooltip" },
+                          [
+                            _vm._v(
+                              "\n                            A continuous metric is one that can be any number like time on site or the number of rooms sold\n                        "
+                            )
+                          ]
+                        )
+                      ]
+                    )
+                  ],
+                  1
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "pc-traffic-mode" }, [
+                  _c(
+                    "label",
+                    {
+                      staticClass: "pc-traffic-mode-labels",
+                      attrs: { slot: "text" },
+                      slot: "text"
+                    },
+                    [
+                      _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.trafficMode,
+                            expression: "trafficMode"
+                          }
+                        ],
+                        attrs: {
+                          type: "radio",
+                          name: "traffic-mode",
+                          value: "daily",
+                          checked: "",
+                          disabled: _vm.nonInferiorityEnabled
+                        },
+                        domProps: { checked: _vm._q(_vm.trafficMode, "daily") },
+                        on: {
+                          change: function($event) {
+                            _vm.trafficMode = "daily";
+                          }
+                        }
+                      }),
+                      _vm._v(
+                        "\n                        Daily traffic\n                    "
+                      )
+                    ]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "label",
+                    {
+                      staticClass: "pc-traffic-mode-labels",
+                      attrs: { slot: "text" },
+                      slot: "text"
+                    },
+                    [
+                      _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.trafficMode,
+                            expression: "trafficMode"
+                          }
+                        ],
+                        attrs: {
+                          type: "radio",
+                          name: "traffic-mode",
+                          value: "total",
+                          disabled: _vm.nonInferiorityEnabled
+                        },
+                        domProps: { checked: _vm._q(_vm.trafficMode, "total") },
+                        on: {
+                          change: function($event) {
+                            _vm.trafficMode = "total";
+                          }
+                        }
+                      }),
+                      _vm._v(
+                        "\n                        Total traffic\n                    "
+                      )
+                    ]
+                  )
+                ]),
+                _vm._v(" "),
+                _c("non-inferiority"),
+                _vm._v(" "),
+                _c("div", { staticClass: "pc-comparison-mode" }, [
+                  _c(
+                    "label",
+                    {
+                      staticClass: "pc-comparison-mode-labels",
+                      attrs: { slot: "text" },
+                      slot: "text"
+                    },
+                    [
+                      _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.comparisonMode,
+                            expression: "comparisonMode"
+                          }
+                        ],
+                        attrs: {
+                          type: "radio",
+                          name: "comparison-mode",
+                          value: "all",
+                          checked: ""
+                        },
+                        domProps: { checked: _vm._q(_vm.comparisonMode, "all") },
+                        on: {
+                          change: function($event) {
+                            _vm.comparisonMode = "all";
+                          }
+                        }
+                      }),
+                      _vm._v(
+                        "\n                        Base vs All variants\n                    "
+                      )
+                    ]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "label",
+                    {
+                      staticClass: "pc-traffic-mode-labels",
+                      attrs: { slot: "text" },
+                      slot: "text"
+                    },
+                    [
+                      _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.comparisonMode,
+                            expression: "comparisonMode"
+                          }
+                        ],
+                        attrs: {
+                          type: "radio",
+                          name: "comparison-mode",
+                          value: "one"
+                        },
+                        domProps: { checked: _vm._q(_vm.comparisonMode, "one") },
+                        on: {
+                          change: function($event) {
+                            _vm.comparisonMode = "one";
+                          }
+                        }
+                      }),
+                      _vm._v(
+                        "\n                        Base vs One variant\n                    "
+                      )
+                    ]
+                  )
+                ])
+              ],
+              1
+            ),
+            _vm._v(" "),
+            _vm._m(0),
+            _vm._v(" "),
+            _c("div", { staticClass: "pc-controls-right" }, [
+              _c(
+                "label",
+                { staticClass: "pc-variants" },
+                [
+                  _c("pc-block-field", {
+                    staticClass: "pc-variants-input",
+                    attrs: {
+                      fieldProp: "variants",
+                      prefix: "base + ",
+                      fieldValue: _vm.variants,
+                      enableEdit: true
+                    }
+                  }),
+                  _vm._v(
+                    "\n                    variant" +
+                      _vm._s(_vm.variants > 1 ? "s" : "") +
+                      "\n                "
+                  )
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c(
+                "label",
+                { staticClass: "pc-false-positive" },
+                [
+                  _c("pc-block-field", {
+                    staticClass: "pc-false-positive-input",
+                    class: { "pc-top-fields-error": _vm.falsePosRate > 10 },
+                    attrs: {
+                      suffix: "%",
+                      fieldProp: "falsePosRate",
+                      fieldValue: _vm.falsePosRate,
+                      enableEdit: true
+                    }
+                  }),
+                  _vm._v(
+                    "\n                    false positive rate\n                "
+                  )
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c(
+                "label",
+                { staticClass: "pc-power" },
+                [
+                  _c("pc-block-field", {
+                    staticClass: "pc-power-input",
+                    class: { "pc-top-fields-error": _vm.power < 80 },
+                    attrs: {
+                      suffix: "%",
+                      fieldProp: "power",
+                      fieldValue: _vm.power,
+                      enableEdit: true
+                    }
+                  }),
+                  _vm._v("\n                    power\n                ")
+                ],
+                1
+              )
+            ])
+          ]),
+          _vm._v(" "),
+          _c(
+            "div",
+            {
+              staticClass: "pc-blocks-wrapper",
+              class: { "pc-blocks-wrapper-ttest": _vm.testType == "tTest" }
+            },
+            [
+              _c("base-comp", {
+                attrs: {
+                  fieldFromBlock: "base",
+                  isBlockFocused: _vm.focusedBlock == "base",
+                  enableEdit: _vm.enabledMainInputs.base
+                },
+                on: { "update:focus": _vm.updateFocus }
+              }),
+              _vm._v(" "),
+              _c("sample-comp", {
+                attrs: {
+                  fieldFromBlock: "sample",
+                  enableEdit: _vm.enabledMainInputs.sample,
+                  isBlockFocused: _vm.focusedBlock == "sample"
+                },
+                on: { "update:focus": _vm.updateFocus }
+              }),
+              _vm._v(" "),
+              !_vm.nonInferiorityEnabled
+                ? _c("impact-comp", {
+                    attrs: {
+                      fieldFromBlock: "impact",
+                      enableEdit: _vm.enabledMainInputs.impact,
+                      isBlockFocused: _vm.focusedBlock == "impact"
+                    },
+                    on: { "update:focus": _vm.updateFocus }
+                  })
+                : _vm._e(),
+              _vm._v(" "),
+              _vm.nonInferiorityEnabled
+                ? _c("non-inferiority-comp", {
+                    attrs: {
+                      fieldFromBlock: "non-inferiority",
+                      enableEdit: _vm.enabledMainInputs["non-inferiority"],
+                      isBlockFocused: _vm.focusedBlock == "non-inferiority"
+                    },
+                    on: { "update:focus": _vm.updateFocus }
+                  })
+                : _vm._e(),
+              _vm._v(" "),
+              _c("svg-graph")
+            ],
+            1
+          )
+        ])
+      ])
+    };
+    var __vue_staticRenderFns__$b = [
+      function() {
+        var _vm = this;
+        var _h = _vm.$createElement;
+        var _c = _vm._self._c || _h;
+        return _c("div", { staticClass: "pc-title" }, [
+          _vm._v("Power Calculator "),
+          _c("sup", { staticStyle: { color: "#F00", "font-size": "11px" } }, [
+            _vm._v("BETA")
+          ])
+        ])
+      }
+    ];
+    __vue_render__$b._withStripped = true;
+
+      /* style */
+      const __vue_inject_styles__$b = function (inject) {
+        if (!inject) return
+        inject("data-v-4eadd51b_0", { source: "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/* application styles */\n\n/* colors */\n.power-calculator {\n\n    --white: #FFF;\n    --black: #000;\n\n    --gray: #B5B5B5;\n    --light-gray: #F0F0F0;\n    --dark-gray: #525252;\n\n    --light-blue: #C1CFD8;\n    --pale-blue: #7898AE;\n    --blue: #155EAB;\n    --dark-blue: #3d78df;\n\n    --light-yellow: #FEF1CB;\n    --dark-yellow: #E2B634;\n    --fade-black: rgba(0, 0, 0, 0.3);\n\n    --red: #F00;\n}\n\n/* layout */\n.pc-main-header {\n    display: grid;\n    grid-template-columns: 33.33% 33.33% 33.33%;\n    grid-template-rows: auto;\n    grid-template-areas:\n        \"controls-left title controls-right\";\n    align-items: center;\n\n    margin: 25px 10px;\n}\n.pc-controls-left {\n    grid-area: controls-left;\n    display: grid;\n    grid-template-columns: min-content min-content min-content;\n    grid-template-rows: 2;\n    grid-template-areas:\n        \"calc-options calc-options calc-options\"\n        \"test-type traffic comparison\";\n    align-items: center;\n}\n.pc-controls-right {\n    grid-area: controls-right;\n    display: grid;\n    grid-template-columns: auto min-content min-content;\n    grid-template-rows: auto;\n    grid-template-areas:\n        \"variants false-positive power\";\n    align-items: center;\n    justify-items: end;\n}\n.pc-title {\n    grid-area: title;\n    font-size: 30px;\n    text-align: center;\n}\n.pc-traffic-mode {\n    grid-area: traffic;\n}\n.pc-non-inf-label,\n.pc-test-type,\n.pc-false-positive,\n.pc-power,\n.pc-traffic-mode,\n.pc-variants,\n.pc-comparison-mode {\n    font-size: 0.8em;\n}\n.pc-test-type {\n    grid-area: test-type;\n}\n.pc-non-inferiority {\n    grid-area: calc-options;\n    margin-bottom: 8px;\n}\n.pc-comparison-mode {\n    grid-area: comparison;\n}\n.pc-test-type-labels,\n.pc-traffic-mode-labels,\n.pc-non-inf-label,\n.pc-comparison-mode-label {\n    white-space: nowrap;\n}\n.pc-non-inferiority ,\n.pc-test-type,\n.pc-traffic-mode,\n.pc-comparison-mode {\n    margin-left: 15px;\n}\n.pc-test-type-tooltip-wrapper {\n    display: inline-block;\n}\n.pc-variants {\n    grid-area: variants;\n    white-space: nowrap;\n    align-self: end;\n}\n.pc-false-positive {\n    grid-area: false-positive;\n    margin-left: 15px;\n    white-space: nowrap;\n    align-self: end;\n}\n.pc-power {\n    grid-area: power;\n    margin-left: 15px;\n    margin-right: 15px;\n    white-space: nowrap;\n    align-self: end;\n}\n.pc-blocks-wrapper {\n    grid-area: pc-blocks-wrapper;\n    display: grid;\n    grid-template-columns: 33% 33% 33%;\n    grid-template-rows: auto;\n    grid-template-areas:\n        \"block-base block-sample block-impact\"\n        \"block-graph block-graph block-graph\"\n    ;\n    grid-template-rows: auto;\n    grid-column-gap: 8px;\n    grid-row-gap: 8px;\n}\n.pc-block--base {\n    grid-area: block-base;\n}\n.pc-block--sample {\n    grid-area: block-sample;\n}\n.pc-block--impact {\n    grid-area: block-impact;\n}\n.pc-block--graph {\n    grid-area: block-graph;\n}\n\n\n/* blocks */\n.pc-block {\n    background: var(--light-gray);\n}\n.pc-header {\n    color: var(--white);\n    text-align: center;\n    font-size: 28px;\n    line-height: 80px;\n    height: 80px;\n    text-shadow: 0 1px 1px rgba(0,0,0,0.29);\n    background: var(--pale-blue);\n    margin-bottom: 25px;\n}\n.pc-calculate {\n    display: inline-block;\n    margin-bottom: 25px;\n    font-weight: bold;\n    font-size: 0.8em;\n}\n.pc-value {\n    display: block;\n    margin-bottom: 25px;\n}\n\n/* block to calculate override rules*/\n.pc-block-to-calculate {\n    background: var(--light-yellow);\n}\n.pc-block-to-calculate .pc-header {\n    background: var(--dark-yellow);\n}\n.pc-hidden {\n    display: none!important;\n}\n", map: {"version":3,"sources":["/Users/ssastoqueher/projects/booking/powercalculator/src/powercalculator.vue"],"names":[],"mappings":";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;AA4SA,uBAAA;;AAEA,WAAA;AAEA;;IAEA,aAAA;IACA,aAAA;;IAEA,eAAA;IACA,qBAAA;IACA,oBAAA;;IAEA,qBAAA;IACA,oBAAA;IACA,eAAA;IACA,oBAAA;;IAEA,uBAAA;IACA,sBAAA;IACA,gCAAA;;IAEA,WAAA;AAEA;;AAEA,WAAA;AAEA;IACA,aAAA;IACA,2CAAA;IACA,wBAAA;IACA;4CACA;IACA,mBAAA;;IAEA,iBAAA;AACA;AAEA;IACA,wBAAA;IACA,aAAA;IACA,0DAAA;IACA,qBAAA;IACA;;sCAEA;IACA,mBAAA;AACA;AAEA;IACA,yBAAA;IACA,aAAA;IACA,mDAAA;IACA,wBAAA;IACA;uCACA;IACA,mBAAA;IACA,kBAAA;AACA;AAEA;IACA,gBAAA;IACA,eAAA;IACA,kBAAA;AACA;AAEA;IACA,kBAAA;AACA;AAEA;;;;;;;IAOA,gBAAA;AACA;AAEA;IACA,oBAAA;AACA;AAEA;IACA,uBAAA;IACA,kBAAA;AACA;AAEA;IACA,qBAAA;AACA;AAEA;;;;IAIA,mBAAA;AACA;AAEA;;;;IAIA,iBAAA;AACA;AAEA;IACA,qBAAA;AACA;AAEA;IACA,mBAAA;IACA,mBAAA;IACA,eAAA;AACA;AAEA;IACA,yBAAA;IACA,iBAAA;IACA,mBAAA;IACA,eAAA;AACA;AAEA;IACA,gBAAA;IACA,iBAAA;IACA,kBAAA;IACA,mBAAA;IACA,eAAA;AACA;AAEA;IACA,4BAAA;IACA,aAAA;IACA,kCAAA;IACA,wBAAA;IACA;;;IAGA;IACA,wBAAA;IACA,oBAAA;IACA,iBAAA;AACA;AAEA;IACA,qBAAA;AACA;AAEA;IACA,uBAAA;AACA;AAEA;IACA,uBAAA;AACA;AAEA;IACA,sBAAA;AACA;;;AAGA,WAAA;AAEA;IACA,6BAAA;AACA;AAEA;IACA,mBAAA;IACA,kBAAA;IACA,eAAA;IACA,iBAAA;IACA,YAAA;IACA,uCAAA;IACA,4BAAA;IACA,mBAAA;AACA;AAEA;IACA,qBAAA;IACA,mBAAA;IACA,iBAAA;IACA,gBAAA;AACA;AAEA;IACA,cAAA;IACA,mBAAA;AACA;;AAEA,qCAAA;AAEA;IACA,+BAAA;AACA;AAEA;IACA,8BAAA;AACA;AAEA;IACA,uBAAA;AACA","file":"powercalculator.vue","sourcesContent":["<template>\n    <div class=\"power-calculator\">\n        <form action=\".\" class=\"pc-form\">\n            <div class=\"pc-main-header\">\n\n                <div class=\"pc-controls-left\">\n\n                    <div class=\"pc-test-type\">\n\n                        <pc-tooltip class=\"pc-test-type-tooltip-wrapper\">\n                            <label class=\"pc-test-type-labels\" slot=\"text\">\n                                <input type=\"radio\" name=\"test-mode\" v-model=\"testType\" value=\"gTest\" checked>\n                                Binomial Metric\n                            </label>\n                            <span slot=\"tooltip\">\n                                A binomial metric is one that can be only two values like 0 or 1, yes or no, converted or not converted\n                            </span>\n                        </pc-tooltip>\n\n\n                        <pc-tooltip class=\"pc-test-type-tooltip-wrapper\">\n                            <label class=\"pc-test-type-labels\" slot=\"text\">\n                                <input type=\"radio\" name=\"test-mode\" v-model=\"testType\" value=\"tTest\">\n                                Continuous Metric\n                            </label>\n                            <span slot=\"tooltip\">\n                                A continuous metric is one that can be any number like time on site or the number of rooms sold\n                            </span>\n                        </pc-tooltip>\n\n                    </div>\n\n                    <div class=\"pc-traffic-mode\">\n                        <label class=\"pc-traffic-mode-labels\" slot=\"text\">\n                            <input type=\"radio\" name=\"traffic-mode\" v-model=\"trafficMode\" value=\"daily\" checked :disabled=\"nonInferiorityEnabled\">\n                            Daily traffic\n                        </label>\n                        <label class=\"pc-traffic-mode-labels\" slot=\"text\">\n                            <input type=\"radio\" name=\"traffic-mode\" v-model=\"trafficMode\" value=\"total\" :disabled=\"nonInferiorityEnabled\">\n                            Total traffic\n                        </label>\n                    </div>\n\n                    <non-inferiority></non-inferiority>\n\n                    <div class=\"pc-comparison-mode\">\n                        <label class=\"pc-comparison-mode-labels\" slot=\"text\">\n                            <input type=\"radio\" name=\"comparison-mode\" v-model=\"comparisonMode\" value=\"all\" checked>\n                            Base vs All variants\n                        </label>\n                        <label class=\"pc-traffic-mode-labels\" slot=\"text\">\n                            <input type=\"radio\" name=\"comparison-mode\" v-model=\"comparisonMode\" value=\"one\">\n                            Base vs One variant\n                        </label>\n                    </div>\n                </div>\n\n                <div class=\"pc-title\">Power Calculator <sup style=\"color: #F00; font-size: 11px;\">BETA</sup> </div>\n\n                <div class=\"pc-controls-right\">\n                    <label class=\"pc-variants\">\n                        <pc-block-field\n                            class=\"pc-variants-input\"\n                            fieldProp=\"variants\"\n                            prefix=\"base + \"\n                            v-bind:fieldValue=\"variants\"\n                            v-bind:enableEdit=\"true\"></pc-block-field>\n                        variant{{ variants > 1 ? 's' : '' }}\n                    </label>\n\n                    <label class=\"pc-false-positive\">\n                        <pc-block-field\n                            class=\"pc-false-positive-input\"\n                            :class=\"{ 'pc-top-fields-error': falsePosRate > 10 }\"\n                            suffix=\"%\"\n                            fieldProp=\"falsePosRate\"\n                            v-bind:fieldValue=\"falsePosRate\"\n                            v-bind:enableEdit=\"true\"></pc-block-field>\n                        false positive rate\n                    </label>\n\n                    <label class=\"pc-power\">\n                        <pc-block-field\n                            class=\"pc-power-input\"\n                            suffix=\"%\"\n                            :class=\"{ 'pc-top-fields-error': power < 80 }\"\n                            fieldProp=\"power\"\n                            v-bind:fieldValue=\"power\"\n                            v-bind:enableEdit=\"true\"></pc-block-field>\n                        power\n                    </label>\n                </div>\n            </div>\n\n\n            <div class=\"pc-blocks-wrapper\" :class=\"{'pc-blocks-wrapper-ttest': testType == 'tTest'}\">\n                <base-comp\n                    fieldFromBlock=\"base\"\n                    v-bind:isBlockFocused=\"focusedBlock == 'base'\"\n                    v-bind:enableEdit=\"enabledMainInputs.base\"\n\n                    v-on:update:focus=\"updateFocus\"\n                    >\n                </base-comp>\n\n                <sample-comp\n                    fieldFromBlock=\"sample\"\n\n                    v-bind:enableEdit=\"enabledMainInputs.sample\"\n                    v-bind:isBlockFocused=\"focusedBlock == 'sample'\"\n                    v-on:update:focus=\"updateFocus\">\n\n                </sample-comp>\n\n                <impact-comp\n                    v-if=\"!nonInferiorityEnabled\"\n                    fieldFromBlock=\"impact\"\n\n                    v-bind:enableEdit=\"enabledMainInputs.impact\"\n                    v-bind:isBlockFocused=\"focusedBlock == 'impact'\"\n                    v-on:update:focus=\"updateFocus\">\n                </impact-comp>\n\n                <non-inferiority-comp\n                    v-if=\"nonInferiorityEnabled\"\n                    fieldFromBlock=\"non-inferiority\"\n\n                    v-bind:enableEdit=\"enabledMainInputs['non-inferiority']\"\n                    v-bind:isBlockFocused=\"focusedBlock == 'non-inferiority'\"\n                    v-on:update:focus=\"updateFocus\">\n                </non-inferiority-comp>\n\n                <svg-graph></svg-graph>\n\n            </div>\n        </form>\n    </div>\n</template>\n\n<script>\nimport svgGraph from './components/svg-graph.vue'\nimport pcBlockField from './components/pc-block-field.vue'\nimport sampleComp from './components/sample-comp.vue'\nimport impactComp from './components/impact-comp.vue'\nimport baseComp from './components/base-comp.vue'\nimport pcTooltip from './components/pc-tooltip.vue'\nimport nonInferiority from './components/non-inferiority.vue'\nimport nonInferiorityComp from './components/non-inferiority-comp.vue'\n\nexport default {\n    mounted () {\n        // start of application\n        this.$store.dispatch('init:calculator')\n    },\n    props: ['parentmetricdata'],\n    data () {\n        // values if parent component sends them\n        let importedData = this.parentmetricdata || {};\n\n        let data = {\n            focusedBlock: '',\n\n            // false means the editable ones are the secondary mode (metric totals, days&daily trials and absolute impact)\n            enabledMainInputs: {\n                base: true,\n                sample: true,\n                impact: true,\n                power: true,\n                'non-inferiority': true\n            }\n        };\n\n        // mergeComponentData has no array support for now\n        return this.mergeComponentData(data, JSON.parse(JSON.stringify(importedData)));\n    },\n    computed: {\n        disableBaseSecondaryInput () {\n            // only metric total is available and as it depends on sample this\n            // creates a circular dependency\n            // this also forces main input back\n            return this.calculateProp == 'sample'\n        },\n\n        // in case parent component needs this information\n        metricData () {\n            let result = {\n                    testType: this.testType,\n                    calculateProp: this.calculateProp,\n                    view: this.view,\n                    lockedField: this.lockedField,\n                    nonInferiority: this.nonInferiority,\n                    comparisonMode: this.comparisonMode,\n                };\n            return JSON.parse(JSON.stringify(result))\n        },\n\n        nonInferiorityEnabled () {\n            return this.$store.state.nonInferiority.enabled\n        },\n\n        nonInferioritySelected () {\n            return this.$store.state.nonInferiority.selected\n        },\n\n        falsePosRate () {\n            return this.$store.state.attributes.falsePosRate\n        },\n        power () {\n            return this.$store.state.attributes.power\n        },\n        variants () {\n            return this.$store.state.attributes.variants\n        },\n        comparisonMode: {\n            get () {\n                return this.$store.state.attributes.comparisonMode\n            },\n            set (newValue) {\n                this.$store.dispatch('field:change', {\n                    prop: 'comparisonMode',\n                    value: newValue\n                })\n            }\n        },\n        testType: {\n            get () {\n                return this.$store.state.attributes.testType\n            },\n            set (newValue) {\n                this.$store.dispatch('field:change', {\n                    prop: 'testType',\n                    value: newValue || 0\n                })\n            }\n        },\n        trafficMode: {\n            get () {\n                if (this.$store.state.attributes.onlyTotalVisitors) {\n                    return 'total';\n                }\n\n                return 'daily';\n            },\n            set (newValue) {\n                this.$store.dispatch('field:change', {\n                    prop: 'onlyTotalVisitors',\n                    value: newValue == 'total'\n                })\n            }\n        }\n    },\n    methods: {\n        updateFocus ({fieldProp, value}) {\n            if (this.focusedBlock == fieldProp && value === false) {\n                this.focusedBlock = ''\n            } else if (value === true) {\n                this.focusedBlock = fieldProp\n            }\n        },\n        mergeComponentData (base, toClone) {\n            // merges default data with imported one from parent component\n            let result = recursive(base, toClone);\n\n            // no array support for now\n            function recursive (baseRef, cloneRef) {\n                Object.keys(cloneRef).forEach((prop) => {\n                    if (typeof cloneRef[prop] == 'object') {\n                        baseRef[prop] = recursive(baseRef[prop], cloneRef[prop]);\n                    } else {\n                        baseRef[prop] = cloneRef[prop];\n                    }\n                })\n\n                return baseRef;\n            };\n\n            return result;\n        }\n    },\n    watch: {\n        // in case parent component needs this information\n        metricData () {\n            this.$emit('update:metricdata', this.metricData)\n        }\n    },\n    components: {\n        'svg-graph': svgGraph,\n        'pc-block-field': pcBlockField,\n        'pc-tooltip': pcTooltip,\n        'sample-comp': sampleComp,\n        'impact-comp' : impactComp,\n        'base-comp': baseComp,\n        'non-inferiority': nonInferiority,\n        'non-inferiority-comp': nonInferiorityComp\n\n    }\n}\n</script>\n\n<style>\n/* application styles */\n\n/* colors */\n\n.power-calculator {\n\n    --white: #FFF;\n    --black: #000;\n\n    --gray: #B5B5B5;\n    --light-gray: #F0F0F0;\n    --dark-gray: #525252;\n\n    --light-blue: #C1CFD8;\n    --pale-blue: #7898AE;\n    --blue: #155EAB;\n    --dark-blue: #3d78df;\n\n    --light-yellow: #FEF1CB;\n    --dark-yellow: #E2B634;\n    --fade-black: rgba(0, 0, 0, 0.3);\n\n    --red: #F00;\n\n}\n\n/* layout */\n\n.pc-main-header {\n    display: grid;\n    grid-template-columns: 33.33% 33.33% 33.33%;\n    grid-template-rows: auto;\n    grid-template-areas:\n        \"controls-left title controls-right\";\n    align-items: center;\n\n    margin: 25px 10px;\n}\n\n.pc-controls-left {\n    grid-area: controls-left;\n    display: grid;\n    grid-template-columns: min-content min-content min-content;\n    grid-template-rows: 2;\n    grid-template-areas:\n        \"calc-options calc-options calc-options\"\n        \"test-type traffic comparison\";\n    align-items: center;\n}\n\n.pc-controls-right {\n    grid-area: controls-right;\n    display: grid;\n    grid-template-columns: auto min-content min-content;\n    grid-template-rows: auto;\n    grid-template-areas:\n        \"variants false-positive power\";\n    align-items: center;\n    justify-items: end;\n}\n\n.pc-title {\n    grid-area: title;\n    font-size: 30px;\n    text-align: center;\n}\n\n.pc-traffic-mode {\n    grid-area: traffic;\n}\n\n.pc-non-inf-label,\n.pc-test-type,\n.pc-false-positive,\n.pc-power,\n.pc-traffic-mode,\n.pc-variants,\n.pc-comparison-mode {\n    font-size: 0.8em;\n}\n\n.pc-test-type {\n    grid-area: test-type;\n}\n\n.pc-non-inferiority {\n    grid-area: calc-options;\n    margin-bottom: 8px;\n}\n\n.pc-comparison-mode {\n    grid-area: comparison;\n}\n\n.pc-test-type-labels,\n.pc-traffic-mode-labels,\n.pc-non-inf-label,\n.pc-comparison-mode-label {\n    white-space: nowrap;\n}\n\n.pc-non-inferiority ,\n.pc-test-type,\n.pc-traffic-mode,\n.pc-comparison-mode {\n    margin-left: 15px;\n}\n\n.pc-test-type-tooltip-wrapper {\n    display: inline-block;\n}\n\n.pc-variants {\n    grid-area: variants;\n    white-space: nowrap;\n    align-self: end;\n}\n\n.pc-false-positive {\n    grid-area: false-positive;\n    margin-left: 15px;\n    white-space: nowrap;\n    align-self: end;\n}\n\n.pc-power {\n    grid-area: power;\n    margin-left: 15px;\n    margin-right: 15px;\n    white-space: nowrap;\n    align-self: end;\n}\n\n.pc-blocks-wrapper {\n    grid-area: pc-blocks-wrapper;\n    display: grid;\n    grid-template-columns: 33% 33% 33%;\n    grid-template-rows: auto;\n    grid-template-areas:\n        \"block-base block-sample block-impact\"\n        \"block-graph block-graph block-graph\"\n    ;\n    grid-template-rows: auto;\n    grid-column-gap: 8px;\n    grid-row-gap: 8px;\n}\n\n.pc-block--base {\n    grid-area: block-base;\n}\n\n.pc-block--sample {\n    grid-area: block-sample;\n}\n\n.pc-block--impact {\n    grid-area: block-impact;\n}\n\n.pc-block--graph {\n    grid-area: block-graph;\n}\n\n\n/* blocks */\n\n.pc-block {\n    background: var(--light-gray);\n}\n\n.pc-header {\n    color: var(--white);\n    text-align: center;\n    font-size: 28px;\n    line-height: 80px;\n    height: 80px;\n    text-shadow: 0 1px 1px rgba(0,0,0,0.29);\n    background: var(--pale-blue);\n    margin-bottom: 25px;\n}\n\n.pc-calculate {\n    display: inline-block;\n    margin-bottom: 25px;\n    font-weight: bold;\n    font-size: 0.8em;\n}\n\n.pc-value {\n    display: block;\n    margin-bottom: 25px;\n}\n\n/* block to calculate override rules*/\n\n.pc-block-to-calculate {\n    background: var(--light-yellow);\n}\n\n.pc-block-to-calculate .pc-header {\n    background: var(--dark-yellow);\n}\n\n.pc-hidden {\n    display: none!important;\n}\n</style>\n"]}, media: undefined });
+
+      };
+      /* scoped */
+      const __vue_scope_id__$b = undefined;
+      /* module identifier */
+      const __vue_module_identifier__$b = undefined;
+      /* functional template */
+      const __vue_is_functional_template__$b = false;
+      /* style inject SSR */
+      
+      /* style inject shadow dom */
+      
+
+      
+      const __vue_component__$b = /*#__PURE__*/normalizeComponent(
+        { render: __vue_render__$b, staticRenderFns: __vue_staticRenderFns__$b },
+        __vue_inject_styles__$b,
+        __vue_script__$b,
+        __vue_scope_id__$b,
+        __vue_is_functional_template__$b,
+        __vue_module_identifier__$b,
+        false,
+        createInjector,
+        undefined,
+        undefined
+      );
 
     var actions = {
         'field:change' (context, { prop, value }) {
@@ -6976,7 +9550,7 @@
         }
     };
 
-    var nonInferiority$1 = {
+    var nonInferiority = {
         state:{
             threshold: 0,
             thresholdRelative: 0,
@@ -7009,9 +9583,6 @@
                         } else {
                             state.thresholdRelative = state.threshold;
                         }
-                    break;
-                    default:
-
                     break;
                 }
 
@@ -7327,7 +9898,7 @@
     var store = {
         modules: {
             attributes,
-            nonInferiority: nonInferiority$1,
+            nonInferiority,
         },
         actions,
         mutations,
@@ -7335,10 +9906,10 @@
     };
 
     var index = {
-        powerCalculator,
+        powerCalculator: __vue_component__$b,
         store
     };
 
     return index;
 
-}));
+})));
