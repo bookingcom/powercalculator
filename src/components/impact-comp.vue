@@ -73,7 +73,7 @@
                     v-on:update:focus="updateFocus"
                     ></pc-block-field>
                     <span class="pc-input-details">
-                        {{ testType == 'gTest' ? ' Incremental trials': ' Incremental change in the metric' }}
+                        {{ testType == 'gTest' ? ' Incremental units': ' Incremental change in the metric' }}
                     </span>
                 </label>
             </li>
@@ -91,7 +91,7 @@
                     v-on:update:focus="updateFocus"
                     ></pc-block-field>
                     <span class="pc-input-details">
-                        {{ testType == 'gTest' ? ' Incremental trials per day': ' Incremental change in the metric per day' }}
+                        {{ testType == 'gTest' ? ' Incremental units per day': ' Incremental change in the metric per day' }}
                     </span>
                 </label>
             </li>

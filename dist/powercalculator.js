@@ -6331,14 +6331,10 @@
               on: {
                 "update:graphType": function($event) {
                   _vm.graphType = $event;
-                },
-                "update:graph-type": function($event) {
-                  _vm.graphType = $event;
                 }
               }
             })
-          }),
-          1
+          })
         ),
         _vm._v(" "),
         _c("div", { ref: "pc-graph-size", staticClass: "pc-graph" }, [
@@ -6736,7 +6732,7 @@
               class: _vm.fieldWrapperClasses,
               on: {
                 click: function($event) {
-                  return _vm.setFocus()
+                  _vm.setFocus();
                 }
               }
             },
@@ -6783,7 +6779,7 @@
                     },
                     on: {
                       focus: function($event) {
-                        return _vm.setFocusStyle(true)
+                        _vm.setFocusStyle(true);
                       },
                       blur: _vm.blur,
                       input: _vm.updateVal
@@ -7764,7 +7760,7 @@
                       "\n                    " +
                         _vm._s(
                           _vm.testType == "gTest"
-                            ? " Incremental trials"
+                            ? " Incremental units"
                             : " Incremental change in the metric"
                         ) +
                         "\n                "
@@ -7796,7 +7792,7 @@
                       "\n                    " +
                         _vm._s(
                           _vm.testType == "gTest"
-                            ? " Incremental trials per day"
+                            ? " Incremental units per day"
                             : " Incremental change in the metric per day"
                         ) +
                         "\n                "
@@ -7817,7 +7813,7 @@
       /* style */
       const __vue_inject_styles__$6 = function (inject) {
         if (!inject) return
-        inject("data-v-076874de_0", { source: "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", map: {"version":3,"sources":[],"names":[],"mappings":"","file":"impact-comp.vue"}, media: undefined });
+        inject("data-v-4a008d42_0", { source: "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", map: {"version":3,"sources":[],"names":[],"mappings":"","file":"impact-comp.vue"}, media: undefined });
 
       };
       /* scoped */
@@ -8095,10 +8091,10 @@
           {
             on: {
               mouseover: function($event) {
-                return _vm.showTooltip(true)
+                _vm.showTooltip(true);
               },
               mouseout: function($event) {
-                return _vm.showTooltip(false)
+                _vm.showTooltip(false);
               }
             }
           },
