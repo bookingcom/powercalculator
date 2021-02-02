@@ -6,13 +6,11 @@ Currently the graph works with D3 and C3. You will have to add those libraries t
 
 # Getting Started
 ## Instalation
-To build the files you will need [Rollup](https://rollupjs.org/).
+Then you can run `$ yarn install`.
 
-Then you can run ```$ npm install```.
+When you want to build the component you will use `$ yarn build`.
 
-When you want to build the component you will use ```$ rollup -c```.
-
-When you want to develop, rollup has a watch flag, use ```$ rollup -c -w```.
+When you want to develop, rollup has a watch flag, use `$ yarn watch`.
 
 You can change rollup.config.js if the current setup doesn't suit your needs.
 
@@ -55,17 +53,18 @@ I'd recommend using [Vuex Plugins](https://vuex.vuejs.org/en/plugins.html) for t
 | update:proptocalculate | Triggers the calculation of the highlighted block |
 
 # Dev Server
-There is no dev server. You can play with the github pages as they point to the dist folder.
-
-You can open the index.html directly or use something such as `python -m SimpleHTTPServer 8080` to use localhost:8080.
+You can run `$ yarn serve` to run a development server which points to
+`localhost:5000`. It will load the `index.html` file which points to the files
+in the `dist` folder. You will need to run `$ yarn watch` in a different process 
+to develop.
 
 # Tests
 Due to the complexity of the tool we have a few different options of testing.
 
- - `npm run test`: Run all tests - test the mathematical functions, runs eslint and test the store updates
- - `npm run vue-check`: runs eslint and test the store updates (we are unlikely to change the mathematical functions as often as the rest)
- - `npm run store`: test the store updates
- - `npm run eslint`: runs eslint
+ - `yarn test`: Run all tests - test the mathematical functions, runs eslint and test the store updates
+ - `yarn vue-check`: runs eslint and test the store updates (we are unlikely to change the mathematical functions as often as the rest)
+ - `yarn store`: test the store updates
+ - `yarn eslint`: runs eslint
 
 # COPYRIGHT AND LICENSE
 
