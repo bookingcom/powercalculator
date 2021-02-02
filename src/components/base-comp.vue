@@ -1,5 +1,5 @@
 <template id="base-comp">
-    <div class="pc-block pc-block--base" :class="{'pc-block-focused': focusedblock == 'base'}">
+    <div class="pc-block pc-block--base" :class="{'pc-block-focused': focusedBlock == 'base'}">
 
         <pc-svg-chain v-bind:fieldFromBlock="fieldFromBlock"></pc-svg-chain>
 

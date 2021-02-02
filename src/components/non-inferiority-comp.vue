@@ -1,5 +1,5 @@
 <template id="noninferiority-comp">
-    <div class="pc-block pc-block--noninferiority" :class="{'pc-block-focused': focusedblock == 'noninferiority'}">
+    <div class="pc-block pc-block--noninferiority" :class="{'pc-block-focused': focusedBlock == 'noninferiority'}">
 
         <pc-svg-chain v-bind:fieldFromBlock="fieldFromBlock"></pc-svg-chain>
 
@@ -28,7 +28,7 @@
 
             <li class="pc-input-item pc-input-right">
                 <label>
-                    <span class="pc-input-title">Absolute <small class="pc-input-sub-title">impact per day</small></span>
+                    <span class="pc-input-title">Absolute</span>
 
                     <pc-block-field
                         fieldProp="thresholdAbsolute"
