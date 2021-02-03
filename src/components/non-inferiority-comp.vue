@@ -28,7 +28,8 @@
 
             <li class="pc-input-item pc-input-right">
                 <label>
-                    <span class="pc-input-title">Absolute</span>
+                    <span class="pc-input-title">Absolute <small
+                        v-if="!onlyTotalVisitors" class="pc-input-sub-title">impact per day</small></span>
 
                     <pc-block-field
                         fieldProp="thresholdAbsolute"
@@ -107,10 +108,18 @@ export default {
             return this.$store.state.nonInferiority.thresholdRelative
         },
         thresholdAbsolute () {
-            return this.$store.state.nonInferiority.thresholdAbsolute
+            const thresholdPerDay =  this.$store.state.nonInferiority.thresholdAbsolute
+            if (this.$store.state.attributes.onlyTotalVisitors) {
+                const runtime = this.$store.getters.runtime;
+                return thresholdPerDay * runtime
+            }
+            return thresholdPerDay
         },
         isRelative () {
             return this.$store.state.nonInferiority.selected == 'relative'
+        },
+        onlyTotalVisitors () {
+            return this.$store.state.attributes.onlyTotalVisitors
         },
         selected: {
             get () {

@@ -196,10 +196,9 @@ export default {
         calculateRelativeFromAbsolute (state, getters, rootState) {
             return function caclulateRelativeFromAbsoluteInner(absoluteThreshold) {
                 const visitorsPerDay = rootState.attributes.visitorsPerDay;
-                const runtime = getters.extractValue('runtime', rootState.attributes.runtime);
                 const base = getters.extractValue('base', rootState.attributes.base);
 
-                const relativeThreshold = absoluteThreshold/(base*visitorsPerDay*runtime);
+                const relativeThreshold = absoluteThreshold/(base*visitorsPerDay);
 
                 return isNaN(relativeThreshold) ? 0 : relativeThreshold;
             }
@@ -207,10 +206,9 @@ export default {
         calculateAbsoluteFromRelative (state, getters, rootState) {
             return function calculateAbsoluteFromRelativeInner(relativeThreshold) {
                 const visitorsPerDay = rootState.attributes.visitorsPerDay;
-                const runtime = getters.extractValue('runtime', rootState.attributes.runtime);
                 const base = getters.extractValue('base', rootState.attributes.base);
 
-                const absoluteThreshold = (relativeThreshold*base*visitorsPerDay*runtime)/100;
+                const absoluteThreshold = (relativeThreshold*base*visitorsPerDay)/100;
                 return isNaN(absoluteThreshold) ? 0 : absoluteThreshold;
             }
         }
