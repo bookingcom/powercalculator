@@ -77,7 +77,7 @@
                     </span>
                 </label>
             </li>
-            <li class="pc-input-item pc-input-bottom-right">
+            <li class="pc-input-item pc-input-bottom-right" v-if="!onlyTotalVisitors">
                 <label>
 
                 <pc-block-field
@@ -144,7 +144,10 @@ export default {
         },
         impactByVisitorsPerDayDisplay () {
             return this.$store.getters.impactByVisitorsPerDayDisplay
-        }
+        },
+        onlyTotalVisitors () {
+            return this.$store.state.attributes.onlyTotalVisitors
+        },
     },
     watch: {
         isReadOnly () {

@@ -32,11 +32,11 @@
 
                     <div class="pc-traffic-mode">
                         <label class="pc-traffic-mode-labels" slot="text">
-                            <input type="radio" name="traffic-mode" v-model="trafficMode" value="daily" checked :disabled="nonInferiorityEnabled">
+                            <input type="radio" name="traffic-mode" v-model="trafficMode" value="daily" checked >
                             Daily traffic
                         </label>
                         <label class="pc-traffic-mode-labels" slot="text">
-                            <input type="radio" name="traffic-mode" v-model="trafficMode" value="total" :disabled="nonInferiorityEnabled">
+                            <input type="radio" name="traffic-mode" v-model="trafficMode" value="total" >
                             Total traffic
                         </label>
                     </div>

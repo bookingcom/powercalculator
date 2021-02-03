@@ -162,7 +162,7 @@ export default {
         alternative (state, getters) {
             if (!state.enabled) {
                 // in this case the test type would be 'comparative'
-                return false
+                return false;
             }
 
             return getters.customAlternative({type: 'noninferiority'});
@@ -187,7 +187,7 @@ export default {
 
                 let result = nonInfThreshold;
                 if (isRelative) {
-                    result = result / 100
+                    result = result / 100;
                 }
 
                 return result;
@@ -195,18 +195,21 @@ export default {
         },
         calculateRelativeFromAbsolute (state, getters, rootState) {
             return function caclulateRelativeFromAbsoluteInner(absoluteThreshold) {
-                let visitorsPerDay = rootState.attributes.visitorsPerDay,
-                base = getters.extractValue('base', rootState.attributes.base);
+                const visitorsPerDay = rootState.attributes.visitorsPerDay;
+                const base = getters.extractValue('base', rootState.attributes.base);
 
-                return absoluteThreshold/(base*visitorsPerDay);
+                const relativeThreshold = absoluteThreshold/(base*visitorsPerDay);
+
+                return isNaN(relativeThreshold) ? 0 : relativeThreshold;
             }
         },
         calculateAbsoluteFromRelative (state, getters, rootState) {
             return function calculateAbsoluteFromRelativeInner(relativeThreshold) {
-                let visitorsPerDay = rootState.attributes.visitorsPerDay,
-                base = getters.extractValue('base', rootState.attributes.base);
+                const visitorsPerDay = rootState.attributes.visitorsPerDay;
+                const base = getters.extractValue('base', rootState.attributes.base);
 
-                return (relativeThreshold*base*visitorsPerDay)/100;
+                const absoluteThreshold = (relativeThreshold*base*visitorsPerDay)/100;
+                return isNaN(absoluteThreshold) ? 0 : absoluteThreshold;
             }
         }
     }
