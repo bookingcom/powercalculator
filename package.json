@@ -9,6 +9,7 @@
     "eslint": "npx eslint ./src --ext .js --ext .vue",
     "vue-check": "npm run eslint && npm run store",
     "build": "rollup -c",
+    "build:production": "rollup -c --environment INCLUDE_DEPS,BUILD:production",
     "watch": "rollup -c -w",
     "serve": "serve"
   },

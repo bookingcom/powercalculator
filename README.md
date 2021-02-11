@@ -8,7 +8,8 @@ Currently the graph works with D3 and C3. You will have to add those libraries t
 ## Instalation
 Then you can run `$ yarn install`.
 
-When you want to build the component you will use `$ yarn build`.
+When you want to build the component you will use `$ yarn build`. If you want a
+production build, use `$ yarn build:production`.
 
 When you want to develop, rollup has a watch flag, use `$ yarn watch`.
 
