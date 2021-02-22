@@ -16,7 +16,7 @@ export default {
         context.dispatch(
           'update:proptocalculate',
           context.getters.calculatedValues
-        )
+          )
         break
 
       case 'sample':
@@ -113,10 +113,6 @@ export default {
   'switch:lockedfield'(context) {
     let newLockedField =
       context.state.attributes.lockedField == 'days' ? 'visitorsPerDay' : 'days'
-
-    if (context.state.nonInferiority.enabled === true) {
-      newLockedField = 'days'
-    }
 
     context.commit('switch:lockedfield', {
       value: newLockedField
@@ -217,50 +213,71 @@ export default {
     })
   },
   'convert:noninferioritythreshold'(context, { prop, value }) {
-    let valueToCalculate,
-      currentValue,
-      propToUpdate,
-      calculatedValue = 0
+
+    const calculateAbsolute = relative => Math.round(context.getters.displayValue(
+      'nonInfThresholdAbsolute',
+      context.getters.calculateAbsoluteFromRelative(relative)) * 100) / 100
+
+    const calculateRelative = absolute => context.getters.displayValue(
+      'nonInfThresholdRelative',
+      context.getters.calculateRelativeFromAbsolute(absolute)
+    )
 
     switch (prop) {
       case 'thresholdRelative':
-        valueToCalculate = 'absolute'
-        currentValue = value
+        context.commit('change:noninferiority', {
+          prop: 'thresholdAbsolute',
+          value: calculateAbsolute(value) || 0
+        })
         break
 
       case 'thresholdAbsolute':
-        valueToCalculate = 'relative'
-        currentValue = value
+        context.commit('change:noninferiority', {
+          prop: 'thresholdRelative',
+          value: calculateRelative(value) || 0
+        })
         break
+
+      case 'visitorsPerDay':
+        if (context.state.nonInferiority.selected == 'absolutePerDay') {
+          context.commit('change:noninferiority', {
+            prop: 'thresholdRelative',
+            value: calculateRelative(context.state.nonInferiority.threshold)
+          })
+          context.dispatch('field:change', {
+            prop: 'thresholdRelative',
+            value: calculateRelative(context.state.nonInferiority.threshold)
+          })
+
+        } else {
+          context.commit('change:noninferiority', {
+            prop: 'thresholdAbsolute',
+            value: calculateAbsolute(context.state.nonInferiority.threshold)
+          })
+          context.dispatch('field:change', {
+            prop: 'thresholdAbsolute',
+            value: calculateAbsolute(context.state.nonInferiority.threshold)
+          })
+        }
+
+        break
+        // both
+        // ISSUE IS HERE: It needs to calculate one of them.
+      case 'impact':
       default:
         if (context.state.nonInferiority.selected == 'absolutePerDay') {
-          valueToCalculate = 'relative'
+          context.commit('change:noninferiority', {
+            prop: 'thresholdRelative',
+            value: calculateRelative(context.state.nonInferiority.threshold)
+          })
         } else {
-          valueToCalculate = 'absolute'
+          context.commit('change:noninferiority', {
+            prop: 'thresholdAbsolute',
+            value: calculateAbsolute(context.state.nonInferiority.threshold)
+          })
         }
-        currentValue = context.state.nonInferiority.threshold
         break
     }
-
-    if (valueToCalculate == 'absolute') {
-      calculatedValue = context.getters.displayValue(
-        'nonInfThresholdAbsolute',
-        context.getters.calculateAbsoluteFromRelative(currentValue)
-      )
-      calculatedValue = Math.round(calculatedValue * 100) / 100
-      propToUpdate = 'thresholdAbsolute'
-    } else if (valueToCalculate == 'relative') {
-      calculatedValue = context.getters.displayValue(
-        'nonInfThresholdRelative',
-        context.getters.calculateRelativeFromAbsolute(currentValue)
-      )
-      propToUpdate = 'thresholdRelative'
-    }
-
-    context.commit('change:noninferiority', {
-      prop: propToUpdate,
-      value: calculatedValue
-    })
   },
   'update:proptocalculate'(context) {
     const calculatedObj = context.getters.calculatedValues || context.rootGetters.calculatedValue

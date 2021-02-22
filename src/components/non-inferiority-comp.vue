@@ -76,7 +76,8 @@
           </span>
 
           <div class="pc-non-inf-select-wrapper">
-            <select v-model="expectedChange" class="pc-non-inf-select">
+            <select v-model="expectedChange" class="pc-non-inf-select"
+              :disabled="isReadOnly">
               <option value="nochange">
                 No Change
               </option>
