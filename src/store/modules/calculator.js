@@ -1,6 +1,16 @@
 export const TEST_TYPE = Object.freeze({
-  CONTINUOS: 'tTest',
+  CONTINUOUS: 'tTest',
   BINOMIAL: 'gTest'
+})
+
+export const TRAFFIC_MODE = Object.freeze({
+  DAILY: 'daily',
+  TOTAL: 'total'
+})
+
+export const COMPARISON_MODE = Object.freeze({
+  ALL: 'all',
+  ONE: 'one'
 })
 
 export const VALUE_TYPE = Object.freeze({
@@ -27,55 +37,83 @@ export const calculator = {
 
     // Configuration
     isNonInferiority: false,
+    comparisonMode: COMPARISON_MODE.ALL,
+    trafficMode: TRAFFIC_MODE.DAILY,
     testType: TEST_TYPE.BINOMIAL
   }),
   mutations: {
     // Variants are reflected in the UI as 1 + amount. We store them all
     // together.
-    setVariants(state, amount) {
-      state.variant = amount + 1
+    SET_VARIANTS(state, amount) {
+      if (Number.isInteger(amount) && amount >= 0) state.variants = amount + 1
+      else state.variants = state.variants
+    },
+    // We can choose between compare the base vs one variant or vs all.
+    SET_COMPARISON_MODE(state, val) {
+      if (Object.values(COMPARISON_MODE).includes(val))
+        state.comparisonMode = val
+      else state.comparisonMode = state.comparisonMode
+    },
+    SET_TRAFFIC_MODE(state, val) {
+      if (Object.values(TRAFFIC_MODE).includes(val)) state.trafficMode = val
+      else state.trafficMode = state.trafficMode
     },
     // In the UI is [0,100], in the store is [0,1]
-    setFalsePositiveRate(state, rate) {
-      state.falsePositiveRate = rate / 100
+    SET_FALSE_POSITIVE_RATE(state, rate) {
+      if (rate >= 0 && rate <= 100) state.falsePositiveRate = rate / 100
+      else state.falsePositiveRate = state.falsePositiveRate
     },
     // In the UI is [0,100], in the store is [0,1]
-    setTargetPower(state, power) {
-      state.targetPower = power / 100
+    SET_TARGET_POWER(state, power) {
+      if (!isNaN(power) && power >= 0 && power <= 100) state.targetPower = power / 100
+      else state.targetPower = state.targetPower
     },
     // In the UI is [0,100], in the store is [0,1]
-    setBaseRate(state, baseRate) {
-      state.baseRate = baseRate / 100
+    SET_BASE_RATE(state, baseRate) {
+      if (baseRate > 0 && baseRate < 100) state.baseRate = baseRate / 100
+      else state.baseRate = state.baseRate
     },
-    setIsNonInferiority(state, flag) {
+    SET_STANDARD_DEVIATION(state, stddev) {
+      if (stddev > 0) state.standardDevation = stddev
+      else state.standardDevation = state.standardDevation
+    },
+    SET_IS_NON_INFERIORITY(state, flag) {
       state.isNonInferiority = !!flag
     },
-    setTestType(state, type) {
-      if (TEST_TYPES.includes(type)) state.testType = type
+    SET_TEST_TYPE(state, type) {
+      if (Object.values(TEST_TYPE).includes(type)) state.testType = type
+      else state.testType = state.testType
     },
     // BaseRate = MetricTotal / Sample
-    setBaseRateByMetricTotal(state, total) {
+    SET_BASE_RATE_BY_METRIC_TOTAL(state, total) {
       state.baseRate = total / state.sample
     },
-    setSampleByTotal(state, total) {
+    SET_SAMPLE_BY_TOTAL(state, total) {
       state.sample = total
     },
-    setSampleByFixedRuntime(state, visitorsPerDay) {},
-    setSampleByFixedVisitorsPerDay(state, runtime) {},
-    setRuntimeByFixedSample(state, visitorsPerDay) {},
-    setRuntimeByFixedVisitorsPerDay(state, total) {}
+    SET_RUNTIME(state, runtime) {
+      if (runtime > 0) state.runtime = runtime
+      else state.runtime = state.runtime
+    },
+    SET_SAMPLE_BY_FIXED_RUNTIME(state, visitorsPerDay) {},
+    SET_SAMPLE_BY_FIXED_VISITORS_PER_DAY(state, runtime) {},
+    SET_RUNTIME_BY_FIXED_SAMPLE(state, visitorsPerDay) {},
+    SET_RUNTIME_BY_FIXED_VISITORS_PER_DAY(state, total) {}
   },
   getters: {
     // UI getters
     // Configuration
     variants: state => state.variants - 1,
-    flasePositiveRate: state => state.falsePositiveRate * 100,
+    falsePositiveRate: state => state.falsePositiveRate * 100,
     targetPower: state => state.targetPower * 100,
     isNonInferiority: state => state.isNonInferiority,
     testType: state => state.testType,
+    comparisonMode: state => state.comparisonMode,
+    trafficMode: state => state.trafficMode,
 
     // Base rate
     baseRate: state => state.baseRate * 100,
+    standardDeviation: state => state.standardDevation,
     metricTotal: state => state.sample * state.baseRate,
 
     // Sample
@@ -133,13 +171,13 @@ export const calculator = {
         base = even
       } else {
         const percentageBase = (1 - state.baseRate) / comparisons
-        const percentageVariant = (1 - percentageBase) / comparions
+        const percentageVariant = (1 - percentageBase) / comparisons
         base = state.sample * percentageBase
         variant = state.sample * percentageVariant
       }
 
       const stddev2 = state.stddev ** 2
-      return Math.sqrt(stdev2 / base + stdev2 / variant)
+      return Math.sqrt(stddev2 / base + stddev2 / variant)
     }
   },
   actions: {
