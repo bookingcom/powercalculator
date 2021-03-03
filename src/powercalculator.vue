@@ -59,7 +59,7 @@
             </label>
           </div>
 
-          <!-- <non-inferiority></non-inferiority> -->
+          <non-inferiority></non-inferiority>
 
           <div class="pc-comparison-mode">
             <label class="pc-comparison-mode-labels" slot="text">
@@ -129,13 +129,13 @@
         class="pc-blocks-wrapper"
         :class="{ 'pc-blocks-wrapper-ttest': testType == 'tTest' }"
       >
-        <!-- <base-comp -->
-        <!--   fieldFromBlock="base" -->
-        <!--   v-bind:isBlockFocused="focusedBlock == 'base'" -->
-        <!--   v-bind:enableEdit="enabledMainInputs.base" -->
-        <!--   v-on:update:focus="updateFocus" -->
-        <!-- > -->
-        <!-- </base-comp> -->
+        <base-comp
+          fieldFromBlock="base"
+          v-bind:isBlockFocused="focusedBlock == 'base'"
+          v-bind:enableEdit="enabledMainInputs.base"
+          v-on:update:focus="updateFocus"
+        >
+        </base-comp>
 
         <!-- <sample-comp -->
         <!--   fieldFromBlock="sample" -->
@@ -170,16 +170,20 @@
 </template>
 
 <script>
-// import baseComp from './components/base-comp.vue'
+import baseComp from './components/base-comp.vue'
 // import impactComp from './components/impact-comp.vue'
-// import nonInferiority from './components/non-inferiority.vue'
+import nonInferiority from './components/non-inferiority.vue'
 // import nonInferiorityComp from './components/non-inferiority-comp.vue'
 import pcBlockField from './components/pc-block-field.vue'
 import pcTooltip from './components/pc-tooltip.vue'
 // import sampleComp from './components/sample-comp.vue'
 // import svgGraph from './components/svg-graph.vue'
 
-import { TEST_TYPE, TRAFFIC_MODE, COMPARISON_MODE } from './store/modules/calculator'
+import {
+  TEST_TYPE,
+  TRAFFIC_MODE,
+  COMPARISON_MODE,
+} from './store/modules/calculator'
 
 export default {
   props: ['parentmetricdata'],
@@ -196,8 +200,8 @@ export default {
         sample: true,
         impact: true,
         power: true,
-        'non-inferiority': true
-      }
+        'non-inferiority': true,
+      },
     }
 
     // mergeComponentData has no array support for now
@@ -225,7 +229,7 @@ export default {
         view: this.view,
         lockedField: this.lockedField,
         // nonInferiority: this.nonInferiority,
-        comparisonMode: this.comparisonMode
+        comparisonMode: this.comparisonMode,
       }
       return JSON.parse(JSON.stringify(result))
     },
@@ -235,7 +239,7 @@ export default {
       },
       set(val) {
         this.$store.commit('SET_FALSE_POSITIVE_RATE', val)
-      }
+      },
     },
     power: {
       get() {
@@ -243,7 +247,7 @@ export default {
       },
       set(val) {
         this.$store.commit('SET_TARGET_POWER', val)
-      }
+      },
     },
     variants: {
       get() {
@@ -251,7 +255,7 @@ export default {
       },
       set(val) {
         this.$store.commit('SET_VARIANTS', val)
-      }
+      },
     },
     testType: {
       get() {
@@ -259,7 +263,7 @@ export default {
       },
       set(val) {
         this.$store.commit('SET_TEST_TYPE', val)
-      }
+      },
     },
     comparisonMode: {
       get() {
@@ -267,7 +271,7 @@ export default {
       },
       set(val) {
         this.$store.commit('SET_COMPARISON_MODE', val)
-      }
+      },
     },
     trafficMode: {
       get() {
@@ -275,8 +279,8 @@ export default {
       },
       set(val) {
         this.$store.commit('SET_TRAFFIC_MODE', val)
-      }  
-    }
+      },
+    },
   },
   methods: {
     updateFocus({ fieldProp, value }) {
@@ -292,7 +296,7 @@ export default {
 
       // no array support for now
       function recursive(baseRef, cloneRef) {
-        Object.keys(cloneRef).forEach(prop => {
+        Object.keys(cloneRef).forEach((prop) => {
           if (typeof cloneRef[prop] == 'object') {
             baseRef[prop] = recursive(baseRef[prop], cloneRef[prop])
           } else {
@@ -304,13 +308,13 @@ export default {
       }
 
       return result
-    }
+    },
   },
   watch: {
     // in case parent component needs this information
     metricData() {
       this.$emit('update:metricdata', this.metricData)
-    }
+    },
   },
   components: {
     // 'svg-graph': svgGraph,
@@ -318,10 +322,10 @@ export default {
     'pc-tooltip': pcTooltip,
     // 'sample-comp': sampleComp,
     // 'impact-comp': impactComp,
-    // 'base-comp': baseComp,
-    // 'non-inferiority': nonInferiority,
+    'base-comp': baseComp,
+    'non-inferiority': nonInferiority,
     // 'non-inferiority-comp': nonInferiorityComp
-  }
+  },
 }
 </script>
 

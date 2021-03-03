@@ -129,11 +129,11 @@ export default {
             // People will use copy paste. We need some data sanitization
 
             // remove markup
-            const oldValue = this.$refs['pc-value'].textContent + '',
+            const oldValue = this.$refs['pc-value'].textContent + ''
 
             // remove commas
             // try to extract numbers from it
-            const newValue = parseFloat(oldValue.replace(/,/g, ''));
+            const newValue = parseFloat(oldValue.replace(/,/g, ''))
 
             return newValue
 
