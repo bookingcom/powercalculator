@@ -21,7 +21,7 @@ export default {
     },
     computed: {
         calculateProp () {
-            return this.$store.state.attributes.calculateProp
+            return // this.$store.state.attributes.calculateProp
         },
         svgFillColor () {
             return this.calculateProp == this.fieldFromBlock ? '#E2B634' : '#C1CFD8'

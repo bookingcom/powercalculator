@@ -70,11 +70,11 @@ export const calculator = {
     },
     // In the UI is [0,100], in the store is [0,1]
     SET_BASE_RATE(state, baseRate) {
-      if (baseRate > 0 && baseRate < 100) state.baseRate = baseRate / 100
+      if (baseRate > 0 && baseRate <= 100) state.baseRate = baseRate / 100
       else state.baseRate = state.baseRate
     },
     SET_STANDARD_DEVIATION(state, stddev) {
-      if (stddev > 0) state.standardDevation = stddev
+      if (stddev >= 0) state.standardDevation = stddev / 100
       else state.standardDevation = state.standardDevation
     },
     SET_IS_NON_INFERIORITY(state, flag) {
@@ -113,8 +113,15 @@ export const calculator = {
 
     // Base rate
     baseRate: state => state.baseRate * 100,
-    standardDeviation: state => state.standardDevation,
-    metricTotal: state => state.sample * state.baseRate,
+    standardDeviation: state => state.standardDevation * 100,
+    metricTotal: state  => {
+      if (state.isNonInferiority) {
+        return '-'
+      }
+      
+      const multiplier = state.testType === TEST_TYPE.BINOMIAL ? 1 : 100
+      return (state.sample * state.baseRate * multiplier).toFixed(0)
+    },
 
     // Sample
     visitorsPerDay: state => Math.ceil(state.sample / state.runtime),

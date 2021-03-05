@@ -125,40 +125,40 @@ export default {
   },
   computed: {
     days() {
-      return this.$store.state.attributes.runtime
+      return this.$store.getters.runtime
     },
     base() {
-      return this.$store.state.attributes.base
+      return this.$store.getters.base
     },
     sample() {
-      return this.$store.state.attributes.sample
+      return this.$store.getters.sample
     },
     impact() {
-      return this.$store.state.attributes.impact
+      return // this.$store.state.attributes.impact
     },
     testType() {
-      return this.$store.state.attributes.testType
+      return this.$store.getters.testType
     },
     isReadOnly() {
       return this.calculateProp == 'impact'
     },
     impactByMetricDisplay() {
-      return this.$store.getters.impactByMetricDisplay
+      return // this.$store.getters.impactByMetricDisplay
     },
     impactByMetricMinDisplay() {
-      return this.$store.getters.impactByMetricMinDisplay
+      return // this.$store.getters.impactByMetricMinDisplay
     },
     impactByMetricMaxDisplay() {
-      return this.$store.getters.impactByMetricMaxDisplay
+      return // this.$store.getters.impactByMetricMaxDisplay
     },
     impactByVisitorsDisplay() {
-      return this.$store.getters.impactByVisitorsDisplay
+      return // this.$store.getters.impactByVisitorsDisplay
     },
     impactByVisitorsPerDayDisplay() {
-      return this.$store.getters.impactByVisitorsPerDayDisplay
+      return // this.$store.getters.impactByVisitorsPerDayDisplay
     },
     onlyTotalVisitors() {
-      return this.$store.state.attributes.onlyTotalVisitors
+      return // this.$store.state.attributes.onlyTotalVisitors
     }
   },
   methods: {

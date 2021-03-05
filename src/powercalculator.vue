@@ -131,37 +131,37 @@
       >
         <base-comp
           fieldFromBlock="base"
-          v-bind:isBlockFocused="focusedBlock == 'base'"
+          :isBlockFocused="focusedBlock == FOCUS.SAMPLE"
           v-bind:enableEdit="enabledMainInputs.base"
           v-on:update:focus="updateFocus"
         >
         </base-comp>
 
-        <!-- <sample-comp -->
-        <!--   fieldFromBlock="sample" -->
-        <!--   v-bind:enableEdit="enabledMainInputs.sample" -->
-        <!--   v-bind:isBlockFocused="focusedBlock == 'sample'" -->
-        <!--   v-on:update:focus="updateFocus" -->
-        <!-- > -->
-        <!-- </sample-comp> -->
+        <sample-comp
+          fieldFromBlock="sample"
+          v-bind:enableEdit="enabledMainInputs.sample"
+          v-bind:isBlockFocused="focusedBlock === FOCUS.SAMPLE"
+          v-on:update:focus="updateFocus"
+        >
+        </sample-comp>
 
-        <!-- <impact-comp -->
-        <!--   v-if="!nonInferiorityEnabled" -->
-        <!--   fieldFromBlock="impact" -->
-        <!--   v-bind:enableEdit="enabledMainInputs.impact" -->
-        <!--   v-bind:isBlockFocused="focusedBlock == 'impact'" -->
-        <!--   v-on:update:focus="updateFocus" -->
-        <!-- > -->
-        <!-- </impact-comp> -->
+        <impact-comp
+          v-if="!isNonInferiority"
+          fieldFromBlock="impact"
+          v-bind:enableEdit="enabledMainInputs.impact"
+          v-bind:isBlockFocused="focusedBlock == FOCUS.IMPACT"
+          v-on:update:focus="updateFocus"
+        >
+        </impact-comp>
 
-        <!-- <non-inferiority-comp -->
-        <!--   v-if="nonInferiorityEnabled" -->
-        <!--   fieldFromBlock="non-inferiority" -->
-        <!--   v-bind:enableEdit="enabledMainInputs['non-inferiority']" -->
-        <!--   v-bind:isBlockFocused="focusedBlock == 'non-inferiority'" -->
-        <!--   v-on:update:focus="updateFocus" -->
-        <!-- > -->
-        <!-- </non-inferiority-comp> -->
+        <non-inferiority-comp
+          v-if="isNonInferiority"
+          fieldFromBlock="non-inferiority"
+          v-bind:enableEdit="enabledMainInputs['non-inferiority']"
+          v-bind:isBlockFocused="focusedBlock == 'non-inferiority'"
+          v-on:update:focus="updateFocus"
+        >
+        </non-inferiority-comp>
 
         <!-- <svg-graph></svg-graph> -->
       </div>
@@ -171,13 +171,13 @@
 
 <script>
 import baseComp from './components/base-comp.vue'
-// import impactComp from './components/impact-comp.vue'
+import impactComp from './components/impact-comp.vue'
 import nonInferiority from './components/non-inferiority.vue'
-// import nonInferiorityComp from './components/non-inferiority-comp.vue'
+import nonInferiorityComp from './components/non-inferiority-comp.vue'
 import pcBlockField from './components/pc-block-field.vue'
 import pcTooltip from './components/pc-tooltip.vue'
-// import sampleComp from './components/sample-comp.vue'
-// import svgGraph from './components/svg-graph.vue'
+import sampleComp from './components/sample-comp.vue'
+import svgGraph from './components/svg-graph.vue'
 
 import {
   TEST_TYPE,
@@ -185,14 +185,19 @@ import {
   COMPARISON_MODE,
 } from './store/modules/calculator'
 
+const FOCUS = Object.freeze({
+  SAMPLE: 'sample',
+  IMPACT: 'impact'
+})
+
 export default {
   props: ['parentmetricdata'],
   data() {
     // values if parent component sends them
     let importedData = this.parentmetricdata || {}
 
-    let data = {
-      focusedBlock: '',
+    const data = {
+      focusedBlock: FOCUS.SAMPLE,
 
       // false means the editable ones are the secondary mode (metric totals, days&daily trials and absolute impact)
       enabledMainInputs: {
@@ -211,15 +216,11 @@ export default {
     )
   },
   computed: {
+    // Constants
     TEST_TYPE: () => TEST_TYPE,
     TRAFFIC_MODE: () => TRAFFIC_MODE,
     COMPARISON_MODE: () => COMPARISON_MODE,
-    disableBaseSecondaryInput() {
-      // only metric total is available and as it depends on sample this
-      // creates a circular dependency
-      // this also forces main input back
-      return this.calculateProp == 'sample'
-    },
+    FOCUS: () => FOCUS,
 
     // in case parent component needs this information
     metricData() {
@@ -232,6 +233,9 @@ export default {
         comparisonMode: this.comparisonMode,
       }
       return JSON.parse(JSON.stringify(result))
+    },
+    isNonInferiority() {
+      return this.$store.getters.isNonInferiority
     },
     falsePositiveRate: {
       get() {
@@ -317,14 +321,14 @@ export default {
     },
   },
   components: {
-    // 'svg-graph': svgGraph,
+    'svg-graph': svgGraph,
     'pc-block-field': pcBlockField,
     'pc-tooltip': pcTooltip,
-    // 'sample-comp': sampleComp,
-    // 'impact-comp': impactComp,
+    'sample-comp': sampleComp,
+    'impact-comp': impactComp,
     'base-comp': baseComp,
     'non-inferiority': nonInferiority,
-    // 'non-inferiority-comp': nonInferiorityComp
+    'non-inferiority-comp': nonInferiorityComp
   },
 }
 </script>

@@ -109,19 +109,19 @@ export default {
     },
     computed: {
         sample () {
-            return this.$store.state.attributes.sample
+            return this.$store.getters.sample
         },
         visitorsPerDay () {
-            return this.$store.state.attributes.visitorsPerDay
+            return this.$store.getters.visitorsPerDay
         },
         runtime () {
-            return this.$store.state.attributes.runtime
+            return this.$store.getters.runtime
         },
         lockedField () {
-            return this.$store.state.attributes.lockedField
+            return // this.$store.state.attributes.lockedField
         },
         onlyTotalVisitors () {
-            return this.$store.state.attributes.onlyTotalVisitors
+            return // this.$store.state.attributes.onlyTotalVisitors
         },
     },
     methods: {
@@ -133,13 +133,13 @@ export default {
                 this.focusedBlock = fieldProp
             }
 
-            this.$emit('update:focus', {
-                fieldProp: this.fieldFromBlock,
-                value: value
-            })
+           //  this.$emit('update:focus', {
+           //     fieldProp: this.fieldFromBlock,
+           //     value: value
+           // })
         },
         switchLockedField () {
-            this.$store.dispatch('switch:lockedfield');
+            // this.$store.dispatch('switch:lockedfield');
         },
         getLockedStateClass (param) {
             return this.lockedField == param ? 'pc-value-field--locked' : 'pc-value-field--unlocked'

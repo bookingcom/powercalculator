@@ -119,60 +119,66 @@ export default {
   },
   computed: {
     enabled() {
-      return this.$store.state.nonInferiority.enabled
+      return this.$store.getters.isNonInferiority
     },
     threshold() {
-      return this.$store.state.nonInferiority.threshold
+      return // this.$store.state.nonInferiority.threshold
     },
     thresholdRelative() {
-      return this.$store.state.nonInferiority.thresholdRelative
+      return // this.$store.state.nonInferiority.thresholdRelative
     },
     thresholdAbsolute() {
+      /*
       const thresholdPerDay = this.$store.state.nonInferiority.thresholdAbsolute
       if (this.$store.state.attributes.onlyTotalVisitors) {
         const runtime = this.$store.getters.runtime
         return thresholdPerDay * runtime
       }
       return thresholdPerDay
+      */
     },
     isRelative() {
-      return this.$store.state.nonInferiority.selected == 'relative'
+      return // this.$store.state.nonInferiority.selected == 'relative'
     },
     onlyTotalVisitors() {
-      return this.$store.state.attributes.onlyTotalVisitors
+      return // this.$store.state.attributes.onlyTotalVisitors
     },
     testType() {
-      return this.$store.state.attributes.testType
+      return this.$store.getters.testType
     },
     isReadOnly() {
-      return this.calculateProp == 'non-inferiority'
+      return // this.calculateProp == 'non-inferiority'
     },
     selected: {
       get() {
-        return this.$store.state.nonInferiority.selected
+        return // this.$store.state.nonInferiority.selected
       },
       set(newValue) {
+        /*
         this.$store.dispatch('change:noninferiority', {
           prop: 'selected',
           value: newValue
         })
+        */
       }
     },
     expectedChange: {
       get() {
-        return this.$store.state.nonInferiority.expectedChange
+        return // this.$store.state.nonInferiority.expectedChange
       },
       set(newValue) {
+        /*
         this.$store.dispatch('field:change', {
           prop: 'expectedChange',
           value: newValue
         })
+        */
       }
     }
   },
   methods: {
     enableInput() {
-      this.$emit('edit:update', { prop: 'base' })
+      // this.$emit('edit:update', { prop: 'base' })
     },
     updateFocus({ fieldProp, value }) {
       if (this.focusedBlock == fieldProp && value === false) {
@@ -181,10 +187,10 @@ export default {
         this.focusedBlock = fieldProp
       }
 
-      this.$emit('update:focus', {
-        fieldProp: this.fieldFromBlock,
-        value: value
-      })
+      // this.$emit('update:focus', {
+      //  fieldProp: this.fieldFromBlock,
+       // value: value
+      //})
     }
   }
 }

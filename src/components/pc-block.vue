@@ -17,18 +17,19 @@ export default {
     computed: {
         isCalculated: {
             get () {
-                return this.$store.state.attributes.calculateProp == this.fieldFromBlock
+              return true;  
+              //return this.$store.state.attributes.calculateProp == this.fieldFromBlock
             },
             set () {
-                this.$store.dispatch('update:calculateprop', {value: this.fieldFromBlock})
+                //this.$store.dispatch('update:calculateprop', {value: this.fieldFromBlock})
             }
         },
 
         calculateProp () {
-            return this.$store.state.attributes.calculateProp
+            //return this.$store.state.attributes.calculateProp
         },
         testType () {
-            return this.$store.state.attributes.testType
+            return this.$store.getters.testType
         }
     },
     components: {

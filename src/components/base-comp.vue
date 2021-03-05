@@ -17,12 +17,12 @@
 
                     <pc-block-field
                         fieldProp="base"
-                        :suffix="testType == 'gTest' ? '%' : ''"
+                        :suffix="testType === TEST_TYPE.BINOMIAL ? '%' : ''"
 
-                        v-bind:fieldValue="base"
-                        v-bind:isReadOnly="isReadOnly"
-                        v-bind:isBlockFocused="isBlockFocused"
-                        v-bind:enableEdit="enableEdit"
+                        :fieldValue.sync="base"
+                        :isReadOnly="isReadOnly"
+                        :isBlockFocused="isBlockFocused"
+                        :enableEdit="enableEdit"
 
                         v-on:update:focus="updateFocus"></pc-block-field>
                 </label>
@@ -34,11 +34,11 @@
 
                     <pc-block-field
                         fieldProp="visitorsWithGoals"
-                        v-bind:fieldValue="visitorsWithGoals"
-                        v-bind:fieldFromBlock="fieldFromBlock"
-                        v-bind:isBlockFocused="isBlockFocused"
-                        v-bind:isReadOnly="isReadOnly"
-                        v-bind:enableEdit="enableEdit && this.calculateProp != 'sample'"
+                        :fieldValue.sync="visitorsWithGoals"
+                        :fieldFromBlock="fieldFromBlock"
+                        :isBlockFocused="isBlockFocused"
+                        :isReadOnly="isReadOnly"
+                        :enableEdit="enableEdit && this.calculateProp != 'sample'"
 
                         v-on:update:focus="updateFocus"></pc-block-field>
                 </label>
@@ -51,10 +51,10 @@
                         fieldProp="sdRate"
                         fieldFromBlock="base"
 
-                        v-bind:fieldValue="sdRate"
-                        v-bind:isReadOnly="isReadOnly"
-                        v-bind:isBlockFocused="isBlockFocused"
-                        v-bind:enableEdit="enableEdit"
+                        :fieldValue.sync="sdRate"
+                        :isReadOnly="isReadOnly"
+                        :isBlockFocused="isBlockFocused"
+                        :enableEdit="enableEdit"
 
                         v-on:update:focus="updateFocus"></pc-block-field>
                     <span class="pc-input-details">Base Standard deviation</span>
@@ -67,6 +67,8 @@
 <script>
 import pcBlock from './pc-block.vue'
 
+const DEBOUNCE = 500
+
 export default {
     props: ['enableEdit', 'fieldFromBlock', 'isBlockFocused'],
     extends: pcBlock,
@@ -74,31 +76,60 @@ export default {
     data () {
         return {
             focusedBlock: '',
+            baseDebouncer: null,
+          sdRateDebouncer: null,
         }
     },
-    computed: {
-        isReadOnly () {
-            return this.calculateProp == 'base'
-        },
-        base () {
-            return this.$store.state.attributes.base
-        },
-        sdRate () {
-            return this.$store.state.attributes.sdRate
-        },
-        sample () {
-            return this.$store.state.attributes.sample
-        },
-        testType () {
-            return this.$store.state.attributes.testType
-        },
-        visitorsWithGoals () {
-            return this.$store.getters.visitorsWithGoals
-        }
+  computed: {
+    isReadOnly () {
+      return this.calculateProp == 'base'
     },
+    base: {
+      get() {
+
+        return this.$store.getters.baseRate
+      },
+      set(val) {
+        if (this.baseDebouncer != null) {
+          clearTimeout(this.baseDebouncer)
+        }
+        this.baseDebouncer = setTimeout(() => {
+          this.$store.commit('SET_BASE_RATE', val)
+        }, DEBOUNCE)
+      }
+    },
+    sdRate: {
+      get() {
+        return this.$store.getters.standardDeviation
+      },
+      set(val) {
+        if (this.sdRateDebouncer != null) {
+          clearTimeout(this.sdRateDebouncer)
+        }
+        this.sdRateDebouncer = setTimeout(() => {
+          this.$store.commit('SET_STANDARD_DEVIATION', val)
+        }, DEBOUNCE)
+      }
+    },
+    visitorsWithGoals:{
+      get() {
+        return this.$store.getters.metricTotal
+      }, 
+      set(val) {
+          if (this.$store.getters.isNonInferiority) return
+      }
+    },
+    sample () {
+      return this.$store.getters.sample
+    },
+    testType () {
+      return this.$store.getters.testType
+    },
+    
+  },
     methods: {
         enableInput () {
-            this.$emit('edit:update', {prop: 'base'})
+            // this.$emit('edit:update', {prop: 'base'})
         },
         updateFocus ({fieldProp, value}) {
             if (this.focusedBlock == fieldProp && value === false) {
@@ -107,10 +138,10 @@ export default {
                 this.focusedBlock = fieldProp
             }
 
-            this.$emit('update:focus', {
-                fieldProp: this.fieldFromBlock,
-                value: value
-            })
+            // this.$emit('update:focus', {
+            //    fieldProp: this.fieldFromBlock,
+            //    value: value
+            // })
         }
 
     }
