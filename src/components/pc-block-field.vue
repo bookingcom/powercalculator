@@ -43,112 +43,108 @@
 </template>
 
 <script>
-
-let validationCache = {};
+let validationCache = {}
 
 export default {
-    template: '#pc-block-field',
-    props: [
-        'lockedField',
-        'enableEdit',
-        'isReadOnly',
-        'fieldProp',
-        'fieldValue',
-        'prefix',
-        'suffix',
-        'fieldFromBlock'
-    ],
-    data () {
-        return {
-            islockedFieldSet: (this.lockedField || '').length > 0,
-            isFocused: false,
-        }
+  template: '#pc-block-field',
+  props: [
+    'lockedField',
+    'enableEdit',
+    'isReadOnly',
+    'fieldProp',
+    'fieldValue',
+    'prefix',
+    'suffix',
+    'fieldFromBlock',
+  ],
+  data() {
+    return {
+      islockedFieldSet: (this.lockedField || '').length > 0,
+      isFocused: false,
+    }
+  },
+  computed: {
+    isLocked() {
+      return this.lockedField && this.lockedField == this.fieldProp
     },
-    computed: {
-        isLocked () {
-            return this.lockedField && this.lockedField == this.fieldProp
-        },
-        formattedVal () {
-            let result = this.fieldValue;
-            const sep = ',';
+    formattedVal() {
+      let result = this.fieldValue
+      const sep = ','
 
-            if (result / 1000 >= 1) {
-                const [integer, decimal] = (result + '').split('.');
+      if (result / 1000 >= 1) {
+        const [integer, decimal] = (result + '').split('.')
 
-                result = integer.split('').reduceRight((prev, cur, i, arr) => {
-                    let resultStr = cur + prev,
-                        iFromLeft = arr.length - i;
+        result = integer.split('').reduceRight((prev, cur, i, arr) => {
+          let resultStr = cur + prev,
+            iFromLeft = arr.length - i
 
-                    if (iFromLeft % 3 == 0 && iFromLeft != 0 && i != 0) {
-                        resultStr = sep + resultStr;
-                    }
+          if (iFromLeft % 3 == 0 && iFromLeft != 0 && i != 0) {
+            resultStr = sep + resultStr
+          }
 
-                    return resultStr;
-                }, '')
+          return resultStr
+        }, '')
 
-                if (decimal) {
-                    result += '.' + decimal;
-
-                }
-
-            }
-
-            return result;
-        },
-        fieldWrapperClasses () {
-            let obj = {};
-
-            obj['pc-field--read-only'] = this.isReadOnly;
-            obj['pc-field--focused'] = this.isFocused;
-            obj['pc-field-' + this.fieldProp] = true;
-
-            return obj
-        },
-        fieldFormattedStyle () {
-            const result = {};
-            if (this.isFocused) {
-                result.display = 'none';
-            }
-
-            return result
-        },
-        fieldEditableStyle () {
-            const result = {};
-            if (!this.isFocused) {
-                result.opacity = 0;
-            }
-
-            return result
-        },
-        testType () {
-            return this.$store.getters.testType
+        if (decimal) {
+          result += '.' + decimal
         }
+      }
+
+      return result
     },
-    methods: {
-        getSanitizedPcValue () {
-            // People will use copy paste. We need some data sanitization
+    fieldWrapperClasses() {
+      let obj = {}
 
-            // remove markup
-            const oldValue = this.$refs['pc-value'].textContent + ''
+      obj['pc-field--read-only'] = this.isReadOnly
+      obj['pc-field--focused'] = this.isFocused
+      obj['pc-field-' + this.fieldProp] = true
 
-            // remove commas
-            // try to extract numbers from it
-            const newValue = parseFloat(oldValue.replace(/,/g, ''))
+      return obj
+    },
+    fieldFormattedStyle() {
+      const result = {}
+      if (this.isFocused) {
+        result.display = 'none'
+      }
 
-            return newValue
+      return result
+    },
+    fieldEditableStyle() {
+      const result = {}
+      if (!this.isFocused) {
+        result.opacity = 0
+      }
 
-        },
-        updateVal (val) {
-            if (this.enableEdit) {
-                const value = this.getSanitizedPcValue();
+      return result
+    },
+    testType() {
+      return this.$store.getters.testType
+    },
+  },
+  methods: {
+    getSanitizedPcValue() {
+      // People will use copy paste. We need some data sanitization
 
-                if (value != this.fieldValue) {
-                    // this.val = value;
-                    this.$emit('update:fieldValue', value)
-                }
-            }
-        },
-        /*
+      // remove markup
+      const oldValue = this.$refs['pc-value'].textContent + ''
+
+      // remove commas
+      // try to extract numbers from it
+      const newValue = parseFloat(oldValue.replace(/,/g, ''))
+
+      return newValue
+    },
+    updateVal(val) {
+      if (this.enableEdit) {
+        const value = this.getSanitizedPcValue()
+
+        if (value != this.fieldValue) {
+          // this.val = value;
+          this.$emit('update:fieldValue', value)
+        }
+      }
+    },
+    /*
         formatDisplay () {
             if (this.enableEdit) {
                 this.$refs['pc-value'].textContent = this.formatNumberFields(this.getSanitizedPcValue());
@@ -164,18 +160,18 @@ export default {
             return result || 0
         },
         */
-        blur () {
-            // this.formatDisplay();
-            this.setFocusStyle(false);
-        },
-        setFocusStyle (bool) {
-            this.isFocused = bool;
-        },
-        setFocus () {
-            let el = this.$refs['pc-value'];
-            el.focus();
-        },
-      /*
+    blur() {
+      // this.formatDisplay();
+      this.setFocusStyle(false)
+    },
+    setFocusStyle(bool) {
+      this.isFocused = bool
+    },
+    setFocus() {
+      let el = this.$refs['pc-value']
+      el.focus()
+    },
+    /*
         validateField (value) {
             let validateConfigList = this.getValidationConfig(),
                 isValid = true,
@@ -229,39 +225,40 @@ export default {
             return result
         },
         */
-        placeCaretAtEnd (el) {
-            if (typeof window.getSelection != "undefined"
-                    && typeof document.createRange != "undefined") {
-                var range = document.createRange();
-                range.selectNodeContents(el);
-                range.collapse(false);
-                var sel = window.getSelection();
-                sel.removeAllRanges();
-                sel.addRange(range);
-            } else if (typeof document.body.createTextRange != "undefined") {
-                var textRange = document.body.createTextRange();
-                textRange.moveToElementText(el);
-                textRange.collapse(false);
-                textRange.select();
-            }
-        }
-
+    placeCaretAtEnd(el) {
+      if (
+        typeof window.getSelection != 'undefined' &&
+        typeof document.createRange != 'undefined'
+      ) {
+        var range = document.createRange()
+        range.selectNodeContents(el)
+        range.collapse(false)
+        var sel = window.getSelection()
+        sel.removeAllRanges()
+        sel.addRange(range)
+      } else if (typeof document.body.createTextRange != 'undefined') {
+        var textRange = document.body.createTextRange()
+        textRange.moveToElementText(el)
+        textRange.collapse(false)
+        textRange.select()
+      }
     },
-    watch: {
-        isFocused (newValue) {
-            this.$emit('update:focus', {
-                fieldProp: this.fieldFromBlock || this.fieldProp,
-                value: newValue
-            })
-        }
+  },
+  watch: {
+    isFocused(newValue) {
+      this.$emit('update:focus', {
+        fieldProp: this.fieldFromBlock || this.fieldProp,
+        value: newValue,
+      })
     },
-    directives: {
-        initialvalue: {
-            inserted (el, directive, vnode) {
-                el.textContent = vnode.context.val
-            }
-        }
-    }
+  },
+  directives: {
+    initialvalue: {
+      inserted(el, directive, vnode) {
+        el.textContent = vnode.context.val
+      },
+    },
+  },
 }
 </script>
 

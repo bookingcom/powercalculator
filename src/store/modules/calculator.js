@@ -1,3 +1,5 @@
+import math from '../../js/math'
+
 export const TEST_TYPE = Object.freeze({
   CONTINUOUS: 'tTest',
   BINOMIAL: 'gTest'
@@ -19,6 +21,20 @@ export const VALUE_TYPE = Object.freeze({
   RELATIVE: 'relative'
 })
 
+function displayValue(value, type = 'int') {
+  const alternativeToNaN = val => isNaN(val) || !isFinite(val) ? '-' : val
+
+  switch (type) {
+    case 'float':
+      return alternativeToNaN(parseFloat(value))
+    case 'percentage':
+      return alternativeToNaN(+((parseFloat(value) * 100).toFixed(2)))
+    case 'int':
+    default:
+      return alternativeToNaN(parseInt(value))
+  }
+}
+
 export const calculator = {
   state: () => ({
     // Metrics
@@ -30,6 +46,7 @@ export const calculator = {
     sample: 561364,
     standardDevation: 0.1, // [0..1]
     variants: 2, // A/A = 1, A/B = 2...
+    impact: 0.02, // [0..1]
 
     // Optional metrics
     expectedEffect: 0,
@@ -95,10 +112,28 @@ export const calculator = {
       if (runtime > 0) state.runtime = runtime
       else state.runtime = state.runtime
     },
-    SET_SAMPLE_BY_FIXED_RUNTIME(state, visitorsPerDay) {},
-    SET_SAMPLE_BY_FIXED_VISITORS_PER_DAY(state, runtime) {},
-    SET_RUNTIME_BY_FIXED_SAMPLE(state, visitorsPerDay) {},
-    SET_RUNTIME_BY_FIXED_VISITORS_PER_DAY(state, total) {}
+    
+    // Mutations when calculating the sample size (fixed sample size, variable
+    // runtime and visitors per day)
+    SET_RUNTIME_AND_VISITORS_PER_DAY_BY_FIXED_SAMPLE(state, runtime) {
+      state.runtime = runtime
+    },
+    SET_VISITORS_PER_DAY_AND_RUNTIME_BY_FIXED_SAMPLE(state, visitorsPerDay) {
+      const currentSample = state.sample
+      const days = Math.ceil(currentSample/visitorsPerDay)
+
+      state.runtime = days
+    },
+
+    // IMPACT
+    SET_RELATIVE_IMPACT(state, impact) {
+      state.impact = impact / 100
+      // TODO: Needs to calculate the new sample
+    },
+
+    SET_ABSOLUTE_IMPACT(state, impact) {
+      // TODO
+    }
   },
   getters: {
     // UI getters
@@ -128,63 +163,45 @@ export const calculator = {
     sample: state => state.sample,
     runtime: state => state.runtime,
 
-    // Calculated fields
-    mu: (state, getters) => valueType => {
-      if (!state.isNonInferiority) return 0
-      switch (valueType) {
-        case VALUE_TYPE.ABSOLUTE:
-          return state.expectedEffect
-        case VALUE_TYPE.RELATIVE:
-          return state.expectedEffect * state.baseRate
-        case VALUE_TYPE.IMPACT:
-          if (getters.visitorsPerDay === 0) return null
-          return state.expectedEffect / getters.visitorsPerDay
-      }
+    // Impact
+    relativeImpact: state => state.impact * 100,
+    absoluteImpact: state => {
+      const { value } = math.getAbsoluteImpactInMetricHash({
+        base_rate: state.baseRate,
+        effect_size: state.impact
+      }) 
+      return displayValue(value, 'percentage')
     },
-    // aka. impact / threshold
-    effectSize: (state, getters) => valueType => {
-      const value = state.isNonInferiority
-        ? state.acceptableCost
-        : state.expectedEffect
-
-      switch (valueType) {
-        case VALUE_TYPE.ABSOLUTE:
-          return value
-        case VALUE_TYPE.RELATIVE:
-          return value * state.baseRate
-        case VALUE_TYPE.IMPACT:
-          if (getters.visitorsPerDay === 0) return null
-          return value / getters.visitorsPerDay
-      }
+    minAbsoluteImpact: state => { 
+      const { min } = math.getAbsoluteImpactInMetricHash({
+        base_rate: state.baseRate,
+        effect_size: state.impact
+      }) 
+      return displayValue(min, 'percentage')
     },
-    alpha: state => {
-      const comparisons = state.variants - 1
-      // (1 - (x/100) ^ 0) = 0
-      if (comparisons === 0) return 0
-
-      const alpha = 1 - (state.confidenceLevel / 100) ** (1 / comparisons)
-      return state.isNonInferiority ? alpha / 2 : alpha
+    maxAbsoluteImpact: state => {
+      const { max } = math.getAbsoluteImpactInMetricHash({
+        base_rate: state.baseRate,
+        effect_size: state.impact
+      }) 
+      return displayValue(max, 'percentage')
     },
-    beta: state => 1 - state.targetPower / 100,
-    stderr: (state, getters) => {
-      const comparisons = state.variants - 1
+    absoluteImpactPerVisitor: state => {
+      const impactPerVisitor = math.getAbsoluteImpactInVisitors({
+        base_rate: state.baseRate,
+        effect_size: state.impact,
+        total_sample_size: state.sample
+      })
 
-      let base = null
-      let variant = null
-      // When the traffic is split evenly, the base is stored as 0
-      if (state.baseRate === 0) {
-        const even = state.sample * (1 / state.variants)
-        base = even
-        base = even
-      } else {
-        const percentageBase = (1 - state.baseRate) / comparisons
-        const percentageVariant = (1 - percentageBase) / comparisons
-        base = state.sample * percentageBase
-        variant = state.sample * percentageVariant
-      }
-
-      const stddev2 = state.stddev ** 2
-      return Math.sqrt(stddev2 / base + stddev2 / variant)
+      return displayValue(impactPerVisitor, 'int')
+    },
+    absoluteImpactPerVisitorPerDay: state => {
+      const impactPerVisitor = math.getAbsoluteImpactInVisitors({
+        base_rate: state.baseRate,
+        effect_size: state.impact,
+        total_sample_size: state.sample
+      })
+      return displayValue(Math.floor(impactPerVisitor / state.runtime), 'int') 
     }
   },
   actions: {

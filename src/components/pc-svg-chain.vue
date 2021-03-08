@@ -13,21 +13,18 @@
 
 <script>
 export default {
-    props: ['fieldFromBlock'],
+    props: ['fieldFromBlock', 'focusedBlock'],
     data () {
         return {
             svgBoxWidth: 26
         }
     },
     computed: {
-        calculateProp () {
-            return // this.$store.state.attributes.calculateProp
-        },
         svgFillColor () {
-            return this.calculateProp == this.fieldFromBlock ? '#E2B634' : '#C1CFD8'
+            return this.focusedBlock == this.fieldFromBlock ? '#E2B634' : '#C1CFD8'
         },
         svgBgColor () {
-            return this.calculateProp == this.fieldFromBlock ? '#FEF1CB' : '#F0F0F0'
+            return this.focusedBlock == this.fieldFromBlock ? '#FEF1CB' : '#F0F0F0'
         },
         svgBgLine () {
             let { svgFillColor, svgBgColor, svgBoxWidth } = this,

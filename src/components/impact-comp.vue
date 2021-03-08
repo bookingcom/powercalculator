@@ -2,22 +2,22 @@
   <div
     class="pc-block pc-block--impact"
     :class="{
-      'pc-block-focused': isBlockFocused,
-      'pc-block-to-calculate': calculateProp == 'impact'
+      'pc-block-focused': focusedBlock == blockName,
+      'pc-block-to-calculate': focusedBlock === blockName,
     }"
   >
     <pc-svg-chain
-      v-bind:calculateProp="calculateProp"
-      v-bind:fieldFromBlock="fieldFromBlock"
+      :focusedBlock="focusedBlock"
+      :fieldFromBlock="blockName"
     ></pc-svg-chain>
 
     <label
       slot="text"
       class="pc-calc-radio pc-calc-radio--impact"
-      :class="{ 'pc-calc-radio--active': isCalculated }"
+      :class="{ 'pc-calc-radio--active': focusedBlock === blockName }"
     >
-      <input type="radio" v-model="isCalculated" :value="true" />
-      {{ isCalculated ? 'Calculating' : 'Calculate' }}
+      <input type="radio" v-model="isSelected" :value="blockName" />
+      {{ focusedBlock === blockName ? 'Calculating' : 'Calculate' }}
     </label>
 
     <div class="pc-header">
@@ -31,15 +31,14 @@
 
           <pc-block-field
             class="pc-input-field"
-            :prefix="isnoninferiority ? '' : '±'"
+            :prefix="isNonInferiority ? '' : '±'"
             suffix="%"
             fieldProp="impact"
-            v-bind:fieldValue="impact"
-            v-bind:testType="testType"
-            v-bind:isReadOnly="calculateProp == 'impact'"
-            v-bind:isBlockFocused="isBlockFocused"
-            v-bind:enableEdit="enableEdit"
-            v-on:update:focus="updateFocus"
+            :fieldValue.sync="relativeImpact"
+            :testType="testType"
+            v-bind:isReadOnly="focusedBlock === blockName"
+            v-bind:isBlockFocused="focusedBlock === blockName"
+            enableEdit="true"
           ></pc-block-field>
         </label>
       </li>
@@ -51,18 +50,17 @@
             class="pc-input-field"
             fieldProp="impactByMetricValue"
             :suffix="testType == 'gTest' ? '%' : ''"
-            v-bind:fieldValue="impactByMetricDisplay"
+            v-bind:fieldValue="absoluteImpact"
             v-bind:testType="testType"
-            v-bind:isReadOnly="isReadOnly"
-            v-bind:isBlockFocused="isBlockFocused"
-            v-bind:enableEdit="enableEdit"
-            v-on:update:focus="updateFocus"
+            v-bind:isReadOnly="focusedBlock === blockName"
+            v-bind:isBlockFocused="focusedBlock === blockName"
+            enableEdit="true"
             aria-label="visitors with goals"
           ></pc-block-field>
           <span class="pc-input-details">
-            going from {{ addPercentToString(base) }} to either
-            {{ addPercentToString(impactByMetricMinDisplay) }} or
-            {{ addPercentToString(impactByMetricMaxDisplay) }}
+            going from {{ addPercentToString(baseRate) }} to either
+            {{ addPercentToString(minAbsoluteImpact) }} or
+            {{ addPercentToString(maxAbsoluteImpact) }}
           </span>
         </label>
       </li>
@@ -71,12 +69,11 @@
           <pc-block-field
             class="pc-input-field"
             fieldProp="impactByVisitors"
-            v-bind:fieldValue="impactByVisitorsDisplay"
+            v-bind:fieldValue="absoluteImpactPerVisitor"
             v-bind:testType="testType"
-            v-bind:isReadOnly="isReadOnly"
-            v-bind:isBlockFocused="isBlockFocused"
-            v-bind:enableEdit="enableEdit && calculateProp != 'sample'"
-            v-on:update:focus="updateFocus"
+            isReadOnly="true"
+            v-bind:isBlockFocused="focusedBlock === blockName"
+            enableEdit="false"
           ></pc-block-field>
           <span class="pc-input-details">
             {{
@@ -91,12 +88,11 @@
         <label>
           <pc-block-field
             fieldProp="impactByVisitorsPerDay"
-            v-bind:fieldValue="impactByVisitorsPerDayDisplay"
+            :fieldValue="absoluteImpactPerVisitorPerDay"
             v-bind:testType="testType"
-            v-bind:isReadOnly="isReadOnly"
-            v-bind:isBlockFocused="isBlockFocused"
-            v-bind:enableEdit="enableEdit && calculateProp != 'sample'"
-            v-on:update:focus="updateFocus"
+            isReadOnly="true"
+            :isBlockFocused="focusedBlock === blockName"
+            enableEdit="false"
           ></pc-block-field>
           <span class="pc-input-details">
             {{
@@ -113,76 +109,79 @@
 
 <script>
 import pcBlock from './pc-block.vue'
+import { TRAFFIC_MODE, TEST_TYPE } from '../store/modules/calculator'
 
 export default {
   extends: pcBlock,
   template: '#impact-comp',
-  props: ['enableEdit', 'fieldFromBlock', 'isBlockFocused', 'isnoninferiority'],
+  props: ['focusedBlock', 'blockName'],
   data() {
     return {
-      focusedBlock: ''
     }
   },
   computed: {
-    days() {
-      return this.$store.getters.runtime
+    isSelected: {
+      get() {
+        return this.focusedBlock
+      },
+      set(val) {
+        if (val === this.blockName) {
+          this.$emit('update:focusedBlock', this.blockName)
+        }
+      },
     },
-    base() {
-      return this.$store.getters.base
+    enableEdit() {
+      return this.focusedBlock === this.blockName
     },
-    sample() {
-      return this.$store.getters.sample
+    isNonInferiority() {
+      return this.$store.getters.isNonInferiority
     },
-    impact() {
-      return // this.$store.state.attributes.impact
+    relativeImpact: {
+      get() {
+        return this.$store.getters.relativeImpact
+      }, 
+      set(val) {
+        if (this.focusedBlock !== this.blockName) {
+          this.$store.commit('SET_RELATIVE_IMPACT', val)
+          // SET_SAMPLE_SIZE
+        }
+      }
+    },
+    baseRate() {
+      return this.$store.getters.baseRate
+    },
+    absoluteImpact() {
+      return this.$store.getters.absoluteImpact
+    },
+    minAbsoluteImpact() {
+      return this.$store.getters.minAbsoluteImpact
+    },
+    maxAbsoluteImpact() {
+      return this.$store.getters.maxAbsoluteImpact
+    },
+    absoluteImpactPerVisitor() {
+      return this.$store.getters.absoluteImpactPerVisitor
+    },
+    absoluteImpactPerVisitorPerDay() {
+      return this.$store.getters.absoluteImpactPerVisitorPerDay
     },
     testType() {
       return this.$store.getters.testType
     },
-    isReadOnly() {
-      return this.calculateProp == 'impact'
-    },
-    impactByMetricDisplay() {
-      return // this.$store.getters.impactByMetricDisplay
-    },
-    impactByMetricMinDisplay() {
-      return // this.$store.getters.impactByMetricMinDisplay
-    },
-    impactByMetricMaxDisplay() {
-      return // this.$store.getters.impactByMetricMaxDisplay
-    },
-    impactByVisitorsDisplay() {
-      return // this.$store.getters.impactByVisitorsDisplay
-    },
-    impactByVisitorsPerDayDisplay() {
-      return // this.$store.getters.impactByVisitorsPerDayDisplay
-    },
     onlyTotalVisitors() {
-      return // this.$store.state.attributes.onlyTotalVisitors
-    }
+      return this.$store.getters.trafficMode === TRAFFIC_MODE.TOTAL
+    },
   },
   methods: {
-    updateFocus({ fieldProp, value }) {
-      if (this.focusedBlock == fieldProp && value === false) {
-        this.focusedBlock = ''
-      } else if (value === true) {
-        this.focusedBlock = fieldProp
-      }
-
-      this.$emit('update:focus', {
-        fieldProp: this.fieldFromBlock,
-        value: value
-      })
-    },
     addPercentToString(str) {
       let result = str
-      if (this.testType == 'gTest') {
+      if (this.testType === TEST_TYPE.BINOMIAL) {
         result += '%'
       }
-
       return result
     }
   }
+  // TODO: Add a watcher on the changes of the sample size to calculate the right one
 }
 </script>
 

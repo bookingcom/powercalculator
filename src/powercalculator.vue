@@ -130,27 +130,21 @@
         :class="{ 'pc-blocks-wrapper-ttest': testType == 'tTest' }"
       >
         <base-comp
-          fieldFromBlock="base"
-          :isBlockFocused="focusedBlock == FOCUS.SAMPLE"
-          v-bind:enableEdit="enabledMainInputs.base"
-          v-on:update:focus="updateFocus"
+          :blockName="FOCUS.BASE"
+          :focusedBlock="focusedBlock"
         >
         </base-comp>
 
         <sample-comp
-          fieldFromBlock="sample"
-          v-bind:enableEdit="enabledMainInputs.sample"
-          v-bind:isBlockFocused="focusedBlock === FOCUS.SAMPLE"
-          v-on:update:focus="updateFocus"
+          :blockName="FOCUS.SAMPLE"
+          :focusedBlock.sync="focusedBlock"
         >
         </sample-comp>
 
         <impact-comp
           v-if="!isNonInferiority"
-          fieldFromBlock="impact"
-          v-bind:enableEdit="enabledMainInputs.impact"
-          v-bind:isBlockFocused="focusedBlock == FOCUS.IMPACT"
-          v-on:update:focus="updateFocus"
+          :blockName="FOCUS.IMPACT"
+          :focusedBlock.sync="focusedBlock"
         >
         </impact-comp>
 
@@ -187,7 +181,8 @@ import {
 
 const FOCUS = Object.freeze({
   SAMPLE: 'sample',
-  IMPACT: 'impact'
+  IMPACT: 'impact',
+  BASE: 'base'
 })
 
 export default {
