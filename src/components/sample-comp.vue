@@ -32,7 +32,7 @@
 
           <pc-block-field
             fieldProp="sample"
-            :fieldValue="sample"
+            :fieldValue.sync="sample"
             :isReadOnly="focusedBlock === blockName"
             enableEdit="true"
           ></pc-block-field>
@@ -226,8 +226,33 @@ export default {
         }
       },
     },
-    sample() {
-      return this.$store.getters.sample
+    sample: {
+      get() {
+        return this.$store.getters.sample
+      },
+      set(val) {
+        if (this.sampleDebouncer != null) {
+          clearTimeout(this.visitorsPerDay)
+        }
+        setTimeout(() => {
+          if (
+            this.focusedBlock !== this.blockName &&
+            val !== this.$store.getters.sample
+          ) {
+            if (this.lockedField === BLOCKED.DAYS) {
+              this.$store.commit(
+                'SET_SAMPLE_AND_RUNTIME_WITH_IMPACT_BY_FIXED_VISITORS_PER_DAY',
+                val
+              )
+            } else {
+              this.$store.commit(
+                'SET_SAMPLE_AND_VISITORS_PER_DAY_WITH_IMPACT_BY_FIXED_RUNTIME',
+                val
+              )
+            }
+          }
+        }, DEBOUNCE)
+      },
     },
     visitorsPerDay: {
       get() {
@@ -238,14 +263,20 @@ export default {
           clearTimeout(this.visitorsPerDayDebouncer)
         }
         setTimeout(() => {
-          // Calculating this block (sample)
-          if (this.focusedBlock === this.blockName) {
-            if (
-              this.lockedField === BLOCKED.DAYS &&
-              val !== this.$store.getters.visitorsPerDay
-            ) {
+          // Calculating sample
+          if (
+            this.lockedField === BLOCKED.DAYS &&
+            val !== this.$store.getters.visitorsPerDay
+          ) {
+            if (this.focusedBlock === this.blockName) {
               this.$store.commit(
                 'SET_VISITORS_PER_DAY_AND_RUNTIME_BY_FIXED_SAMPLE',
+                val
+              )
+              // Calculating impact
+            } else {
+              this.$store.commit(
+                'SET_VISITORS_PER_DAY_AND_SAMPLE_WITH_IMPACT_BY_FIXED_RUNTIME',
                 val
               )
             }
@@ -263,14 +294,20 @@ export default {
         }
 
         this.runtimeDebouncer = setTimeout(() => {
-          // Calculating this block (sample)
-          if (this.focusedBlock === this.blockName) {
-            if (
-              this.lockedField === BLOCKED.VISITORS_PER_DAY &&
-              val !== this.$store.getters.runtime
-            ) {
+          if (
+            this.lockedField === BLOCKED.VISITORS_PER_DAY &&
+            val !== this.$store.getters.runtime
+          ) {
+            // Calculating this block (sample)
+            if (this.focusedBlock === this.blockName) {
               this.$store.commit(
                 'SET_RUNTIME_AND_VISITORS_PER_DAY_BY_FIXED_SAMPLE',
+                val
+              )
+              // Calculating some other block (impact/non-inf)
+            } else {
+              this.$store.commit(
+                'SET_RUNTIME_AND_SAMPLE_WITH_IMPACT_BY_FIXED_VISITORS_PER_DAY',
                 val
               )
             }

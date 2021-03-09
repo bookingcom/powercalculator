@@ -100,7 +100,13 @@ export default {
           clearTimeout(this.baseDebouncer)
         }
         this.baseDebouncer = setTimeout(() => {
-          this.$store.commit('SET_BASE_RATE', val)
+          if (this.$store.getters.baseRate !== val) {
+            if (this.focusedBlock !== 'sample') {
+              this.$store.commit('SET_BASE_RATE_AND_IMPACT_BY_SAMPLE', val)
+            } else {
+              this.$store.commit('SET_BASE_RATE_AND_SAMPLE_BY_IMPACT', val)
+            }
+          }
         }, DEBOUNCE)
       },
     },
@@ -123,6 +129,10 @@ export default {
       },
       set(val) {
         if (this.$store.getters.isNonInferiority) return
+        // This field is only editable when calculating impact.
+        if (val !== this.$store.getters.metricTotal) {
+          this.$store.commit('SET_BASE_RATE_BY_METRIC_TOTAL_WITH_IMPACT', val)
+        }
       },
     },
     sample() {
