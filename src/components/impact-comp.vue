@@ -145,11 +145,12 @@ export default {
       set(val) {
         if (this.focusedBlock === FOCUS.SAMPLE) {
           if (this.lockedField === BLOCKED.DAYS) {
-            this.$store.commit('SET_RELATIVE_IMPACT_SAMPLE_AND_RUNTIME', val)
+            this.$store.commit('SET_RELATIVE_IMPACT_SAMPLE_AND_RUNTIME', {
+              impact: val, isAbsolute: false})
           } else {
             this.$store.commit(
               'SET_RELATIVE_IMPACT_SAMPLE_AND_VISITORS_PER_DAY',
-              val
+              { impact: val, isAbsolute: false}
             )
           }
         }
@@ -165,14 +166,12 @@ export default {
       set(val) {
         if (this.focusedBlock === FOCUS.SAMPLE) {
           if (this.lockedField === BLOCKED.DAYS) {
-            this.$store.commit(
-              'SET_RELATIVE_IMPACT_SAMPLE_AND_RUNTIME_BY_ABSOLUTE',
-              val
-            )
+            this.$store.commit('SET_RELATIVE_IMPACT_SAMPLE_AND_RUNTIME', {
+              impact: val, isAbsolute: true})
           } else {
             this.$store.commit(
-              'SET_RELATIVE_IMPACT_SAMPLE_AND_VISITORS_PER_DAY_BY_ABSOLUTE',
-              val
+              'SET_RELATIVE_IMPACT_SAMPLE_AND_VISITORS_PER_DAY',
+              { impact: val, isAbsolute: true}
             )
           }
         }

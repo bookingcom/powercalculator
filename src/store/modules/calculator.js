@@ -55,7 +55,7 @@ export const calculator = {
     targetPower: 0.8, // [0..1]
     runtime: 14,
     sample: 561364,
-    standardDevation: 0.1, // [0..1]
+    standardDeviation: 0.1,
     // It would make sense to store it as variants + 1 but everywhere it uses
     // this format.
     variants: 1, // A/A = 0, A/B = 1...
@@ -99,15 +99,63 @@ export const calculator = {
       else state.targetPower = state.targetPower
     },
     SET_STANDARD_DEVIATION(state, stddev) {
-      if (stddev >= 0) state.standardDevation = stddev / 100
-      else state.standardDevation = state.standardDevation
+      if (stddev >= 0) state.standardDeviation = stddev / 100
+      else state.standardDeviation = state.standardDeviation
     },
     SET_IS_NON_INFERIORITY(state, flag) {
       state.isNonInferiority = !!flag
     },
-    SET_TEST_TYPE(state, type) {
-      if (Object.values(TEST_TYPE).includes(type)) state.testType = type
-      else state.testType = state.testType
+    SET_TEST_TYPE(state, { type, focused, locked }) {
+      if (!Object.values(TEST_TYPE).includes(type)) {
+        state.testType = state.testType
+        return
+      }
+      
+      // We need to recalculate based on the selected fields.
+      // the result will be something like [tTest/gTest][impact/sample]
+      const formula = math[type][focused]
+      const alpha =
+        state.comparisonMode === COMPARISON_MODE.ALL
+          ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
+          : state.falsePositiveRate
+        if ( focused === FOCUS.SAMPLE) {
+          const sample = formula({
+            base_rate: state.baseRate,
+            effect_size: state.impact,
+            sd_rate: state.standardDeviation,
+            alpha,
+            beta: 1 - state.targetPower,
+            variants: state.variants,
+            alternative: math.getAlternative({ type }),
+            mu: 0, // if it isn't non-inferiority, it is always 0
+            opts: {}, // emtpy if it isn't non-inferiority
+          })
+
+          if (locked === BLOCKED.DAYS) {
+            const currentVisitorsPerDay = Math.ceil(state.sample / state.runtime)
+            const newRuntime = sample / currentVisitorsPerDay
+
+            state.runtime = newRuntime
+          }
+          state.sample = sample
+        } else {
+          const impact = formula({
+            // It is totally unclear when the current engine rounds up and when it
+            // doesnt.
+            total_sample_size: state.sample,
+            base_rate: state.baseRate, // It uses the displayed value
+            sd_rate: state.standardDeviation,
+            alpha,
+            beta: 1 - state.targetPower,
+            variants: state.variants,
+            alternative: math.getAlternative({ type }),
+            mu: 0, // if it isn't non-inferiority, it is always 0
+          })
+          state.impact = impact
+        }
+
+
+      state.testType = type
     },
 
     // == BASE ==
@@ -131,7 +179,7 @@ export const calculator = {
         // doesnt.
         total_sample_size: state.sample,
         base_rate: newBaseRate, // It uses the displayed value
-        sd_rate: state.standardDevation * 100,
+        sd_rate: state.standardDeviation,
         alpha,
         beta: 1 - state.targetPower,
         variants: state.variants,
@@ -159,6 +207,7 @@ export const calculator = {
       const sample = sampleFormula({
         base_rate: newBaseRate,
         effect_size: state.impact,
+        sd_rate: state.standardDeviation,
         alpha,
         beta: 1 - state.targetPower,
         variants: state.variants,
@@ -188,6 +237,7 @@ export const calculator = {
       const sample = sampleFormula({
         base_rate: newBaseRate,
         effect_size: state.impact,
+        sd_rate: standardDeviation,
         alpha,
         beta: 1 - state.targetPower,
         variants: state.variants,
@@ -224,7 +274,7 @@ export const calculator = {
         // doesnt.
         total_sample_size: state.sample,
         base_rate: newBaseRate, // It uses the displayed value
-        sd_rate: state.standardDevation * 100,
+        sd_rate: state.standardDeviation,
         alpha,
         beta: 1 - state.targetPower,
         variants: state.variants,
@@ -248,8 +298,11 @@ export const calculator = {
       state.runtime = days
     },
 
-    SET_RELATIVE_IMPACT_SAMPLE_AND_RUNTIME(state, impact) {
-      const newImpact = impact / 100
+    SET_RELATIVE_IMPACT_SAMPLE_AND_RUNTIME(state, { impact, isAbsolute }) {
+      const newImpact = (isAbsolute ? math.getRelativeImpactFromAbsolute({
+          base_rate: state.baseRate,
+          absolute_effect_size: impact,
+      }) : impact) / 100
 
       const type = state.testType
       const sampleFormula = math[type].sample
@@ -261,6 +314,7 @@ export const calculator = {
       const sample = sampleFormula({
         base_rate: state.baseRate,
         effect_size: newImpact,
+        sd_rate: state.standardDeviation,
         alpha,
         beta: 1 - state.targetPower,
         variants: state.variants,
@@ -276,37 +330,11 @@ export const calculator = {
       state.sample = sample
       state.runtime = newRuntime
     },
-    SET_RELATIVE_IMPACT_SAMPLE_AND_VISITORS_PER_DAY(state, impact) {
-      const newImpact = impact / 100
-
-      const type = state.testType
-      const sampleFormula = math[type].sample
-      const alpha =
-        state.comparisonMode === COMPARISON_MODE.ALL
-          ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
-          : state.falsePositiveRate
-
-      const sample = sampleFormula({
-        base_rate: state.baseRate,
-        effect_size: newImpact,
-        alpha,
-        beta: 1 - state.targetPower,
-        variants: state.variants,
-        alternative: math.getAlternative({ type }),
-        mu: 0, // if it isn't non-inferiority, it is always 0
-        opts: {}, // emtpy if it isn't non-inferiority
-      })
-
-      state.impact = newImpact
-      state.sample = sample
-    },
-
-    SET_RELATIVE_IMPACT_SAMPLE_AND_RUNTIME_BY_ABSOLUTE(state, impact) {
-      const newImpact =
-        math.getRelativeImpactFromAbsolute({
+    SET_RELATIVE_IMPACT_SAMPLE_AND_VISITORS_PER_DAY(state, { impact, isAbsolute }) {
+      const newImpact = (isAbsolute ? math.getRelativeImpactFromAbsolute({
           base_rate: state.baseRate,
           absolute_effect_size: impact,
-        }) / 100
+      }) : impact) / 100
 
       const type = state.testType
       const sampleFormula = math[type].sample
@@ -318,38 +346,7 @@ export const calculator = {
       const sample = sampleFormula({
         base_rate: state.baseRate,
         effect_size: newImpact,
-        alpha,
-        beta: 1 - state.targetPower,
-        variants: state.variants,
-        alternative: math.getAlternative({ type }),
-        mu: 0, // if it isn't non-inferiority, it is always 0
-        opts: {}, // emtpy if it isn't non-inferiority
-      })
-
-      const currentVisitorsPerDay = Math.ceil(state.sample / state.runtime)
-      const newRuntime = sample / currentVisitorsPerDay
-
-      state.impact = newImpact
-      state.sample = sample
-      state.runtime = newRuntime
-    },
-    SET_RELATIVE_IMPACT_SAMPLE_AND_VISITORS_PER_DAY_BY_ABSOLUTE(state, impact) {
-      const newImpact =
-        math.getRelativeImpactFromAbsolute({
-          base_rate: state.baseRate,
-          absolute_effect_size: impact,
-        }) / 100
-
-      const type = state.testType
-      const sampleFormula = math[type].sample
-      const alpha =
-        state.comparisonMode === COMPARISON_MODE.ALL
-          ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
-          : state.falsePositiveRate
-
-      const sample = sampleFormula({
-        base_rate: state.baseRate,
-        effect_size: newImpact,
+        sd_rate: state.standardDeviation,
         alpha,
         beta: 1 - state.targetPower,
         variants: state.variants,
@@ -392,7 +389,7 @@ export const calculator = {
         // doesnt.
         total_sample_size: newSample,
         base_rate: state.baseRate,
-        sd_rate: state.standardDevation * 100,
+        sd_rate: state.standardDeviation,
         alpha,
         beta: 1 - state.targetPower,
         variants: state.variants,
@@ -428,7 +425,7 @@ export const calculator = {
         // doesnt.
         total_sample_size: newSample,
         base_rate: state.baseRate,
-        sd_rate: state.standardDevation * 100,
+        sd_rate: state.standardDeviation,
         alpha,
         beta: 1 - state.targetPower,
         variants: state.variants,
@@ -460,7 +457,7 @@ export const calculator = {
         // doesnt.
         total_sample_size: sample,
         base_rate: state.baseRate,
-        sd_rate: state.standardDevation * 100,
+        sd_rate: state.standardDeviation,
         alpha,
         beta: 1 - state.targetPower,
         variants: state.variants,
@@ -496,7 +493,7 @@ export const calculator = {
         // doesnt.
         total_sample_size: sample,
         base_rate: state.baseRate,
-        sd_rate: state.standardDevation * 100,
+        sd_rate: state.standardDeviation,
         alpha,
         beta: 1 - state.targetPower,
         variants: state.variants,
@@ -520,7 +517,7 @@ export const calculator = {
 
     // Base rate
     baseRate: (state) => displayValue(state.baseRate, 'percentage'),
-    standardDeviation: (state) => state.standardDevation * 100,
+    standardDeviation: (state) => displayValue(state.standardDeviation * 100, 'float'),
     metricTotal: (state) => {
       if (state.isNonInferiority) {
         return '-'
@@ -537,12 +534,7 @@ export const calculator = {
     runtime: (state) => displayValue(Math.ceil(state.runtime), 'int'),
 
     // Impact
-    relativeImpact: (state) => {
-      if (state.testType === TEST_TYPE.BINOMIAL) {
-        return displayValue(state.impact, 'percentage')
-      }
-      return '-'
-    },
+    relativeImpact: (state) => displayValue(state.impact, 'percentage'),
     absoluteImpact: (state) => {
       const { value } = math.getAbsoluteImpactInMetricHash({
         base_rate: state.baseRate,

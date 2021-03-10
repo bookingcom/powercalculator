@@ -261,7 +261,11 @@ export default {
         return this.$store.getters.testType
       },
       set(val) {
-        this.$store.commit('SET_TEST_TYPE', val)
+        this.$store.commit('SET_TEST_TYPE', {
+          type: val,
+          focused: this.focusedBlock,
+          locked: this.lockedField
+        })
       },
     },
     comparisonMode: {
