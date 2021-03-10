@@ -57,7 +57,7 @@
             :isReadOnly="lockedField === BLOCKED.VISITORS_PER_DAY"
             :isBlockFocused="focusedBlock === blockName"
             enableEdit="true"
-            v-bind:lockedField="lockedField"
+            :lockedField="lockedField"
           ></pc-block-field>
         </label>
 
@@ -193,22 +193,16 @@
 
 <script>
 import pcBlock from './pc-block.vue'
-import { TRAFFIC_MODE } from '../store/modules/calculator'
-
-const BLOCKED = Object.freeze({
-  VISITORS_PER_DAY: 'visitorsPerDay',
-  DAYS: 'days',
-})
+import { TRAFFIC_MODE, BLOCKED } from '../store/modules/calculator'
 
 const DEBOUNCE = 500
 
 export default {
-  props: ['focusedBlock', 'blockName'],
+  props: ['focusedBlock', 'lockedField', 'blockName'],
   template: '#sample-comp',
   extends: pcBlock,
   data() {
     return {
-      lockedField: BLOCKED.DAYS,
       runtimeDebouncer: null,
       visitorsPerDayDebouncer: null,
       sampleDebouncer: null,
@@ -236,7 +230,7 @@ export default {
         }
         setTimeout(() => {
           if (
-            this.focusedBlock !== this.blockName &&
+            this.focusedBlock !== FOCUS.SAMPLE &&
             val !== this.$store.getters.sample
           ) {
             if (this.lockedField === BLOCKED.DAYS) {
@@ -263,12 +257,12 @@ export default {
           clearTimeout(this.visitorsPerDayDebouncer)
         }
         setTimeout(() => {
-          // Calculating sample
           if (
             this.lockedField === BLOCKED.DAYS &&
             val !== this.$store.getters.visitorsPerDay
           ) {
-            if (this.focusedBlock === this.blockName) {
+            // Calculating sample
+            if (this.focusedBlock === FOCUS.SAMPLE) {
               this.$store.commit(
                 'SET_VISITORS_PER_DAY_AND_RUNTIME_BY_FIXED_SAMPLE',
                 val
@@ -299,7 +293,7 @@ export default {
             val !== this.$store.getters.runtime
           ) {
             // Calculating this block (sample)
-            if (this.focusedBlock === this.blockName) {
+            if (this.focusedBlock === FOCUS.SAMPLE) {
               this.$store.commit(
                 'SET_RUNTIME_AND_VISITORS_PER_DAY_BY_FIXED_SAMPLE',
                 val
@@ -311,6 +305,7 @@ export default {
                 val
               )
             }
+            m
           }
         }, DEBOUNCE)
       },
@@ -322,9 +317,9 @@ export default {
   methods: {
     switchLockedField() {
       if (this.lockedField === BLOCKED.DAYS) {
-        this.lockedField = BLOCKED.VISITORS_PER_DAY
+        this.$emit('update:lockedField', BLOCKED.VISITORS_PER_DAY)
       } else {
-        this.lockedField = BLOCKED.DAYS
+        this.$emit('update:lockedField', BLOCKED.DAYS)
       }
     },
     getLockedStateClass(param) {

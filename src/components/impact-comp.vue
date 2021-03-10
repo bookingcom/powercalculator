@@ -20,9 +20,7 @@
       {{ focusedBlock === blockName ? 'Calculating' : 'Calculate' }}
     </label>
 
-    <div class="pc-header">
-      Impact
-    </div>
+    <div class="pc-header">Impact</div>
 
     <ul class="pc-inputs">
       <li class="pc-input-item pc-input-left">
@@ -50,7 +48,7 @@
             class="pc-input-field"
             fieldProp="impactByMetricValue"
             :suffix="testType == 'gTest' ? '%' : ''"
-            v-bind:fieldValue="absoluteImpact"
+            :fieldValue.sync="absoluteImpact"
             v-bind:testType="testType"
             v-bind:isReadOnly="focusedBlock === blockName"
             v-bind:isBlockFocused="focusedBlock === blockName"
@@ -109,15 +107,19 @@
 
 <script>
 import pcBlock from './pc-block.vue'
-import { TRAFFIC_MODE, TEST_TYPE } from '../store/modules/calculator'
+import {
+  TRAFFIC_MODE,
+  TEST_TYPE,
+  FOCUS,
+  BLOCKED,
+} from '../store/modules/calculator'
 
 export default {
   extends: pcBlock,
   template: '#impact-comp',
-  props: ['focusedBlock', 'blockName'],
+  props: ['focusedBlock', 'lockedField', 'blockName'],
   data() {
-    return {
-    }
+    return {}
   },
   computed: {
     isSelected: {
@@ -139,19 +141,42 @@ export default {
     relativeImpact: {
       get() {
         return this.$store.getters.relativeImpact
-      }, 
+      },
       set(val) {
-        if (this.focusedBlock !== this.blockName) {
-          this.$store.commit('SET_RELATIVE_IMPACT', val)
-          // SET_SAMPLE_SIZE
+        if (this.focusedBlock === FOCUS.SAMPLE) {
+          if (this.lockedField === BLOCKED.DAYS) {
+            this.$store.commit('SET_RELATIVE_IMPACT_SAMPLE_AND_RUNTIME', val)
+          } else {
+            this.$store.commit(
+              'SET_RELATIVE_IMPACT_SAMPLE_AND_VISITORS_PER_DAY',
+              val
+            )
+          }
         }
-      }
+      },
     },
     baseRate() {
       return this.$store.getters.baseRate
     },
-    absoluteImpact() {
-      return this.$store.getters.absoluteImpact
+    absoluteImpact: {
+      get() {
+        return this.$store.getters.absoluteImpact
+      },
+      set(val) {
+        if (this.focusedBlock === FOCUS.SAMPLE) {
+          if (this.lockedField === BLOCKED.DAYS) {
+            this.$store.commit(
+              'SET_RELATIVE_IMPACT_SAMPLE_AND_RUNTIME_BY_ABSOLUTE',
+              val
+            )
+          } else {
+            this.$store.commit(
+              'SET_RELATIVE_IMPACT_SAMPLE_AND_VISITORS_PER_DAY_BY_ABSOLUTE',
+              val
+            )
+          }
+        }
+      },
     },
     minAbsoluteImpact() {
       return this.$store.getters.minAbsoluteImpact
@@ -179,8 +204,8 @@ export default {
         result += '%'
       }
       return result
-    }
-  }
+    },
+  },
   // TODO: Add a watcher on the changes of the sample size to calculate the right one
 }
 </script>

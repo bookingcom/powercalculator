@@ -69,12 +69,12 @@
 
 <script>
 import pcBlock from './pc-block.vue'
-import { TEST_TYPE } from '../store/modules/calculator'
+import { TEST_TYPE, BLOCKED, FOCUS } from '../store/modules/calculator'
 
 const DEBOUNCE = 500
 
 export default {
-  props: ['focusedBlock', 'blockName'],
+  props: ['focusedBlock', 'blockName', 'lockedField'],
   extends: pcBlock,
   template: '#base-comp',
   data() {
@@ -101,10 +101,20 @@ export default {
         }
         this.baseDebouncer = setTimeout(() => {
           if (this.$store.getters.baseRate !== val) {
-            if (this.focusedBlock !== 'sample') {
+            if (this.focusedBlock !== FOCUS.SAMPLE) {
               this.$store.commit('SET_BASE_RATE_AND_IMPACT_BY_SAMPLE', val)
             } else {
-              this.$store.commit('SET_BASE_RATE_AND_SAMPLE_BY_IMPACT', val)
+              if (this.lockedField === BLOCKED.VISITORS_PER_DAY) {
+                this.$store.commit(
+                  'SET_BASE_RATE_VISITORS_PER_DAY_AND_SAMPLE_BY_IMPACT',
+                  val
+                )
+              } else {
+                this.$store.commit(
+                  'SET_BASE_RATE_RUNTIME_AND_SAMPLE_BY_IMPACT',
+                  val
+                )
+              }
             }
           }
         }, DEBOUNCE)
@@ -129,9 +139,10 @@ export default {
       },
       set(val) {
         if (this.$store.getters.isNonInferiority) return
-        // This field is only editable when calculating impact.
-        if (val !== this.$store.getters.metricTotal) {
-          this.$store.commit('SET_BASE_RATE_BY_METRIC_TOTAL_WITH_IMPACT', val)
+        if (this.focusedBlock === FOCUS.IMPACT) {
+          if (val !== this.$store.getters.metricTotal) {
+            this.$store.commit('SET_BASE_RATE_BY_METRIC_TOTAL_WITH_IMPACT', val)
+          }
         }
       },
     },

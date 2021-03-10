@@ -132,12 +132,14 @@
         <base-comp
           :blockName="FOCUS.BASE"
           :focusedBlock="focusedBlock"
+          :lockedField="lockedField"
         >
         </base-comp>
 
         <sample-comp
           :blockName="FOCUS.SAMPLE"
           :focusedBlock.sync="focusedBlock"
+          :lockedField.sync="lockedField"
         >
         </sample-comp>
 
@@ -145,6 +147,7 @@
           v-if="!isNonInferiority"
           :blockName="FOCUS.IMPACT"
           :focusedBlock.sync="focusedBlock"
+          :lockedField="lockedField"
         >
         </impact-comp>
 
@@ -177,13 +180,9 @@ import {
   TEST_TYPE,
   TRAFFIC_MODE,
   COMPARISON_MODE,
+  FOCUS,
+  BLOCKED,
 } from './store/modules/calculator'
-
-const FOCUS = Object.freeze({
-  SAMPLE: 'sample',
-  IMPACT: 'impact',
-  BASE: 'base'
-})
 
 export default {
   props: ['parentmetricdata'],
@@ -193,6 +192,7 @@ export default {
 
     const data = {
       focusedBlock: FOCUS.SAMPLE,
+      lockedField: BLOCKED.DAYS,
 
       // false means the editable ones are the secondary mode (metric totals, days&daily trials and absolute impact)
       enabledMainInputs: {

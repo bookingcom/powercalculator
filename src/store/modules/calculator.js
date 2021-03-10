@@ -21,6 +21,17 @@ export const VALUE_TYPE = Object.freeze({
   RELATIVE: 'relative',
 })
 
+export const FOCUS = Object.freeze({
+  SAMPLE: 'sample',
+  IMPACT: 'impact',
+  BASE: 'base',
+})
+
+export const BLOCKED = Object.freeze({
+  VISITORS_PER_DAY: 'visitorsPerDay',
+  DAYS: 'days',
+})
+
 function displayValue(value, type = 'int') {
   const alternativeToNaN = (val) => (isNaN(val) || !isFinite(val) ? '-' : val)
 
@@ -131,7 +142,7 @@ export const calculator = {
       state.impact = impact
       state.baseRate = newBaseRate
     },
-    SET_BASE_RATE_AND_SAMPLE_BY_IMPACT(state, baseRate) {
+    SET_BASE_RATE_VISITORS_PER_DAY_AND_SAMPLE_BY_IMPACT(state, baseRate) {
       if (baseRate < 0 || baseRate > 100) {
         state.baseRate = state.baseRate
       }
@@ -159,6 +170,39 @@ export const calculator = {
       state.sample = sample
       state.baseRate = newBaseRate
     },
+
+    SET_BASE_RATE_RUNTIME_AND_SAMPLE_BY_IMPACT(state, baseRate) {
+      if (baseRate < 0 || baseRate > 100) {
+        state.baseRate = state.baseRate
+      }
+
+      const newBaseRate = baseRate / 100
+
+      const type = state.testType
+      const sampleFormula = math[type].sample
+      const alpha =
+        state.comparisonMode === COMPARISON_MODE.ALL
+          ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
+          : state.falsePositiveRate
+
+      const sample = sampleFormula({
+        base_rate: newBaseRate,
+        effect_size: state.impact,
+        alpha,
+        beta: 1 - state.targetPower,
+        variants: state.variants,
+        alternative: math.getAlternative({ type }),
+        mu: 0, // if it isn't non-inferiority, it is always 0
+        opts: {}, // emtpy if it isn't non-inferiority
+      })
+
+      const currentVisitorsPerDay = Math.ceil(state.sample / state.runtime)
+      const newRuntime = sample / currentVisitorsPerDay
+      state.sample = sample
+      state.baseRate = newBaseRate
+      state.runtime = newRuntime
+    },
+
     // BaseRate = MetricTotal / Sample. Only when calculating impact.
     SET_BASE_RATE_BY_METRIC_TOTAL_WITH_IMPACT(state, total) {
       if (total < 0) {
@@ -204,13 +248,118 @@ export const calculator = {
       state.runtime = days
     },
 
-    SET_RELATIVE_IMPACT(state, impact) {
-      state.impact = impact / 100
-      // TODO: Needs to calculate the new sample
+    SET_RELATIVE_IMPACT_SAMPLE_AND_RUNTIME(state, impact) {
+      const newImpact = impact / 100
+
+      const type = state.testType
+      const sampleFormula = math[type].sample
+      const alpha =
+        state.comparisonMode === COMPARISON_MODE.ALL
+          ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
+          : state.falsePositiveRate
+
+      const sample = sampleFormula({
+        base_rate: state.baseRate,
+        effect_size: newImpact,
+        alpha,
+        beta: 1 - state.targetPower,
+        variants: state.variants,
+        alternative: math.getAlternative({ type }),
+        mu: 0, // if it isn't non-inferiority, it is always 0
+        opts: {}, // emtpy if it isn't non-inferiority
+      })
+
+      const currentVisitorsPerDay = Math.ceil(state.sample / state.runtime)
+      const newRuntime = sample / currentVisitorsPerDay
+
+      state.impact = newImpact
+      state.sample = sample
+      state.runtime = newRuntime
+    },
+    SET_RELATIVE_IMPACT_SAMPLE_AND_VISITORS_PER_DAY(state, impact) {
+      const newImpact = impact / 100
+
+      const type = state.testType
+      const sampleFormula = math[type].sample
+      const alpha =
+        state.comparisonMode === COMPARISON_MODE.ALL
+          ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
+          : state.falsePositiveRate
+
+      const sample = sampleFormula({
+        base_rate: state.baseRate,
+        effect_size: newImpact,
+        alpha,
+        beta: 1 - state.targetPower,
+        variants: state.variants,
+        alternative: math.getAlternative({ type }),
+        mu: 0, // if it isn't non-inferiority, it is always 0
+        opts: {}, // emtpy if it isn't non-inferiority
+      })
+
+      state.impact = newImpact
+      state.sample = sample
     },
 
-    SET_ABSOLUTE_IMPACT(state, impact) {
-      // TODO
+    SET_RELATIVE_IMPACT_SAMPLE_AND_RUNTIME_BY_ABSOLUTE(state, impact) {
+      const newImpact =
+        math.getRelativeImpactFromAbsolute({
+          base_rate: state.baseRate,
+          absolute_effect_size: impact,
+        }) / 100
+
+      const type = state.testType
+      const sampleFormula = math[type].sample
+      const alpha =
+        state.comparisonMode === COMPARISON_MODE.ALL
+          ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
+          : state.falsePositiveRate
+
+      const sample = sampleFormula({
+        base_rate: state.baseRate,
+        effect_size: newImpact,
+        alpha,
+        beta: 1 - state.targetPower,
+        variants: state.variants,
+        alternative: math.getAlternative({ type }),
+        mu: 0, // if it isn't non-inferiority, it is always 0
+        opts: {}, // emtpy if it isn't non-inferiority
+      })
+
+      const currentVisitorsPerDay = Math.ceil(state.sample / state.runtime)
+      const newRuntime = sample / currentVisitorsPerDay
+
+      state.impact = newImpact
+      state.sample = sample
+      state.runtime = newRuntime
+    },
+    SET_RELATIVE_IMPACT_SAMPLE_AND_VISITORS_PER_DAY_BY_ABSOLUTE(state, impact) {
+      const newImpact =
+        math.getRelativeImpactFromAbsolute({
+          base_rate: state.baseRate,
+          absolute_effect_size: impact,
+        }) / 100
+
+      const type = state.testType
+      const sampleFormula = math[type].sample
+      const alpha =
+        state.comparisonMode === COMPARISON_MODE.ALL
+          ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
+          : state.falsePositiveRate
+
+      const sample = sampleFormula({
+        base_rate: state.baseRate,
+        effect_size: newImpact,
+        alpha,
+        beta: 1 - state.targetPower,
+        variants: state.variants,
+        alternative: math.getAlternative({ type }),
+        mu: 0, // if it isn't non-inferiority, it is always 0
+        opts: {}, // emtpy if it isn't non-inferiority
+      })
+
+      state.impact = newImpact
+      state.sample = sample
     },
 
     // == IMPACT ==
