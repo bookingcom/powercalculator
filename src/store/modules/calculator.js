@@ -32,6 +32,12 @@ export const BLOCKED = Object.freeze({
   DAYS: 'days',
 })
 
+export const CHANGE = Object.freeze({
+  NO_CHANGE: 'nochange',
+  DEGRADATION: 'degradation',
+  IMPROVEMENT: 'improvement'
+})
+
 function displayValue(value, type = 'int') {
   const alternativeToNaN = (val) => (isNaN(val) || !isFinite(val) ? '-' : val)
 
@@ -60,16 +66,15 @@ export const calculator = {
     // this format.
     variants: 1, // A/A = 0, A/B = 1...
     impact: 0.02, // [0..1]
+    threshold: 0,
 
-    // Optional metrics
-    expectedEffect: 0,
-    acceptableCost: 0,
 
     // Configuration
     isNonInferiority: false,
     comparisonMode: COMPARISON_MODE.ALL,
     trafficMode: TRAFFIC_MODE.DAILY,
     testType: TEST_TYPE.BINOMIAL,
+    expectedChange: CHANGE.NO_CHANGE,
   }),
   mutations: {
     // Configuration
@@ -503,13 +508,21 @@ export const calculator = {
 
       state.impact = impact
     },
+
+    SET_RELATIVE_THRESHOLD(state, threshold) {
+      if (threshold < 0) {
+        state.threshold = threshold
+        return
+      }
+      state.threshold = threshold / 100
+    }
   },
   getters: {
     // UI getters
     // Configuration
     variants: (state) => state.variants,
-    falsePositiveRate: (state) => state.falsePositiveRate * 100,
-    targetPower: (state) => state.targetPower * 100,
+    falsePositiveRate: (state) => displayValue(state.falsePositiveRate, 'percentage'),
+    targetPower: (state) => displayValue(state.targetPower, 'percentage'),
     isNonInferiority: (state) => state.isNonInferiority,
     testType: (state) => state.testType,
     comparisonMode: (state) => state.comparisonMode,
@@ -577,6 +590,17 @@ export const calculator = {
         'int'
       )
     },
+
+    // THRESHOLD
+    thresholdRelative: state => displayValue(state.threshold, 'percentage'),
+    thresholdAbsolute: state => {
+      const visitorsPerDay = Math.ceil(state.sample / state.runtime )
+      const baseRate = state.baseRate
+      const thresholdRelative = state.threshold
+
+      const absoluteThreshold = (thresholdRelative * baseRate * visitorsPerDay)/100;
+      return isNaN(absoluteThreshold) ? 0 : absoluteThreshold;
+    }
   },
 }
 

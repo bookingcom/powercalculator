@@ -2,27 +2,25 @@
   <div
     class="pc-block pc-block--noninferiority"
     :class="{
-      'pc-block-focused': isBlockFocused,
-      'pc-block-to-calculate': calculateProp == 'non-inferiority'
+      'pc-block-focused': focusedBlock == blockName,
+      'pc-block-to-calculate': focusedBlock === blockName,
     }"
   >
     <pc-svg-chain
-      v-bind:calculateProp="calculateProp"
-      v-bind:fieldFromBlock="fieldFromBlock"
+      :focusedBlock="focusedBlock"
+      :fieldFromBlock="blockName"
     ></pc-svg-chain>
 
     <label
       slot="text"
       class="pc-calc-radio pc-calc-radio--impact"
-      :class="{ 'pc-calc-radio--active': isCalculated }"
+      :class="{ 'pc-calc-radio--active': focusedBlock === blockName }"
     >
-      <input type="radio" v-model="isCalculated" :value="true" />
-      {{ isCalculated ? 'Calculating' : 'Calculate' }}
+      <input type="radio" v-model="isSelected" :value="blockName" />
+      {{ focusedBlock === blockName ? 'Calculating' : 'Calculate' }}
     </label>
 
-    <div class="pc-header">
-      Non Inferiority
-    </div>
+    <div class="pc-header">Non Inferiority</div>
 
     <ul class="pc-inputs">
       <li class="pc-input-item pc-input-left">
@@ -35,12 +33,11 @@
             class="pc-input-field"
             fieldProp="thresholdRelative"
             suffix="%"
-            v-bind:fieldValue="thresholdRelative"
+            :fieldValue.sync="thresholdRelative"
             v-bind:fieldFromBlock="fieldFromBlock"
-            v-bind:isBlockFocused="isBlockFocused"
+            v-bind:isBlockFocused="focusedBlock === blockName"
             v-bind:isReadOnly="isReadOnly"
-            v-bind:enableEdit="enableEdit"
-            v-on:update:focus="updateFocus"
+            v-bind:enableEdit="true"
           ></pc-block-field>
         </label>
       </li>
@@ -58,12 +55,11 @@
             class="pc-input-field"
             fieldProp="thresholdAbsolute"
             suffix=""
-            v-bind:fieldValue="thresholdAbsolute"
+            :fieldValue.sync="thresholdAbsolute"
             v-bind:fieldFromBlock="fieldFromBlock"
-            v-bind:isBlockFocused="isBlockFocused"
+            v-bind:isBlockFocused="focusedBlock === blockName"
             v-bind:isReadOnly="isReadOnly"
-            v-bind:enableEdit="enableEdit"
-            v-on:update:focus="updateFocus"
+            v-bind:enableEdit="true"
           ></pc-block-field>
         </label>
       </li>
@@ -76,17 +72,14 @@
           </span>
 
           <div class="pc-non-inf-select-wrapper">
-            <select v-model="expectedChange" class="pc-non-inf-select"
-              :disabled="isReadOnly">
-              <option value="nochange">
-                No Change
-              </option>
-              <option value="degradation">
-                Degradation
-              </option>
-              <option value="improvement">
-                Improvement
-              </option>
+            <select
+              v-model="change"
+              class="pc-non-inf-select"
+              :disabled="isReadOnly"
+            >
+              <option :value="CHANGE.NO_CHANGE">No Change</option>
+              <option :value="CHANGE.DEGRADATION">Degradation</option>
+              <option :value="CHANGE.IMPROVEMENT">Improvement</option>
             </select>
           </div>
         </label>
@@ -97,51 +90,61 @@
 
 <script>
 import pcBlock from './pc-block.vue'
+import {
+  TRAFFIC_MODE,
+  TEST_TYPE,
+  FOCUS,
+  BLOCKED,
+  CHANGE,
+} from '../store/modules/calculator'
 
 export default {
-  props: ['enableEdit', 'fieldFromBlock', 'isBlockFocused'],
+  props: ['focusedBlock', 'lockedField', 'blockName', 'expectedChange'],
   extends: pcBlock,
   template: '#base-comp',
   data() {
     return {
-      focusedBlock: '',
       options: [
         {
           text: 'relative',
-          value: 'relative'
+          value: 'relative',
         },
         {
           text: 'absolute',
-          value: 'absolutePerDay'
-        }
-      ]
+          value: 'absolutePerDay',
+        },
+      ],
     }
   },
   computed: {
+    CHANGE: () => CHANGE,
+    FOCUSED: () => FOCUSED,
+    isSelected: {
+      get() {
+        return this.focusedBlock
+      },
+      set(val) {
+        if (val === this.blockName) {
+          this.$emit('update:focusedBlock', this.blockName)
+        }
+      },
+    },
     enabled() {
       return this.$store.getters.isNonInferiority
     },
-    threshold() {
-      return // this.$store.state.nonInferiority.threshold
-    },
-    thresholdRelative() {
-      return // this.$store.state.nonInferiority.thresholdRelative
+    thresholdRelative: {
+      get() {
+        return this.$store.getters.thresholdRelative
+      },
+      set(val) {
+        this.$store.commit('SET_RELATIVE_THRESHOLD', val)
+      },
     },
     thresholdAbsolute() {
-      /*
-      const thresholdPerDay = this.$store.state.nonInferiority.thresholdAbsolute
-      if (this.$store.state.attributes.onlyTotalVisitors) {
-        const runtime = this.$store.getters.runtime
-        return thresholdPerDay * runtime
-      }
-      return thresholdPerDay
-      */
-    },
-    isRelative() {
-      return // this.$store.state.nonInferiority.selected == 'relative'
+      return this.$store.getters.thresholdAbsolute
     },
     onlyTotalVisitors() {
-      return // this.$store.state.attributes.onlyTotalVisitors
+      return this.$store.getters.trafficMode === TRAFFIC_MODE.TOTAL
     },
     testType() {
       return this.$store.getters.testType
@@ -160,39 +163,17 @@ export default {
           value: newValue
         })
         */
-      }
+      },
     },
-    expectedChange: {
+    change: {
       get() {
-        return // this.$store.state.nonInferiority.expectedChange
+        return this.expectedChange
       },
       set(newValue) {
-        /*
-        this.$store.dispatch('field:change', {
-          prop: 'expectedChange',
-          value: newValue
-        })
-        */
-      }
-    }
-  },
-  methods: {
-    enableInput() {
-      // this.$emit('edit:update', { prop: 'base' })
+        this.$emit('update:expectedChange', newValue)
+      },
     },
-    updateFocus({ fieldProp, value }) {
-      if (this.focusedBlock == fieldProp && value === false) {
-        this.focusedBlock = ''
-      } else if (value === true) {
-        this.focusedBlock = fieldProp
-      }
-
-      // this.$emit('update:focus', {
-      //  fieldProp: this.fieldFromBlock,
-       // value: value
-      //})
-    }
-  }
+  },
 }
 </script>
 

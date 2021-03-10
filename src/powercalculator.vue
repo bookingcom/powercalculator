@@ -153,10 +153,10 @@
 
         <non-inferiority-comp
           v-if="isNonInferiority"
-          fieldFromBlock="non-inferiority"
-          v-bind:enableEdit="enabledMainInputs['non-inferiority']"
-          v-bind:isBlockFocused="focusedBlock == 'non-inferiority'"
-          v-on:update:focus="updateFocus"
+          :blockName="FOCUS.IMPACT"
+          :focusedBlock.sync="focusedBlock"
+          :lockedField="lockedField"
+          :expectedChange="expectedChange"
         >
         </non-inferiority-comp>
 
@@ -181,6 +181,7 @@ import {
   TRAFFIC_MODE,
   COMPARISON_MODE,
   FOCUS,
+  CHANGE,
   BLOCKED,
 } from './store/modules/calculator'
 
@@ -193,6 +194,7 @@ export default {
     const data = {
       focusedBlock: FOCUS.SAMPLE,
       lockedField: BLOCKED.DAYS,
+      expectedChange: CHANGE.NO_CHANGE,
 
       // false means the editable ones are the secondary mode (metric totals, days&daily trials and absolute impact)
       enabledMainInputs: {

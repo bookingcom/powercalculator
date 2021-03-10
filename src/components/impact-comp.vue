@@ -117,7 +117,7 @@ import {
 export default {
   extends: pcBlock,
   template: '#impact-comp',
-  props: ['focusedBlock', 'lockedField', 'blockName'],
+  props: ['focusedBlock', 'lockedField', 'blockName', 'expectedChange'],
   data() {
     return {}
   },
@@ -146,11 +146,13 @@ export default {
         if (this.focusedBlock === FOCUS.SAMPLE) {
           if (this.lockedField === BLOCKED.DAYS) {
             this.$store.commit('SET_RELATIVE_IMPACT_SAMPLE_AND_RUNTIME', {
-              impact: val, isAbsolute: false})
+              impact: val,
+              isAbsolute: false,
+            })
           } else {
             this.$store.commit(
               'SET_RELATIVE_IMPACT_SAMPLE_AND_VISITORS_PER_DAY',
-              { impact: val, isAbsolute: false}
+              { impact: val, isAbsolute: false }
             )
           }
         }
@@ -167,11 +169,13 @@ export default {
         if (this.focusedBlock === FOCUS.SAMPLE) {
           if (this.lockedField === BLOCKED.DAYS) {
             this.$store.commit('SET_RELATIVE_IMPACT_SAMPLE_AND_RUNTIME', {
-              impact: val, isAbsolute: true})
+              impact: val,
+              isAbsolute: true,
+            })
           } else {
             this.$store.commit(
               'SET_RELATIVE_IMPACT_SAMPLE_AND_VISITORS_PER_DAY',
-              { impact: val, isAbsolute: true}
+              { impact: val, isAbsolute: true }
             )
           }
         }
