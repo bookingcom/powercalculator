@@ -35,7 +35,7 @@ export const BLOCKED = Object.freeze({
 export const CHANGE = Object.freeze({
   NO_CHANGE: 'nochange',
   DEGRADATION: 'degradation',
-  IMPROVEMENT: 'improvement'
+  IMPROVEMENT: 'improvement',
 })
 
 function displayValue(value, type = 'int') {
@@ -51,6 +51,9 @@ function displayValue(value, type = 'int') {
       return alternativeToNaN(parseInt(value))
   }
 }
+
+const getAlternative = (isNonInferiority) =>
+  isNonInferiority ? 'two-sided' : 'greater'
 
 export const calculator = {
   state: () => ({
@@ -68,13 +71,11 @@ export const calculator = {
     impact: 0.02, // [0..1]
     threshold: 0,
 
-
     // Configuration
     isNonInferiority: false,
     comparisonMode: COMPARISON_MODE.ALL,
     trafficMode: TRAFFIC_MODE.DAILY,
     testType: TEST_TYPE.BINOMIAL,
-    expectedChange: CHANGE.NO_CHANGE,
   }),
   mutations: {
     // Configuration
@@ -115,7 +116,7 @@ export const calculator = {
         state.testType = state.testType
         return
       }
-      
+
       // We need to recalculate based on the selected fields.
       // the result will be something like [tTest/gTest][impact/sample]
       const formula = math[type][focused]
@@ -123,42 +124,41 @@ export const calculator = {
         state.comparisonMode === COMPARISON_MODE.ALL
           ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
           : state.falsePositiveRate
-        if ( focused === FOCUS.SAMPLE) {
-          const sample = formula({
-            base_rate: state.baseRate,
-            effect_size: state.impact,
-            sd_rate: state.standardDeviation,
-            alpha,
-            beta: 1 - state.targetPower,
-            variants: state.variants,
-            alternative: math.getAlternative({ type }),
-            mu: 0, // if it isn't non-inferiority, it is always 0
-            opts: {}, // emtpy if it isn't non-inferiority
-          })
+      if (focused === FOCUS.SAMPLE) {
+        const sample = formula({
+          base_rate: state.baseRate,
+          effect_size: state.impact,
+          sd_rate: state.standardDeviation,
+          alpha,
+          beta: 1 - state.targetPower,
+          variants: state.variants,
+          alternative: getAlternative({ type }),
+          mu: 0, // if it isn't non-inferiority, it is always 0
+          opts: {}, // emtpy if it isn't non-inferiority
+        })
 
-          if (locked === BLOCKED.DAYS) {
-            const currentVisitorsPerDay = Math.ceil(state.sample / state.runtime)
-            const newRuntime = sample / currentVisitorsPerDay
+        if (locked === BLOCKED.DAYS) {
+          const currentVisitorsPerDay = Math.ceil(state.sample / state.runtime)
+          const newRuntime = sample / currentVisitorsPerDay
 
-            state.runtime = newRuntime
-          }
-          state.sample = sample
-        } else {
-          const impact = formula({
-            // It is totally unclear when the current engine rounds up and when it
-            // doesnt.
-            total_sample_size: state.sample,
-            base_rate: state.baseRate, // It uses the displayed value
-            sd_rate: state.standardDeviation,
-            alpha,
-            beta: 1 - state.targetPower,
-            variants: state.variants,
-            alternative: math.getAlternative({ type }),
-            mu: 0, // if it isn't non-inferiority, it is always 0
-          })
-          state.impact = impact
+          state.runtime = newRuntime
         }
-
+        state.sample = sample
+      } else {
+        const impact = formula({
+          // It is totally unclear when the current engine rounds up and when it
+          // doesnt.
+          total_sample_size: state.sample,
+          base_rate: state.baseRate, // It uses the displayed value
+          sd_rate: state.standardDeviation,
+          alpha,
+          beta: 1 - state.targetPower,
+          variants: state.variants,
+          alternative: getAlternative({ type }),
+          mu: 0, // if it isn't non-inferiority, it is always 0
+        })
+        state.impact = impact
+      }
 
       state.testType = type
     },
@@ -188,7 +188,7 @@ export const calculator = {
         alpha,
         beta: 1 - state.targetPower,
         variants: state.variants,
-        alternative: math.getAlternative({ type }),
+        alternative: getAlternative({ type }),
         mu: 0, // if it isn't non-inferiority, it is always 0
       })
 
@@ -216,7 +216,7 @@ export const calculator = {
         alpha,
         beta: 1 - state.targetPower,
         variants: state.variants,
-        alternative: math.getAlternative({ type }),
+        alternative: getAlternative({ type }),
         mu: 0, // if it isn't non-inferiority, it is always 0
         opts: {}, // emtpy if it isn't non-inferiority
       })
@@ -242,11 +242,11 @@ export const calculator = {
       const sample = sampleFormula({
         base_rate: newBaseRate,
         effect_size: state.impact,
-        sd_rate: standardDeviation,
+        sd_rate: state.standardDeviation,
         alpha,
         beta: 1 - state.targetPower,
         variants: state.variants,
-        alternative: math.getAlternative({ type }),
+        alternative: getAlternative({ type }),
         mu: 0, // if it isn't non-inferiority, it is always 0
         opts: {}, // emtpy if it isn't non-inferiority
       })
@@ -283,7 +283,7 @@ export const calculator = {
         alpha,
         beta: 1 - state.targetPower,
         variants: state.variants,
-        alternative: math.getAlternative({ type }),
+        alternative: getAlternative({ type }),
         mu: 0, // if it isn't non-inferiority, it is always 0
       })
 
@@ -304,10 +304,13 @@ export const calculator = {
     },
 
     SET_RELATIVE_IMPACT_SAMPLE_AND_RUNTIME(state, { impact, isAbsolute }) {
-      const newImpact = (isAbsolute ? math.getRelativeImpactFromAbsolute({
-          base_rate: state.baseRate,
-          absolute_effect_size: impact,
-      }) : impact) / 100
+      const newImpact =
+        (isAbsolute
+          ? math.getRelativeImpactFromAbsolute({
+              base_rate: state.baseRate,
+              absolute_effect_size: impact,
+            })
+          : impact) / 100
 
       const type = state.testType
       const sampleFormula = math[type].sample
@@ -323,7 +326,7 @@ export const calculator = {
         alpha,
         beta: 1 - state.targetPower,
         variants: state.variants,
-        alternative: math.getAlternative({ type }),
+        alternative: getAlternative({ type }),
         mu: 0, // if it isn't non-inferiority, it is always 0
         opts: {}, // emtpy if it isn't non-inferiority
       })
@@ -335,11 +338,17 @@ export const calculator = {
       state.sample = sample
       state.runtime = newRuntime
     },
-    SET_RELATIVE_IMPACT_SAMPLE_AND_VISITORS_PER_DAY(state, { impact, isAbsolute }) {
-      const newImpact = (isAbsolute ? math.getRelativeImpactFromAbsolute({
-          base_rate: state.baseRate,
-          absolute_effect_size: impact,
-      }) : impact) / 100
+    SET_RELATIVE_IMPACT_SAMPLE_AND_VISITORS_PER_DAY(
+      state,
+      { impact, isAbsolute }
+    ) {
+      const newImpact =
+        (isAbsolute
+          ? math.getRelativeImpactFromAbsolute({
+              base_rate: state.baseRate,
+              absolute_effect_size: impact,
+            })
+          : impact) / 100
 
       const type = state.testType
       const sampleFormula = math[type].sample
@@ -355,7 +364,7 @@ export const calculator = {
         alpha,
         beta: 1 - state.targetPower,
         variants: state.variants,
-        alternative: math.getAlternative({ type }),
+        alternative: getAlternative({ type }),
         mu: 0, // if it isn't non-inferiority, it is always 0
         opts: {}, // emtpy if it isn't non-inferiority
       })
@@ -398,7 +407,7 @@ export const calculator = {
         alpha,
         beta: 1 - state.targetPower,
         variants: state.variants,
-        alternative: math.getAlternative({ type }),
+        alternative: getAlternative({ type }),
         mu: 0, // if it isn't non-inferiority, it is always 0
       })
 
@@ -434,7 +443,7 @@ export const calculator = {
         alpha,
         beta: 1 - state.targetPower,
         variants: state.variants,
-        alternative: math.getAlternative({ type }),
+        alternative: getAlternative({ type }),
         mu: 0, // if it isn't non-inferiority, it is always 0
       })
 
@@ -466,7 +475,7 @@ export const calculator = {
         alpha,
         beta: 1 - state.targetPower,
         variants: state.variants,
-        alternative: math.getAlternative({ type }),
+        alternative: getAlternative({ type }),
         mu: 0, // if it isn't non-inferiority, it is always 0
       })
 
@@ -502,26 +511,85 @@ export const calculator = {
         alpha,
         beta: 1 - state.targetPower,
         variants: state.variants,
-        alternative: math.getAlternative({ type }),
+        alternative: getAlternative({ type }),
         mu: 0, // if it isn't non-inferiority, it is always 0
       })
 
       state.impact = impact
     },
 
-    SET_RELATIVE_THRESHOLD(state, threshold) {
+    // This is only triggered when non-inferity == true, focusedBlock === sample
+    // and locked === days
+    SET_THRESHOLD(state, { threshold, isAbsolute, expectedChange }) {
       if (threshold < 0) {
         state.threshold = threshold
         return
       }
-      state.threshold = threshold / 100
-    }
+
+      const baseRate = state.baseRate
+      const visitorsPerDay = Math.ceil(state.sample / state.runtime)
+      const relativeThreshold = isAbsolute
+        ? (threshold / (baseRate * visitorsPerDay)) * 100
+        : threshold / 100
+
+      let impact = 0
+      switch (expectedChange) {
+        case CHANGE.DEGRADATION:
+          impact = -relativeThreshold / 2
+          break
+        case CHANGE.IMPROVEMENT:
+          impact = relativeThreshold
+          break
+        case CHANGE.NO_CHANGE:
+        default:
+          impact = 0
+          break
+      }
+
+      const muFormula = isAbsolute
+        ? math.getMuFromAbsolutePerDay
+        : math.getMuFromRelativeDifference
+      const mu = muFormula({
+        threshold: -relativeThreshold,
+        runtime: state.runtime,
+        base_rate: baseRate,
+        visitors_per_day: visitorsPerDay,
+      })
+
+      const type = state.testType
+      const sampleFormula = math[type].sample
+      const alpha =
+        state.comparisonMode === COMPARISON_MODE.ALL
+          ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
+          : state.falsePositiveRate
+
+      const sample = sampleFormula({
+        base_rate: baseRate,
+        effect_size: impact,
+        sd_rate: state.standardDeviation,
+        alpha,
+        beta: 1 - state.targetPower,
+        variants: state.variants,
+        alternative: getAlternative({ type }),
+        mu,
+        opts: {
+          // type: 'absolutePerDay'
+        },
+      })
+
+      const newRuntime = sample / visitorsPerDay
+
+      state.sample = sample
+      state.runtime = newRuntime
+      state.threshold = relativeThreshold
+    },
   },
   getters: {
     // UI getters
     // Configuration
     variants: (state) => state.variants,
-    falsePositiveRate: (state) => displayValue(state.falsePositiveRate, 'percentage'),
+    falsePositiveRate: (state) =>
+      displayValue(state.falsePositiveRate, 'percentage'),
     targetPower: (state) => displayValue(state.targetPower, 'percentage'),
     isNonInferiority: (state) => state.isNonInferiority,
     testType: (state) => state.testType,
@@ -530,7 +598,8 @@ export const calculator = {
 
     // Base rate
     baseRate: (state) => displayValue(state.baseRate, 'percentage'),
-    standardDeviation: (state) => displayValue(state.standardDeviation * 100, 'float'),
+    standardDeviation: (state) =>
+      displayValue(state.standardDeviation * 100, 'float'),
     metricTotal: (state) => {
       if (state.isNonInferiority) {
         return '-'
@@ -592,15 +661,17 @@ export const calculator = {
     },
 
     // THRESHOLD
-    thresholdRelative: state => displayValue(state.threshold, 'percentage'),
-    thresholdAbsolute: state => {
-      const visitorsPerDay = Math.ceil(state.sample / state.runtime )
+    thresholdRelative: (state) => displayValue(state.threshold, 'percentage'),
+    thresholdAbsolute: (state) => {
+      const visitorsPerDay = Math.ceil(state.sample / state.runtime)
       const baseRate = state.baseRate
       const thresholdRelative = state.threshold
 
-      const absoluteThreshold = (thresholdRelative * baseRate * visitorsPerDay)/100;
-      return isNaN(absoluteThreshold) ? 0 : absoluteThreshold;
-    }
+      const absoluteThreshold = thresholdRelative * baseRate * visitorsPerDay
+      return isNaN(absoluteThreshold)
+        ? 0
+        : displayValue(absoluteThreshold, 'float')
+    },
   },
 }
 

@@ -65,6 +65,7 @@
           type="button"
           class="pc-swap-button"
           v-on:click="switchLockedField"
+          :disabled="isNonInferiority"
         >
           <svg
             width="20px"
@@ -193,7 +194,7 @@
 
 <script>
 import pcBlock from './pc-block.vue'
-import { TRAFFIC_MODE, BLOCKED } from '../store/modules/calculator'
+import { TRAFFIC_MODE, BLOCKED, FOCUS } from '../store/modules/calculator'
 
 const DEBOUNCE = 500
 
@@ -312,6 +313,9 @@ export default {
     },
     onlyTotalVisitors() {
       return this.$store.getters.trafficMode === TRAFFIC_MODE.TOTAL
+    },
+    isNonInferiority() {
+      return this.$store.getters.isNonInferiority
     },
   },
   methods: {

@@ -36,7 +36,7 @@
             :fieldValue.sync="thresholdRelative"
             v-bind:fieldFromBlock="fieldFromBlock"
             v-bind:isBlockFocused="focusedBlock === blockName"
-            v-bind:isReadOnly="isReadOnly"
+            v-bind:isReadOnly="false"
             v-bind:enableEdit="true"
           ></pc-block-field>
         </label>
@@ -58,7 +58,7 @@
             :fieldValue.sync="thresholdAbsolute"
             v-bind:fieldFromBlock="fieldFromBlock"
             v-bind:isBlockFocused="focusedBlock === blockName"
-            v-bind:isReadOnly="isReadOnly"
+            v-bind:isReadOnly="false"
             v-bind:enableEdit="true"
           ></pc-block-field>
         </label>
@@ -75,7 +75,7 @@
             <select
               v-model="change"
               class="pc-non-inf-select"
-              :disabled="isReadOnly"
+              :disabled="focusedBlock === blockName"
             >
               <option :value="CHANGE.NO_CHANGE">No Change</option>
               <option :value="CHANGE.DEGRADATION">Degradation</option>
@@ -103,18 +103,7 @@ export default {
   extends: pcBlock,
   template: '#base-comp',
   data() {
-    return {
-      options: [
-        {
-          text: 'relative',
-          value: 'relative',
-        },
-        {
-          text: 'absolute',
-          value: 'absolutePerDay',
-        },
-      ],
-    }
+    return {}
   },
   computed: {
     CHANGE: () => CHANGE,
@@ -136,34 +125,41 @@ export default {
       get() {
         return this.$store.getters.thresholdRelative
       },
-      set(val) {
-        this.$store.commit('SET_RELATIVE_THRESHOLD', val)
+      set(threshold) {
+        if (
+          this.$store.getters.relativeThreshold !== threshold &&
+          this.focusedBlock === FOCUS.SAMPLE
+        ) {
+          this.$store.commit('SET_THRESHOLD', {
+            threshold,
+            isAbsolute: false,
+            expectedChange: this.expectedChange,
+          })
+        }
       },
     },
-    thresholdAbsolute() {
-      return this.$store.getters.thresholdAbsolute
+    thresholdAbsolute: {
+      get() {
+        return this.$store.getters.thresholdAbsolute
+      },
+      set(threshold) {
+        if (
+          this.$store.getters.absoluteThreshold !== threshold &&
+          this.focusedBlock === FOCUS.SAMPLE
+        ) {
+          this.$store.commit('SET_THRESHOLD', {
+            threshold,
+            isAbsolute: true,
+            expectedChange: this.expectedChange,
+          })
+        }
+      },
     },
     onlyTotalVisitors() {
       return this.$store.getters.trafficMode === TRAFFIC_MODE.TOTAL
     },
     testType() {
       return this.$store.getters.testType
-    },
-    isReadOnly() {
-      return // this.calculateProp == 'non-inferiority'
-    },
-    selected: {
-      get() {
-        return // this.$store.state.nonInferiority.selected
-      },
-      set(newValue) {
-        /*
-        this.$store.dispatch('change:noninferiority', {
-          prop: 'selected',
-          value: newValue
-        })
-        */
-      },
     },
     change: {
       get() {

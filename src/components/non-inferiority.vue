@@ -8,6 +8,8 @@
 </template>
 
 <script>
+import { BLOCKED } from '../store/modules/calculator'
+
 export default {
   props: ['lockedField'],
   data: () => ({}),
@@ -18,6 +20,7 @@ export default {
       },
       set(newValue) {
         this.$store.commit('SET_IS_NON_INFERIORITY', newValue)
+        this.$emit('update:lockedField', BLOCKED.DAYS)
       },
     },
   },

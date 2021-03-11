@@ -59,7 +59,7 @@
             </label>
           </div>
 
-          <non-inferiority></non-inferiority>
+          <non-inferiority :lockedField.sync="lockedField"></non-inferiority>
 
           <div class="pc-comparison-mode">
             <label class="pc-comparison-mode-labels" slot="text">
@@ -156,7 +156,7 @@
           :blockName="FOCUS.IMPACT"
           :focusedBlock.sync="focusedBlock"
           :lockedField="lockedField"
-          :expectedChange="expectedChange"
+          :expectedChange.sync="expectedChange"
         >
         </non-inferiority-comp>
 
