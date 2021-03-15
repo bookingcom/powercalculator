@@ -40,11 +40,11 @@
 
           <pc-block-field
             fieldProp="visitorsWithGoals"
-            :fieldValue.sync="visitorsWithGoals"
+            :fieldValue="visitorsWithGoals"
             :fieldFromBlock="fieldFromBlock"
             :isBlockFocused="isBlockFocused"
-            :isReadOnly="isReadOnly"
-            :enableEdit="this.focusedBlock != 'sample'"
+            :isReadOnly="true"
+            :enableEdit="false"
           ></pc-block-field>
         </label>
       </li>
@@ -133,18 +133,8 @@ export default {
         }, DEBOUNCE)
       },
     },
-    visitorsWithGoals: {
-      get() {
-        return this.$store.getters.metricTotal
-      },
-      set(val) {
-        if (this.$store.getters.isNonInferiority) return
-        if (this.focusedBlock === FOCUS.IMPACT) {
-          if (val !== this.$store.getters.metricTotal) {
-            this.$store.commit('SET_BASE_RATE_BY_METRIC_TOTAL_WITH_IMPACT', val)
-          }
-        }
-      },
+    visitorsWithGoals() {
+      return this.$store.getters.metricTotal
     },
     sample() {
       return this.$store.getters.sample

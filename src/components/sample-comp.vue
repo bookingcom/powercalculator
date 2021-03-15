@@ -31,10 +31,9 @@
           >
 
           <pc-block-field
-            fieldProp="sample"
             :fieldValue.sync="sample"
-            :isReadOnly="focusedBlock === blockName"
-            enableEdit="true"
+            :isReadOnly="!(onlyTotalVisitors && focusedBlock !== blockName)"
+            :enableEdit="onlyTotalVisitors || focusedBlock === blockName"
           ></pc-block-field>
         </label>
       </li>
@@ -65,7 +64,6 @@
           type="button"
           class="pc-swap-button"
           v-on:click="switchLockedField"
-          :disabled="isNonInferiority"
         >
           <svg
             width="20px"
@@ -232,6 +230,7 @@ export default {
         setTimeout(() => {
           if (
             this.focusedBlock !== FOCUS.SAMPLE &&
+            this.$store.getters.trafficMode === TRAFFIC_MODE.TOTAL &&
             val !== this.$store.getters.sample
           ) {
             if (this.lockedField === BLOCKED.DAYS) {

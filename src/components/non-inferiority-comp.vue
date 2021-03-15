@@ -36,8 +36,8 @@
             :fieldValue.sync="thresholdRelative"
             v-bind:fieldFromBlock="fieldFromBlock"
             v-bind:isBlockFocused="focusedBlock === blockName"
-            v-bind:isReadOnly="false"
-            v-bind:enableEdit="true"
+            :isReadOnly="focusedBlock === blockName"
+            :enableEdit="true"
           ></pc-block-field>
         </label>
       </li>
@@ -58,8 +58,8 @@
             :fieldValue.sync="thresholdAbsolute"
             v-bind:fieldFromBlock="fieldFromBlock"
             v-bind:isBlockFocused="focusedBlock === blockName"
-            v-bind:isReadOnly="false"
-            v-bind:enableEdit="true"
+            :isReadOnly="focusedBlock === blockName"
+            :enableEdit="true"
           ></pc-block-field>
         </label>
       </li>
@@ -133,6 +133,7 @@ export default {
           this.$store.commit('SET_THRESHOLD', {
             threshold,
             isAbsolute: false,
+            lockedField: this.lockedField,
             expectedChange: this.expectedChange,
           })
         }
@@ -150,6 +151,7 @@ export default {
           this.$store.commit('SET_THRESHOLD', {
             threshold,
             isAbsolute: true,
+            lockedField: this.lockedField,
             expectedChange: this.expectedChange,
           })
         }
@@ -167,6 +169,12 @@ export default {
       },
       set(newValue) {
         this.$emit('update:expectedChange', newValue)
+        this.$store.commit('SET_THRESHOLD', {
+          threshold: this.$store.getters.thresholdRelative,
+          isAbsolute: false,
+          lockedField: this.lockedField,
+          expectedChange: newValue,
+        })
       },
     },
   },
