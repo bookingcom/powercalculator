@@ -74,15 +74,13 @@ import { TEST_TYPE, BLOCKED, FOCUS } from '../store/modules/calculator'
 const DEBOUNCE = 500
 
 export default {
-  props: ['focusedBlock', 'blockName', 'lockedField'],
+  props: ['focusedBlock', 'blockName', 'lockedField', 'expectedChange'],
   extends: pcBlock,
   template: '#base-comp',
-  data() {
-    return {
-      baseDebouncer: null,
-      sdRateDebouncer: null,
-    }
-  },
+  data: () => ({
+    baseDebouncer: null,
+    sdRateDebouncer: null,
+  }),
   computed: {
     TEST_TYPE: () => TEST_TYPE,
     isBlockFocused() {
@@ -101,21 +99,12 @@ export default {
         }
         this.baseDebouncer = setTimeout(() => {
           if (this.$store.getters.baseRate !== val) {
-            if (this.focusedBlock !== FOCUS.SAMPLE) {
-              this.$store.commit('SET_BASE_RATE_AND_IMPACT_BY_SAMPLE', val)
-            } else {
-              if (this.lockedField === BLOCKED.VISITORS_PER_DAY) {
-                this.$store.commit(
-                  'SET_BASE_RATE_VISITORS_PER_DAY_AND_SAMPLE_BY_IMPACT',
-                  val
-                )
-              } else {
-                this.$store.commit(
-                  'SET_BASE_RATE_RUNTIME_AND_SAMPLE_BY_IMPACT',
-                  val
-                )
-              }
-            }
+            this.$store.commit('SET_BASE_RATE', {
+              baseRate: val,
+              lockedField: this.lockedField,
+              focusedBlock: this.focusedBlock,
+              expectedChange: this.expectedChange,
+            })
           }
         }, DEBOUNCE)
       },
@@ -125,9 +114,7 @@ export default {
         return this.$store.getters.standardDeviation
       },
       set(val) {
-        if (this.sdRateDebouncer != null) {
-          clearTimeout(this.sdRateDebouncer)
-        }
+        if (this.sdRateDebouncer != null) clearTimeout(this.sdRateDebouncer)
         this.sdRateDebouncer = setTimeout(() => {
           this.$store.commit('SET_STANDARD_DEVIATION', val)
         }, DEBOUNCE)

@@ -133,6 +133,7 @@
           :blockName="FOCUS.BASE"
           :focusedBlock="focusedBlock"
           :lockedField="lockedField"
+          :expectedChange="expectedChange"
         >
         </base-comp>
 

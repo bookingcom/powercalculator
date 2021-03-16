@@ -114,13 +114,16 @@ import {
   BLOCKED,
 } from '../store/modules/calculator'
 
+const DEBOUNCE = 500
+
 export default {
   extends: pcBlock,
   template: '#impact-comp',
   props: ['focusedBlock', 'lockedField', 'blockName', 'expectedChange'],
-  data() {
-    return {}
-  },
+  data: () => ({
+    absoluteImpactDebouncer: null,
+    relativeImpactDebouncer: null,
+  }),
   computed: {
     isSelected: {
       get() {
@@ -144,17 +147,15 @@ export default {
       },
       set(val) {
         if (this.focusedBlock === FOCUS.SAMPLE) {
-          if (this.lockedField === BLOCKED.DAYS) {
-            this.$store.commit('SET_RELATIVE_IMPACT_SAMPLE_AND_RUNTIME', {
+          if (this.relativeImpactDebouncer != null)
+            clearTimeout(this.relativeImpactDebouncer)
+          this.relativeImpactDebouncer = setTimeout(() => {
+            this.$store.commit('SET_IMPACT', {
               impact: val,
               isAbsolute: false,
+              lockedField: this.lockedField,
             })
-          } else {
-            this.$store.commit(
-              'SET_RELATIVE_IMPACT_SAMPLE_AND_VISITORS_PER_DAY',
-              { impact: val, isAbsolute: false }
-            )
-          }
+          }, DEBOUNCE)
         }
       },
     },
@@ -167,17 +168,11 @@ export default {
       },
       set(val) {
         if (this.focusedBlock === FOCUS.SAMPLE) {
-          if (this.lockedField === BLOCKED.DAYS) {
-            this.$store.commit('SET_RELATIVE_IMPACT_SAMPLE_AND_RUNTIME', {
-              impact: val,
-              isAbsolute: true,
-            })
-          } else {
-            this.$store.commit(
-              'SET_RELATIVE_IMPACT_SAMPLE_AND_VISITORS_PER_DAY',
-              { impact: val, isAbsolute: true }
-            )
-          }
+          this.$store.commit('SET_IMPACT', {
+            impact: val,
+            isAbsolute: true,
+            lockedField: this.lockedField,
+          })
         }
       },
     },
