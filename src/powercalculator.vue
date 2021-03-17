@@ -325,7 +325,6 @@ export default {
     },
   },
   components: {
-    'svg-graph': svgGraph,
     'pc-block-field': pcBlockField,
     'pc-tooltip': pcTooltip,
     'sample-comp': sampleComp,
