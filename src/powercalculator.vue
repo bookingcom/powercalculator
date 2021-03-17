@@ -160,8 +160,6 @@
           :expectedChange.sync="expectedChange"
         >
         </non-inferiority-comp>
-
-        <!-- <svg-graph></svg-graph> -->
       </div>
     </form>
   </div>
@@ -175,7 +173,6 @@ import nonInferiorityComp from './components/non-inferiority-comp.vue'
 import pcBlockField from './components/pc-block-field.vue'
 import pcTooltip from './components/pc-tooltip.vue'
 import sampleComp from './components/sample-comp.vue'
-import svgGraph from './components/svg-graph.vue'
 
 import {
   TEST_TYPE,
@@ -241,6 +238,7 @@ export default {
       },
       set(val) {
         this.$store.commit('SET_FALSE_POSITIVE_RATE', val)
+        this.refresh()
       },
     },
     power: {
@@ -249,6 +247,7 @@ export default {
       },
       set(val) {
         this.$store.commit('SET_TARGET_POWER', val)
+        this.refresh()
       },
     },
     variants: {
@@ -257,6 +256,7 @@ export default {
       },
       set(val) {
         this.$store.commit('SET_VARIANTS', val)
+        this.refresh()
       },
     },
     testType: {
@@ -277,6 +277,7 @@ export default {
       },
       set(val) {
         this.$store.commit('SET_COMPARISON_MODE', val)
+        this.refresh()
       },
     },
     trafficMode: {
@@ -289,12 +290,13 @@ export default {
     },
   },
   methods: {
-    updateFocus({ fieldProp, value }) {
-      if (this.focusedBlock == fieldProp && value === false) {
-        this.focusedBlock = ''
-      } else if (value === true) {
-        this.focusedBlock = fieldProp
-      }
+    refresh() {
+      this.$store.commit('SET_BASE_RATE', {
+        baseRate: this.$store.getters.baseRate,
+        lockedField: this.lockedField,
+        focusedBlock: this.focusedBlock,
+        expectedChange: this.expectedChange
+      })
     },
     mergeComponentData(base, toClone) {
       // merges default data with imported one from parent component

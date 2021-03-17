@@ -43,7 +43,7 @@ function displayValue(value, type = 'int') {
 
   switch (type) {
     case 'float':
-      return alternativeToNaN(parseFloat(value))
+      return alternativeToNaN(parseFloat(value).toFixed(2))
     case 'percentage':
       return alternativeToNaN(+(parseFloat(value) * 100).toFixed(2))
     case 'int':
@@ -174,14 +174,18 @@ export const calculator = {
 
       const currentVisitorsPerDay = Math.ceil(state.sample / state.runtime)
 
+      // We use relative threshold = 0 when we are calculating the impact.
+      const relativeThreshold =
+        focusedBlock === FOCUS.SAMPLE ? state.threshold : 0
+
       let impact = state.impact
       if (state.isNonInferiority) {
         switch (expectedChange) {
           case CHANGE.DEGRADATION:
-            impact = -state.threshold / 2
+            impact = -relativeThreshold / 2
             break
           case CHANGE.IMPROVEMENT:
-            impact = state.threshold
+            impact = relativeThreshold
             break
           case CHANGE.NO_CHANGE:
           default:
@@ -190,26 +194,21 @@ export const calculator = {
         }
       }
 
-      const mu = state.isNonInferiority
-        ? math.getMuFromRelativeDifference({
-            threshold: -state.threshold,
-            runtime: state.runtime,
-            base_rate: newBaseRate,
-            visitors_per_day: currentVisitorsPerDay,
-          })
-        : 0
-
       const opts = state.isNonInferiority
         ? {
             type: 'relative',
             alternative: getAlternative(state.isNonInferiority),
             calculating: lockedField,
             runtime: state.runtime,
-            threshold: -state.threshold,
+            threshold: -relativeThreshold,
             visitors_per_day: currentVisitorsPerDay,
             base_rate: newBaseRate,
           }
         : {}
+
+      const mu = state.isNonInferiority
+        ? math.getMuFromRelativeDifference(opts)
+        : 0
 
       const type = state.testType
       const formula = math[type][focusedBlock]
@@ -267,6 +266,25 @@ export const calculator = {
         return
       }
 
+      const visitorsPerDay = sample / state.runtime
+
+      // To achieve consistency, we assume relativeThreshold = 0
+      const opts = state.isNonInferiority
+        ? {
+            type: 'relative',
+            alternative: getAlternative(state.isNonInferiority),
+            calculating: lockedField,
+            runtime: state.runtime,
+            threshold: 0,
+            visitors_per_day: visitorsPerDay,
+            base_rate: state.baseRate,
+          }
+        : {}
+
+      const mu = state.isNonInferiority
+        ? math.getMuFromRelativeDifference(opts)
+        : 0
+
       const type = state.testType
       const impactFormula = math[type].impact
       const alpha =
@@ -284,18 +302,23 @@ export const calculator = {
         beta: 1 - state.targetPower,
         variants: state.variants,
         alternative: getAlternative(state.isNonInferiority),
-        mu: 0, // if it isn't non-inferiority, it is always 0
+        mu,
+        opts,
       })
 
       if (lockedField === BLOCKED.DAYS) {
-        // TODO: Real runtime vs visible runtime.
-        const currentVisitorsPerDay = Math.ceil(state.sample / state.runtime)
+        const currentVisitorsPerDay = state.sample / state.runtime
         const newRuntime = Math.ceil(sample / currentVisitorsPerDay)
         state.runtime = newRuntime
       }
 
-      state.sample = sample
-      state.impact = impact
+      if (state.isNonInferiority) {
+        state.threshold = impact
+      } else {
+        state.impact = impact
+      }
+
+      state.sample = Math.ceil(sample)
     },
     SET_RUNTIME(state, { runtime, focusedBlock }) {
       if (runtime <= 0) {
@@ -308,6 +331,23 @@ export const calculator = {
       if (focusedBlock !== FOCUS.SAMPLE) {
         const currentVisitorsPerDay = state.sample / state.runtime
         const newSample = Math.ceil(runtime * currentVisitorsPerDay)
+
+        // To achieve consistency, we assume relativeThreshold = 0
+        const opts = state.isNonInferiority
+          ? {
+              type: 'relative',
+              alternative: getAlternative(state.isNonInferiority),
+              calculating: BLOCKED.VISITORS_PER_DAY,
+              runtime: newRuntime,
+              threshold: 0,
+              visitors_per_day: currentVisitorsPerDay,
+              base_rate: state.baseRate,
+            }
+          : {}
+
+        const mu = state.isNonInferiority
+          ? math.getMuFromRelativeDifference(opts)
+          : 0
 
         const type = state.testType
         const impactFormula = math[type].impact
@@ -324,16 +364,81 @@ export const calculator = {
           beta: 1 - state.targetPower,
           variants: state.variants,
           alternative: getAlternative(state.isNonInferiority),
-          mu: 0, // if it isn't non-inferiority, it is always 0
+          mu,
+          opts,
         })
 
+        if (state.isNonInferiority) {
+          state.threshold = impact
+        } else {
+          state.impact = impact
+        }
         state.sample = newSample
-        state.impact = impact
       }
 
       state.runtime = newRuntime
     },
 
+    SET_VISITORS_PER_DAY(state, { visitorsPerDay, focusedBlock }) {
+      if (visitorsPerDay < 0) {
+        return
+      }
+
+      if (focusedBlock === FOCUS.SAMPLE) {
+        const currentSample = state.sample
+        const newRuntime = Math.ceil(currentSample / visitorsPerDay)
+
+        state.runtime = newRuntime
+      } else {
+        const newSample = Math.ceil(state.runtime * visitorsPerDay)
+
+        // To achieve consistency, we assume relativeThreshold = 0
+        const opts = state.isNonInferiority
+          ? {
+              type: 'relative',
+              alternative: getAlternative(state.isNonInferiority),
+              calculating: BLOCKED.DAYS,
+              runtime: state.runtime,
+              threshold: 0,
+              visitors_per_day: visitorsPerDay,
+              base_rate: state.baseRate,
+            }
+          : {}
+
+        const mu = state.isNonInferiority
+          ? math.getMuFromRelativeDifference(opts)
+          : 0
+
+        const type = state.testType
+        const impactFormula = math[type].impact
+        const alpha =
+          state.comparisonMode === COMPARISON_MODE.ALL
+            ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
+            : state.falsePositiveRate
+
+        const impact = impactFormula({
+          // It is totally unclear when the current engine rounds up and when it
+          // doesnt.
+          total_sample_size: newSample,
+          base_rate: state.baseRate,
+          sd_rate: state.standardDeviation,
+          alpha,
+          beta: 1 - state.targetPower,
+          variants: state.variants,
+          alternative: getAlternative(state.isNonInferiority),
+          mu,
+          opts,
+        })
+
+        if (state.isNonInferiority) {
+          state.threshold = impact
+        } else {
+          state.impact = impact
+        }
+
+        state.sample = newSample
+      }
+    },
     // == IMPACT ==
     SET_IMPACT(state, { impact, isAbsolute, lockedField }) {
       const newImpact =
@@ -364,50 +469,13 @@ export const calculator = {
       })
 
       if (lockedField === BLOCKED.DAYS) {
-        const currentVisitorsPerDay = Math.ceil(state.sample / state.runtime)
+        const currentVisitorsPerDay = state.sample / state.runtime
         const newRuntime = Math.ceil(sample / currentVisitorsPerDay)
         state.runtime = newRuntime
       }
 
       state.impact = newImpact
-      state.sample = sample
-    },
-    SET_VISITORS_PER_DAY(state, { visitorsPerDay, focusedBlock }) {
-      if (visitorsPerDay < 0) {
-        return
-      }
-
-      if (focusedBlock === FOCUS.SAMPLE) {
-        const currentSample = state.sample
-        const newRuntime = Math.ceil(currentSample / visitorsPerDay)
-
-        state.runtime = newRuntime
-      } else {
-        const newSample = Math.ceil(state.runtime * visitorsPerDay)
-        state.sample = newSample
-
-        const type = state.testType
-        const impactFormula = math[type].impact
-        const alpha =
-          state.comparisonMode === COMPARISON_MODE.ALL
-            ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
-            : state.falsePositiveRate
-
-        const impact = impactFormula({
-          // It is totally unclear when the current engine rounds up and when it
-          // doesnt.
-          total_sample_size: newSample,
-          base_rate: state.baseRate,
-          sd_rate: state.standardDeviation,
-          alpha,
-          beta: 1 - state.targetPower,
-          variants: state.variants,
-          alternative: getAlternative(state.isNonInferiority),
-          mu: 0, // if it isn't non-inferiority, it is always 0
-        })
-
-        state.impact = impact
-      }
+      state.sample = Math.ceil(sample)
     },
 
     // This is only triggered when non-inferity == true and focusedBlock === sample
@@ -440,12 +508,17 @@ export const calculator = {
           break
       }
 
-      const mu = math.getMuFromRelativeDifference({
-        threshold: -relativeThreshold,
+      const opts = {
+        type: 'relative',
+        alternative: getAlternative(state.isNonInferiority),
+        calculating: lockedField,
         runtime: state.runtime,
-        base_rate: baseRate,
+        threshold: -relativeThreshold,
         visitors_per_day: visitorsPerDay,
-      })
+        base_rate: baseRate,
+      }
+
+      const mu = math.getMuFromRelativeDifference(opts)
 
       const type = state.testType
       const sampleFormula = math[type].sample
@@ -463,15 +536,7 @@ export const calculator = {
         variants: state.variants,
         alternative: getAlternative(state.isNonInferiority),
         mu,
-        opts: {
-          type: 'relative',
-          alternative: getAlternative(state.isNonInferiority),
-          calculating: lockedField,
-          runtime: state.runtime,
-          threshold: -relativeThreshold,
-          visitors_per_day: visitorsPerDay,
-          base_rate: baseRate,
-        },
+        opts,
       })
 
       if (lockedField === BLOCKED.DAYS) {
@@ -479,7 +544,7 @@ export const calculator = {
         state.runtime = newRuntime
       }
 
-      state.sample = sample
+      state.sample = Math.ceil(sample)
       state.threshold = relativeThreshold
     },
   },

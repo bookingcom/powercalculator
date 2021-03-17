@@ -98,16 +98,19 @@ import {
   CHANGE,
 } from '../store/modules/calculator'
 
+const DEBOUNCE = 500
+
 export default {
   props: ['focusedBlock', 'lockedField', 'blockName', 'expectedChange'],
   extends: pcBlock,
   template: '#base-comp',
-  data() {
-    return {}
-  },
+  data: () => ({
+    relativeDebouncer: null,
+    absoluteDebouncer: null,
+  }),
   computed: {
     CHANGE: () => CHANGE,
-    FOCUSED: () => FOCUSED,
+    FOCUS: () => FOCUS,
     isSelected: {
       get() {
         return this.focusedBlock
@@ -130,12 +133,16 @@ export default {
           this.$store.getters.relativeThreshold !== threshold &&
           this.focusedBlock === FOCUS.SAMPLE
         ) {
-          this.$store.commit('SET_THRESHOLD', {
-            threshold,
-            isAbsolute: false,
-            lockedField: this.lockedField,
-            expectedChange: this.expectedChange,
-          })
+          if (this.relativeDebouncer != null)
+            clearTimeout(this.relativeDebouncer)
+          this.relativeDebouncer = setTimeout(() => {
+            this.$store.commit('SET_THRESHOLD', {
+              threshold,
+              isAbsolute: false,
+              lockedField: this.lockedField,
+              expectedChange: this.expectedChange,
+            })
+          }, DEBOUNCE)
         }
       },
     },
@@ -148,12 +155,16 @@ export default {
           this.$store.getters.absoluteThreshold !== threshold &&
           this.focusedBlock === FOCUS.SAMPLE
         ) {
-          this.$store.commit('SET_THRESHOLD', {
-            threshold,
-            isAbsolute: true,
-            lockedField: this.lockedField,
-            expectedChange: this.expectedChange,
-          })
+          if (this.absoluteDebouncer != null)
+            clearTimeout(this.relativeDebouncer)
+          this.absoluteDebouncer = setTimeout(() => {
+            this.$store.commit('SET_THRESHOLD', {
+              threshold,
+              isAbsolute: true,
+              lockedField: this.lockedField,
+              expectedChange: this.expectedChange,
+            })
+          }, DEBOUNCE)
         }
       },
     },
