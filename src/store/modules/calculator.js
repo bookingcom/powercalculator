@@ -78,6 +78,41 @@ export const calculator = {
     testType: TEST_TYPE.BINOMIAL,
   }),
   mutations: {
+    // Initial update
+    SET_IMPORTED_METRICS(state, props) {
+      if (props.testType && Object.values(TEST_TYPE).includes(props.testType))
+        state.testType = props.testType
+      // skipping calculateProp
+      if (props.view_sample) state.sample = props.view_sample
+      if (props.view_base) state.baseRate = props.view_base / 100
+      if (props.view_impact) state.impact = props.view_impact / 100
+      if (props.view_power) state.targetPower = props.view_power / 100
+      if (props.view_falsePosRate)
+        state.falsePositiveRate = props.view_falsePosRate / 100
+      if (props.view_sdRate) state.standardDeviation = props.view_sdRate / 100
+      if (props.view_runtime) state.runtime = props.view_runtime
+      // skipping view_visitorsPerDay
+      if (props.view_nonInfThreshold)
+        state.threshold = props.view_nonInfThreshold
+      // skipping view_nonInfThresholdRelative
+      // skipping view_nonInfThresholdAbsolute
+      if (props.view_variants) state.variants = props.view_variants
+      if (
+        props.view_comparisonMode &&
+        Object.values(COMPARISON_MODE).includes(props.view_comparisonMode)
+      )
+        state.comparisonMode = props.view_comparisonMode
+      if (
+        props.view_trafficMode &&
+        Object.values(TRAFFIC_MODE).includes(props.view_trafficMode)
+      )
+        state.trafficMode = props.view_trafficMode
+      // skipping lockedField
+      // skipping nonInferiority_selected
+      if (props.nonInferiority_enabled)
+        state.isNonInferiority = props.nonInferiority_enabled == 'true'
+      // skipping nonInferiority_expectedChange
+    },
     // Configuration
     SET_VARIANTS(state, amount) {
       if (Number.isInteger(amount) && amount >= 0) state.variants = amount

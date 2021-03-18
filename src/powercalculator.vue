@@ -11,7 +11,7 @@
                   name="test-mode"
                   v-model="testType"
                   :value="TEST_TYPE.BINOMIAL"
-                />
+                  />
                 Binomial Metric
               </label>
               <span slot="tooltip">
@@ -27,7 +27,7 @@
                   name="test-mode"
                   v-model="testType"
                   :value="TEST_TYPE.CONTINUOUS"
-                />
+                  />
                 Continuous Metric
               </label>
               <span slot="tooltip">
@@ -45,7 +45,7 @@
                 v-model="trafficMode"
                 :value="TRAFFIC_MODE.DAILY"
                 checked
-              />
+                />
               Daily traffic
             </label>
             <label class="pc-traffic-mode-labels" slot="text">
@@ -54,7 +54,7 @@
                 name="traffic-mode"
                 v-model="trafficMode"
                 :value="TRAFFIC_MODE.TOTAL"
-              />
+                />
               Total traffic
             </label>
           </div>
@@ -68,7 +68,7 @@
                 name="comparison-mode"
                 v-model="comparisonMode"
                 :value="COMPARISON_MODE.ALL"
-              />
+                />
               Base vs All variants
             </label>
             <label class="pc-traffic-mode-labels" slot="text">
@@ -77,7 +77,7 @@
                 name="comparison-mode"
                 v-model="comparisonMode"
                 :value="COMPARISON_MODE.ONE"
-              />
+                />
               Base vs One variant
             </label>
           </div>
@@ -95,7 +95,7 @@
               prefix="base + "
               :fieldValue.sync="variants"
               enableEdit="true"
-            ></pc-block-field>
+              ></pc-block-field>
             variant{{ variants > 1 ? 's' : '' }}
           </label>
 
@@ -107,7 +107,7 @@
               fieldProp="falsePositiveRate"
               :fieldValue.sync="falsePositiveRate"
               enableEdit="true"
-            ></pc-block-field>
+              ></pc-block-field>
             false positive rate
           </label>
 
@@ -119,7 +119,7 @@
               fieldProp="power"
               :fieldValue.sync="power"
               enableEdit="true"
-            ></pc-block-field>
+              ></pc-block-field>
             power
           </label>
         </div>
@@ -128,38 +128,38 @@
       <div
         class="pc-blocks-wrapper"
         :class="{ 'pc-blocks-wrapper-ttest': testType == 'tTest' }"
-      >
+        >
         <base-comp
           :blockName="FOCUS.BASE"
           :focusedBlock="focusedBlock"
           :lockedField="lockedField"
           :expectedChange="expectedChange"
-        >
+          >
         </base-comp>
 
-        <sample-comp
-          :blockName="FOCUS.SAMPLE"
-          :focusedBlock.sync="focusedBlock"
-          :lockedField.sync="lockedField"
-        >
-        </sample-comp>
+          <sample-comp
+            :blockName="FOCUS.SAMPLE"
+            :focusedBlock.sync="focusedBlock"
+            :lockedField.sync="lockedField"
+            >
+          </sample-comp>
 
-        <impact-comp
-          v-if="!isNonInferiority"
-          :blockName="FOCUS.IMPACT"
-          :focusedBlock.sync="focusedBlock"
-          :lockedField="lockedField"
-        >
-        </impact-comp>
+            <impact-comp
+              v-if="!isNonInferiority"
+              :blockName="FOCUS.IMPACT"
+              :focusedBlock.sync="focusedBlock"
+              :lockedField="lockedField"
+              >
+            </impact-comp>
 
-        <non-inferiority-comp
-          v-if="isNonInferiority"
-          :blockName="FOCUS.IMPACT"
-          :focusedBlock.sync="focusedBlock"
-          :lockedField="lockedField"
-          :expectedChange.sync="expectedChange"
-        >
-        </non-inferiority-comp>
+              <non-inferiority-comp
+                v-if="isNonInferiority"
+                :blockName="FOCUS.IMPACT"
+                :focusedBlock.sync="focusedBlock"
+                :lockedField="lockedField"
+                :expectedChange.sync="expectedChange"
+                >
+              </non-inferiority-comp>
       </div>
     </form>
   </div>
@@ -187,29 +187,59 @@ export default {
   props: ['parentmetricdata'],
   data() {
     // values if parent component sends them
-    let importedData = this.parentmetricdata || {}
-
+    const importedData = JSON.parse(JSON.stringify(this.parentmetricdata || {}))
     const data = {
-      focusedBlock: FOCUS.SAMPLE,
-      lockedField: BLOCKED.DAYS,
-      expectedChange: CHANGE.NO_CHANGE,
-
-      // false means the editable ones are the secondary mode (metric totals, days&daily trials and absolute impact)
-      enabledMainInputs: {
-        base: true,
-        sample: true,
-        impact: true,
-        power: true,
-        'non-inferiority': true,
-      },
+      focusedBlock: importedData.calculateProp || FOCUS.SAMPLE,
+      lockedField: importedData.lockedField || BLOCKED.DAYS,
+      expectedChange: importedData.nonInferiority_expectedChange || CHANGE.NO_CHANGE,
     }
 
-    // mergeComponentData has no array support for now
-    return this.mergeComponentData(
-      data,
-      JSON.parse(JSON.stringify(importedData))
-    )
+    return data
   },
+  created() {
+    const importedData = JSON.parse(JSON.stringify(this.parentmetricdata || {}))
+
+    if (importedData.lockedField &&
+      Object.values(BLOCKED).includes(importedData.lockedField))
+      this.lockedField = importedData.lockedField
+
+    if (importedData.calculateProp &&
+      Object.values(FOCUS).includes(importedData.calculateProp))
+      this.focusedBlock = importedData.calculateProp
+
+    if (importedData.nonInferiority_expectedChange &&
+      Object.values(CHANGE).includes(importedData.nonInferiority_expectedChange))
+      this.expectedChange = importedData.nonInferiority_expectedChange
+
+    this.$store.commit('SET_IMPORTED_METRICS', importedData) 
+
+    this.$store.subscribe(() => {
+      this.$emit('update:metricdata', {
+        testType:           this.$store.getters.testType,
+        calculateProp:      this.focusedBlock,
+        sample:             this.$store.getters.sample,
+        base:               this.$store.getters.baseRate,
+        impact:             this.$store.getters.relativeImpact,
+        power:              this.$store.getters.targetPower,
+        falsePosRate:       this.$store.getters.falsePositiveRate,
+        sdRate:             this.$store.getters.standardDeviation,
+        runtime:            this.$store.getters.runtime,
+        visitorsPerDay:     this.$store.getters.visitorsPerDay,
+        threshold:          this.$store.getters.thresholdRelative,
+        thresholdAbsolute:  this.$store.getters.thresholdAbsolute,
+        thresholdRelative:  this.$store.getters.thresholdRelative,
+        variants:           this.$store.getters.variants,
+        comparisonMode:     this.$store.getters.comparisonMode,
+        onlyTotalVisitors:  this.$store.getters.trafficMode === TRAFFIC_MODE.TOTAL,
+        lockedField:        this.lockedField,
+        // selected:           'relative'
+        enabled:            this.$store.getters.isNonInferiority,
+        expectedChange:     this.expectedChange
+        // expId:              'exp_id',
+      })
+    })
+  },
+
   computed: {
     // Constants
     TEST_TYPE: () => TEST_TYPE,
@@ -217,18 +247,7 @@ export default {
     COMPARISON_MODE: () => COMPARISON_MODE,
     FOCUS: () => FOCUS,
 
-    // in case parent component needs this information
-    metricData() {
-      let result = {
-        testType: this.testType,
-        calculateProp: this.calculateProp,
-        view: this.view,
-        lockedField: this.lockedField,
-        // nonInferiority: this.nonInferiority,
-        comparisonMode: this.comparisonMode,
-      }
-      return JSON.parse(JSON.stringify(result))
-    },
+    // Getters
     isNonInferiority() {
       return this.$store.getters.isNonInferiority
     },
@@ -298,32 +317,8 @@ export default {
         expectedChange: this.expectedChange
       })
     },
-    mergeComponentData(base, toClone) {
-      // merges default data with imported one from parent component
-      let result = recursive(base, toClone)
-
-      // no array support for now
-      function recursive(baseRef, cloneRef) {
-        Object.keys(cloneRef).forEach((prop) => {
-          if (typeof cloneRef[prop] == 'object') {
-            baseRef[prop] = recursive(baseRef[prop], cloneRef[prop])
-          } else {
-            baseRef[prop] = cloneRef[prop]
-          }
-        })
-
-        return baseRef
-      }
-
-      return result
-    },
   },
-  watch: {
-    // in case parent component needs this information
-    metricData() {
-      this.$emit('update:metricdata', this.metricData)
-    },
-  },
+
   components: {
     'pc-block-field': pcBlockField,
     'pc-tooltip': pcTooltip,
@@ -379,8 +374,8 @@ export default {
   grid-template-columns: min-content min-content min-content;
   grid-template-rows: 2;
   grid-template-areas:
-    'calc-options calc-options calc-options'
-    'test-type traffic comparison';
+  'calc-options calc-options calc-options'
+  'test-type traffic comparison';
   align-items: center;
 }
 
@@ -472,8 +467,8 @@ export default {
   grid-template-columns: 33% 33% 33%;
   grid-template-rows: auto;
   grid-template-areas:
-    'block-base block-sample block-impact'
-    'block-graph block-graph block-graph';
+  'block-base block-sample block-impact'
+  'block-graph block-graph block-graph';
   grid-template-rows: auto;
   grid-column-gap: 8px;
   grid-row-gap: 8px;
