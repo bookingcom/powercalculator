@@ -39,7 +39,7 @@ export const CHANGE = Object.freeze({
 })
 
 function displayValue(value, type = 'int') {
-  const alternativeToNaN = (val) => (isNaN(val) || !isFinite(val) ? '-' : val)
+  const alternativeToNaN = (val) => (!Number.isInteger(val) || !isFinite(val) ? '-' : val)
 
   switch (type) {
     case 'float':
@@ -115,7 +115,7 @@ export const calculator = {
     },
     // Configuration
     SET_VARIANTS(state, amount) {
-      if (Number.isInteger(amount) && amount >= 0) state.variants = amount
+      if (!isNaN(amount) && amount >= 0) state.variants = amount
       else state.variants = state.variants
     },
     // We can choose between compare the base vs one variant or vs all.
@@ -130,7 +130,7 @@ export const calculator = {
     },
     // In the UI is [0,100], in the store is [0,1]
     SET_FALSE_POSITIVE_RATE(state, rate) {
-      if (rate >= 0 && rate <= 100) state.falsePositiveRate = rate / 100
+      if (!isNaN(rate) && rate >= 0 && rate <= 100) state.falsePositiveRate = rate / 100
       else state.falsePositiveRate = state.falsePositiveRate
     },
     // In the UI is [0,100], in the store is [0,1]
@@ -200,7 +200,7 @@ export const calculator = {
       state,
       { baseRate, lockedField, focusedBlock, expectedChange }
     ) {
-      if (baseRate < 0 || baseRate > 100) {
+      if (isNaN(baseRate) || baseRate < 0 || baseRate > 100) {
         state.baseRate = state.baseRate
         return
       }
@@ -290,13 +290,13 @@ export const calculator = {
       state.baseRate = newBaseRate
     },
     SET_STANDARD_DEVIATION(state, stddev) {
-      if (stddev >= 0) state.standardDeviation = stddev / 100
+      if (!isNaN(stddev) && stddev >= 0) state.standardDeviation = stddev / 100
       else state.standardDeviation = state.standardDeviation
     },
 
     // == SAMPLE ==
     SET_SAMPLE(state, { sample, lockedField }) {
-      if (sample < 0) {
+      if (isNaN(sample) || sample < 0) {
         state.sample = state.sample
         return
       }
@@ -356,7 +356,7 @@ export const calculator = {
       state.sample = Math.ceil(sample)
     },
     SET_RUNTIME(state, { runtime, focusedBlock }) {
-      if (runtime <= 0) {
+      if (isNaN(runtime) || runtime <= 0) {
         state.runtime = state.runtime
         return
       }
@@ -415,7 +415,7 @@ export const calculator = {
     },
 
     SET_VISITORS_PER_DAY(state, { visitorsPerDay, focusedBlock }) {
-      if (visitorsPerDay < 0) {
+      if (isNaN(visitorsPerDay) || visitorsPerDay < 0) {
         return
       }
 
@@ -476,6 +476,10 @@ export const calculator = {
     },
     // == IMPACT ==
     SET_IMPACT(state, { impact, isAbsolute, lockedField }) {
+      if (isNaN(impact) || impact < 0) {
+        state.impact = state.impact
+        return
+      }
       const newImpact =
         (isAbsolute
           ? math.getRelativeImpactFromAbsolute({
@@ -518,7 +522,7 @@ export const calculator = {
       state,
       { threshold, isAbsolute, expectedChange, lockedField }
     ) {
-      if (threshold < 0) {
+      if (isNaN(threshold) || threshold < 0) {
         state.threshold = threshold
         return
       }

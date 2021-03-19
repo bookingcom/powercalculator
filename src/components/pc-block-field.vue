@@ -34,7 +34,7 @@
         v-on:input="updateVal"
         v-initialvalue
         ref="pc-value"
-      ></span>
+        ></span>
     </span>
   </span>
   <span v-else class="pc-value-display pc-field-not-editable">
@@ -43,8 +43,6 @@
 </template>
 
 <script>
-let validationCache = {}
-
 export default {
   template: '#pc-block-field',
   props: [
@@ -134,35 +132,18 @@ export default {
 
       return newValue
     },
-    updateVal(val) {
+    updateVal(event) {
       if (this.enableEdit) {
         const value = this.getSanitizedPcValue()
 
         if (value != this.fieldValue) {
-          // this.val = value;
           this.$emit('update:fieldValue', value)
         }
       }
     },
-    /*
-        formatDisplay () {
-            if (this.enableEdit) {
-                this.$refs['pc-value'].textContent = this.formatNumberFields(this.getSanitizedPcValue());
-            } else {
-                this.val = this.formatNumberFields(this.fieldValue);
-            }
-        },
-        formatNumberFields (value) {
-            let result = parseFloat(value);
-
-            result = this.validateField(result);
-
-            return result || 0
-        },
-        */
-    blur() {
-      // this.formatDisplay();
+    blur(event) {
       this.setFocusStyle(false)
+      event.target.textContent = this.fieldValue
     },
     setFocusStyle(bool) {
       this.isFocused = bool
@@ -171,60 +152,6 @@ export default {
       let el = this.$refs['pc-value']
       el.focus()
     },
-    /*
-        validateField (value) {
-            let validateConfigList = this.getValidationConfig(),
-                isValid = true,
-                result = value;
-
-            if (isNaN(result) || !isFinite(result)) {
-                result = validateConfigList.defaultVal;
-            }
-
-            if (validateConfigList.fns.length > 0) {
-                validateConfigList.fns.forEach((fn) => {
-                    if (!fn(result)) {
-                        isValid = false;
-                    }
-                })
-            }
-
-            if (!isValid) {
-                result = validateConfigList.defaultVal;
-            }
-
-            return result
-        },
-        getValidationConfig () {
-            let {fieldProp, testtype} = this,
-                validationTypeCategories,
-                result;
-
-            if (validationCache[testtype] && validationCache[testtype][fieldProp]) {
-                return validationCache[testtype][fieldProp]
-            }
-
-            validationTypeCategories = [].filter(Boolean);
-
-            result = validationTypeCategories.reduce((prev, cur) => {
-                let {fn, defaultVal} = cur[fieldProp] || {};
-
-                if (typeof fn != 'undefined') {
-                    prev.fns.push(fn);
-                }
-                if (typeof defaultVal != 'undefined') {
-                    prev.defaultVal = defaultVal;
-                }
-                return prev
-            }, {fns: [], defaultVal: 0})
-
-            //cacheing
-            validationCache[testtype] = validationCache[testtype] || {};
-            validationCache[testtype][fieldProp] = result;
-
-            return result
-        },
-        */
     placeCaretAtEnd(el) {
       if (
         typeof window.getSelection != 'undefined' &&
@@ -242,14 +169,6 @@ export default {
         textRange.collapse(false)
         textRange.select()
       }
-    },
-  },
-  watch: {
-    isFocused(newValue) {
-      this.$emit('update:focus', {
-        fieldProp: this.fieldFromBlock || this.fieldProp,
-        value: newValue,
-      })
     },
   },
   directives: {
