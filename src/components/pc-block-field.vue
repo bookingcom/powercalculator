@@ -34,7 +34,7 @@
         v-on:input="updateVal"
         v-initialvalue
         ref="pc-value"
-        ></span>
+      ></span>
     </span>
   </span>
   <span v-else class="pc-value-display pc-field-not-editable">
@@ -150,6 +150,7 @@ export default {
     },
     setFocus() {
       let el = this.$refs['pc-value']
+      el.textContent = this.fieldValue
       el.focus()
     },
     placeCaretAtEnd(el) {

@@ -39,7 +39,8 @@ export const CHANGE = Object.freeze({
 })
 
 function displayValue(value, type = 'int') {
-  const alternativeToNaN = (val) => (!Number.isInteger(val) || !isFinite(val) ? '-' : val)
+  const alternativeToNaN = (val) =>
+    !Number.isInteger(val) || !isFinite(val) ? '-' : val
 
   switch (type) {
     case 'float':
@@ -83,35 +84,32 @@ export const calculator = {
       if (props.testType && Object.values(TEST_TYPE).includes(props.testType))
         state.testType = props.testType
       // skipping calculateProp
-      if (props.view_sample) state.sample = props.view_sample
-      if (props.view_base) state.baseRate = props.view_base / 100
-      if (props.view_impact) state.impact = props.view_impact / 100
-      if (props.view_power) state.targetPower = props.view_power / 100
-      if (props.view_falsePosRate)
-        state.falsePositiveRate = props.view_falsePosRate / 100
-      if (props.view_sdRate) state.standardDeviation = props.view_sdRate / 100
-      if (props.view_runtime) state.runtime = props.view_runtime
-      // skipping view_visitorsPerDay
-      if (props.view_nonInfThreshold)
-        state.threshold = props.view_nonInfThreshold
-      // skipping view_nonInfThresholdRelative
-      // skipping view_nonInfThresholdAbsolute
-      if (props.view_variants) state.variants = props.view_variants
+      if (props.sample) state.sample = props.sample
+      if (props.baseRate) state.baseRate = props.baseRate / 100
+      if (props.impact) state.impact = props.impact / 100
+      if (props.targetPower) state.targetPower = props.targetPower / 100
+      if (props.falsePositiveRate)
+        state.falsePositiveRate = props.falsePositiveRate / 100
+      if (props.standardDeviation)
+        state.standardDeviation = props.standardDeviation / 100
+      if (props.runtime) state.runtime = props.runtime
+      if (props.threshold) state.threshold = props.threshold / 100
+      if (props.variants) state.variants = props.variants
       if (
-        props.view_comparisonMode &&
-        Object.values(COMPARISON_MODE).includes(props.view_comparisonMode)
+        props.comparisonMode &&
+        Object.values(COMPARISON_MODE).includes(props.comparisonMode)
       )
-        state.comparisonMode = props.view_comparisonMode
+        state.comparisonMode = props.comparisonMode
       if (
-        props.view_trafficMode &&
-        Object.values(TRAFFIC_MODE).includes(props.view_trafficMode)
+        props.trafficMode &&
+        Object.values(TRAFFIC_MODE).includes(props.trafficMode)
       )
-        state.trafficMode = props.view_trafficMode
-      // skipping lockedField
-      // skipping nonInferiority_selected
-      if (props.nonInferiority_enabled)
-        state.isNonInferiority = props.nonInferiority_enabled == 'true'
-      // skipping nonInferiority_expectedChange
+        state.trafficMode = props.trafficMode
+      if (props.isNonInferiority)
+        state.isNonInferiority =
+          typeof props.isNonInferiority === 'boolean'
+            ? props.isNonInferiority
+            : props.isNonInferiority === 'true'
     },
     // Configuration
     SET_VARIANTS(state, amount) {
@@ -130,7 +128,8 @@ export const calculator = {
     },
     // In the UI is [0,100], in the store is [0,1]
     SET_FALSE_POSITIVE_RATE(state, rate) {
-      if (!isNaN(rate) && rate >= 0 && rate <= 100) state.falsePositiveRate = rate / 100
+      if (!isNaN(rate) && rate >= 0 && rate <= 100)
+        state.falsePositiveRate = rate / 100
       else state.falsePositiveRate = state.falsePositiveRate
     },
     // In the UI is [0,100], in the store is [0,1]
@@ -523,7 +522,7 @@ export const calculator = {
       { threshold, isAbsolute, expectedChange, lockedField }
     ) {
       if (isNaN(threshold) || threshold < 0) {
-        state.threshold = threshold
+        state.threshold = state.threshold
         return
       }
 
@@ -556,6 +555,8 @@ export const calculator = {
         visitors_per_day: visitorsPerDay,
         base_rate: baseRate,
       }
+
+      console.log(relativeThreshold, opts)
 
       const mu = math.getMuFromRelativeDifference(opts)
 
@@ -602,7 +603,7 @@ export const calculator = {
     // Base rate
     baseRate: (state) => displayValue(state.baseRate, 'percentage'),
     standardDeviation: (state) =>
-      displayValue(state.standardDeviation * 100, 'float'),
+      displayValue(state.standardDeviation * 100, 'int'),
     metricTotal: (state) => {
       const multiplier = state.testType === TEST_TYPE.BINOMIAL ? 1 : 100
       return (state.sample * state.baseRate * multiplier).toFixed(0)
