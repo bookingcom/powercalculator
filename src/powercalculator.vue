@@ -297,6 +297,7 @@ export default {
       },
       set(val) {
         this.$store.commit('SET_TRAFFIC_MODE', val)
+        this.refreshValues()
         this.updateMetrics()
       },
     },

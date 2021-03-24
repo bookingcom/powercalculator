@@ -314,7 +314,7 @@ export const calculator = {
       }
 
       const newBaseRate =
-        testType === TEST_TYPE.BINOMIAL ? baseRate / 100 : baseRate * 100
+        state.testType === TEST_TYPE.BINOMIAL ? baseRate / 100 : baseRate
 
       // We use relative threshold = 0 when we are calculating the impact.
       const relativeThreshold =
@@ -379,6 +379,15 @@ export const calculator = {
         } else {
           state.visitorsPerDay = Math.ceil(sample / state.runtime)
         }
+
+        if (state.isNonInferiority) {
+          state.absoluteThreshold = getAbsoluteThreshold(state)
+        } else {
+          state.absoluteImpact = getAbsoluteImpact(
+            newBaseRate,
+            state.relativeImpact
+          )
+        }
         state.sample = sample
       } else {
         const impact = formula({
@@ -396,7 +405,7 @@ export const calculator = {
         if (state.isNonInferiority) {
           state.relativeThreshold = impact
           state.absoluteThreshold = getAbsoluteThreshold({
-            state,
+            ...state,
             relativeThreshold: impact,
           })
         } else {
