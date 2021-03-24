@@ -141,6 +141,7 @@
           :blockName="FOCUS.SAMPLE"
           :focusedBlock.sync="focusedBlock"
           :lockedField.sync="lockedField"
+          :expectedChange="expectedChange"
         >
         </sample-comp>
 
@@ -149,6 +150,7 @@
           :blockName="FOCUS.IMPACT"
           :focusedBlock.sync="focusedBlock"
           :lockedField="lockedField"
+          :expectedChange="expectedChange"
         >
         </impact-comp>
 
@@ -271,9 +273,10 @@ export default {
       },
       set(val) {
         this.$store.commit('SET_TEST_TYPE', {
-          type: val,
+          testType: val,
           focused: this.focusedBlock,
-          locked: this.lockedField,
+          lockedField: this.lockedField,
+          expectedChange: this.expectedChange
         })
         this.updateMetrics()
       },

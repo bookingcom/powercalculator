@@ -197,7 +197,7 @@ import { TRAFFIC_MODE, BLOCKED, FOCUS } from '../store/modules/calculator'
 const DEBOUNCE = 500
 
 export default {
-  props: ['focusedBlock', 'lockedField', 'blockName'],
+  props: ['focusedBlock', 'lockedField', 'blockName', 'expectedChange'],
   template: '#sample-comp',
   extends: pcBlock,
   data: () => ({
@@ -232,6 +232,8 @@ export default {
             this.$store.commit('SET_SAMPLE', {
               sample: val,
               lockedField: this.lockedField,
+              focusedBlock: this.focusedBlock,
+              expectedChange: this.expectedChange,
             })
           }
         }, DEBOUNCE)
@@ -251,6 +253,8 @@ export default {
             this.$store.commit('SET_VISITORS_PER_DAY', {
               visitorsPerDay: val,
               focusedBlock: this.focusedBlock,
+              lockedField: this.lockedField,
+              expectedChange: this.expectedChange,
             })
           }
         }, DEBOUNCE)
@@ -270,6 +274,8 @@ export default {
             this.$store.commit('SET_RUNTIME', {
               runtime: val,
               focusedBlock: this.focusedBlock,
+              lockedField: this.lockedField,
+              expectedChange: this.expectedChange,
             })
           }
         }, DEBOUNCE)
