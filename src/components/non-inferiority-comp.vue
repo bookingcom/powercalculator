@@ -156,7 +156,7 @@ export default {
           this.focusedBlock === FOCUS.SAMPLE
         ) {
           if (this.absoluteDebouncer != null)
-            clearTimeout(this.relativeDebouncer)
+            clearTimeout(this.absoluteDebouncer)
           this.absoluteDebouncer = setTimeout(() => {
             this.$store.commit('SET_THRESHOLD', {
               threshold,

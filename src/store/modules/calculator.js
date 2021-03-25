@@ -313,6 +313,8 @@ export const calculator = {
         return
       }
 
+      // If it is binomial, it is a percentage. If it is continuos, it is a
+      // float. Therefore, we need to divide by 100 if it is a gTest.
       const newBaseRate =
         state.testType === TEST_TYPE.BINOMIAL ? baseRate / 100 : baseRate
 
@@ -417,10 +419,12 @@ export const calculator = {
       state.baseRate = newBaseRate
     },
 
-    // TODO: Do we need to recalculate?
     SET_STANDARD_DEVIATION(state, stddev) {
-      if (!isNaN(stddev) && stddev >= 0) state.standardDeviation = stddev
-      else state.standardDeviation = state.standardDeviation
+      if (isNaN(stddev) || stddev < 0) {
+        state.standardDeviation = state.standardDeviation
+        return
+      }
+      state.standardDeviation = stddev
     },
 
     // == SAMPLE ==

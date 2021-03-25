@@ -117,6 +117,13 @@ export default {
         if (this.sdRateDebouncer != null) clearTimeout(this.sdRateDebouncer)
         this.sdRateDebouncer = setTimeout(() => {
           this.$store.commit('SET_STANDARD_DEVIATION', val)
+          // Little hack to not rewrite everything again.
+          this.$store.commit('SET_BASE_RATE', {
+              baseRate: this.base,
+              lockedField: this.lockedField,
+              focusedBlock: this.focusedBlock,
+              expectedChange: this.expectedChange,
+          })
         }, DEBOUNCE)
       },
     },
