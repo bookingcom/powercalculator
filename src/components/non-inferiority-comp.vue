@@ -130,7 +130,6 @@ export default {
       },
       set(threshold) {
         if (
-          this.$store.getters.relativeThreshold !== threshold &&
           this.focusedBlock === FOCUS.SAMPLE
         ) {
           if (this.relativeDebouncer != null)
@@ -152,7 +151,6 @@ export default {
       },
       set(threshold) {
         if (
-          this.$store.getters.absoluteThreshold !== threshold &&
           this.focusedBlock === FOCUS.SAMPLE
         ) {
           if (this.absoluteDebouncer != null)

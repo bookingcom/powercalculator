@@ -168,11 +168,15 @@ export default {
       },
       set(val) {
         if (this.focusedBlock === FOCUS.SAMPLE) {
-          this.$store.commit('SET_IMPACT', {
-            impact: val,
-            isAbsolute: true,
-            lockedField: this.lockedField,
-          })
+          if (this.absoluteImpactDebouncer != null)
+            clearTimeout(this.absoluteImpactDebouncer)
+          this.absoluteImpactDebouncer = setTimeout(() => {
+            this.$store.commit('SET_IMPACT', {
+              impact: val,
+              isAbsolute: true,
+              lockedField: this.lockedField,
+            })
+          }, DEBOUNCE)
         }
       },
     },
@@ -204,7 +208,6 @@ export default {
       return result
     },
   },
-  // TODO: Add a watcher on the changes of the sample size to calculate the right one
 }
 </script>
 

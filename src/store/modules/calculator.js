@@ -68,14 +68,29 @@ function getAbsoluteImpact(baseRate, impactRelative) {
 function getAbsoluteThreshold(state) {
   const visitorsPerDay = state.visitorsPerDay
   const baseRate = state.baseRate
-  const thresholdRelative = state.relativeThreshold
+  const runtime = state.runtime
+  const relativeThreshold = state.relativeThreshold
 
-  let absoluteThreshold = thresholdRelative * baseRate * visitorsPerDay
+  let absoluteThreshold = relativeThreshold * baseRate * visitorsPerDay
 
   if (state.trafficMode === TRAFFIC_MODE.TOTAL)
-    absoluteThreshold = absoluteThreshold * state.runtime
+    absoluteThreshold = absoluteThreshold * runtime
 
   return isNaN(absoluteThreshold) ? 0 : displayValue(absoluteThreshold, 'float')
+}
+
+function getRelativeThreshold(state) {
+  const visitorsPerDay = state.visitorsPerDay
+  const baseRate = state.baseRate
+  const runtime = state.runtime
+  const absoluteThreshold = state.absoluteThreshold
+  
+  let relativeThreshold = absoluteThreshold / (baseRate * visitorsPerDay)
+
+  if (state.trafficMode === TRAFFIC_MODE.TOTAL) 
+    relativeThreshold = relativeThreshold / runtime
+
+  return isNaN(relativeThreshold) ? 0 : displayValue(relativeThreshold, 'float')
 }
 
 export const calculator = {
@@ -731,7 +746,7 @@ export const calculator = {
       }
 
       state.relativeImpact = newImpact
-      state.absolutImpact = getAbsoluteImpact(state.baseRate, newImpact)
+      state.absoluteImpact = getAbsoluteImpact(state.baseRate, newImpact)
       state.sample = sample
     },
 
@@ -747,35 +762,23 @@ export const calculator = {
 
       const baseRate = state.baseRate
       const visitorsPerDay = state.visitorsPerDay
-      const relativeThreshold = isAbsolute
-        ? threshold / (baseRate * visitorsPerDay)
+
+      const normaliseThreshold = isAbsolute
+        ? state.trafficMode === TRAFFIC_MODE.TOTAL ? threshold / state.runtime : threshold
         : threshold / 100
 
-      let impact = 0
-      switch (expectedChange) {
-        case CHANGE.DEGRADATION:
-          impact = -relativeThreshold / 2
-          break
-        case CHANGE.IMPROVEMENT:
-          impact = relativeThreshold
-          break
-        case CHANGE.NO_CHANGE:
-        default:
-          impact = 0
-          break
-      }
 
       const opts = {
-        type: 'relative',
+        type: isAbsolute ? 'absolutePerDay' : 'relative',
         alternative: getAlternative(state.isNonInferiority),
         calculating: lockedField,
         runtime: state.runtime,
-        threshold: -relativeThreshold,
+        threshold: -normaliseThreshold,
         visitors_per_day: visitorsPerDay,
         base_rate: baseRate,
       }
 
-      const mu = math.getMuFromRelativeDifference(opts)
+      const mu = isAbsolute ? math.getMuFromAbsolutePerDay(opts) : math.getMuFromRelativeDifference(opts)
 
       const type = state.testType
       const sampleFormula = math[type].sample
@@ -787,7 +790,7 @@ export const calculator = {
       const sample = Math.ceil(
         sampleFormula({
           base_rate: baseRate,
-          effect_size: impact,
+          effect_size: 0,
           sd_rate: state.standardDeviation,
           alpha,
           beta: 1 - state.targetPower,
@@ -805,12 +808,22 @@ export const calculator = {
       }
 
       state.sample = sample
-      state.relativeThreshold = relativeThreshold
-      state.absoluteThreshold = getAbsoluteThreshold({
-        ...state,
-        sample,
-        relativeThreshold,
-      })
+
+      if (isAbsolute) {
+        state.absoluteThreshold = threshold
+        state.relativeThreshold = getRelativeThreshold({
+          ...state,
+          sample,
+          absoluteThreshold: normaliseThreshold
+        })
+      } else {
+        state.relativeThreshold = normaliseThreshold
+        state.absoluteThreshold = getAbsoluteThreshold({
+          ...state,
+          sample,
+          relativeThreshold: normaliseThreshold
+        })
+      }
     },
   },
   getters: {
