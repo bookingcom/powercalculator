@@ -814,7 +814,7 @@ export const calculator = {
         state.relativeThreshold = getRelativeThreshold({
           ...state,
           sample,
-          absoluteThreshold: normaliseThreshold
+          absoluteThreshold: threshold
         })
       } else {
         state.relativeThreshold = normaliseThreshold
