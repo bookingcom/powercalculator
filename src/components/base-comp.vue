@@ -74,7 +74,7 @@ import { TEST_TYPE, BLOCKED, FOCUS } from '../store/modules/calculator'
 const DEBOUNCE = 500
 
 export default {
-  props: ['focusedBlock', 'blockName', 'lockedField', 'expectedChange'],
+  props: ['focusedBlock', 'blockName', 'lockedField'],
   extends: pcBlock,
   template: '#base-comp',
   data: () => ({
@@ -103,7 +103,6 @@ export default {
               baseRate: val,
               lockedField: this.lockedField,
               focusedBlock: this.focusedBlock,
-              expectedChange: this.expectedChange,
             })
           }
         }, DEBOUNCE)
@@ -119,10 +118,9 @@ export default {
           this.$store.commit('SET_STANDARD_DEVIATION', val)
           // Little hack to not rewrite everything again.
           this.$store.commit('SET_BASE_RATE', {
-              baseRate: this.base,
-              lockedField: this.lockedField,
-              focusedBlock: this.focusedBlock,
-              expectedChange: this.expectedChange,
+            baseRate: this.base,
+            lockedField: this.lockedField,
+            focusedBlock: this.focusedBlock,
           })
         }, DEBOUNCE)
       },

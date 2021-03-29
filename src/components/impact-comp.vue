@@ -119,7 +119,7 @@ const DEBOUNCE = 500
 export default {
   extends: pcBlock,
   template: '#impact-comp',
-  props: ['focusedBlock', 'lockedField', 'blockName', 'expectedChange'],
+  props: ['focusedBlock', 'lockedField', 'blockName'],
   data: () => ({
     absoluteImpactDebouncer: null,
     relativeImpactDebouncer: null,

@@ -197,7 +197,7 @@ import { TRAFFIC_MODE, BLOCKED, FOCUS } from '../store/modules/calculator'
 const DEBOUNCE = 500
 
 export default {
-  props: ['focusedBlock', 'lockedField', 'blockName', 'expectedChange'],
+  props: ['focusedBlock', 'lockedField', 'blockName'],
   template: '#sample-comp',
   extends: pcBlock,
   data: () => ({
@@ -233,7 +233,6 @@ export default {
               sample: val,
               lockedField: this.lockedField,
               focusedBlock: this.focusedBlock,
-              expectedChange: this.expectedChange,
             })
           }
         }, DEBOUNCE)
@@ -254,7 +253,6 @@ export default {
               visitorsPerDay: val,
               focusedBlock: this.focusedBlock,
               lockedField: this.lockedField,
-              expectedChange: this.expectedChange,
             })
           }
         }, DEBOUNCE)
@@ -275,7 +273,6 @@ export default {
               runtime: val,
               focusedBlock: this.focusedBlock,
               lockedField: this.lockedField,
-              expectedChange: this.expectedChange,
             })
           }
         }, DEBOUNCE)

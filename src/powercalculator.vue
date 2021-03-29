@@ -133,7 +133,6 @@
           :blockName="FOCUS.BASE"
           :focusedBlock="focusedBlock"
           :lockedField="lockedField"
-          :expectedChange="expectedChange"
         >
         </base-comp>
 
@@ -141,7 +140,6 @@
           :blockName="FOCUS.SAMPLE"
           :focusedBlock.sync="focusedBlock"
           :lockedField.sync="lockedField"
-          :expectedChange="expectedChange"
         >
         </sample-comp>
 
@@ -150,7 +148,6 @@
           :blockName="FOCUS.IMPACT"
           :focusedBlock.sync="focusedBlock"
           :lockedField="lockedField"
-          :expectedChange="expectedChange"
         >
         </impact-comp>
 
@@ -159,7 +156,6 @@
           :blockName="FOCUS.IMPACT"
           :focusedBlock.sync="focusedBlock"
           :lockedField="lockedField"
-          :expectedChange.sync="expectedChange"
         >
         </non-inferiority-comp>
       </div>
@@ -181,7 +177,6 @@ import {
   TRAFFIC_MODE,
   COMPARISON_MODE,
   FOCUS,
-  CHANGE,
   BLOCKED,
 } from './store/modules/calculator'
 
@@ -193,8 +188,6 @@ export default {
     const data = {
       focusedBlock: importedData.calculateProp || FOCUS.SAMPLE,
       lockedField: importedData.lockedField || BLOCKED.DAYS,
-      expectedChange:
-        importedData.nonInferiority_expectedChange || CHANGE.NO_CHANGE,
     }
 
     return data
@@ -213,12 +206,6 @@ export default {
       Object.values(FOCUS).includes(importedData.focusedBlock)
     )
       this.focusedBlock = importedData.focusedBlock
-
-    if (
-      importedData.expectedChange &&
-      Object.values(CHANGE).includes(importedData.expectedChange)
-    )
-      this.expectedChange = importedData.expectedChange
 
     this.$store.commit('SET_IMPORTED_METRICS', importedData)
     this.$store.subscribe(() => {
@@ -276,7 +263,6 @@ export default {
           testType: val,
           focused: this.focusedBlock,
           lockedField: this.lockedField,
-          expectedChange: this.expectedChange
         })
         this.updateMetrics()
       },
@@ -308,7 +294,6 @@ export default {
         baseRate: this.$store.getters.baseRate,
         lockedField: this.lockedField,
         focusedBlock: this.focusedBlock,
-        expectedChange: this.expectedChange,
       })
     },
     updateMetrics() {
@@ -332,7 +317,6 @@ export default {
         lockedField: this.lockedField,
         // selected:           'relative'
         isNonInferiority: this.$store.getters.isNonInferiority,
-        expectedChange: this.expectedChange,
         // expId:              'exp_id',
       })
     },

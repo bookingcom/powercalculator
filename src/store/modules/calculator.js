@@ -32,12 +32,6 @@ export const BLOCKED = Object.freeze({
   DAYS: 'days',
 })
 
-export const CHANGE = Object.freeze({
-  NO_CHANGE: 'nochange',
-  DEGRADATION: 'degradation',
-  IMPROVEMENT: 'improvement',
-})
-
 function displayValue(value, type = 'int') {
   const alternativeToNaN = (val) =>
     !Number.isInteger(val) && !isFinite(val) ? '-' : val
@@ -162,16 +156,28 @@ export const calculator = {
       if (props.visitorsPerDay) state.visitorsPerDay = props.visitorsPerDay
 
       // Impact
-      if (props.thresholdRelative)
-        state.thresholdRelative = props.thresholdRelative / 100
-      if (props.thresholdAbsolute)
-        state.thresholdAbsolute = props.thresholdAbsolute
-      if (props.impact) state.relativeImpact = props.relativeImpact / 100
-      if (props.impact && props.baseRate)
+      if (props.relativeThreshold)
+        state.relativeThreshold = props.relativeThreshold / 100
+      if (props.absoluteThreshold)
+        state.absoluteThreshold = props.absoluteThreshold
+      if (props.relativeImpact && props.absoluteImpact) {
+        state.relativeImpact = props.relativeImpact / 100
+        state.absoluteImpact = props.absoluteImpact
+      } else if (props.relativeImpact) {
+        state.relativeImpact = props.relativeImpact / 100
         state.absoluteImpact = getAbsoluteImpact(
           props.baseRate,
           props.relativeImpact / 100
         )
+        // Necessary for backwards compatibility
+      } else if (props.impact) {
+        state.relativeImpact = props.impact / 100
+        state.absoluteImpact = getAbsoluteImpact(
+          props.baseRate,
+          props.impact / 100
+        )
+      }
+        
     },
     // Configuration
     SET_VARIANTS(state, amount) {
@@ -205,7 +211,7 @@ export const calculator = {
       state.isNonInferiority = !!flag
     },
 
-    SET_TEST_TYPE(state, { testType, focused, lockedField, expectedChange }) {
+    SET_TEST_TYPE(state, { testType, focused, lockedField }) {
       if (!Object.values(TEST_TYPE).includes(testType)) {
         state.testType = state.testType
         return
@@ -228,22 +234,7 @@ export const calculator = {
           ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
           : state.falsePositiveRate
 
-      let impact = state.relativeImpact
-      if (state.isNonInferiority) {
-        switch (expectedChange) {
-          case CHANGE.DEGRADATION:
-            impact = -state.thresholdRelative / 2
-            break
-          case CHANGE.IMPROVEMENT:
-            impact = state.thresholdRelative
-            break
-          case CHANGE.NO_CHANGE:
-          default:
-            impact = 0
-            break
-        }
-      }
-
+      const impact = state.isNonInferiority ? 0 : state.relativeImpact
       const opts = state.isNonInferiority
         ? {
             type: 'relative',
@@ -321,7 +312,7 @@ export const calculator = {
     // == BASE ==
     SET_BASE_RATE(
       state,
-      { baseRate, lockedField, focusedBlock, expectedChange }
+      { baseRate, lockedField, focusedBlock }
     ) {
       if (isNaN(baseRate) || baseRate < 0) {
         state.baseRate = state.baseRate
@@ -337,22 +328,7 @@ export const calculator = {
       const relativeThreshold =
         focusedBlock === FOCUS.SAMPLE ? state.relativeThreshold : 0
 
-      let impact = state.relativeImpact
-      if (state.isNonInferiority) {
-        switch (expectedChange) {
-          case CHANGE.DEGRADATION:
-            impact = -relativeThreshold / 2
-            break
-          case CHANGE.IMPROVEMENT:
-            impact = relativeThreshold
-            break
-          case CHANGE.NO_CHANGE:
-          default:
-            impact = 0
-            break
-        }
-      }
-
+      const impact = state.isNonInferiority ? 0 : state.relativeImpact
       const opts = state.isNonInferiority
         ? {
             type: 'relative',
@@ -443,7 +419,7 @@ export const calculator = {
     },
 
     // == SAMPLE ==
-    SET_SAMPLE(state, { sample, lockedField, expectedChange, focusedBlock }) {
+    SET_SAMPLE(state, { sample, lockedField,  focusedBlock }) {
       if (isNaN(sample) || sample < 0) {
         state.sample = state.sample
         return
@@ -455,23 +431,7 @@ export const calculator = {
       const relativeThreshold =
         focusedBlock === FOCUS.SAMPLE ? state.relativeThreshold : 0
 
-      let impact = state.relativeImpact
-      if (state.isNonInferiority) {
-        switch (expectedChange) {
-          case CHANGE.DEGRADATION:
-            impact = -relativeThreshold / 2
-            break
-          case CHANGE.IMPROVEMENT:
-            impact = relativeThreshold
-            break
-          case CHANGE.NO_CHANGE:
-          default:
-            impact = 0
-            break
-        }
-      }
-
-      // To achieve consistency, we assume relativeThreshold = 0
+      const impact = state.isNonInferiority ? 0 : state.relativeImpact
       const opts = state.isNonInferiority
         ? {
             type: 'relative',
@@ -529,7 +489,7 @@ export const calculator = {
 
       state.sample = newSample
     },
-    SET_RUNTIME(state, { runtime, lockedField, expectedChange, focusedBlock }) {
+    SET_RUNTIME(state, { runtime, lockedField, focusedBlock }) {
       if (isNaN(runtime) || runtime <= 0) {
         state.runtime = state.runtime
         return
@@ -546,22 +506,7 @@ export const calculator = {
         const relativeThreshold =
           focusedBlock === FOCUS.SAMPLE ? state.relativeThreshold : 0
 
-        let impact = state.relativeImpact
-        if (state.isNonInferiority) {
-          switch (expectedChange) {
-            case CHANGE.DEGRADATION:
-              impact = -relativeThreshold / 2
-              break
-            case CHANGE.IMPROVEMENT:
-              impact = relativeThreshold
-              break
-            case CHANGE.NO_CHANGE:
-            default:
-              impact = 0
-              break
-          }
-        }
-
+        const impact = state.isNonInferiority ? 0 : state.relativeImpact
         const opts = state.isNonInferiority
           ? {
               type: 'relative',
@@ -617,7 +562,7 @@ export const calculator = {
 
     SET_VISITORS_PER_DAY(
       state,
-      { visitorsPerDay, lockedField, expectedChange, focusedBlock }
+      { visitorsPerDay, lockedField, focusedBlock }
     ) {
       if (isNaN(visitorsPerDay) || visitorsPerDay < 0) {
         return
@@ -633,23 +578,7 @@ export const calculator = {
         const relativeThreshold =
           focusedBlock === FOCUS.SAMPLE ? state.relativeThreshold : 0
 
-        let impact = state.relativeImpact
-        if (state.isNonInferiority) {
-          switch (expectedChange) {
-            case CHANGE.DEGRADATION:
-              impact = -relativeThreshold / 2
-              break
-            case CHANGE.IMPROVEMENT:
-              impact = relativeThreshold
-              break
-            case CHANGE.NO_CHANGE:
-            default:
-              impact = 0
-              break
-          }
-        }
-
-        // To achieve consistency, we assume relativeThreshold = 0
+        const impact = state.isNonInferiority ? 0 : state.relativeImpact
         const opts = state.isNonInferiority
           ? {
               type: 'relative',
@@ -753,7 +682,7 @@ export const calculator = {
     // This is only triggered when non-inferity == true and focusedBlock === sample
     SET_THRESHOLD(
       state,
-      { threshold, isAbsolute, expectedChange, lockedField }
+      { threshold, isAbsolute, lockedField }
     ) {
       if (isNaN(threshold) || threshold < 0) {
         state.threshold = state.threshold
@@ -767,7 +696,7 @@ export const calculator = {
         ? state.trafficMode === TRAFFIC_MODE.TOTAL ? threshold / state.runtime : threshold
         : threshold / 100
 
-
+      const impact = state.isNonInferiority ? 0 : state.relativeImpact
       const opts = {
         type: isAbsolute ? 'absolutePerDay' : 'relative',
         alternative: getAlternative(state.isNonInferiority),
@@ -790,7 +719,7 @@ export const calculator = {
       const sample = Math.ceil(
         sampleFormula({
           base_rate: baseRate,
-          effect_size: 0,
+          effect_size: impact,
           sd_rate: state.standardDeviation,
           alpha,
           beta: 1 - state.targetPower,
@@ -905,9 +834,9 @@ export const calculator = {
     },
 
     // THRESHOLD
-    thresholdRelative: (state) =>
+    relativeThreshold: (state) =>
       displayValue(state.relativeThreshold, 'percentage'),
-    thresholdAbsolute: (state) =>
+    absoluteThreshold: (state) =>
       displayValue(state.absoluteThreshold, 'float'),
   },
 }

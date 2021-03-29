@@ -63,27 +63,6 @@
           ></pc-block-field>
         </label>
       </li>
-
-      <li class="pc-input-item pc-input-left-bottom">
-        <label>
-          <span class="pc-input-title no-sub-title">
-            Expected Change
-            <small class="pc-input-sub-title"> </small>
-          </span>
-
-          <div class="pc-non-inf-select-wrapper">
-            <select
-              v-model="change"
-              class="pc-non-inf-select"
-              :disabled="focusedBlock === blockName"
-            >
-              <option :value="CHANGE.NO_CHANGE">No Change</option>
-              <option :value="CHANGE.DEGRADATION">Degradation</option>
-              <option :value="CHANGE.IMPROVEMENT">Improvement</option>
-            </select>
-          </div>
-        </label>
-      </li>
     </ul>
   </div>
 </template>
@@ -95,13 +74,12 @@ import {
   TEST_TYPE,
   FOCUS,
   BLOCKED,
-  CHANGE,
 } from '../store/modules/calculator'
 
 const DEBOUNCE = 500
 
 export default {
-  props: ['focusedBlock', 'lockedField', 'blockName', 'expectedChange'],
+  props: ['focusedBlock', 'lockedField', 'blockName'],
   extends: pcBlock,
   template: '#base-comp',
   data: () => ({
@@ -126,12 +104,10 @@ export default {
     },
     thresholdRelative: {
       get() {
-        return this.$store.getters.thresholdRelative
+        return this.$store.getters.relativeThreshold
       },
       set(threshold) {
-        if (
-          this.focusedBlock === FOCUS.SAMPLE
-        ) {
+        if (this.focusedBlock === FOCUS.SAMPLE) {
           if (this.relativeDebouncer != null)
             clearTimeout(this.relativeDebouncer)
           this.relativeDebouncer = setTimeout(() => {
@@ -139,7 +115,6 @@ export default {
               threshold,
               isAbsolute: false,
               lockedField: this.lockedField,
-              expectedChange: this.expectedChange,
             })
           }, DEBOUNCE)
         }
@@ -147,12 +122,10 @@ export default {
     },
     thresholdAbsolute: {
       get() {
-        return this.$store.getters.thresholdAbsolute
+        return this.$store.getters.absoluteThreshold
       },
       set(threshold) {
-        if (
-          this.focusedBlock === FOCUS.SAMPLE
-        ) {
+        if (this.focusedBlock === FOCUS.SAMPLE) {
           if (this.absoluteDebouncer != null)
             clearTimeout(this.absoluteDebouncer)
           this.absoluteDebouncer = setTimeout(() => {
@@ -160,7 +133,6 @@ export default {
               threshold,
               isAbsolute: true,
               lockedField: this.lockedField,
-              expectedChange: this.expectedChange,
             })
           }, DEBOUNCE)
         }
@@ -171,20 +143,6 @@ export default {
     },
     testType() {
       return this.$store.getters.testType
-    },
-    change: {
-      get() {
-        return this.expectedChange
-      },
-      set(newValue) {
-        this.$emit('update:expectedChange', newValue)
-        this.$store.commit('SET_THRESHOLD', {
-          threshold: this.$store.getters.thresholdRelative,
-          isAbsolute: false,
-          lockedField: this.lockedField,
-          expectedChange: newValue,
-        })
-      },
     },
   },
 }
