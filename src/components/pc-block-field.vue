@@ -3,7 +3,7 @@
     v-if="enableEdit"
     class="pc-value-field-wrapper"
     :class="fieldWrapperClasses"
-    v-on:click="setFocus()"
+    @click="setFocus()"
   >
     <span
       class="pc-value-formatting pc-value--formatted"
@@ -27,16 +27,17 @@
     >
       <span
         class="pc-value-display"
-        :data-test="isFocused"
         :contenteditable="!isReadOnly"
-        v-on:focus="setFocusStyle(true)"
-        v-on:blur="blur"
-        v-on:input="updateVal"
-        v-initialvalue
+        @focus="setFocusStyle(true)"
+        @blur="setFocusStyle(false)"
+        @input="updateVal"
+        @keydown.enter.prevent
         ref="pc-value"
-      ></span>
+        >{{ formattedVal }}</span
+      >
     </span>
   </span>
+  <!-- Display value in case it is not editable -->
   <span v-else class="pc-value-display pc-field-not-editable">
     {{ prefix }} <strong>{{ formattedVal }}</strong> {{ suffix }}
   </span>
@@ -91,7 +92,7 @@ export default {
       return result
     },
     fieldWrapperClasses() {
-      let obj = {}
+      const obj = {}
 
       obj['pc-field--read-only'] = this.isReadOnly
       obj['pc-field--focused'] = this.isFocused
@@ -141,42 +142,12 @@ export default {
         }
       }
     },
-    blur(event) {
-      this.setFocusStyle(false)
-      event.target.textContent = this.fieldValue
-    },
     setFocusStyle(bool) {
       this.isFocused = bool
     },
     setFocus() {
-      let el = this.$refs['pc-value']
-      el.textContent = this.fieldValue
+      const el = this.$refs['pc-value']
       el.focus()
-    },
-    placeCaretAtEnd(el) {
-      if (
-        typeof window.getSelection != 'undefined' &&
-        typeof document.createRange != 'undefined'
-      ) {
-        var range = document.createRange()
-        range.selectNodeContents(el)
-        range.collapse(false)
-        var sel = window.getSelection()
-        sel.removeAllRanges()
-        sel.addRange(range)
-      } else if (typeof document.body.createTextRange != 'undefined') {
-        var textRange = document.body.createTextRange()
-        textRange.moveToElementText(el)
-        textRange.collapse(false)
-        textRange.select()
-      }
-    },
-  },
-  directives: {
-    initialvalue: {
-      inserted(el, directive, vnode) {
-        el.textContent = vnode.context.val
-      },
     },
   },
 }
