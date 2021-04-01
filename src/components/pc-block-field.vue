@@ -32,8 +32,9 @@
         @blur="setFocusStyle(false)"
         @input="updateVal"
         @keydown.enter.prevent
+        v-text="formattedVal"
         ref="pc-value"
-        >{{ formattedVal }}</span
+        ></span
       >
     </span>
   </span>
