@@ -156,12 +156,18 @@ export const calculator = {
       if (props.visitorsPerDay) state.visitorsPerDay = +props.visitorsPerDay
 
       // Impact
+      // non-inferiority
       if (props.relativeThreshold)
         state.relativeThreshold = props.relativeThreshold / 100
       if (props.absoluteThreshold)
         state.absoluteThreshold = +props.absoluteThreshold
+
+      // comparative
       if (props.relativeImpact && props.absoluteImpact) {
         state.relativeImpact = props.relativeImpact / 100
+        state.absoluteImpact = +props.absoluteImpact
+      } else if (props.impact && props.absoluteImpact) {
+        state.relativeImpact = props.impact / 100
         state.absoluteImpact = +props.absoluteImpact
       } else if (props.relativeImpact && props.baseRate) {
         state.relativeImpact = props.relativeImpact / 100

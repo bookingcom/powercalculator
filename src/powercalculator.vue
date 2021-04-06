@@ -303,6 +303,7 @@ export default {
         sample: this.$store.getters.sample,
         baseRate: this.$store.getters.baseRate,
         impact: this.$store.getters.relativeImpact,
+        absoluteImpact: this.$store.getters.absoluteImpact,
         targetPower: this.$store.getters.targetPower,
         falsePositiveRate: this.$store.getters.falsePositiveRate,
         standardDeviation: this.$store.getters.standardDeviation,
