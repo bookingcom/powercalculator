@@ -207,7 +207,12 @@ export default {
     )
       this.focusedBlock = importedData.focusedBlock
 
+    // Import the metrics.
     this.$store.commit('SET_IMPORTED_METRICS', importedData)
+    // Recalculate possible missing values.
+    this.refreshValues()
+    // Trigger the update event.
+    this.updateMetrics()
     this.$store.subscribe(() => {
       this.updateMetrics()
     })
