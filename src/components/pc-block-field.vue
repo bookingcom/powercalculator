@@ -34,8 +34,7 @@
         @keydown.enter.prevent
         v-text="formattedVal"
         ref="pc-value"
-        ></span
-      >
+      ></span>
     </span>
   </span>
   <!-- Display value in case it is not editable -->

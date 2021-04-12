@@ -16,7 +16,7 @@
       class="pc-calc-radio pc-calc-radio--impact"
       :class="{ 'pc-calc-radio--active': focusedBlock === blockName }"
     >
-      <input type="radio" v-model="isSelected" :value="blockName" />
+      <input type="radio" v-model="isFocused" :value="blockName" />
       {{ focusedBlock === blockName ? 'Calculating' : 'Calculate' }}
     </label>
 
@@ -74,6 +74,7 @@ import {
   TEST_TYPE,
   FOCUS,
   BLOCKED,
+  SELECTED,
 } from '../store/modules/calculator'
 
 const DEBOUNCE = 500
@@ -89,7 +90,7 @@ export default {
   computed: {
     CHANGE: () => CHANGE,
     FOCUS: () => FOCUS,
-    isSelected: {
+    isFocused: {
       get() {
         return this.focusedBlock
       },
@@ -111,6 +112,7 @@ export default {
           if (this.relativeDebouncer != null)
             clearTimeout(this.relativeDebouncer)
           this.relativeDebouncer = setTimeout(() => {
+            this.$emit('update:selected', SELECTED.RELATIVE)
             this.$store.commit('SET_THRESHOLD', {
               threshold,
               isAbsolute: false,
@@ -129,6 +131,7 @@ export default {
           if (this.absoluteDebouncer != null)
             clearTimeout(this.absoluteDebouncer)
           this.absoluteDebouncer = setTimeout(() => {
+            this.$emit('update:selected', SELECTED.ABSOLUTE)
             this.$store.commit('SET_THRESHOLD', {
               threshold,
               isAbsolute: true,

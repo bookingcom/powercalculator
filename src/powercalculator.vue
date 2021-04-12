@@ -147,6 +147,7 @@
           v-if="!isNonInferiority"
           :blockName="FOCUS.IMPACT"
           :focusedBlock.sync="focusedBlock"
+          @update:selected="selected = $event"
           :lockedField="lockedField"
         >
         </impact-comp>
@@ -155,6 +156,7 @@
           v-if="isNonInferiority"
           :blockName="FOCUS.IMPACT"
           :focusedBlock.sync="focusedBlock"
+          @update:selected="selected = $event"
           :lockedField="lockedField"
         >
         </non-inferiority-comp>
@@ -176,6 +178,7 @@ import {
   TEST_TYPE,
   TRAFFIC_MODE,
   COMPARISON_MODE,
+  SELECTED,
   FOCUS,
   BLOCKED,
 } from './store/modules/calculator'
@@ -188,6 +191,7 @@ export default {
     const data = {
       focusedBlock: importedData.calculateProp || FOCUS.SAMPLE,
       lockedField: importedData.lockedField || BLOCKED.DAYS,
+      selected: importedData.selected || SELECTED.RELATIVE
     }
 
     return data
@@ -206,6 +210,12 @@ export default {
       Object.values(FOCUS).includes(importedData.focusedBlock)
     )
       this.focusedBlock = importedData.focusedBlock
+
+    if (
+      importedData.selected &&
+      Object.values(SELECTED).includes(importedData.selected)
+    )
+      this.selected = importedData.selected
 
     // Import the metrics.
     this.$store.commit('SET_IMPORTED_METRICS', importedData)
@@ -321,11 +331,11 @@ export default {
         comparisonMode: this.$store.getters.comparisonMode,
         trafficMode: this.$store.getters.trafficMode,
         lockedField: this.lockedField,
-        // selected:           'relative'
+        selected: this.selected,
         isNonInferiority: this.$store.getters.isNonInferiority,
         // expId:              'exp_id',
       })
-    },
+    }
   },
 
   components: {
