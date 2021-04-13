@@ -188,7 +188,7 @@ export const calculator = {
         // Backwards compatibility (1)
       } else if (props.relativeImpact && props.baseRate) {
         state.relativeImpact = props.relativeImpact / 100
-        state.absoluteImpact = props.getAbsoluteImpact(
+        state.absoluteImpact = getAbsoluteImpact(
           props.baseRate,
           props.relativeImpact / 100
         )
