@@ -7,13 +7,19 @@ import pcBlockField from './pc-block-field.vue'
 import pcSvgChain from './pc-svg-chain.vue'
 
 export default {
-  props: ['fieldFromBlock'],
-  data() {
-    return {}
-  },
+  props: ['blockName', 'lockedField', 'focusedBlock'],
+  data: () => ({}),
   computed: {
     testType() {
       return this.$store.getters.testType
+    },
+  },
+  computed: {
+    isBlockFocused() {
+      return this.focusedBlock === this.blockName
+    },
+    isReadOnly() {
+      return this.calculateProp == this.blockName
     },
   },
   components: {

@@ -1,12 +1,9 @@
 <template id="base-comp">
   <div
     class="pc-block pc-block--base"
-    :class="{ 'pc-block-focused': focusedBlock === fieldFromBlock }"
+    :class="{ 'pc-block-focused': isBlockFocused }"
   >
-    <pc-svg-chain
-      :fieldFromBlock="blockName"
-      :focusedBlock="focusedBlock"
-    ></pc-svg-chain>
+    <pc-svg-chain :isBlockFocused="isBlockFocused"></pc-svg-chain>
 
     <div class="pc-header" v-if="testType == 'gTest'">Base Rate</div>
     <div class="pc-header" v-else>Base Average</div>
@@ -41,10 +38,9 @@
           <pc-block-field
             fieldProp="visitorsWithGoals"
             :fieldValue="visitorsWithGoals"
-            :fieldFromBlock="fieldFromBlock"
             :isBlockFocused="isBlockFocused"
             :isReadOnly="true"
-            :enableEdit="false"
+            enableEdit="false"
           ></pc-block-field>
         </label>
       </li>
@@ -54,7 +50,6 @@
           <pc-block-field
             prefix="±"
             fieldProp="sdRate"
-            fieldFromBlock="base"
             :fieldValue.sync="sdRate"
             :isReadOnly="isReadOnly"
             :isBlockFocused="isBlockFocused"
@@ -74,7 +69,6 @@ import { TEST_TYPE, BLOCKED, FOCUS } from '../store/modules/calculator'
 const DEBOUNCE = 500
 
 export default {
-  props: ['focusedBlock', 'blockName', 'lockedField'],
   extends: pcBlock,
   template: '#base-comp',
   data: () => ({
@@ -83,12 +77,6 @@ export default {
   }),
   computed: {
     TEST_TYPE: () => TEST_TYPE,
-    isBlockFocused() {
-      return this.focusedBlock === this.blockName
-    },
-    isReadOnly() {
-      return this.calculateProp == this.blockName
-    },
     base: {
       get() {
         return this.$store.getters.baseRate

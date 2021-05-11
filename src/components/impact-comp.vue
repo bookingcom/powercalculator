@@ -2,22 +2,19 @@
   <div
     class="pc-block pc-block--impact"
     :class="{
-      'pc-block-focused': focusedBlock == blockName,
-      'pc-block-to-calculate': focusedBlock === blockName,
+      'pc-block-focused': isBlockFocused,
+      'pc-block-to-calculate': isBlockFocused,
     }"
   >
-    <pc-svg-chain
-      :focusedBlock="focusedBlock"
-      :fieldFromBlock="blockName"
-    ></pc-svg-chain>
+    <pc-svg-chain :isBlockFocused="isBlockFocused"></pc-svg-chain>
 
     <label
       slot="text"
       class="pc-calc-radio pc-calc-radio--impact"
-      :class="{ 'pc-calc-radio--active': focusedBlock === blockName }"
+      :class="{ 'pc-calc-radio--active': isBlockFocused }"
     >
       <input type="radio" v-model="isFocused" :value="blockName" />
-      {{ focusedBlock === blockName ? 'Calculating' : 'Calculate' }}
+      {{ isBlockFocused ? 'Calculating' : 'Calculate' }}
     </label>
 
     <div class="pc-header">Impact</div>
@@ -33,9 +30,8 @@
             suffix="%"
             fieldProp="impact"
             :fieldValue.sync="relativeImpact"
-            :testType="testType"
-            v-bind:isReadOnly="focusedBlock === blockName"
-            v-bind:isBlockFocused="focusedBlock === blockName"
+            :isReadOnly="isBlockFocused"
+            :isBlockFocused="isBlockFocused"
             enableEdit="true"
           ></pc-block-field>
         </label>
@@ -49,9 +45,8 @@
             fieldProp="impactByMetricValue"
             :suffix="testType == 'gTest' ? '%' : ''"
             :fieldValue.sync="absoluteImpact"
-            v-bind:testType="testType"
-            v-bind:isReadOnly="focusedBlock === blockName"
-            v-bind:isBlockFocused="focusedBlock === blockName"
+            :isReadOnly="isBlockFocuse"
+            :isBlockFocused="isBlockFocused"
             enableEdit="true"
             aria-label="visitors with goals"
           ></pc-block-field>
@@ -67,10 +62,9 @@
           <pc-block-field
             class="pc-input-field"
             fieldProp="impactByVisitors"
-            v-bind:fieldValue="absoluteImpactPerVisitor"
-            v-bind:testType="testType"
+            :fieldValue="absoluteImpactPerVisitor"
             isReadOnly="true"
-            v-bind:isBlockFocused="focusedBlock === blockName"
+            :isBlockFocused="isBlockFocused"
             enableEdit="false"
           ></pc-block-field>
           <span class="pc-input-details">
@@ -87,9 +81,8 @@
           <pc-block-field
             fieldProp="impactByVisitorsPerDay"
             :fieldValue="absoluteImpactPerVisitorPerDay"
-            v-bind:testType="testType"
             isReadOnly="true"
-            :isBlockFocused="focusedBlock === blockName"
+            :isBlockFocused="isBlockFocused"
             enableEdit="false"
           ></pc-block-field>
           <span class="pc-input-details">
@@ -111,7 +104,6 @@ import {
   TRAFFIC_MODE,
   TEST_TYPE,
   FOCUS,
-  BLOCKED,
   SELECTED,
 } from '../store/modules/calculator'
 
@@ -120,7 +112,6 @@ const DEBOUNCE = 500
 export default {
   extends: pcBlock,
   template: '#impact-comp',
-  props: ['focusedBlock', 'lockedField', 'blockName'],
   data: () => ({
     absoluteImpactDebouncer: null,
     relativeImpactDebouncer: null,
@@ -135,9 +126,6 @@ export default {
           this.$emit('update:focusedBlock', this.blockName)
         }
       },
-    },
-    enableEdit() {
-      return this.focusedBlock === this.blockName
     },
     isNonInferiority() {
       return this.$store.getters.isNonInferiority

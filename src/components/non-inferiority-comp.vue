@@ -2,22 +2,19 @@
   <div
     class="pc-block pc-block--noninferiority"
     :class="{
-      'pc-block-focused': focusedBlock == blockName,
-      'pc-block-to-calculate': focusedBlock === blockName,
+      'pc-block-focused': isBlockFocused,
+      'pc-block-to-calculate': isBlockFocused,
     }"
   >
-    <pc-svg-chain
-      :focusedBlock="focusedBlock"
-      :fieldFromBlock="blockName"
-    ></pc-svg-chain>
+    <pc-svg-chain :isBlockFocused="isBlockFocused"></pc-svg-chain>
 
     <label
       slot="text"
       class="pc-calc-radio pc-calc-radio--impact"
-      :class="{ 'pc-calc-radio--active': focusedBlock === blockName }"
+      :class="{ 'pc-calc-radio--active': isBlockFocused }"
     >
       <input type="radio" v-model="isFocused" :value="blockName" />
-      {{ focusedBlock === blockName ? 'Calculating' : 'Calculate' }}
+      {{ isBlockFocused ? 'Calculating' : 'Calculate' }}
     </label>
 
     <div class="pc-header">Non Inferiority</div>
@@ -34,10 +31,10 @@
             fieldProp="thresholdRelative"
             suffix="%"
             :fieldValue.sync="thresholdRelative"
-            v-bind:fieldFromBlock="fieldFromBlock"
-            v-bind:isBlockFocused="focusedBlock === blockName"
-            :isReadOnly="focusedBlock === blockName"
-            :enableEdit="true"
+            :fieldFromBlock="fieldFromBlock"
+            :isBlockFocused="isBlockFocused"
+            :isReadOnly="isBlockFocused"
+            enableEdit="true"
           ></pc-block-field>
         </label>
       </li>
@@ -56,10 +53,10 @@
             fieldProp="thresholdAbsolute"
             suffix=""
             :fieldValue.sync="thresholdAbsolute"
-            v-bind:fieldFromBlock="fieldFromBlock"
-            v-bind:isBlockFocused="focusedBlock === blockName"
-            :isReadOnly="focusedBlock === blockName"
-            :enableEdit="true"
+            :fieldFromBlock="fieldFromBlock"
+            :isBlockFocused="isBlockFocused"
+            :isReadOnly="isBlockFocused"
+            enableEdit="true"
           ></pc-block-field>
         </label>
       </li>
@@ -69,18 +66,11 @@
 
 <script>
 import pcBlock from './pc-block.vue'
-import {
-  TRAFFIC_MODE,
-  TEST_TYPE,
-  FOCUS,
-  BLOCKED,
-  SELECTED,
-} from '../store/modules/calculator'
+import { TRAFFIC_MODE, FOCUS, SELECTED } from '../store/modules/calculator'
 
 const DEBOUNCE = 500
 
 export default {
-  props: ['focusedBlock', 'lockedField', 'blockName'],
   extends: pcBlock,
   template: '#base-comp',
   data: () => ({

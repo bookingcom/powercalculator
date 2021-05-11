@@ -34,7 +34,7 @@
 
 <script>
 export default {
-  props: ['fieldFromBlock', 'focusedBlock'],
+  props: ['isBlockFocused'],
   data() {
     return {
       svgBoxWidth: 26,
@@ -42,10 +42,10 @@ export default {
   },
   computed: {
     svgFillColor() {
-      return this.focusedBlock == this.fieldFromBlock ? '#E2B634' : '#C1CFD8'
+      return this.isBlockFocused ? '#E2B634' : '#C1CFD8'
     },
     svgBgColor() {
-      return this.focusedBlock == this.fieldFromBlock ? '#FEF1CB' : '#F0F0F0'
+      return this.isBlockFocused ? '#FEF1CB' : '#F0F0F0'
     },
     svgBgLine() {
       let { svgFillColor, svgBgColor, svgBoxWidth } = this,

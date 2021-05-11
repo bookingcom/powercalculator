@@ -2,22 +2,19 @@
   <div
     class="pc-block pc-block--sample"
     :class="{
-      'pc-block-focused': focusedBlock == blockName,
-      'pc-block-to-calculate': focusedBlock === blockName,
+      'pc-block-focused': isBlockFocused,
+      'pc-block-to-calculate': isBlockFocused,
     }"
   >
-    <pc-svg-chain
-      :focusedBlock="focusedBlock"
-      :fieldFromBlock="blockName"
-    ></pc-svg-chain>
+    <pc-svg-chain :isBlockFocused="isBlockFocused"></pc-svg-chain>
 
     <label
       slot="text"
       class="pc-calc-radio pc-calc-radio--sample"
-      :class="{ 'pc-calc-radio--active': focusedBlock === blockName }"
+      :class="{ 'pc-calc-radio--active': isBlockFocused }"
     >
       <input type="radio" :value="blockName" v-model="isSelected" />
-      {{ focusedBlock === blockName ? 'Calculating' : 'Calculate' }}
+      {{ isBlockFocused ? 'Calculating' : 'Calculate' }}
     </label>
 
     <div class="pc-header">Sample Size</div>
@@ -32,8 +29,8 @@
 
           <pc-block-field
             :fieldValue.sync="sample"
-            :isReadOnly="!(onlyTotalVisitors && focusedBlock !== blockName)"
-            :enableEdit="onlyTotalVisitors || focusedBlock === blockName"
+            :isReadOnly="!(onlyTotalVisitors && !isBlockFocused)"
+            :enableEdit="onlyTotalVisitors || isBlockFocused"
           ></pc-block-field>
         </label>
       </li>
@@ -54,7 +51,7 @@
             fieldProp="visitorsPerDay"
             :fieldValue.sync="visitorsPerDay"
             :isReadOnly="lockedField === BLOCKED.VISITORS_PER_DAY"
-            :isBlockFocused="focusedBlock === blockName"
+            :isBlockFocused="isBlockFocused"
             enableEdit="true"
             :lockedField="lockedField"
           ></pc-block-field>
@@ -178,10 +175,10 @@
             prefix=""
             suffix=" days"
             :fieldValue.sync="runtime"
-            v-bind:isReadOnly="lockedField === BLOCKED.DAYS"
-            v-bind:isBlockFocused="focusedBlock === blockName"
+            :isReadOnly="lockedField === BLOCKED.DAYS"
+            :isBlockFocused="isBlockFocused"
             enableEdit="true"
-            v-bind:lockedField="lockedField"
+            :lockedField="lockedField"
             aria-label="Days"
           ></pc-block-field>
         </label>
@@ -197,7 +194,6 @@ import { TRAFFIC_MODE, BLOCKED, FOCUS } from '../store/modules/calculator'
 const DEBOUNCE = 500
 
 export default {
-  props: ['focusedBlock', 'lockedField', 'blockName'],
   template: '#sample-comp',
   extends: pcBlock,
   data: () => ({

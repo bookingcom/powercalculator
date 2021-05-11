@@ -13,9 +13,11 @@
       :data-suffix="suffix"
       :style="fieldFormattedStyle"
     >
-      <span class="pc-value-display" ref="pc-formatted-value">{{
-        formattedVal
-      }}</span>
+      <span
+        class="pc-value-display"
+        ref="pc-formatted-value"
+        v-text="formattedVal"
+      ></span>
     </span>
 
     <span
@@ -44,6 +46,7 @@
 </template>
 
 <script>
+// Known bug: https://bugzilla.mozilla.org/show_bug.cgi?id=1248186
 export default {
   template: '#pc-block-field',
   props: [
@@ -54,7 +57,6 @@ export default {
     'fieldValue',
     'prefix',
     'suffix',
-    'fieldFromBlock',
   ],
   data() {
     return {
@@ -62,6 +64,7 @@ export default {
       isFocused: false,
     }
   },
+
   computed: {
     isLocked() {
       return this.lockedField && this.lockedField == this.fieldProp
@@ -133,7 +136,7 @@ export default {
 
       return newValue
     },
-    updateVal(event) {
+    updateVal() {
       if (this.enableEdit) {
         const value = this.getSanitizedPcValue()
 
@@ -147,9 +150,12 @@ export default {
     },
     setFocus() {
       const el = this.$refs['pc-value']
+      if (el.textContent != this.formattedVal)
+        el.textContent = this.formattedVal
       el.focus()
     },
   },
+  watch: {},
 }
 </script>
 

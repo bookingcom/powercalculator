@@ -59,7 +59,12 @@
             </label>
           </div>
 
-          <non-inferiority></non-inferiority>
+          <div class="pc-non-inferiority">
+            <label class="pc-non-inf-label">
+              <input type="checkbox" v-model="isNonInferiority" />
+              Use non inferiority test
+            </label>
+          </div>
 
           <div class="pc-comparison-mode">
             <label class="pc-comparison-mode-labels" slot="text">
@@ -168,7 +173,6 @@
 <script>
 import baseComp from './components/base-comp.vue'
 import impactComp from './components/impact-comp.vue'
-import nonInferiority from './components/non-inferiority.vue'
 import nonInferiorityComp from './components/non-inferiority-comp.vue'
 import pcBlockField from './components/pc-block-field.vue'
 import pcTooltip from './components/pc-tooltip.vue'
@@ -191,7 +195,7 @@ export default {
     const data = {
       focusedBlock: importedData.calculateProp || FOCUS.SAMPLE,
       lockedField: importedData.lockedField || BLOCKED.DAYS,
-      selected: importedData.selected || SELECTED.RELATIVE
+      selected: importedData.selected || SELECTED.RELATIVE,
     }
 
     return data
@@ -236,8 +240,15 @@ export default {
     FOCUS: () => FOCUS,
 
     // Getters
-    isNonInferiority() {
-      return this.$store.getters.isNonInferiority
+    isNonInferiority: {
+      get() {
+        return this.$store.getters.isNonInferiority
+      },
+      set(val) {
+        this.$store.commit('SET_IS_NON_INFERIORITY', val)
+        this.refreshValues()
+        this.updateMetrics()
+      },
     },
     falsePositiveRate: {
       get() {
@@ -335,7 +346,7 @@ export default {
         isNonInferiority: this.$store.getters.isNonInferiority,
         // expId:              'exp_id',
       })
-    }
+    },
   },
 
   components: {
@@ -344,7 +355,6 @@ export default {
     'sample-comp': sampleComp,
     'impact-comp': impactComp,
     'base-comp': baseComp,
-    'non-inferiority': nonInferiority,
     'non-inferiority-comp': nonInferiorityComp,
   },
 }
@@ -457,6 +467,19 @@ export default {
 
 .pc-test-type-tooltip-wrapper {
   display: inline-block;
+}
+
+.pc-non-inf-label {
+  white-space: nowrap;
+}
+
+.pc-non-inf-treshold {
+  display: flex;
+  align-items: center;
+}
+
+.pc-non-inf-treshold-input {
+  margin-left: 5px;
 }
 
 .pc-variants {
