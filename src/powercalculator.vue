@@ -89,7 +89,7 @@
         </div>
 
         <div class="pc-title">
-          Power Calculator <sup style="color: #f00; font-size: 11px">BETA</sup>
+          Power Calculator <sup style="color: #f00; font-size: 11px">β</sup>
         </div>
 
         <div class="pc-controls-right">

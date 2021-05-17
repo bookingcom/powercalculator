@@ -45,7 +45,7 @@
             fieldProp="impactByMetricValue"
             :suffix="testType == 'gTest' ? '%' : ''"
             :fieldValue.sync="absoluteImpact"
-            :isReadOnly="isBlockFocuse"
+            :isReadOnly="isBlockFocused"
             :isBlockFocused="isBlockFocused"
             enableEdit="true"
             aria-label="visitors with goals"
@@ -65,7 +65,7 @@
             :fieldValue="absoluteImpactPerVisitor"
             isReadOnly="true"
             :isBlockFocused="isBlockFocused"
-            enableEdit="false"
+            :enableEdit="false"
           ></pc-block-field>
           <span class="pc-input-details">
             {{
@@ -83,7 +83,7 @@
             :fieldValue="absoluteImpactPerVisitorPerDay"
             isReadOnly="true"
             :isBlockFocused="isBlockFocused"
-            enableEdit="false"
+            :enableEdit="false"
           ></pc-block-field>
           <span class="pc-input-details">
             {{

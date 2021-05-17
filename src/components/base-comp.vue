@@ -40,7 +40,7 @@
             :fieldValue="visitorsWithGoals"
             :isBlockFocused="isBlockFocused"
             :isReadOnly="true"
-            enableEdit="false"
+            :enableEdit="false"
           ></pc-block-field>
         </label>
       </li>
