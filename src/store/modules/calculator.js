@@ -115,8 +115,8 @@ export const calculator = {
     variants: 1, // A/A = 0, A/B = 1...
     relativeImpact: 0.02, // [0..1]
     absoluteImpact: 0.2,
-    relativeThreshold: 0,
-    absoluteThreshold: 0,
+    relativeThreshold: 0.02,
+    absoluteThreshold: 80.2,
 
     // Configuration
     isNonInferiority: false,
@@ -335,7 +335,14 @@ export const calculator = {
 
     // == BASE ==
     SET_BASE_RATE(state, { baseRate, lockedField, focusedBlock }) {
-      if (isNaN(baseRate) || baseRate < 0) {
+      if (
+        // Do not allow not numbers
+        isNaN(baseRate) ||
+        // baseRate 0 or lower is always forbidden
+        baseRate <= 0 ||
+        // If it is binomial, do not allow 100% either.
+        (state.testType === TEST_TYPE.BINOMIAL && baseRate >= 100)
+      ) {
         state.baseRate = state.baseRate
         return
       }
@@ -652,7 +659,17 @@ export const calculator = {
 
     // == IMPACT ==
     SET_IMPACT(state, { impact, isAbsolute, lockedField }) {
-      if (isNaN(impact) || impact < 0) {
+      if (
+        // Do not allow not numbers
+        isNaN(impact) ||
+        // No percetages or values less than 0
+        impact <= 0 ||
+        // If it is not absolute, do not allow percentages higher or equal than 100
+        (!isAbsolute && impact >= 100) ||
+        // If it is absolute, do not allow percentages higher or equal than 100
+        // when it is binomial
+        (isAbsolute && state.testType === TEST_TYPE.BINOMIAL && impact >= 100)
+      ) {
         state.relativeImpact = state.relativeImpact
         state.absoluteImpact = state.absoluteImpact
         return
@@ -699,7 +716,14 @@ export const calculator = {
 
     // This is only triggered when non-inferity == true and focusedBlock === sample
     SET_THRESHOLD(state, { threshold, isAbsolute, lockedField }) {
-      if (isNaN(threshold) || threshold < 0) {
+      if (
+        // Disallow not numbers
+        isNaN(threshold) ||
+        // Not values lower than 0 in general
+        threshold <= 0 ||
+        // If it is relative, do not allow 100 or more.
+        (!isAbsolute && threshold >= 100)
+      ) {
         state.threshold = state.threshold
         return
       }
