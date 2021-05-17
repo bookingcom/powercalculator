@@ -75,7 +75,7 @@ function getAbsoluteThreshold(state) {
   const visitorsPerDay = state.visitorsPerDay
   const baseRate = state.baseRate
   const runtime = state.runtime
-  const relativeThreshold = state.relativeThreshold
+  const relativeThreshold = +state.relativeThreshold
 
   let absoluteThreshold = relativeThreshold * baseRate * visitorsPerDay
 
