@@ -17,7 +17,7 @@
       {{ isBlockFocused ? 'Calculating' : 'Calculate' }}
     </label>
 
-    <div class="pc-header">Non Inferiority</div>
+    <div class="pc-header">Acceptable Cost</div>
 
     <ul class="pc-inputs">
       <li class="pc-input-item pc-input-left">
