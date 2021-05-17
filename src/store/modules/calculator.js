@@ -265,7 +265,10 @@ export const calculator = {
             alternative: getAlternative(state.isNonInferiority),
             calculating: lockedField,
             runtime: state.runtime,
-            threshold: -state.relativeThreshold,
+            // The current threshold is invalid as it is the result of a
+            // different test. Also, it would turn the calculation stateful
+            // TODO: Confirm assumptions.
+            threshold: 0,
             visitors_per_day: state.visitorsPerDay,
             base_rate: newBaseRate,
           }
