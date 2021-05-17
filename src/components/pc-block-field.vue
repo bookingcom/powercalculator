@@ -22,7 +22,7 @@
 
     <span
       class="pc-value-formatting"
-      :class="'pc-value-formatting-' + fieldProp"
+      :class="fieldClass"
       :data-prefix="prefix"
       :data-suffix="suffix"
       :style="fieldEditableStyle"
@@ -64,7 +64,12 @@ export default {
       isFocused: false,
     }
   },
-
+  updated() {
+    // Resync the editable fields
+    const el = this.$refs['pc-value']
+    if (el && el.textContent != this.formattedVal)
+      el.textContent = this.formattedVal
+  },
   computed: {
     isLocked() {
       return this.lockedField && this.lockedField == this.fieldProp
@@ -93,6 +98,10 @@ export default {
       }
 
       return result
+    },
+    fieldClass() {
+      if (this.fieldProp != null) return `pc-value-formatting-${this.fieldProp}`
+      else return ''
     },
     fieldWrapperClasses() {
       const obj = {}
@@ -150,8 +159,6 @@ export default {
     },
     setFocus() {
       const el = this.$refs['pc-value']
-      if (el.textContent != this.formattedVal)
-        el.textContent = this.formattedVal
       el.focus()
     },
   },

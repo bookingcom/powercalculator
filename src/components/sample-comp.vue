@@ -28,6 +28,7 @@
           >
 
           <pc-block-field
+            fieldProp="sample"
             :fieldValue.sync="sample"
             :isReadOnly="!(onlyTotalVisitors && !isBlockFocused)"
             :enableEdit="onlyTotalVisitors || isBlockFocused"
