@@ -219,7 +219,9 @@ export default {
         return this.$store.getters.sample
       },
       set(val) {
-        if (this.sampleDebouncer != null) clearTimeout(this.sampleDebouncer)
+        if (this.sampleDebouncer != null) {
+          clearTimeout(this.sampleDebouncer)
+        }
         this.sampleDebouncer = setTimeout(() => {
           if (
             this.focusedBlock !== FOCUS.SAMPLE &&
@@ -240,7 +242,9 @@ export default {
         return this.$store.getters.visitorsPerDay
       },
       set(val) {
-        if (this.visitorsDebouncer != null) clearTimeout(this.visitorsDebouncer)
+        if (this.visitorsDebouncer != null) {
+          clearTimeout(this.visitorsDebouncer)
+        }
         this.visitorsDebouncer = setTimeout(() => {
           if (
             this.lockedField === BLOCKED.DAYS &&
@@ -260,7 +264,9 @@ export default {
         return this.$store.getters.runtime
       },
       set(val) {
-        if (this.runtimeDebouncer != null) clearTimeout(this.runtimeDebouncer)
+        if (this.runtimeDebouncer != null) {
+          clearTimeout(this.runtimeDebouncer)
+        }
         this.runtimeDebouncer = setTimeout(() => {
           if (
             this.lockedField === BLOCKED.VISITORS_PER_DAY &&

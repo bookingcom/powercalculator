@@ -67,8 +67,9 @@ export default {
   updated() {
     // Resync the editable fields
     const el = this.$refs['pc-value']
-    if (el && el.textContent != this.formattedVal)
+    if (el && el.textContent != this.formattedVal) {
       el.textContent = this.formattedVal
+    }
   },
   computed: {
     isLocked() {
@@ -82,8 +83,8 @@ export default {
         const [integer, decimal] = (result + '').split('.')
 
         result = integer.split('').reduceRight((prev, cur, i, arr) => {
-          let resultStr = cur + prev,
-            iFromLeft = arr.length - i
+          const iFromLeft = arr.length - i
+          let resultStr = cur + prev
 
           if (iFromLeft % 3 == 0 && iFromLeft != 0 && i != 0) {
             resultStr = sep + resultStr
@@ -100,8 +101,10 @@ export default {
       return result
     },
     fieldClass() {
-      if (this.fieldProp != null) return `pc-value-formatting-${this.fieldProp}`
-      else return ''
+      if (this.fieldProp != null) {
+        return `pc-value-formatting-${this.fieldProp}`
+      }
+      return ''
     },
     fieldWrapperClasses() {
       const obj = {}

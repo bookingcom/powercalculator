@@ -4,15 +4,15 @@
   "description": "Calculator to help define runtime for A/B Experiments",
   "main": "dist/powercalculator.js",
   "scripts": {
-    "test": "NODE_ENV=development jest && npm run vue-check",
+    "test": "yarn test:unit && yarn test:verifyMath && yarn lint",
+    "test:unit": "NODE_ENV=development jest",
     "test:verifyMath": "NODE_ENV=development jest ./tests/verification.test.js",
-    "store": "NODE_ENV=development jest ./tests/store.test.js",
-    "eslint": "npx eslint ./src --ext .js --ext .vue",
-    "vue-check": "npm run eslint && npm run store",
-    "build": "rollup -c",
+    "lint": "eslint ./src --ext .js --ext .vue",
+    "build:dev": "rollup -c",
     "build:production": "rollup -c --environment INCLUDE_DEPS,BUILD:production",
-    "watch": "rollup -c -w",
-    "serve": "serve"
+    "build:watch": "rollup -c -w",
+    "serve": "serve",
+    "format": "prettier --write src/**/*.{vue,js}"
   },
   "repository": {
     "type": "git",
@@ -35,6 +35,7 @@
     "eslint-plugin-vue": "^6.2.2",
     "jest": "^26.0.1",
     "jstat": "^1.9.3",
+    "prettier": "^2.3.0",
     "rands": "^1.0.0",
     "regenerator-runtime": "^0.13.7",
     "rollup": "^2.38.3",
@@ -54,5 +55,10 @@
     "transform": {
       "^.+\\.jsx?$": "babel-jest"
     }
+  },
+  "prettier": {
+    "tabWidth": 2,
+    "semi": false,
+    "singleQuote": true
   }
 }

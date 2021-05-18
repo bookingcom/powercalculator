@@ -136,8 +136,9 @@ export default {
       },
       set(val) {
         if (this.focusedBlock === FOCUS.SAMPLE) {
-          if (this.relativeImpactDebouncer != null)
+          if (this.relativeImpactDebouncer != null) {
             clearTimeout(this.relativeImpactDebouncer)
+          }
           this.relativeImpactDebouncer = setTimeout(() => {
             this.$emit('update:selected', SELECTED.RELATIVE)
             this.$store.commit('SET_IMPACT', {
@@ -158,8 +159,9 @@ export default {
       },
       set(val) {
         if (this.focusedBlock === FOCUS.SAMPLE) {
-          if (this.absoluteImpactDebouncer != null)
+          if (this.absoluteImpactDebouncer != null) {
             clearTimeout(this.absoluteImpactDebouncer)
+          }
           this.absoluteImpactDebouncer = setTimeout(() => {
             this.$emit('update:selected', SELECTED.ABSOLUTE)
             this.$store.commit('SET_IMPACT', {

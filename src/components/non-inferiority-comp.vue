@@ -76,7 +76,6 @@ export default {
     absoluteDebouncer: null,
   }),
   computed: {
-    CHANGE: () => CHANGE,
     FOCUS: () => FOCUS,
     isFocused: {
       get() {
@@ -97,8 +96,9 @@ export default {
       },
       set(threshold) {
         if (this.focusedBlock === FOCUS.SAMPLE) {
-          if (this.relativeDebouncer != null)
+          if (this.relativeDebouncer != null) {
             clearTimeout(this.relativeDebouncer)
+          }
           this.relativeDebouncer = setTimeout(() => {
             this.$emit('update:selected', SELECTED.RELATIVE)
             this.$store.commit('SET_THRESHOLD', {
@@ -116,8 +116,9 @@ export default {
       },
       set(threshold) {
         if (this.focusedBlock === FOCUS.SAMPLE) {
-          if (this.absoluteDebouncer != null)
+          if (this.absoluteDebouncer != null) {
             clearTimeout(this.absoluteDebouncer)
+          }
           this.absoluteDebouncer = setTimeout(() => {
             this.$emit('update:selected', SELECTED.ABSOLUTE)
             this.$store.commit('SET_THRESHOLD', {

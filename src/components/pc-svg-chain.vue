@@ -48,7 +48,7 @@ export default {
       return this.isBlockFocused ? '#FEF1CB' : '#F0F0F0'
     },
     svgBgLine() {
-      let { svgFillColor, svgBgColor, svgBoxWidth } = this,
+      const { svgFillColor, svgBgColor, svgBoxWidth } = this,
         strokeWidth = 2,
         stokeStyle = `linear-gradient(
                     0deg,

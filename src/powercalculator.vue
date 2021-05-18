@@ -206,20 +206,17 @@ export default {
     if (
       importedData.lockedField &&
       Object.values(BLOCKED).includes(importedData.lockedField)
-    )
-      this.lockedField = importedData.lockedField
+    ) {this.lockedField = importedData.lockedField}
 
     if (
       importedData.focusedBlock &&
       Object.values(FOCUS).includes(importedData.focusedBlock)
-    )
-      this.focusedBlock = importedData.focusedBlock
+    ) {this.focusedBlock = importedData.focusedBlock}
 
     if (
       importedData.selected &&
       Object.values(SELECTED).includes(importedData.selected)
-    )
-      this.selected = importedData.selected
+    ) {this.selected = importedData.selected}
 
     // Import the metrics.
     this.$store.commit('SET_IMPORTED_METRICS', importedData)

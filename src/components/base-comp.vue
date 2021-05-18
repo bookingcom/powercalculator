@@ -64,7 +64,7 @@
 
 <script>
 import pcBlock from './pc-block.vue'
-import { TEST_TYPE, BLOCKED, FOCUS } from '../store/modules/calculator'
+import { TEST_TYPE } from '../store/modules/calculator'
 
 const DEBOUNCE = 500
 
@@ -101,7 +101,9 @@ export default {
         return this.$store.getters.standardDeviation
       },
       set(val) {
-        if (this.sdRateDebouncer != null) clearTimeout(this.sdRateDebouncer)
+        if (this.sdRateDebouncer != null) {
+          clearTimeout(this.sdRateDebouncer)
+        }
         this.sdRateDebouncer = setTimeout(() => {
           this.$store.commit('SET_STANDARD_DEVIATION', val)
           // Little hack to not rewrite everything again.

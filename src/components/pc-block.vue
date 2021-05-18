@@ -13,8 +13,6 @@ export default {
     testType() {
       return this.$store.getters.testType
     },
-  },
-  computed: {
     isBlockFocused() {
       return this.focusedBlock === this.blockName
     },
@@ -23,7 +21,9 @@ export default {
     },
   },
   components: {
+    // eslint-disable-next-line vue/no-unused-components
     'pc-block-field': pcBlockField,
+    // eslint-disable-next-line vue/no-unused-components
     'pc-svg-chain': pcSvgChain,
   },
 }

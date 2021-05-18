@@ -1,7 +1,7 @@
 import calculator from './modules/calculator'
 
 const store = {
-  calculator
+  calculator,
 }
 
 export default store
