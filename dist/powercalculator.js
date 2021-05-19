@@ -6017,7 +6017,7 @@
       relativeThreshold = relativeThreshold / runtime;
     }
 
-    return isNaN(relativeThreshold) ? 0 : displayValue(relativeThreshold, 'float')
+    return isNaN(relativeThreshold) ? 0 : relativeThreshold
   }
 
   const calculator = {

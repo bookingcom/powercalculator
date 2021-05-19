@@ -97,7 +97,7 @@ function getRelativeThreshold(state) {
     relativeThreshold = relativeThreshold / runtime
   }
 
-  return isNaN(relativeThreshold) ? 0 : displayValue(relativeThreshold, 'float')
+  return isNaN(relativeThreshold) ? 0 : relativeThreshold
 }
 
 export const calculator = {
