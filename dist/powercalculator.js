@@ -9,8 +9,55 @@
 }(this, (function () { 'use strict';
 
   //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
 
-  var script = {
+  // Known bug: https://bugzilla.mozilla.org/show_bug.cgi?id=1248186
+  var script$8 = {
     template: '#pc-block-field',
     props: [
       'lockedField',
@@ -20,12 +67,18 @@
       'fieldValue',
       'prefix',
       'suffix',
-      'fieldFromBlock',
     ],
     data() {
       return {
         islockedFieldSet: (this.lockedField || '').length > 0,
         isFocused: false,
+      }
+    },
+    updated() {
+      // Resync the editable fields
+      const el = this.$refs['pc-value'];
+      if (el && el.textContent != this.formattedVal) {
+        el.textContent = this.formattedVal;
       }
     },
     computed: {
@@ -40,8 +93,8 @@
           const [integer, decimal] = (result + '').split('.');
 
           result = integer.split('').reduceRight((prev, cur, i, arr) => {
-            let resultStr = cur + prev,
-              iFromLeft = arr.length - i;
+            const iFromLeft = arr.length - i;
+            let resultStr = cur + prev;
 
             if (iFromLeft % 3 == 0 && iFromLeft != 0 && i != 0) {
               resultStr = sep + resultStr;
@@ -57,8 +110,14 @@
 
         return result
       },
+      fieldClass() {
+        if (this.fieldProp != null) {
+          return `pc-value-formatting-${this.fieldProp}`
+        }
+        return ''
+      },
       fieldWrapperClasses() {
-        let obj = {};
+        const obj = {};
 
         obj['pc-field--read-only'] = this.isReadOnly;
         obj['pc-field--focused'] = this.isFocused;
@@ -99,131 +158,24 @@
 
         return newValue
       },
-      updateVal(val) {
+      updateVal() {
         if (this.enableEdit) {
           const value = this.getSanitizedPcValue();
 
           if (value != this.fieldValue) {
-            // this.val = value;
             this.$emit('update:fieldValue', value);
           }
         }
-      },
-      /*
-          formatDisplay () {
-              if (this.enableEdit) {
-                  this.$refs['pc-value'].textContent = this.formatNumberFields(this.getSanitizedPcValue());
-              } else {
-                  this.val = this.formatNumberFields(this.fieldValue);
-              }
-          },
-          formatNumberFields (value) {
-              let result = parseFloat(value);
-
-              result = this.validateField(result);
-
-              return result || 0
-          },
-          */
-      blur() {
-        // this.formatDisplay();
-        this.setFocusStyle(false);
       },
       setFocusStyle(bool) {
         this.isFocused = bool;
       },
       setFocus() {
-        let el = this.$refs['pc-value'];
+        const el = this.$refs['pc-value'];
         el.focus();
       },
-      /*
-          validateField (value) {
-              let validateConfigList = this.getValidationConfig(),
-                  isValid = true,
-                  result = value;
-
-              if (isNaN(result) || !isFinite(result)) {
-                  result = validateConfigList.defaultVal;
-              }
-
-              if (validateConfigList.fns.length > 0) {
-                  validateConfigList.fns.forEach((fn) => {
-                      if (!fn(result)) {
-                          isValid = false;
-                      }
-                  })
-              }
-
-              if (!isValid) {
-                  result = validateConfigList.defaultVal;
-              }
-
-              return result
-          },
-          getValidationConfig () {
-              let {fieldProp, testtype} = this,
-                  validationTypeCategories,
-                  result;
-
-              if (validationCache[testtype] && validationCache[testtype][fieldProp]) {
-                  return validationCache[testtype][fieldProp]
-              }
-
-              validationTypeCategories = [].filter(Boolean);
-
-              result = validationTypeCategories.reduce((prev, cur) => {
-                  let {fn, defaultVal} = cur[fieldProp] || {};
-
-                  if (typeof fn != 'undefined') {
-                      prev.fns.push(fn);
-                  }
-                  if (typeof defaultVal != 'undefined') {
-                      prev.defaultVal = defaultVal;
-                  }
-                  return prev
-              }, {fns: [], defaultVal: 0})
-
-              //cacheing
-              validationCache[testtype] = validationCache[testtype] || {};
-              validationCache[testtype][fieldProp] = result;
-
-              return result
-          },
-          */
-      placeCaretAtEnd(el) {
-        if (
-          typeof window.getSelection != 'undefined' &&
-          typeof document.createRange != 'undefined'
-        ) {
-          var range = document.createRange();
-          range.selectNodeContents(el);
-          range.collapse(false);
-          var sel = window.getSelection();
-          sel.removeAllRanges();
-          sel.addRange(range);
-        } else if (typeof document.body.createTextRange != 'undefined') {
-          var textRange = document.body.createTextRange();
-          textRange.moveToElementText(el);
-          textRange.collapse(false);
-          textRange.select();
-        }
-      },
     },
-    watch: {
-      isFocused(newValue) {
-        this.$emit('update:focus', {
-          fieldProp: this.fieldFromBlock || this.fieldProp,
-          value: newValue,
-        });
-      },
-    },
-    directives: {
-      initialvalue: {
-        inserted(el, directive, vnode) {
-          el.textContent = vnode.context.val;
-        },
-      },
-    },
+    watch: {},
   };
 
   function normalizeComponent(template, style, script, scopeId, isFunctionalTemplate, moduleIdentifier /* server only */, shadowMode, createInjector, createInjectorSSR, createInjectorShadow) {
@@ -355,112 +307,37 @@
   }
 
   /* script */
-  const __vue_script__ = script;
+  const __vue_script__$8 = script$8;
 
   /* template */
-  var __vue_render__ = function() {
-    var _vm = this;
-    var _h = _vm.$createElement;
-    var _c = _vm._self._c || _h;
-    return _vm.enableEdit
-      ? _c(
-          "span",
-          {
-            staticClass: "pc-value-field-wrapper",
-            class: _vm.fieldWrapperClasses,
-            on: {
-              click: function($event) {
-                return _vm.setFocus()
-              }
-            }
-          },
-          [
-            _c(
-              "span",
-              {
-                staticClass: "pc-value-formatting pc-value--formatted",
-                class: "pc-value-formatting-" + _vm.fieldProp,
-                style: _vm.fieldFormattedStyle,
-                attrs: {
-                  "aria-hidden": "true",
-                  "data-prefix": _vm.prefix,
-                  "data-suffix": _vm.suffix
-                }
-              },
-              [
-                _c(
-                  "span",
-                  { ref: "pc-formatted-value", staticClass: "pc-value-display" },
-                  [_vm._v(_vm._s(_vm.formattedVal))]
-                )
-              ]
-            ),
-            _vm._v(" "),
-            _c(
-              "span",
-              {
-                staticClass: "pc-value-formatting",
-                class: "pc-value-formatting-" + _vm.fieldProp,
-                style: _vm.fieldEditableStyle,
-                attrs: { "data-prefix": _vm.prefix, "data-suffix": _vm.suffix }
-              },
-              [
-                _c("span", {
-                  directives: [
-                    { name: "initialvalue", rawName: "v-initialvalue" }
-                  ],
-                  ref: "pc-value",
-                  staticClass: "pc-value-display",
-                  attrs: {
-                    "data-test": _vm.isFocused,
-                    contenteditable: !_vm.isReadOnly
-                  },
-                  on: {
-                    focus: function($event) {
-                      return _vm.setFocusStyle(true)
-                    },
-                    blur: _vm.blur,
-                    input: _vm.updateVal
-                  }
-                })
-              ]
-            )
-          ]
-        )
-      : _c("span", { staticClass: "pc-value-display pc-field-not-editable" }, [
-          _vm._v("\n  " + _vm._s(_vm.prefix) + " "),
-          _c("strong", [_vm._v(_vm._s(_vm.formattedVal))]),
-          _vm._v(" " + _vm._s(_vm.suffix) + "\n")
-        ])
-  };
-  var __vue_staticRenderFns__ = [];
-  __vue_render__._withStripped = true;
+  var __vue_render__$8 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return (_vm.enableEdit)?_c('span',{staticClass:"pc-value-field-wrapper",class:_vm.fieldWrapperClasses,on:{"click":function($event){return _vm.setFocus()}}},[_c('span',{staticClass:"pc-value-formatting pc-value--formatted",class:'pc-value-formatting-' + _vm.fieldProp,style:(_vm.fieldFormattedStyle),attrs:{"aria-hidden":"true","data-prefix":_vm.prefix,"data-suffix":_vm.suffix}},[_c('span',{ref:"pc-formatted-value",staticClass:"pc-value-display",domProps:{"textContent":_vm._s(_vm.formattedVal)}})]),_vm._v(" "),_c('span',{staticClass:"pc-value-formatting",class:_vm.fieldClass,style:(_vm.fieldEditableStyle),attrs:{"data-prefix":_vm.prefix,"data-suffix":_vm.suffix}},[_c('span',{ref:"pc-value",staticClass:"pc-value-display",attrs:{"contenteditable":!_vm.isReadOnly},domProps:{"textContent":_vm._s(_vm.formattedVal)},on:{"focus":function($event){return _vm.setFocusStyle(true)},"blur":function($event){return _vm.setFocusStyle(false)},"input":_vm.updateVal,"keydown":function($event){if(!$event.type.indexOf('key')&&_vm._k($event.keyCode,"enter",13,$event.key,"Enter")){ return null; }$event.preventDefault();}}})])]):_c('span',{staticClass:"pc-value-display pc-field-not-editable"},[_vm._v("\n  "+_vm._s(_vm.prefix)+" "),_c('strong',[_vm._v(_vm._s(_vm.formattedVal))]),_vm._v(" "+_vm._s(_vm.suffix)+"\n")])};
+  var __vue_staticRenderFns__$8 = [];
 
     /* style */
-    const __vue_inject_styles__ = function (inject) {
+    const __vue_inject_styles__$8 = function (inject) {
       if (!inject) return
-      inject("data-v-799d29de_0", { source: "\n.pc-value-field-wrapper {\n  --base-padding: 5px;\n\n  display: block;\n  position: relative;\n  box-sizing: border-box;\n  width: 100%;\n  filter: drop-shadow(0 4px 2px rgba(0, 0, 0, 0.1));\n  border-radius: 5px;\n  background: var(--white);\n  padding: var(--base-padding);\n\n  overflow: hidden;\n}\n.pc-field--focused {\n  box-shadow: inset 0 0 0 1px var(--dark-blue);\n}\n.pc-value--formatted {\n  position: absolute;\n  left: 50%;\n  top: 50%;\n  transform: translate(-50%, -50%);\n  pointer-events: none;\n  width: 100%;\n}\n.pc-value-display {\n  box-sizing: border-box;\n  font-size: 1em;\n  line-height: 1.8em;\n  align-self: center;\n  min-height: 1em;\n  display: inline-block;\n}\n.pc-value-display:focus {\n  outline: 0;\n}\n.pc-non-inf-treshold-input,\n.pc-power-input,\n.pc-false-positive-input,\n.pc-variants-input {\n  display: inline-block;\n  vertical-align: middle;\n  padding: 4px 8px;\n  text-align: center;\n  width: 4em;\n  border: 2px solid var(--gray);\n  border-radius: 8px;\n  font-size: inherit;\n}\n.pc-variants-input {\n  width: 6.5em;\n}\n.pc-top-fields-error {\n  color: var(--red);\n}\n\n/* prefixes and suffixes */\n.pc-value-formatting:before {\n  color: var(--gray);\n  content: attr(data-prefix);\n}\n.pc-value-formatting:after {\n  color: var(--gray);\n  content: attr(data-suffix);\n}\n\n/* block to calculate override rules*/\n.pc-block-to-calculate .pc-value-field-wrapper:not(.pc-value-display) {\n  background: var(--light-yellow);\n  outline: 2px solid var(--dark-yellow);\n}\n.pc-block-to-calculate .pc-value .pc-value-formatting:before {\n  content: '=' attr(data-prefix);\n  color: var(--black);\n}\n.pc-block-to-calculate .pc-value-formatting:after {\n  color: var(--black);\n}\n", map: {"version":3,"sources":["/Users/amartinezdem/git_tree/github/bookingcom/powercalculator/src/components/pc-block-field.vue"],"names":[],"mappings":";AAyQA;EACA,mBAAA;;EAEA,cAAA;EACA,kBAAA;EACA,sBAAA;EACA,WAAA;EACA,iDAAA;EACA,kBAAA;EACA,wBAAA;EACA,4BAAA;;EAEA,gBAAA;AACA;AAEA;EACA,4CAAA;AACA;AAEA;EACA,kBAAA;EACA,SAAA;EACA,QAAA;EACA,gCAAA;EACA,oBAAA;EACA,WAAA;AACA;AAEA;EACA,sBAAA;EACA,cAAA;EACA,kBAAA;EACA,kBAAA;EACA,eAAA;EACA,qBAAA;AACA;AAEA;EACA,UAAA;AACA;AAEA;;;;EAIA,qBAAA;EACA,sBAAA;EACA,gBAAA;EACA,kBAAA;EACA,UAAA;EACA,6BAAA;EACA,kBAAA;EACA,kBAAA;AACA;AAEA;EACA,YAAA;AACA;AAEA;EACA,iBAAA;AACA;;AAEA,0BAAA;AAEA;EACA,kBAAA;EACA,0BAAA;AACA;AAEA;EACA,kBAAA;EACA,0BAAA;AACA;;AAEA,qCAAA;AAEA;EACA,+BAAA;EACA,qCAAA;AACA;AAEA;EACA,8BAAA;EACA,mBAAA;AACA;AAEA;EACA,mBAAA;AACA","file":"pc-block-field.vue","sourcesContent":["<template id=\"pc-block-field\">\n  <span\n    v-if=\"enableEdit\"\n    class=\"pc-value-field-wrapper\"\n    :class=\"fieldWrapperClasses\"\n    v-on:click=\"setFocus()\"\n  >\n    <span\n      class=\"pc-value-formatting pc-value--formatted\"\n      aria-hidden=\"true\"\n      :class=\"'pc-value-formatting-' + fieldProp\"\n      :data-prefix=\"prefix\"\n      :data-suffix=\"suffix\"\n      :style=\"fieldFormattedStyle\"\n    >\n      <span class=\"pc-value-display\" ref=\"pc-formatted-value\">{{\n        formattedVal\n      }}</span>\n    </span>\n\n    <span\n      class=\"pc-value-formatting\"\n      :class=\"'pc-value-formatting-' + fieldProp\"\n      :data-prefix=\"prefix\"\n      :data-suffix=\"suffix\"\n      :style=\"fieldEditableStyle\"\n    >\n      <span\n        class=\"pc-value-display\"\n        :data-test=\"isFocused\"\n        :contenteditable=\"!isReadOnly\"\n        v-on:focus=\"setFocusStyle(true)\"\n        v-on:blur=\"blur\"\n        v-on:input=\"updateVal\"\n        v-initialvalue\n        ref=\"pc-value\"\n      ></span>\n    </span>\n  </span>\n  <span v-else class=\"pc-value-display pc-field-not-editable\">\n    {{ prefix }} <strong>{{ formattedVal }}</strong> {{ suffix }}\n  </span>\n</template>\n\n<script>\nlet validationCache = {}\n\nexport default {\n  template: '#pc-block-field',\n  props: [\n    'lockedField',\n    'enableEdit',\n    'isReadOnly',\n    'fieldProp',\n    'fieldValue',\n    'prefix',\n    'suffix',\n    'fieldFromBlock',\n  ],\n  data() {\n    return {\n      islockedFieldSet: (this.lockedField || '').length > 0,\n      isFocused: false,\n    }\n  },\n  computed: {\n    isLocked() {\n      return this.lockedField && this.lockedField == this.fieldProp\n    },\n    formattedVal() {\n      let result = this.fieldValue\n      const sep = ','\n\n      if (result / 1000 >= 1) {\n        const [integer, decimal] = (result + '').split('.')\n\n        result = integer.split('').reduceRight((prev, cur, i, arr) => {\n          let resultStr = cur + prev,\n            iFromLeft = arr.length - i\n\n          if (iFromLeft % 3 == 0 && iFromLeft != 0 && i != 0) {\n            resultStr = sep + resultStr\n          }\n\n          return resultStr\n        }, '')\n\n        if (decimal) {\n          result += '.' + decimal\n        }\n      }\n\n      return result\n    },\n    fieldWrapperClasses() {\n      let obj = {}\n\n      obj['pc-field--read-only'] = this.isReadOnly\n      obj['pc-field--focused'] = this.isFocused\n      obj['pc-field-' + this.fieldProp] = true\n\n      return obj\n    },\n    fieldFormattedStyle() {\n      const result = {}\n      if (this.isFocused) {\n        result.display = 'none'\n      }\n\n      return result\n    },\n    fieldEditableStyle() {\n      const result = {}\n      if (!this.isFocused) {\n        result.opacity = 0\n      }\n\n      return result\n    },\n    testType() {\n      return this.$store.getters.testType\n    },\n  },\n  methods: {\n    getSanitizedPcValue() {\n      // People will use copy paste. We need some data sanitization\n\n      // remove markup\n      const oldValue = this.$refs['pc-value'].textContent + ''\n\n      // remove commas\n      // try to extract numbers from it\n      const newValue = parseFloat(oldValue.replace(/,/g, ''))\n\n      return newValue\n    },\n    updateVal(val) {\n      if (this.enableEdit) {\n        const value = this.getSanitizedPcValue()\n\n        if (value != this.fieldValue) {\n          // this.val = value;\n          this.$emit('update:fieldValue', value)\n        }\n      }\n    },\n    /*\n        formatDisplay () {\n            if (this.enableEdit) {\n                this.$refs['pc-value'].textContent = this.formatNumberFields(this.getSanitizedPcValue());\n            } else {\n                this.val = this.formatNumberFields(this.fieldValue);\n            }\n        },\n        formatNumberFields (value) {\n            let result = parseFloat(value);\n\n            result = this.validateField(result);\n\n            return result || 0\n        },\n        */\n    blur() {\n      // this.formatDisplay();\n      this.setFocusStyle(false)\n    },\n    setFocusStyle(bool) {\n      this.isFocused = bool\n    },\n    setFocus() {\n      let el = this.$refs['pc-value']\n      el.focus()\n    },\n    /*\n        validateField (value) {\n            let validateConfigList = this.getValidationConfig(),\n                isValid = true,\n                result = value;\n\n            if (isNaN(result) || !isFinite(result)) {\n                result = validateConfigList.defaultVal;\n            }\n\n            if (validateConfigList.fns.length > 0) {\n                validateConfigList.fns.forEach((fn) => {\n                    if (!fn(result)) {\n                        isValid = false;\n                    }\n                })\n            }\n\n            if (!isValid) {\n                result = validateConfigList.defaultVal;\n            }\n\n            return result\n        },\n        getValidationConfig () {\n            let {fieldProp, testtype} = this,\n                validationTypeCategories,\n                result;\n\n            if (validationCache[testtype] && validationCache[testtype][fieldProp]) {\n                return validationCache[testtype][fieldProp]\n            }\n\n            validationTypeCategories = [].filter(Boolean);\n\n            result = validationTypeCategories.reduce((prev, cur) => {\n                let {fn, defaultVal} = cur[fieldProp] || {};\n\n                if (typeof fn != 'undefined') {\n                    prev.fns.push(fn);\n                }\n                if (typeof defaultVal != 'undefined') {\n                    prev.defaultVal = defaultVal;\n                }\n                return prev\n            }, {fns: [], defaultVal: 0})\n\n            //cacheing\n            validationCache[testtype] = validationCache[testtype] || {};\n            validationCache[testtype][fieldProp] = result;\n\n            return result\n        },\n        */\n    placeCaretAtEnd(el) {\n      if (\n        typeof window.getSelection != 'undefined' &&\n        typeof document.createRange != 'undefined'\n      ) {\n        var range = document.createRange()\n        range.selectNodeContents(el)\n        range.collapse(false)\n        var sel = window.getSelection()\n        sel.removeAllRanges()\n        sel.addRange(range)\n      } else if (typeof document.body.createTextRange != 'undefined') {\n        var textRange = document.body.createTextRange()\n        textRange.moveToElementText(el)\n        textRange.collapse(false)\n        textRange.select()\n      }\n    },\n  },\n  watch: {\n    isFocused(newValue) {\n      this.$emit('update:focus', {\n        fieldProp: this.fieldFromBlock || this.fieldProp,\n        value: newValue,\n      })\n    },\n  },\n  directives: {\n    initialvalue: {\n      inserted(el, directive, vnode) {\n        el.textContent = vnode.context.val\n      },\n    },\n  },\n}\n</script>\n\n<style>\n.pc-value-field-wrapper {\n  --base-padding: 5px;\n\n  display: block;\n  position: relative;\n  box-sizing: border-box;\n  width: 100%;\n  filter: drop-shadow(0 4px 2px rgba(0, 0, 0, 0.1));\n  border-radius: 5px;\n  background: var(--white);\n  padding: var(--base-padding);\n\n  overflow: hidden;\n}\n\n.pc-field--focused {\n  box-shadow: inset 0 0 0 1px var(--dark-blue);\n}\n\n.pc-value--formatted {\n  position: absolute;\n  left: 50%;\n  top: 50%;\n  transform: translate(-50%, -50%);\n  pointer-events: none;\n  width: 100%;\n}\n\n.pc-value-display {\n  box-sizing: border-box;\n  font-size: 1em;\n  line-height: 1.8em;\n  align-self: center;\n  min-height: 1em;\n  display: inline-block;\n}\n\n.pc-value-display:focus {\n  outline: 0;\n}\n\n.pc-non-inf-treshold-input,\n.pc-power-input,\n.pc-false-positive-input,\n.pc-variants-input {\n  display: inline-block;\n  vertical-align: middle;\n  padding: 4px 8px;\n  text-align: center;\n  width: 4em;\n  border: 2px solid var(--gray);\n  border-radius: 8px;\n  font-size: inherit;\n}\n\n.pc-variants-input {\n  width: 6.5em;\n}\n\n.pc-top-fields-error {\n  color: var(--red);\n}\n\n/* prefixes and suffixes */\n\n.pc-value-formatting:before {\n  color: var(--gray);\n  content: attr(data-prefix);\n}\n\n.pc-value-formatting:after {\n  color: var(--gray);\n  content: attr(data-suffix);\n}\n\n/* block to calculate override rules*/\n\n.pc-block-to-calculate .pc-value-field-wrapper:not(.pc-value-display) {\n  background: var(--light-yellow);\n  outline: 2px solid var(--dark-yellow);\n}\n\n.pc-block-to-calculate .pc-value .pc-value-formatting:before {\n  content: '=' attr(data-prefix);\n  color: var(--black);\n}\n\n.pc-block-to-calculate .pc-value-formatting:after {\n  color: var(--black);\n}\n</style>\n"]}, media: undefined });
+      inject("data-v-f8c2be5a_0", { source: ".pc-value-field-wrapper{--base-padding:5px;display:block;position:relative;box-sizing:border-box;width:100%;filter:drop-shadow(0 4px 2px rgba(0, 0, 0, .1));border-radius:5px;background:var(--white);padding:var(--base-padding);overflow:hidden}.pc-field--focused{box-shadow:inset 0 0 0 1px var(--dark-blue)}.pc-value--formatted{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none;width:100%}.pc-value-display{box-sizing:border-box;font-size:1em;line-height:1.8em;align-self:center;min-height:1em;display:inline-block}.pc-value-display:focus{outline:0}.pc-false-positive-input,.pc-non-inf-treshold-input,.pc-power-input,.pc-variants-input{display:inline-block;vertical-align:middle;padding:4px 8px;text-align:center;width:4em;border:2px solid var(--gray);border-radius:8px;font-size:inherit}.pc-variants-input{width:6.5em}.pc-top-fields-error{color:var(--red)}.pc-value-formatting:before{color:var(--gray);content:attr(data-prefix)}.pc-value-formatting:after{color:var(--gray);content:attr(data-suffix)}.pc-block-to-calculate .pc-value-field-wrapper:not(.pc-value-display){background:var(--light-yellow);outline:2px solid var(--dark-yellow)}.pc-block-to-calculate .pc-value .pc-value-formatting:before{content:'=' attr(data-prefix);color:var(--black)}.pc-block-to-calculate .pc-value-formatting:after{color:var(--black)}", map: undefined, media: undefined });
 
     };
     /* scoped */
-    const __vue_scope_id__ = undefined;
+    const __vue_scope_id__$8 = undefined;
     /* module identifier */
-    const __vue_module_identifier__ = undefined;
+    const __vue_module_identifier__$8 = undefined;
     /* functional template */
-    const __vue_is_functional_template__ = false;
+    const __vue_is_functional_template__$8 = false;
     /* style inject SSR */
     
     /* style inject shadow dom */
     
 
     
-    const __vue_component__ = /*#__PURE__*/normalizeComponent(
-      { render: __vue_render__, staticRenderFns: __vue_staticRenderFns__ },
-      __vue_inject_styles__,
-      __vue_script__,
-      __vue_scope_id__,
-      __vue_is_functional_template__,
-      __vue_module_identifier__,
+    const __vue_component__$8 = /*#__PURE__*/normalizeComponent(
+      { render: __vue_render__$8, staticRenderFns: __vue_staticRenderFns__$8 },
+      __vue_inject_styles__$8,
+      __vue_script__$8,
+      __vue_scope_id__$8,
+      __vue_is_functional_template__$8,
+      __vue_module_identifier__$8,
       false,
       createInjector,
       undefined,
@@ -480,153 +357,101 @@
   //
   //
   //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
 
-  var script$1 = {
-      props: ['fieldFromBlock', 'focusedBlock'],
-      data () {
-          return {
-              svgBoxWidth: 26
-          }
+  var script$7 = {
+    props: ['isBlockFocused'],
+    data() {
+      return {
+        svgBoxWidth: 26,
+      }
+    },
+    computed: {
+      svgFillColor() {
+        return this.isBlockFocused ? '#E2B634' : '#C1CFD8'
       },
-      computed: {
-          svgFillColor () {
-              return this.focusedBlock == this.fieldFromBlock ? '#E2B634' : '#C1CFD8'
-          },
-          svgBgColor () {
-              return this.focusedBlock == this.fieldFromBlock ? '#FEF1CB' : '#F0F0F0'
-          },
-          svgBgLine () {
-              let { svgFillColor, svgBgColor, svgBoxWidth } = this,
-                  strokeWidth = 2,
-                  stokeStyle = `linear-gradient(
+      svgBgColor() {
+        return this.isBlockFocused ? '#FEF1CB' : '#F0F0F0'
+      },
+      svgBgLine() {
+        const { svgFillColor, svgBgColor, svgBoxWidth } = this,
+          strokeWidth = 2,
+          stokeStyle = `linear-gradient(
                     0deg,
                     transparent,
-                    transparent calc(50% - ${strokeWidth/2}px - 1px),
-                    ${svgFillColor} calc(50% - ${strokeWidth/2}px),
-                    ${svgFillColor} calc(50% + ${strokeWidth/2}px),
-                    transparent calc(50% + ${strokeWidth/2}px + 1px),
+                    transparent calc(50% - ${strokeWidth / 2}px - 1px),
+                    ${svgFillColor} calc(50% - ${strokeWidth / 2}px),
+                    ${svgFillColor} calc(50% + ${strokeWidth / 2}px),
+                    transparent calc(50% + ${strokeWidth / 2}px + 1px),
                     transparent 100%
                 )`,
-                  strokeMask = `linear-gradient(
+          strokeMask = `linear-gradient(
                     90deg,
                     transparent,
-                    transparent calc(50% - ${svgBoxWidth/2}px - 1px),
-                    ${svgBgColor} calc(50% - ${svgBoxWidth/2}px),
-                    ${svgBgColor} calc(50% + ${svgBoxWidth/2}px),
-                    transparent calc(50% + ${svgBoxWidth/2}px + 1px),
+                    transparent calc(50% - ${svgBoxWidth / 2}px - 1px),
+                    ${svgBgColor} calc(50% - ${svgBoxWidth / 2}px),
+                    ${svgBgColor} calc(50% + ${svgBoxWidth / 2}px),
+                    transparent calc(50% + ${svgBoxWidth / 2}px + 1px),
                     transparent 100%
                 )`;
 
-
-              return `background: ${strokeMask}, ${stokeStyle};`.replace(/\n/g, '');
-          }
-      }
+        return `background: ${strokeMask}, ${stokeStyle};`.replace(/\n/g, '')
+      },
+    },
   };
 
   /* script */
-  const __vue_script__$1 = script$1;
+  const __vue_script__$7 = script$7;
 
   /* template */
-  var __vue_render__$1 = function() {
-    var _vm = this;
-    var _h = _vm.$createElement;
-    var _c = _vm._self._c || _h;
-    return _c(
-      "svg",
-      {
-        staticClass: "pc-svg-chain-icon",
-        style: _vm.svgBgLine,
-        attrs: {
-          width: "100%",
-          height: "59px",
-          viewBox: "0 0 " + _vm.svgBoxWidth + " 59",
-          version: "1.1",
-          xmlns: "http://www.w3.org/2000/svg",
-          "xmlns:xlink": "http://www.w3.org/1999/xlink",
-          "aria-hidden": "true"
-        }
-      },
-      [
-        _c(
-          "g",
-          {
-            attrs: {
-              id: "Power-Calculator",
-              transform: "translate(-811.000000, -485.000000)"
-            }
-          },
-          [
-            _c(
-              "g",
-              { attrs: { transform: "translate(676.000000, 327.000000)" } },
-              [
-                _c(
-                  "g",
-                  {
-                    attrs: {
-                      id: "Chain",
-                      transform: "translate(132.000000, 158.000000)"
-                    }
-                  },
-                  [
-                    _c("path", {
-                      attrs: {
-                        d:
-                          "M12.1680332,24.5 L14.5,24.5 C16.709139,24.5 18.5,26.290861 18.5,28.5 L18.5,29.5 C18.5,31.709139 16.709139,33.5 14.5,33.5 L9.5,33.5 C7.290861,33.5 5.5,31.709139 5.5,29.5 L5.5,28.5 C6.20701437,28.5 6.87368104,28.5 7.5,28.5 L7.5,29.5 C7.5,30.6045695 8.3954305,31.5 9.5,31.5 L14.5,31.5 C15.6045695,31.5 16.5,30.6045695 16.5,29.5 L16.5,28.5 C16.5,27.3954305 15.6045695,26.5 14.5,26.5 L13.7237764,26.5 C13.463452,25.7924504 12.944871,25.1257837 12.1680332,24.5 Z",
-                        id: "Rectangle-5",
-                        fill: _vm.svgFillColor,
-                        "fill-rule": "nonzero",
-                        transform:
-                          "translate(12.000000, 29.000000) scale(-1, -1) translate(-12.000000, -29.000000) "
-                      }
-                    }),
-                    _vm._v(" "),
-                    _c("path", {
-                      attrs: {
-                        d:
-                          "M18.1680332,24.5 L20.5,24.5 C22.709139,24.5 24.5,26.290861 24.5,28.5 L24.5,29.5 C24.5,31.709139 22.709139,33.5 20.5,33.5 L15.5,33.5 C13.290861,33.5 11.5,31.709139 11.5,29.5 L11.5,28.5 C12.2070144,28.5 12.873681,28.5 13.5,28.5 L13.5,29.5 C13.5,30.6045695 14.3954305,31.5 15.5,31.5 L20.5,31.5 C21.6045695,31.5 22.5,30.6045695 22.5,29.5 L22.5,28.5 C22.5,27.3954305 21.6045695,26.5 20.5,26.5 L19.7237764,26.5 C19.463452,25.7924504 18.944871,25.1257837 18.1680332,24.5 Z",
-                        id: "Rectangle-5",
-                        fill: _vm.svgFillColor,
-                        "fill-rule": "nonzero"
-                      }
-                    })
-                  ]
-                )
-              ]
-            )
-          ]
-        )
-      ]
-    )
-  };
-  var __vue_staticRenderFns__$1 = [];
-  __vue_render__$1._withStripped = true;
+  var __vue_render__$7 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('svg',{staticClass:"pc-svg-chain-icon",style:(_vm.svgBgLine),attrs:{"width":"100%","height":"59px","viewBox":("0 0 " + _vm.svgBoxWidth + " 59"),"version":"1.1","xmlns":"http://www.w3.org/2000/svg","xmlns:xlink":"http://www.w3.org/1999/xlink","aria-hidden":"true"}},[_c('g',{attrs:{"id":"Power-Calculator","transform":"translate(-811.000000, -485.000000)"}},[_c('g',{attrs:{"transform":"translate(676.000000, 327.000000)"}},[_c('g',{attrs:{"id":"Chain","transform":"translate(132.000000, 158.000000)"}},[_c('path',{attrs:{"d":"M12.1680332,24.5 L14.5,24.5 C16.709139,24.5 18.5,26.290861 18.5,28.5 L18.5,29.5 C18.5,31.709139 16.709139,33.5 14.5,33.5 L9.5,33.5 C7.290861,33.5 5.5,31.709139 5.5,29.5 L5.5,28.5 C6.20701437,28.5 6.87368104,28.5 7.5,28.5 L7.5,29.5 C7.5,30.6045695 8.3954305,31.5 9.5,31.5 L14.5,31.5 C15.6045695,31.5 16.5,30.6045695 16.5,29.5 L16.5,28.5 C16.5,27.3954305 15.6045695,26.5 14.5,26.5 L13.7237764,26.5 C13.463452,25.7924504 12.944871,25.1257837 12.1680332,24.5 Z","id":"Rectangle-5","fill":_vm.svgFillColor,"fill-rule":"nonzero","transform":"translate(12.000000, 29.000000) scale(-1, -1) translate(-12.000000, -29.000000) "}}),_vm._v(" "),_c('path',{attrs:{"d":"M18.1680332,24.5 L20.5,24.5 C22.709139,24.5 24.5,26.290861 24.5,28.5 L24.5,29.5 C24.5,31.709139 22.709139,33.5 20.5,33.5 L15.5,33.5 C13.290861,33.5 11.5,31.709139 11.5,29.5 L11.5,28.5 C12.2070144,28.5 12.873681,28.5 13.5,28.5 L13.5,29.5 C13.5,30.6045695 14.3954305,31.5 15.5,31.5 L20.5,31.5 C21.6045695,31.5 22.5,30.6045695 22.5,29.5 L22.5,28.5 C22.5,27.3954305 21.6045695,26.5 20.5,26.5 L19.7237764,26.5 C19.463452,25.7924504 18.944871,25.1257837 18.1680332,24.5 Z","id":"Rectangle-5","fill":_vm.svgFillColor,"fill-rule":"nonzero"}})])])])])};
+  var __vue_staticRenderFns__$7 = [];
 
     /* style */
-    const __vue_inject_styles__$1 = function (inject) {
+    const __vue_inject_styles__$7 = function (inject) {
       if (!inject) return
-      inject("data-v-457b419c_0", { source: "\n.pc-svg-chain-icon {\n    position: absolute;\n    top: 138px;\n    pointer-events: none;\n    z-index: 0;\n}\n\n", map: {"version":3,"sources":["/Users/amartinezdem/git_tree/github/bookingcom/powercalculator/src/components/pc-svg-chain.vue"],"names":[],"mappings":";AA0DA;IACA,kBAAA;IACA,UAAA;IACA,oBAAA;IACA,UAAA;AACA","file":"pc-svg-chain.vue","sourcesContent":["<template>\n    <svg width=\"100%\" height=\"59px\" :viewBox=\"`0 0 ${svgBoxWidth} 59`\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" aria-hidden=\"true\" class=\"pc-svg-chain-icon\" :style=\"svgBgLine\">\n        <g id=\"Power-Calculator\" transform=\"translate(-811.000000, -485.000000)\">\n            <g transform=\"translate(676.000000, 327.000000)\">\n                <g id=\"Chain\" transform=\"translate(132.000000, 158.000000)\">\n                    <path d=\"M12.1680332,24.5 L14.5,24.5 C16.709139,24.5 18.5,26.290861 18.5,28.5 L18.5,29.5 C18.5,31.709139 16.709139,33.5 14.5,33.5 L9.5,33.5 C7.290861,33.5 5.5,31.709139 5.5,29.5 L5.5,28.5 C6.20701437,28.5 6.87368104,28.5 7.5,28.5 L7.5,29.5 C7.5,30.6045695 8.3954305,31.5 9.5,31.5 L14.5,31.5 C15.6045695,31.5 16.5,30.6045695 16.5,29.5 L16.5,28.5 C16.5,27.3954305 15.6045695,26.5 14.5,26.5 L13.7237764,26.5 C13.463452,25.7924504 12.944871,25.1257837 12.1680332,24.5 Z\" id=\"Rectangle-5\" :fill=\"svgFillColor\" fill-rule=\"nonzero\" transform=\"translate(12.000000, 29.000000) scale(-1, -1) translate(-12.000000, -29.000000) \"></path>\n                    <path d=\"M18.1680332,24.5 L20.5,24.5 C22.709139,24.5 24.5,26.290861 24.5,28.5 L24.5,29.5 C24.5,31.709139 22.709139,33.5 20.5,33.5 L15.5,33.5 C13.290861,33.5 11.5,31.709139 11.5,29.5 L11.5,28.5 C12.2070144,28.5 12.873681,28.5 13.5,28.5 L13.5,29.5 C13.5,30.6045695 14.3954305,31.5 15.5,31.5 L20.5,31.5 C21.6045695,31.5 22.5,30.6045695 22.5,29.5 L22.5,28.5 C22.5,27.3954305 21.6045695,26.5 20.5,26.5 L19.7237764,26.5 C19.463452,25.7924504 18.944871,25.1257837 18.1680332,24.5 Z\" id=\"Rectangle-5\" :fill=\"svgFillColor\" fill-rule=\"nonzero\"></path>\n                </g>\n            </g>\n        </g>\n    </svg>\n</template>\n\n<script>\nexport default {\n    props: ['fieldFromBlock', 'focusedBlock'],\n    data () {\n        return {\n            svgBoxWidth: 26\n        }\n    },\n    computed: {\n        svgFillColor () {\n            return this.focusedBlock == this.fieldFromBlock ? '#E2B634' : '#C1CFD8'\n        },\n        svgBgColor () {\n            return this.focusedBlock == this.fieldFromBlock ? '#FEF1CB' : '#F0F0F0'\n        },\n        svgBgLine () {\n            let { svgFillColor, svgBgColor, svgBoxWidth } = this,\n                strokeWidth = 2,\n                stokeStyle = `linear-gradient(\n                    0deg,\n                    transparent,\n                    transparent calc(50% - ${strokeWidth/2}px - 1px),\n                    ${svgFillColor} calc(50% - ${strokeWidth/2}px),\n                    ${svgFillColor} calc(50% + ${strokeWidth/2}px),\n                    transparent calc(50% + ${strokeWidth/2}px + 1px),\n                    transparent 100%\n                )`,\n                strokeMask = `linear-gradient(\n                    90deg,\n                    transparent,\n                    transparent calc(50% - ${svgBoxWidth/2}px - 1px),\n                    ${svgBgColor} calc(50% - ${svgBoxWidth/2}px),\n                    ${svgBgColor} calc(50% + ${svgBoxWidth/2}px),\n                    transparent calc(50% + ${svgBoxWidth/2}px + 1px),\n                    transparent 100%\n                )`;\n\n\n            return `background: ${strokeMask}, ${stokeStyle};`.replace(/\\n/g, '');\n        }\n    }\n}\n</script>\n<style>\n\n.pc-svg-chain-icon {\n    position: absolute;\n    top: 138px;\n    pointer-events: none;\n    z-index: 0;\n}\n\n</style>\n"]}, media: undefined });
+      inject("data-v-b46b9c9c_0", { source: ".pc-svg-chain-icon{position:absolute;top:138px;pointer-events:none;z-index:0}", map: undefined, media: undefined });
 
     };
     /* scoped */
-    const __vue_scope_id__$1 = undefined;
+    const __vue_scope_id__$7 = undefined;
     /* module identifier */
-    const __vue_module_identifier__$1 = undefined;
+    const __vue_module_identifier__$7 = undefined;
     /* functional template */
-    const __vue_is_functional_template__$1 = false;
+    const __vue_is_functional_template__$7 = false;
     /* style inject SSR */
     
     /* style inject shadow dom */
     
 
     
-    const __vue_component__$1 = /*#__PURE__*/normalizeComponent(
-      { render: __vue_render__$1, staticRenderFns: __vue_staticRenderFns__$1 },
-      __vue_inject_styles__$1,
-      __vue_script__$1,
-      __vue_scope_id__$1,
-      __vue_is_functional_template__$1,
-      __vue_module_identifier__$1,
+    const __vue_component__$7 = /*#__PURE__*/normalizeComponent(
+      { render: __vue_render__$7, staticRenderFns: __vue_staticRenderFns__$7 },
+      __vue_inject_styles__$7,
+      __vue_script__$7,
+      __vue_scope_id__$7,
+      __vue_is_functional_template__$7,
+      __vue_module_identifier__$7,
       false,
       createInjector,
       undefined,
@@ -635,75 +460,60 @@
 
   //
 
-  var script$2 = {
-      props: ['fieldFromBlock'],
-      data () {
-          return {
-              // isCalculated: this.calculateProp == this.fieldFromBlock,
-          }
+  var script$6 = {
+    props: ['blockName', 'lockedField', 'focusedBlock'],
+    data: () => ({}),
+    computed: {
+      testType() {
+        return this.$store.getters.testType
       },
-      computed: {
-          isCalculated: {
-              get () {
-                return true;  
-                //return this.$store.state.attributes.calculateProp == this.fieldFromBlock
-              },
-              set () {
-                  //this.$store.dispatch('update:calculateprop', {value: this.fieldFromBlock})
-              }
-          },
-
-          calculateProp () {
-              //return this.$store.state.attributes.calculateProp
-          },
-          testType () {
-              return this.$store.getters.testType
-          }
+      isBlockFocused() {
+        return this.focusedBlock === this.blockName
       },
-      components: {
-          'pc-block-field': __vue_component__,
-          'pc-svg-chain': __vue_component__$1,
-      }
+      isReadOnly() {
+        return this.calculateProp == this.blockName
+      },
+    },
+    components: {
+      // eslint-disable-next-line vue/no-unused-components
+      'pc-block-field': __vue_component__$8,
+      // eslint-disable-next-line vue/no-unused-components
+      'pc-svg-chain': __vue_component__$7,
+    },
   };
 
   /* script */
-  const __vue_script__$2 = script$2;
+  const __vue_script__$6 = script$6;
 
   /* template */
-  var __vue_render__$2 = function() {
-    var _vm = this;
-    var _h = _vm.$createElement;
-    var _c = _vm._self._c || _h;
-    return _c("div")
-  };
-  var __vue_staticRenderFns__$2 = [];
-  __vue_render__$2._withStripped = true;
+  var __vue_render__$6 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div')};
+  var __vue_staticRenderFns__$6 = [];
 
     /* style */
-    const __vue_inject_styles__$2 = function (inject) {
+    const __vue_inject_styles__$6 = function (inject) {
       if (!inject) return
-      inject("data-v-42f03817_0", { source: "\n.pc-block {\n    position: relative;\n    padding-bottom: 25px;\n    border-bottom: 3px solid var(--pale-blue);\n}\n.pc-block-to-calculate {\n    border-bottom-color: var(--dark-yellow);\n}\n.pc-calc-radio {\n    position: absolute;\n    top: 0;\n    left: 50%;\n    transform: translate(-50%, -50%);\n    background: var(--light-gray);\n    border-radius: 25% / 100%;\n    padding: 7px 15px;\n}\n.pc-calc-radio--active {\n    background: var(--white);\n}\n.pc-inputs {\n    display: block;\n    list-style-type: none;\n    margin: 0;\n    padding: 0;\n\n    --row-gap: 10px;\n    --padding: 25px;\n    --columns-gap: 70px;\n    --grid-column-width: calc(50% - (var(--columns-gap) / 2));\n\n    display: grid;\n    grid-template-columns: var(--grid-column-width) var(--grid-column-width);\n    grid-template-rows: auto;\n    grid-template-areas:\n        \"pc-input-left pc-input-right\"\n        \"pc-input-left-bottom pc-input-right-bottom\"\n    ;\n    align-items: start;\n    grid-gap: var(--row-gap) var(--columns-gap);\n    padding: 0 var(--padding);\n}\n.pc-input-item {\n    text-align: center;\n}\n.pc-input-title {\n    position: relative;\n    display: block;\n    margin-bottom: 25px;\n}\n.pc-input-sub-title {\n    position: absolute;\n    top: 100%;\n    left: 0;\n    right: 0;\n    text-align: center;\n    font-size: 9px;\n}\n.pc-input-left {\n    grid-area: pc-input-left;\n}\n.pc-input-right {\n    grid-area: pc-input-right;\n}\n.pc-input-left-bottom {\n    grid-area: pc-input-left-bottom;\n}\n.pc-input-right-bottom {\n    grid-area: pc-input-right-bottom;\n}\n.pc-input-details {\n    font-size: 10px;\n    color: var(--dark-gray);\n}\n.pc-field-not-editable {\n    position: relative;\n    padding: 5px;\n    display: block;\n}\n.pc-input-left .pc-field-not-editable,\n.pc-input-right .pc-field-not-editable {\n    background: var(--light-gray);\n    outline: 2px solid var(--light-blue);\n}\n\n", map: {"version":3,"sources":["/Users/amartinezdem/git_tree/github/bookingcom/powercalculator/src/components/pc-block.vue"],"names":[],"mappings":";AA2CA;IACA,kBAAA;IACA,oBAAA;IACA,yCAAA;AACA;AAEA;IACA,uCAAA;AACA;AAEA;IACA,kBAAA;IACA,MAAA;IACA,SAAA;IACA,gCAAA;IACA,6BAAA;IACA,yBAAA;IACA,iBAAA;AACA;AAEA;IACA,wBAAA;AACA;AAEA;IACA,cAAA;IACA,qBAAA;IACA,SAAA;IACA,UAAA;;IAEA,eAAA;IACA,eAAA;IACA,mBAAA;IACA,yDAAA;;IAEA,aAAA;IACA,wEAAA;IACA,wBAAA;IACA;;;IAGA;IACA,kBAAA;IACA,2CAAA;IACA,yBAAA;AAEA;AAEA;IACA,kBAAA;AACA;AAEA;IACA,kBAAA;IACA,cAAA;IACA,mBAAA;AACA;AAEA;IACA,kBAAA;IACA,SAAA;IACA,OAAA;IACA,QAAA;IACA,kBAAA;IACA,cAAA;AACA;AAEA;IACA,wBAAA;AAEA;AAEA;IACA,yBAAA;AACA;AAEA;IACA,+BAAA;AACA;AAEA;IACA,gCAAA;AACA;AAEA;IACA,eAAA;IACA,uBAAA;AACA;AAEA;IACA,kBAAA;IACA,YAAA;IACA,cAAA;AACA;AAEA;;IAEA,6BAAA;IACA,oCAAA;AACA","file":"pc-block.vue","sourcesContent":["<template>\n    <div></div>\n</template>\n\n<script>\n\nimport pcBlockField from './pc-block-field.vue'\nimport pcSvgChain from './pc-svg-chain.vue'\n\nexport default {\n    props: ['fieldFromBlock'],\n    data () {\n        return {\n            // isCalculated: this.calculateProp == this.fieldFromBlock,\n        }\n    },\n    computed: {\n        isCalculated: {\n            get () {\n              return true;  \n              //return this.$store.state.attributes.calculateProp == this.fieldFromBlock\n            },\n            set () {\n                //this.$store.dispatch('update:calculateprop', {value: this.fieldFromBlock})\n            }\n        },\n\n        calculateProp () {\n            //return this.$store.state.attributes.calculateProp\n        },\n        testType () {\n            return this.$store.getters.testType\n        }\n    },\n    components: {\n        'pc-block-field': pcBlockField,\n        'pc-svg-chain': pcSvgChain,\n    }\n}\n\n</script>\n\n<style>\n.pc-block {\n    position: relative;\n    padding-bottom: 25px;\n    border-bottom: 3px solid var(--pale-blue);\n}\n\n.pc-block-to-calculate {\n    border-bottom-color: var(--dark-yellow);\n}\n\n.pc-calc-radio {\n    position: absolute;\n    top: 0;\n    left: 50%;\n    transform: translate(-50%, -50%);\n    background: var(--light-gray);\n    border-radius: 25% / 100%;\n    padding: 7px 15px;\n}\n\n.pc-calc-radio--active {\n    background: var(--white);\n}\n\n.pc-inputs {\n    display: block;\n    list-style-type: none;\n    margin: 0;\n    padding: 0;\n\n    --row-gap: 10px;\n    --padding: 25px;\n    --columns-gap: 70px;\n    --grid-column-width: calc(50% - (var(--columns-gap) / 2));\n\n    display: grid;\n    grid-template-columns: var(--grid-column-width) var(--grid-column-width);\n    grid-template-rows: auto;\n    grid-template-areas:\n        \"pc-input-left pc-input-right\"\n        \"pc-input-left-bottom pc-input-right-bottom\"\n    ;\n    align-items: start;\n    grid-gap: var(--row-gap) var(--columns-gap);\n    padding: 0 var(--padding);\n\n}\n\n.pc-input-item {\n    text-align: center;\n}\n\n.pc-input-title {\n    position: relative;\n    display: block;\n    margin-bottom: 25px;\n}\n\n.pc-input-sub-title {\n    position: absolute;\n    top: 100%;\n    left: 0;\n    right: 0;\n    text-align: center;\n    font-size: 9px;\n}\n\n.pc-input-left {\n    grid-area: pc-input-left;\n\n}\n\n.pc-input-right {\n    grid-area: pc-input-right;\n}\n\n.pc-input-left-bottom {\n    grid-area: pc-input-left-bottom;\n}\n\n.pc-input-right-bottom {\n    grid-area: pc-input-right-bottom;\n}\n\n.pc-input-details {\n    font-size: 10px;\n    color: var(--dark-gray);\n}\n\n.pc-field-not-editable {\n    position: relative;\n    padding: 5px;\n    display: block;\n}\n\n.pc-input-left .pc-field-not-editable,\n.pc-input-right .pc-field-not-editable {\n    background: var(--light-gray);\n    outline: 2px solid var(--light-blue);\n}\n\n</style>\n"]}, media: undefined });
+      inject("data-v-0ffdbf67_0", { source: ".pc-block{position:relative;padding-bottom:25px;border-bottom:3px solid var(--pale-blue)}.pc-block-to-calculate{border-bottom-color:var(--dark-yellow)}.pc-calc-radio{position:absolute;top:0;left:50%;transform:translate(-50%,-50%);background:var(--light-gray);border-radius:25%/100%;padding:7px 15px}.pc-calc-radio--active{background:var(--white)}.pc-inputs{display:block;list-style-type:none;margin:0;padding:0;--row-gap:10px;--padding:25px;--columns-gap:70px;--grid-column-width:calc(50% - (var(--columns-gap) / 2));display:grid;grid-template-columns:var(--grid-column-width) var(--grid-column-width);grid-template-rows:auto;grid-template-areas:'pc-input-left pc-input-right' 'pc-input-left-bottom pc-input-right-bottom';align-items:start;grid-gap:var(--row-gap) var(--columns-gap);padding:0 var(--padding)}.pc-input-item{text-align:center}.pc-input-title{position:relative;display:block;margin-bottom:25px}.pc-input-sub-title{position:absolute;top:100%;left:0;right:0;text-align:center;font-size:9px}.pc-input-left{grid-area:pc-input-left}.pc-input-right{grid-area:pc-input-right}.pc-input-left-bottom{grid-area:pc-input-left-bottom}.pc-input-right-bottom{grid-area:pc-input-right-bottom}.pc-input-details{font-size:10px;color:var(--dark-gray)}.pc-field-not-editable{position:relative;padding:5px;display:block}.pc-input-left .pc-field-not-editable,.pc-input-right .pc-field-not-editable{background:var(--light-gray);outline:2px solid var(--light-blue)}", map: undefined, media: undefined });
 
     };
     /* scoped */
-    const __vue_scope_id__$2 = undefined;
+    const __vue_scope_id__$6 = undefined;
     /* module identifier */
-    const __vue_module_identifier__$2 = undefined;
+    const __vue_module_identifier__$6 = undefined;
     /* functional template */
-    const __vue_is_functional_template__$2 = false;
+    const __vue_is_functional_template__$6 = false;
     /* style inject SSR */
     
     /* style inject shadow dom */
     
 
     
-    const __vue_component__$2 = /*#__PURE__*/normalizeComponent(
-      { render: __vue_render__$2, staticRenderFns: __vue_staticRenderFns__$2 },
-      __vue_inject_styles__$2,
-      __vue_script__$2,
-      __vue_scope_id__$2,
-      __vue_is_functional_template__$2,
-      __vue_module_identifier__$2,
+    const __vue_component__$6 = /*#__PURE__*/normalizeComponent(
+      { render: __vue_render__$6, staticRenderFns: __vue_staticRenderFns__$6 },
+      __vue_inject_styles__$6,
+      __vue_script__$6,
+      __vue_scope_id__$6,
+      __vue_is_functional_template__$6,
+      __vue_module_identifier__$6,
       false,
       createInjector,
       undefined,
@@ -5722,341 +5532,492 @@
   });
 
   function get_alpha_sidaks_correction(alpha, variants) {
-      if (variants == 1) {
-          return alpha;
-      }
+    if (variants == 1) {
+      return alpha
+    }
 
-      return 1 - (Math.pow(1-alpha, 1/variants));
+    return 1 - Math.pow(1 - alpha, 1 / variants)
   }
 
   // SOLVING FOR POWER
   function solveforpower_Gtest(data) {
-      var { base_rate, effect_size } = data;
-      var mean_var = base_rate*(1+effect_size);
-      data.variance = base_rate*(1-base_rate) + mean_var*(1-mean_var);
+    var { base_rate, effect_size } = data;
+    var mean_var = base_rate * (1 + effect_size);
+    data.variance = base_rate * (1 - base_rate) + mean_var * (1 - mean_var);
 
-      return solve_for_power(data);
+    return solve_for_power(data)
   }
 
   function solveforpower_Ttest(data) {
-      var { sd_rate } = data;
-      data.variance = 2*sd_rate**2;
+    var { sd_rate } = data;
+    data.variance = 2 * sd_rate ** 2;
 
-      return solve_for_power(data);
+    return solve_for_power(data)
   }
 
   function solve_for_power(data) {
-      var {total_sample_size, base_rate, variance, effect_size, alpha, variants, alternative, mu} = data;
-      var sample_size = total_sample_size / (1 + variants);
+    var {
+      total_sample_size,
+      base_rate,
+      variance,
+      effect_size,
+      alpha,
+      variants,
+      alternative,
+      mu,
+    } = data;
+    var sample_size = total_sample_size / (1 + variants);
 
-      var mean_base = base_rate;
-      var mean_var = base_rate * (1+effect_size);
+    var mean_base = base_rate;
+    var mean_var = base_rate * (1 + effect_size);
 
-      var mean_diff = mean_var - mean_base;
-      var delta = mean_diff - mu;
+    var mean_diff = mean_var - mean_base;
+    var delta = mean_diff - mu;
 
-      var z = jstat.normal.inv(1-alpha/2, 0, 1);
-      var mean = delta*Math.sqrt(sample_size/variance);
+    var z = jstat.normal.inv(1 - alpha / 2, 0, 1);
+    var mean = delta * Math.sqrt(sample_size / variance);
 
-      var power;
-      if (alternative == 'lower') {
-          power = jstat.normal.cdf(jstat.normal.inv(alpha, 0, 1), mean, 1);
-      } else if (alternative == 'greater') {
-          power = 1-jstat.normal.cdf(jstat.normal.inv(1-alpha, 0, 1), mean, 1);
-      } else {
-          power = 1 - (jstat.normal.cdf(z, mean, 1) - jstat.normal.cdf(-z, mean, 1));
-     }
+    var power;
+    if (alternative == 'lower') {
+      power = jstat.normal.cdf(jstat.normal.inv(alpha, 0, 1), mean, 1);
+    } else if (alternative == 'greater') {
+      power = 1 - jstat.normal.cdf(jstat.normal.inv(1 - alpha, 0, 1), mean, 1);
+    } else {
+      power = 1 - (jstat.normal.cdf(z, mean, 1) - jstat.normal.cdf(-z, mean, 1));
+    }
 
-      return power;
+    return power
   }
 
-
   function is_valid_input(data) {
-      var { base_rate, effect_size, alternative, opts, mu } = data;
-      var change = effect_size*base_rate;
-      if (typeof(mu) != 'undefined') {
-          if (alternative == 'greater' && mu >= change) {
-              return false;
-          }
-          if (alternative == 'lower' && mu <= change) {
-              return false;
-          }
-       }
+    var { base_rate, effect_size, alternative, opts, mu } = data;
+    var change = effect_size * base_rate;
+    if (typeof mu != 'undefined') {
+      if (alternative == 'greater' && mu >= change) {
+        return false
+      }
+      if (alternative == 'lower' && mu <= change) {
+        return false
+      }
+    }
 
-       if (opts && opts.type == 'relative') {
-          if (alternative == 'greater' && opts.threshold >= effect_size) {
-              return false;
-          }
-          if (alternative == 'lower' && opts.threshold <= effect_size) {
-              return false;
-          }
-       }
+    if (opts && opts.type == 'relative') {
+      if (alternative == 'greater' && opts.threshold >= effect_size) {
+        return false
+      }
+      if (alternative == 'lower' && opts.threshold <= effect_size) {
+        return false
+      }
+    }
 
-       if (opts && opts.type == 'absolutePerDay' && opts.calculating == 'days') {
-          if (alternative == 'greater' && opts.threshold/opts.visitors_per_day >= change) {
-              return false;
-          }
-          if (alternative == 'lower' && opts.threshold/opts.visitors_per_day <= change) {
-              return false;
-          }
-       }
+    if (opts && opts.type == 'absolutePerDay' && opts.calculating == 'days') {
+      if (
+        alternative == 'greater' &&
+        opts.threshold / opts.visitors_per_day >= change
+      ) {
+        return false
+      }
+      if (
+        alternative == 'lower' &&
+        opts.threshold / opts.visitors_per_day <= change
+      ) {
+        return false
+      }
+    }
 
-       return true;
+    return true
   }
 
   // SOLVING FOR SAMPLE SIZE
-  function solve_quadratic_for_sample({mean_diff, Z, days, threshold, variance}) {
-      var a = mean_diff;
-      if (a == 0) {
-          return threshold*Math.sqrt(days)/(2*Math.sqrt(variance)*Z)
-      }
+  function solve_quadratic_for_sample({
+    mean_diff,
+    Z,
+    days,
+    threshold,
+    variance,
+  }) {
+    var a = mean_diff;
+    if (a == 0) {
+      return (threshold * Math.sqrt(days)) / (2 * Math.sqrt(variance) * Z)
+    }
 
-      var b = Math.sqrt(variance)*Z/Math.sqrt(days);
-      var c = -threshold/2;
+    var b = (Math.sqrt(variance) * Z) / Math.sqrt(days);
+    var c = -threshold / 2;
 
-      var det = b**2 - 4*a*c;
-      if (det < 0) {
-        return NaN;
-      }
+    var det = b ** 2 - 4 * a * c;
+    if (det < 0) {
+      return NaN
+    }
 
-      var sol_h = (-b + Math.sqrt(det)) / (2*a);
-      var sol_l = (-b - Math.sqrt(det)) / (2*a);
+    var sol_h = (-b + Math.sqrt(det)) / (2 * a);
+    var sol_l = (-b - Math.sqrt(det)) / (2 * a);
 
-      return sol_h >= 0 ? sol_h : sol_l;
+    return sol_h >= 0 ? sol_h : sol_l
   }
 
-  function solveforsample_Ttest(data){
-      var { sd_rate } = data;
-      data.variance = 2*sd_rate**2;
-      return sample_size_calculation(data);
+  function solveforsample_Ttest(data) {
+    var { sd_rate } = data;
+    data.variance = 2 * sd_rate ** 2;
+    return sample_size_calculation(data)
   }
 
-  function solveforsample_Gtest(data){
-      var { base_rate, effect_size } = data;
-      var mean_var = base_rate*(1+effect_size);
-      data.variance = base_rate*(1-base_rate) + mean_var*(1-mean_var);
+  function solveforsample_Gtest(data) {
+    var { base_rate, effect_size } = data;
+    var mean_var = base_rate * (1 + effect_size);
+    data.variance = base_rate * (1 - base_rate) + mean_var * (1 - mean_var);
 
-      return sample_size_calculation(data);
+    return sample_size_calculation(data)
   }
 
   function sample_size_calculation(data) {
-      var { base_rate, variance, effect_size, alpha, beta, variants, alternative, mu, opts } = data;
+    var {
+      base_rate,
+      variance,
+      effect_size,
+      alpha,
+      beta,
+      variants,
+      alternative,
+      mu,
+      opts,
+    } = data;
 
-      if (!is_valid_input(data)) {
-          return NaN;
-      }
+    if (!is_valid_input(data)) {
+      return NaN
+    }
 
-      var mean_base = base_rate;
-      var mean_var = base_rate*(1+effect_size);
-      var mean_diff = mean_var - mean_base;
+    var mean_base = base_rate;
+    var mean_var = base_rate * (1 + effect_size);
+    var mean_diff = mean_var - mean_base;
 
-      var multiplier;
-      var sample_one_group;
-      if (opts && opts.type == 'absolutePerDay') {
-          if (opts.calculating == 'visitorsPerDay') {
-              var Z;
-              if (alternative == "greater") {
-                  Z = jstat.normal.inv(beta, 0, 1) - jstat.normal.inv(1-alpha, 0, 1);
-              } else if (alternative == "lower") {
-                  Z = jstat.normal.inv(1-beta, 0, 1) - jstat.normal.inv(alpha, 0, 1);
-              } else {
-                  Z = jstat.normal.inv(1-beta, 0, 1) + jstat.normal.inv(1-alpha/2, 0, 1);
-              }
-              var sqrt_visitors_per_day = solve_quadratic_for_sample({mean_diff: mean_diff, Z: Z,
-                  days: opts.days, threshold: opts.threshold, variance: variance});
-              sample_one_group = opts.days*sqrt_visitors_per_day**2;
-          } else {
-              multiplier = variance/(mean_diff*Math.sqrt(opts.visitors_per_day/2) - opts.threshold/(Math.sqrt(2*opts.visitors_per_day)))**2;
-              var days;
-              if (alternative == "greater" || alternative == "lower") {
-                  days = multiplier * (jstat.normal.inv(beta, 0, 1) - jstat.normal.inv(1-alpha, 0, 1))**2;
-              } else {
-                  days = multiplier * (jstat.normal.inv(1-beta, 0, 1) + jstat.normal.inv(1-alpha/2, 0, 1))**2;
-              }
-              sample_one_group = days*opts.visitors_per_day/2;
-          }
+    var multiplier;
+    var sample_one_group;
+    if (opts && opts.type == 'absolutePerDay') {
+      if (opts.calculating == 'visitorsPerDay') {
+        var Z;
+        if (alternative == 'greater') {
+          Z = jstat.normal.inv(beta, 0, 1) - jstat.normal.inv(1 - alpha, 0, 1);
+        } else if (alternative == 'lower') {
+          Z = jstat.normal.inv(1 - beta, 0, 1) - jstat.normal.inv(alpha, 0, 1);
+        } else {
+          Z =
+            jstat.normal.inv(1 - beta, 0, 1) +
+            jstat.normal.inv(1 - alpha / 2, 0, 1);
+        }
+        var sqrt_visitors_per_day = solve_quadratic_for_sample({
+          mean_diff: mean_diff,
+          Z: Z,
+          days: opts.days,
+          threshold: opts.threshold,
+          variance: variance,
+        });
+        sample_one_group = opts.days * sqrt_visitors_per_day ** 2;
       } else {
-          multiplier = variance/(mu - mean_diff)**2;
-
-          if (alternative == "greater" || alternative == "lower") {
-              sample_one_group = multiplier * (jstat.normal.inv(beta, 0, 1) - jstat.normal.inv(1-alpha, 0, 1))**2;
-          } else {
-              sample_one_group = multiplier * (jstat.normal.inv(1-beta, 0, 1) + jstat.normal.inv(1-alpha/2, 0, 1))**2;
-          }
+        multiplier =
+          variance /
+          (mean_diff * Math.sqrt(opts.visitors_per_day / 2) -
+            opts.threshold / Math.sqrt(2 * opts.visitors_per_day)) **
+            2;
+        var days;
+        if (alternative == 'greater' || alternative == 'lower') {
+          days =
+            multiplier *
+            (jstat.normal.inv(beta, 0, 1) - jstat.normal.inv(1 - alpha, 0, 1)) **
+              2;
+        } else {
+          days =
+            multiplier *
+            (jstat.normal.inv(1 - beta, 0, 1) +
+              jstat.normal.inv(1 - alpha / 2, 0, 1)) **
+              2;
+        }
+        sample_one_group = (days * opts.visitors_per_day) / 2;
       }
+    } else {
+      multiplier = variance / (mu - mean_diff) ** 2;
 
-      return (1+variants)*Math.ceil(sample_one_group);
+      if (alternative == 'greater' || alternative == 'lower') {
+        sample_one_group =
+          multiplier *
+          (jstat.normal.inv(beta, 0, 1) - jstat.normal.inv(1 - alpha, 0, 1)) ** 2;
+      } else {
+        sample_one_group =
+          multiplier *
+          (jstat.normal.inv(1 - beta, 0, 1) +
+            jstat.normal.inv(1 - alpha / 2, 0, 1)) **
+            2;
+      }
+    }
+
+    return (1 + variants) * Math.ceil(sample_one_group)
   }
 
-
-
   // SOLVING FOR EFFECT SIZE
-  function solveforeffectsize_Ttest({total_sample_size, base_rate, sd_rate, alpha, beta, variants, alternative, mu}){
-      var sample_size = total_sample_size / (1 + variants);
-      var variance = 2*sd_rate**2;
+  function solveforeffectsize_Ttest({
+    total_sample_size,
+    base_rate,
+    sd_rate,
+    alpha,
+    beta,
+    variants,
+    alternative,
+    mu,
+  }) {
+    var sample_size = total_sample_size / (1 + variants);
+    var variance = 2 * sd_rate ** 2;
 
-      var z = jstat.normal.inv(1-beta, 0, 1);
-      var multiplier = Math.sqrt(variance/sample_size);
-      var effect_size;
-      if (alternative == "greater") {
-          effect_size = mu + (z - jstat.normal.inv(alpha, 0, 1)) * multiplier;
-      } else if (alternative == "lower") {
-          effect_size = mu - (z - jstat.normal.inv(alpha, 0, 1)) * multiplier;
-      } else {
-          var delta = (z + jstat.normal.inv(1-alpha/2, 0, 1) )* multiplier;
-          effect_size = mu + delta;
-      }
+    var z = jstat.normal.inv(1 - beta, 0, 1);
+    var multiplier = Math.sqrt(variance / sample_size);
+    var effect_size;
+    if (alternative == 'greater') {
+      effect_size = mu + (z - jstat.normal.inv(alpha, 0, 1)) * multiplier;
+    } else if (alternative == 'lower') {
+      effect_size = mu - (z - jstat.normal.inv(alpha, 0, 1)) * multiplier;
+    } else {
+      var delta = (z + jstat.normal.inv(1 - alpha / 2, 0, 1)) * multiplier;
+      effect_size = mu + delta;
+    }
 
-      return effect_size/base_rate;
+    return effect_size / base_rate
   }
 
   function solve_quadratic(Z, sample_size, control_rate, mu) {
-      var a = (Z**2 + sample_size) * control_rate**2;
-      var b = -(Z**2) * control_rate - 2 * (control_rate + mu) * sample_size * control_rate;
-      var c = sample_size * (control_rate + mu)**2 - Z**2 * control_rate * (1-control_rate);
+    var a = (Z ** 2 + sample_size) * control_rate ** 2;
+    var b =
+      -(Z ** 2) * control_rate -
+      2 * (control_rate + mu) * sample_size * control_rate;
+    var c =
+      sample_size * (control_rate + mu) ** 2 -
+      Z ** 2 * control_rate * (1 - control_rate);
 
-      var det = b**2 - 4*a*c;
-      if (det < 0) {
-        return [NaN, NaN];
-      }
+    var det = b ** 2 - 4 * a * c;
+    if (det < 0) {
+      return [NaN, NaN]
+    }
 
-      var sol_h = (-b + Math.sqrt(det)) / (2*a);
-      var sol_l = (-b - Math.sqrt(det)) / (2*a);
+    var sol_h = (-b + Math.sqrt(det)) / (2 * a);
+    var sol_l = (-b - Math.sqrt(det)) / (2 * a);
 
-      return [sol_h, sol_l];
+    return [sol_h, sol_l]
   }
 
-  function solveforeffectsize_Gtest({total_sample_size, base_rate, alpha, beta, variants, alternative, mu}){
-      var sample_size = total_sample_size / (1 + variants);
+  function solveforeffectsize_Gtest({
+    total_sample_size,
+    base_rate,
+    alpha,
+    beta,
+    variants,
+    alternative,
+    mu,
+  }) {
+    var sample_size = total_sample_size / (1 + variants);
 
-      var rel_effect_size;
-      var Z;
-      var solutions;
-      if (alternative == "greater" || alternative == "lower") {
-          Z = jstat.normal.inv(beta, 0, 1) + jstat.normal.inv(alpha, 0, 1);
-          solutions = solve_quadratic(Z, sample_size, base_rate, mu);
-          if (alternative == 'greater') {
-              rel_effect_size = solutions[0] - 1;
-          } else {
-              rel_effect_size = solutions[1] - 1;
-          }
+    var rel_effect_size;
+    var Z;
+    var solutions;
+    if (alternative == 'greater' || alternative == 'lower') {
+      Z = jstat.normal.inv(beta, 0, 1) + jstat.normal.inv(alpha, 0, 1);
+      solutions = solve_quadratic(Z, sample_size, base_rate, mu);
+      if (alternative == 'greater') {
+        rel_effect_size = solutions[0] - 1;
       } else {
-          Z = jstat.normal.inv(1-beta, 0, 1) + jstat.normal.inv(1-alpha/2, 0, 1);
-          solutions = solve_quadratic(Z, sample_size, base_rate, mu);
-          rel_effect_size = solutions[0] - 1;
+        rel_effect_size = solutions[1] - 1;
       }
+    } else {
+      Z = jstat.normal.inv(1 - beta, 0, 1) + jstat.normal.inv(1 - alpha / 2, 0, 1);
+      solutions = solve_quadratic(Z, sample_size, base_rate, mu);
+      rel_effect_size = solutions[0] - 1;
+    }
 
-      return rel_effect_size;
+    return rel_effect_size
   }
 
-
-  function get_visitors_with_goals({total_sample_size, base_rate}){
-      return total_sample_size * base_rate;
+  function get_visitors_with_goals({ total_sample_size, base_rate }) {
+    return total_sample_size * base_rate
   }
 
-  function get_base_rate({total_sample_size, visitors_with_goals}){
-      return visitors_with_goals / total_sample_size;
+  function get_base_rate({ total_sample_size, visitors_with_goals }) {
+    return visitors_with_goals / total_sample_size
   }
 
-  function get_absolute_impact_in_metric_hash({base_rate, effect_size}) {
-      let value = base_rate * effect_size;
-      return {
-          value,
-          min: base_rate - value,
-          max: base_rate + value
-      }
+  function get_absolute_impact_in_metric_hash({ base_rate, effect_size }) {
+    const value = base_rate * effect_size;
+    return {
+      value,
+      min: base_rate - value,
+      max: base_rate + value,
+    }
   }
 
-  function get_relative_impact_from_absolute({base_rate, absolute_effect_size}) {
-      return ((base_rate + absolute_effect_size) / base_rate) - 1
+  function get_relative_impact_from_absolute({
+    base_rate,
+    absolute_effect_size,
+  }) {
+    return (base_rate + absolute_effect_size) / base_rate - 1
   }
 
-  function get_absolute_impact_in_visitors({total_sample_size, base_rate, effect_size}) {
-      let absoluteImpactInMetric = get_absolute_impact_in_metric_hash({base_rate, effect_size}).value;
-      return absoluteImpactInMetric * total_sample_size
+  function get_absolute_impact_in_visitors({
+    total_sample_size,
+    base_rate,
+    effect_size,
+  }) {
+    const absoluteImpactInMetric = get_absolute_impact_in_metric_hash({
+      base_rate,
+      effect_size,
+    }).value;
+    return absoluteImpactInMetric * total_sample_size
   }
 
-  function get_relative_impact_from_visitors({total_sample_size, base_rate, visitors}) {
-      let absoluteImpactInMetric = visitors / total_sample_size;
+  function get_relative_impact_from_visitors({
+    total_sample_size,
+    base_rate,
+    visitors,
+  }) {
+    const absoluteImpactInMetric = visitors / total_sample_size;
 
-      return get_relative_impact_from_absolute({
-          base_rate,
-          absolute_effect_size: absoluteImpactInMetric
-      })
+    return get_relative_impact_from_absolute({
+      base_rate,
+      absolute_effect_size: absoluteImpactInMetric,
+    })
   }
 
-  function get_mu_from_relative_difference ({threshold, base_rate}) {
-      return threshold*base_rate;
+  function get_mu_from_relative_difference({ threshold, base_rate }) {
+    return threshold * base_rate
   }
 
-  function get_mu_from_absolute_per_day ({threshold, visitors_per_day}) {
-      return threshold/visitors_per_day;
+  function get_mu_from_absolute_per_day({ threshold, visitors_per_day }) {
+    return threshold / visitors_per_day
   }
 
-  function get_alternative ({type}) {
-      let alternative = 'two-sided';
-      if (type == 'noninferiority') {
-          alternative = 'greater';
-      }
-      return alternative;
+  function get_alternative({ type }) {
+    let alternative = 'two-sided';
+    if (type == 'noninferiority') {
+      alternative = 'greater';
+    }
+    return alternative
   }
 
-  var statFormulas = {
-      gTest: {
-          power: solveforpower_Gtest,
-          sample: solveforsample_Gtest,
-          impact: solveforeffectsize_Gtest
-      },
-      tTest: {
-          power: solveforpower_Ttest,
-          sample: solveforsample_Ttest,
-          impact: solveforeffectsize_Ttest
-      },
-      getVisitorsWithGoals: get_visitors_with_goals,
-      getBaseRate: get_base_rate,
-      getAbsoluteImpactInMetricHash: get_absolute_impact_in_metric_hash,
-      getAbsoluteImpactInVisitors: get_absolute_impact_in_visitors,
-      getRelativeImpactFromAbsolute: get_relative_impact_from_absolute,
-      getRelativeImpactFromVisitors: get_relative_impact_from_visitors,
-      getMuFromRelativeDifference: get_mu_from_relative_difference,
-      getMuFromAbsolutePerDay: get_mu_from_absolute_per_day,
-      getAlternative: get_alternative,
-      getCorrectedAlpha: get_alpha_sidaks_correction,
+  var math = {
+    gTest: {
+      power: solveforpower_Gtest,
+      sample: solveforsample_Gtest,
+      impact: solveforeffectsize_Gtest,
+    },
+    tTest: {
+      power: solveforpower_Ttest,
+      sample: solveforsample_Ttest,
+      impact: solveforeffectsize_Ttest,
+    },
+    getVisitorsWithGoals: get_visitors_with_goals,
+    getBaseRate: get_base_rate,
+    getAbsoluteImpactInMetricHash: get_absolute_impact_in_metric_hash,
+    getAbsoluteImpactInVisitors: get_absolute_impact_in_visitors,
+    getRelativeImpactFromAbsolute: get_relative_impact_from_absolute,
+    getRelativeImpactFromVisitors: get_relative_impact_from_visitors,
+    getMuFromRelativeDifference: get_mu_from_relative_difference,
+    getMuFromAbsolutePerDay: get_mu_from_absolute_per_day,
+    getAlternative: get_alternative,
+    getCorrectedAlpha: get_alpha_sidaks_correction,
   };
 
   const TEST_TYPE = Object.freeze({
     CONTINUOUS: 'tTest',
-    BINOMIAL: 'gTest'
+    BINOMIAL: 'gTest',
   });
 
   const TRAFFIC_MODE = Object.freeze({
     DAILY: 'daily',
-    TOTAL: 'total'
+    TOTAL: 'total',
   });
 
   const COMPARISON_MODE = Object.freeze({
     ALL: 'all',
-    ONE: 'one'
+    ONE: 'one',
   });
 
   Object.freeze({
     ABSOLUTE: 'absolute',
     IMPACT: 'impact',
-    RELATIVE: 'relative'
+    RELATIVE: 'relative',
+  });
+
+  const FOCUS = Object.freeze({
+    SAMPLE: 'sample',
+    IMPACT: 'impact',
+    BASE: 'base',
+  });
+
+  const BLOCKED = Object.freeze({
+    VISITORS_PER_DAY: 'visitorsPerDay',
+    DAYS: 'days',
+  });
+
+  const SELECTED = Object.freeze({
+    RELATIVE: 'relative',
+    ABSOLUTE: 'absolute',
   });
 
   function displayValue(value, type = 'int') {
-    const alternativeToNaN = val => isNaN(val) || !isFinite(val) ? '-' : val;
+    const alternativeToNaN = (val) => (!Number.isInteger(val) && !isFinite(val) ? '-' : val);
 
     switch (type) {
       case 'float':
-        return alternativeToNaN(parseFloat(value))
+        return alternativeToNaN(+parseFloat(value).toFixed(2))
       case 'percentage':
-        return alternativeToNaN(+((parseFloat(value) * 100).toFixed(2)))
+        return alternativeToNaN(+(parseFloat(value) * 100).toFixed(2))
       case 'int':
       default:
-        return alternativeToNaN(parseInt(value))
+        return alternativeToNaN(parseInt(value, 10))
     }
+  }
+
+  function getAlternative(isNonInferiority) {
+    return isNonInferiority ? 'greater' : 'two-sided'
+  }
+
+  function getAbsoluteImpact(baseRate, impactRelative) {
+    const { value } = math.getAbsoluteImpactInMetricHash({
+      base_rate: baseRate,
+      effect_size: impactRelative,
+    });
+    return value
+  }
+
+  function getRelativeImpact(baseRate, absoluteImpact) {
+    return math.getRelativeImpactFromAbsolute({
+      base_rate: baseRate,
+      absolute_effect_size: absoluteImpact,
+    })
+  }
+
+  function getAbsoluteThreshold(state) {
+    const visitorsPerDay = state.visitorsPerDay;
+    const baseRate = state.baseRate;
+    const runtime = state.runtime;
+    const relativeThreshold = +state.relativeThreshold;
+
+    let absoluteThreshold = relativeThreshold * baseRate * visitorsPerDay;
+
+    if (state.trafficMode === TRAFFIC_MODE.TOTAL) {
+      absoluteThreshold = absoluteThreshold * runtime;
+    }
+
+    return isNaN(absoluteThreshold) ? 0 : displayValue(absoluteThreshold, 'float')
+  }
+
+  function getRelativeThreshold(state) {
+    const visitorsPerDay = +state.visitorsPerDay;
+    const baseRate = +state.baseRate;
+    const runtime = +state.runtime;
+    const absoluteThreshold = +state.absoluteThreshold;
+
+    let relativeThreshold = absoluteThreshold / (baseRate * visitorsPerDay);
+
+    if (state.trafficMode === TRAFFIC_MODE.TOTAL) {
+      relativeThreshold = relativeThreshold / runtime;
+    }
+
+    return isNaN(relativeThreshold) ? 0 : displayValue(relativeThreshold, 'float')
   }
 
   const calculator = {
@@ -6067,196 +6028,805 @@
       falsePositiveRate: 0.1, // [0..1]
       targetPower: 0.8, // [0..1]
       runtime: 14,
+      visitorsPerDay: 40098,
       sample: 561364,
-      standardDevation: 0.1, // [0..1]
-      variants: 2, // A/A = 1, A/B = 2...
-      impact: 0.02, // [0..1]
-
-      // Optional metrics
-      expectedEffect: 0,
-      acceptableCost: 0,
+      standardDeviation: 10,
+      // It would make sense to store it as variants + 1 but everywhere it uses
+      // this format.
+      variants: 1, // A/A = 0, A/B = 1...
+      relativeImpact: 0.02, // [0..1]
+      absoluteImpact: 0.2,
+      relativeThreshold: 0.02,
+      absoluteThreshold: 80.2,
 
       // Configuration
       isNonInferiority: false,
       comparisonMode: COMPARISON_MODE.ALL,
       trafficMode: TRAFFIC_MODE.DAILY,
-      testType: TEST_TYPE.BINOMIAL
+      testType: TEST_TYPE.BINOMIAL,
     }),
     mutations: {
-      // Variants are reflected in the UI as 1 + amount. We store them all
-      // together.
+      // Initial update
+      // eslint-disable-next-line complexity
+      SET_IMPORTED_METRICS(state, props) {
+        // Test setup
+        if (props.testType && Object.values(TEST_TYPE).includes(props.testType)) {
+          state.testType = props.testType;
+        }
+
+        if (
+          props.comparisonMode &&
+          Object.values(COMPARISON_MODE).includes(props.comparisonMode)
+        ) {
+          state.comparisonMode = props.comparisonMode;
+        }
+
+        if (
+          props.trafficMode &&
+          Object.values(TRAFFIC_MODE).includes(props.trafficMode)
+        ) {
+          state.trafficMode = props.trafficMode;
+        }
+
+        if (props.isNonInferiority) {
+          state.isNonInferiority =
+            typeof props.isNonInferiority === 'boolean'
+              ? props.isNonInferiority
+              : props.isNonInferiority === 'true';
+        }
+
+        // Configuration values
+        if (props.targetPower) {
+          state.targetPower = props.targetPower / 100;
+        }
+
+        if (props.falsePositiveRate) {
+          state.falsePositiveRate = props.falsePositiveRate / 100;
+        }
+
+        if (props.variants) {
+          state.variants = +props.variants;
+        }
+
+        // Base Rate
+        if (props.baseRate) {
+          state.baseRate =
+            props.testType === TEST_TYPE.BINOMIAL
+              ? props.baseRate / 100
+              : +props.baseRate;
+        }
+
+        if (props.standardDeviation) {
+          state.standardDeviation = +props.standardDeviation;
+        }
+
+        // Sample
+        if (props.sample) {
+          state.sample = +props.sample;
+        }
+        if (props.runtime) {
+          state.runtime = +props.runtime;
+        }
+        if (props.visitorsPerDay) {
+          state.visitorsPerDay = +props.visitorsPerDay;
+        }
+
+        // Impact
+        // non-inferiority
+        if (props.relativeThreshold && props.absoluteThreshold) {
+          state.relativeThreshold = props.relativeThreshold / 100;
+          state.absoluteThreshold = +props.absoluteThreshold;
+        } else if (props.absoluteThreshold) {
+          state.absoluteThreshold = +props.absoluteThreshold;
+          state.relativeThreshold = getRelativeThreshold(props);
+        } else if (props.relativeThreshold) {
+          state.relativeThreshold = props.relativeThreshold / 100;
+          state.absoluteThreshold = getAbsoluteThreshold(props);
+        }
+
+        // comparative
+        // Ideal case
+        if (props.relativeImpact && props.absoluteImpact) {
+          state.relativeImpact = props.relativeImpact / 100;
+          state.absoluteImpact = +props.absoluteImpact;
+          // Backwards compatibility (1)
+        } else if (props.relativeImpact && props.baseRate) {
+          state.relativeImpact = props.relativeImpact / 100;
+          state.absoluteImpact = getAbsoluteImpact(
+            props.baseRate,
+            props.relativeImpact / 100
+          );
+          if (props.trafficMode === TRAFFIC_MODE.DAILY) {
+            state.absoluteImpact = state.absoluteImpact / 100;
+          }
+          // Necessary for backwards compatibility (2)
+        } else if (props.absoluteImpact && props.baseRate) {
+          state.absoluteImpact = props.absoluteImpact;
+          state.realativeImpact = getRelativeImpact(
+            props.baseRate,
+            props.absoluteImpact
+          );
+        }
+      },
+      // Configuration
       SET_VARIANTS(state, amount) {
-        if (Number.isInteger(amount) && amount >= 0) state.variants = amount + 1;
-        else state.variants = state.variants;
+        if (!isNaN(amount) && amount >= 0) {
+          state.variants = amount;
+        }
       },
       // We can choose between compare the base vs one variant or vs all.
       SET_COMPARISON_MODE(state, val) {
-        if (Object.values(COMPARISON_MODE).includes(val))
+        if (Object.values(COMPARISON_MODE).includes(val)) {
           state.comparisonMode = val;
-        else state.comparisonMode = state.comparisonMode;
+        }
       },
       SET_TRAFFIC_MODE(state, val) {
-        if (Object.values(TRAFFIC_MODE).includes(val)) state.trafficMode = val;
-        else state.trafficMode = state.trafficMode;
+        if (Object.values(TRAFFIC_MODE).includes(val)) {
+          state.trafficMode = val;
+        }
       },
       // In the UI is [0,100], in the store is [0,1]
       SET_FALSE_POSITIVE_RATE(state, rate) {
-        if (rate >= 0 && rate <= 100) state.falsePositiveRate = rate / 100;
-        else state.falsePositiveRate = state.falsePositiveRate;
+        if (!isNaN(rate) && rate >= 0 && rate <= 100) {
+          state.falsePositiveRate = rate / 100;
+        }
       },
       // In the UI is [0,100], in the store is [0,1]
       SET_TARGET_POWER(state, power) {
-        if (!isNaN(power) && power >= 0 && power <= 100) state.targetPower = power / 100;
-        else state.targetPower = state.targetPower;
+        if (!isNaN(power) && power >= 0 && power <= 100) {
+          state.targetPower = power / 100;
+        }
       },
-      // In the UI is [0,100], in the store is [0,1]
-      SET_BASE_RATE(state, baseRate) {
-        if (baseRate > 0 && baseRate <= 100) state.baseRate = baseRate / 100;
-        else state.baseRate = state.baseRate;
-      },
-      SET_STANDARD_DEVIATION(state, stddev) {
-        if (stddev >= 0) state.standardDevation = stddev / 100;
-        else state.standardDevation = state.standardDevation;
-      },
+
       SET_IS_NON_INFERIORITY(state, flag) {
         state.isNonInferiority = !!flag;
       },
-      SET_TEST_TYPE(state, type) {
-        if (Object.values(TEST_TYPE).includes(type)) state.testType = type;
-        else state.testType = state.testType;
-      },
-      // BaseRate = MetricTotal / Sample
-      SET_BASE_RATE_BY_METRIC_TOTAL(state, total) {
-        state.baseRate = total / state.sample;
-      },
-      SET_SAMPLE_BY_TOTAL(state, total) {
-        state.sample = total;
-      },
-      SET_RUNTIME(state, runtime) {
-        if (runtime > 0) state.runtime = runtime;
-        else state.runtime = state.runtime;
-      },
-      
-      // Mutations when calculating the sample size (fixed sample size, variable
-      // runtime and visitors per day)
-      SET_RUNTIME_AND_VISITORS_PER_DAY_BY_FIXED_SAMPLE(state, runtime) {
-        state.runtime = runtime;
-      },
-      SET_VISITORS_PER_DAY_AND_RUNTIME_BY_FIXED_SAMPLE(state, visitorsPerDay) {
-        const currentSample = state.sample;
-        const days = Math.ceil(currentSample/visitorsPerDay);
 
-        state.runtime = days;
+      SET_TEST_TYPE(state, { testType, focused, lockedField }) {
+        if (!Object.values(TEST_TYPE).includes(testType)) {
+          return
+        }
+
+        // If the new type is a gTest, it means that before it was in 0 -> 100
+        // scale, which means we need to move it ot 0 -> 1 scale. If the new type
+        // is tTest, it means that it was in 0 -> 1 and we need to move it to 0 ->
+        // 100
+        const newBaseRate =
+          testType === TEST_TYPE.BINOMIAL
+            ? state.baseRate / 100
+            : state.baseRate * 100;
+
+        // We need to recalculate based on the selected fields.
+        // the result will be something like [tTest/gTest][impact/sample]
+        const formula = math[testType][focused];
+        const alpha =
+          state.comparisonMode === COMPARISON_MODE.ALL
+            ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
+            : state.falsePositiveRate;
+
+        const impact = state.isNonInferiority ? 0 : state.relativeImpact;
+        const opts = state.isNonInferiority
+          ? {
+              type: 'relative',
+              alternative: getAlternative(state.isNonInferiority),
+              calculating: lockedField,
+              runtime: state.runtime,
+              // The current threshold is invalid as it is the result of a
+              // different test. Also, it would turn the calculation stateful
+              threshold: 0,
+              visitors_per_day: state.visitorsPerDay,
+              base_rate: newBaseRate,
+            }
+          : {};
+
+        const mu = state.isNonInferiority
+          ? math.getMuFromRelativeDifference(opts)
+          : 0;
+
+        if (focused === FOCUS.SAMPLE) {
+          const sample = Math.ceil(formula({
+              base_rate: newBaseRate,
+              effect_size: impact,
+              sd_rate: state.standardDeviation,
+              alpha,
+              beta: 1 - state.targetPower,
+              variants: state.variants,
+              alternative: getAlternative(state.isNonInferiority),
+              mu,
+              opts,
+            }));
+
+          if (lockedField === BLOCKED.DAYS) {
+            state.runtime = Math.ceil(sample / state.visitorsPerDay);
+          } else {
+            state.visitorsPerDay = Math.ceil(sample / state.runtime);
+          }
+
+          if (state.isNonInferiority) {
+            state.absoluteThreshold = getAbsoluteThreshold({
+              ...state,
+              baseRate: newBaseRate,
+            });
+          } else {
+            state.absoluteImpact = getAbsoluteImpact(newBaseRate, impact);
+          }
+          state.sample = sample;
+        } else {
+          const effect = formula({
+            total_sample_size: state.sample,
+            base_rate: newBaseRate,
+            sd_rate: state.standardDeviation,
+            alpha,
+            beta: 1 - state.targetPower,
+            variants: state.variants,
+            alternative: getAlternative(state.isNonInferiority),
+            mu,
+            opts,
+          });
+
+          if (state.isNonInferiority) {
+            state.relativeThreshold = effect;
+            state.absoluteThreshold = getAbsoluteThreshold({
+              ...state,
+              baseRate: newBaseRate,
+              relativeThreshold: effect,
+            });
+          } else {
+            state.relativeImpact = effect;
+            state.absoluteImpact = getAbsoluteImpact(newBaseRate, effect);
+          }
+        }
+
+        state.baseRate = newBaseRate;
+        state.testType = testType;
       },
 
-      // IMPACT
-      SET_RELATIVE_IMPACT(state, impact) {
-        state.impact = impact / 100;
-        // TODO: Needs to calculate the new sample
+      // == BASE ==
+      SET_BASE_RATE(state, { baseRate, lockedField, focusedBlock }) {
+        if (
+          // Do not allow not numbers
+          isNaN(baseRate) ||
+          // baseRate 0 or lower is always forbidden
+          baseRate <= 0 ||
+          // If it is binomial, do not allow 100% either.
+          (state.testType === TEST_TYPE.BINOMIAL && baseRate >= 100)
+        ) {
+          return
+        }
+
+        // If it is binomial, it is a percentage. If it is continuos, it is a
+        // float. Therefore, we need to divide by 100 if it is a gTest.
+        const newBaseRate =
+          state.testType === TEST_TYPE.BINOMIAL ? baseRate / 100 : baseRate;
+
+        // We use relative threshold = 0 when we are calculating the impact.
+        const relativeThreshold =
+          focusedBlock === FOCUS.SAMPLE ? state.relativeThreshold : 0;
+
+        const impact = state.isNonInferiority ? 0 : state.relativeImpact;
+        const opts = state.isNonInferiority
+          ? {
+              type: 'relative',
+              alternative: getAlternative(state.isNonInferiority),
+              calculating: lockedField,
+              runtime: state.runtime,
+              threshold: -relativeThreshold,
+              visitors_per_day: state.visitorsPerDay,
+              base_rate: newBaseRate,
+            }
+          : {};
+
+        const mu = state.isNonInferiority
+          ? math.getMuFromRelativeDifference(opts)
+          : 0;
+
+        const type = state.testType;
+        const formula = math[type][focusedBlock];
+        const alpha =
+          state.comparisonMode === COMPARISON_MODE.ALL
+            ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
+            : state.falsePositiveRate;
+
+        if (focusedBlock === FOCUS.SAMPLE) {
+          const sample = Math.ceil(formula({
+              base_rate: newBaseRate,
+              effect_size: impact,
+              sd_rate: state.standardDeviation,
+              alpha,
+              beta: 1 - state.targetPower,
+              variants: state.variants,
+              alternative: getAlternative(state.isNonInferiority),
+              mu,
+              opts,
+            }));
+
+          if (lockedField === BLOCKED.DAYS) {
+            state.runtime = Math.ceil(sample / state.visitorsPerDay);
+          } else {
+            state.visitorsPerDay = Math.ceil(sample / state.runtime);
+          }
+
+          if (state.isNonInferiority) {
+            state.absoluteThreshold = getAbsoluteThreshold(state);
+          } else {
+            state.absoluteImpact = getAbsoluteImpact(
+              newBaseRate,
+              state.relativeImpact
+            );
+          }
+          state.sample = sample;
+        } else {
+          const effect = formula({
+            total_sample_size: state.sample,
+            base_rate: newBaseRate, // It uses the displayed value
+            sd_rate: state.standardDeviation,
+            alpha,
+            beta: 1 - state.targetPower,
+            variants: state.variants,
+            alternative: getAlternative(state.isNonInferiority),
+            mu,
+            opts,
+          });
+
+          if (state.isNonInferiority) {
+            state.relativeThreshold = effect;
+            state.absoluteThreshold = getAbsoluteThreshold({
+              ...state,
+              relativeThreshold: effect,
+            });
+          } else {
+            state.relativeImpact = effect;
+            state.absoluteImpact = getAbsoluteImpact(newBaseRate, effect);
+          }
+        }
+
+        state.baseRate = newBaseRate;
       },
 
-      SET_ABSOLUTE_IMPACT(state, impact) {
-        // TODO
-      }
+      SET_STANDARD_DEVIATION(state, stddev) {
+        if (isNaN(stddev) || stddev < 0) {
+          return
+        }
+        state.standardDeviation = stddev;
+      },
+
+      // == SAMPLE ==
+      SET_SAMPLE(state, { sample, lockedField, focusedBlock }) {
+        if (isNaN(sample) || sample < 0) {
+          return
+        }
+
+        const newSample = Math.ceil(sample);
+
+        // We use relative threshold = 0 when we are calculating the impact.
+        const relativeThreshold =
+          focusedBlock === FOCUS.SAMPLE ? state.relativeThreshold : 0;
+
+        const impact = state.isNonInferiority ? 0 : state.relativeImpact;
+        const opts = state.isNonInferiority
+          ? {
+              type: 'relative',
+              alternative: getAlternative(state.isNonInferiority),
+              calculating: lockedField,
+              runtime: state.runtime,
+              threshold: relativeThreshold,
+              visitors_per_day: state.visitorsPerDay,
+              base_rate: state.baseRate,
+            }
+          : {};
+
+        const mu = state.isNonInferiority
+          ? math.getMuFromRelativeDifference(opts)
+          : 0;
+
+        const type = state.testType;
+        const impactFormula = math[type].impact;
+        const alpha =
+          state.comparisonMode === COMPARISON_MODE.ALL
+            ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
+            : state.falsePositiveRate;
+
+        const newImpact = impactFormula({
+          // It is totally unclear when the current engine rounds up and when it
+          // doesnt.
+          total_sample_size: newSample,
+          base_rate: state.baseRate,
+          sd_rate: state.standardDeviation,
+          alpha,
+          beta: 1 - state.targetPower,
+          variants: state.variants,
+          alternative: getAlternative(state.isNonInferiority),
+          mu,
+          opts,
+        });
+
+        if (lockedField === BLOCKED.DAYS) {
+          state.runtime = Math.ceil(newSample / state.visitorsPerDay);
+        } else {
+          state.visitorsPerDay = Math.ceil(newSample / state.runtime);
+        }
+
+        if (state.isNonInferiority) {
+          state.relativeThreshold = newImpact;
+          state.absoluteThreshold = getAbsoluteThreshold({
+            ...state,
+            sample: newSample,
+            relativeThreshold: newImpact,
+          });
+        } else {
+          state.relativeImpact = impact;
+          state.absoluteImpact = getAbsoluteImpact(state.baseRate, newImpact);
+        }
+
+        state.sample = newSample;
+      },
+      SET_RUNTIME(state, { runtime, lockedField, focusedBlock }) {
+        if (isNaN(runtime) || runtime <= 0) {
+          return
+        }
+
+        const newRuntime = Math.ceil(runtime);
+
+        if (focusedBlock === FOCUS.SAMPLE) {
+          state.visitorsPerDay = Math.ceil(state.sample / newRuntime);
+        } else {
+          const newSample = Math.ceil(newRuntime * state.visitorsPerDay);
+
+          // We use relative threshold = 0 when we are calculating the impact.
+          const relativeThreshold =
+            focusedBlock === FOCUS.SAMPLE ? state.relativeThreshold : 0;
+
+          const opts = state.isNonInferiority
+            ? {
+                type: 'relative',
+                alternative: getAlternative(state.isNonInferiority),
+                calculating: BLOCKED.VISITORS_PER_DAY,
+                runtime: newRuntime,
+                threshold: relativeThreshold,
+                visitors_per_day: state.visitorsPerDay,
+                base_rate: state.baseRate,
+              }
+            : {};
+
+          const mu = state.isNonInferiority
+            ? math.getMuFromRelativeDifference(opts)
+            : 0;
+
+          const type = state.testType;
+          const impactFormula = math[type].impact;
+          const alpha =
+            state.comparisonMode === COMPARISON_MODE.ALL
+              ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
+              : state.falsePositiveRate;
+
+          const newImpact = impactFormula({
+            total_sample_size: newSample,
+            base_rate: state.baseRate,
+            sd_rate: state.standardDeviation,
+            alpha,
+            beta: 1 - state.targetPower,
+            variants: state.variants,
+            alternative: getAlternative(state.isNonInferiority),
+            mu,
+            opts,
+          });
+
+          if (state.isNonInferiority) {
+            state.relativeThreshold = newImpact;
+            state.absoluteThreshold = getAbsoluteThreshold({
+              ...state,
+              sample: newSample,
+              runtime: newRuntime,
+              relativeThreshold: newImpact,
+            });
+          } else {
+            state.relativeImpact = newImpact;
+            state.absoluteImpact = getAbsoluteImpact(state.baseRate, newImpact);
+          }
+          state.sample = newSample;
+        }
+
+        state.runtime = newRuntime;
+      },
+
+      SET_VISITORS_PER_DAY(state, { visitorsPerDay, lockedField, focusedBlock }) {
+        if (isNaN(visitorsPerDay) || visitorsPerDay < 0) {
+          return
+        }
+
+        const newVisitorsPerDay = Math.ceil(visitorsPerDay);
+        if (focusedBlock === FOCUS.SAMPLE) {
+          state.runtime = Math.ceil(state.sample / newVisitorsPerDay);
+        } else {
+          const newSample = Math.ceil(state.runtime * newVisitorsPerDay);
+
+          // We use relative threshold = 0 when we are calculating the impact.
+          const relativeThreshold =
+            focusedBlock === FOCUS.SAMPLE ? state.relativeThreshold : 0;
+
+          const opts = state.isNonInferiority
+            ? {
+                type: 'relative',
+                alternative: getAlternative(state.isNonInferiority),
+                calculating: BLOCKED.DAYS,
+                runtime: state.runtime,
+                threshold: relativeThreshold,
+                visitors_per_day: newVisitorsPerDay,
+                base_rate: state.baseRate,
+              }
+            : {};
+
+          const mu = state.isNonInferiority
+            ? math.getMuFromRelativeDifference(opts)
+            : 0;
+
+          const type = state.testType;
+          const impactFormula = math[type].impact;
+          const alpha =
+            state.comparisonMode === COMPARISON_MODE.ALL
+              ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
+              : state.falsePositiveRate;
+
+          const newImpact = impactFormula({
+            // It is totally unclear when the current engine rounds up and when it
+            // doesnt.
+            total_sample_size: newSample,
+            base_rate: state.baseRate,
+            sd_rate: state.standardDeviation,
+            alpha,
+            beta: 1 - state.targetPower,
+            variants: state.variants,
+            alternative: getAlternative(state.isNonInferiority),
+            mu,
+            opts,
+          });
+
+          if (state.isNonInferiority) {
+            state.relativeThreshold = newImpact;
+            state.absoluteThreshold = getAbsoluteThreshold({
+              ...state,
+              relativeThreshold: newImpact,
+            });
+          } else {
+            state.relativeImpact = newImpact;
+            state.absoluteImpact = getAbsoluteImpact(state.baseRate, newImpact);
+          }
+
+          state.sample = newSample;
+        }
+        state.visitorsPerDay = newVisitorsPerDay;
+      },
+
+      // == IMPACT ==
+      SET_IMPACT(state, { impact, isAbsolute, lockedField }) {
+        if (
+          // Do not allow not numbers
+          isNaN(impact) ||
+          // No percetages or values less than 0
+          impact <= 0 ||
+          // If it is not absolute, do not allow percentages higher or equal than 100
+          (!isAbsolute && impact >= 100) ||
+          // If it is absolute, do not allow percentages higher or equal than 100
+          // when it is binomial
+          (isAbsolute && state.testType === TEST_TYPE.BINOMIAL && impact >= 100)
+        ) {
+          return
+        }
+        const newImpact =
+          (isAbsolute
+            ? math.getRelativeImpactFromAbsolute({
+                base_rate: state.baseRate,
+                absolute_effect_size: impact,
+              })
+            : impact) / 100;
+
+        const type = state.testType;
+        const sampleFormula = math[type].sample;
+        const alpha =
+          state.comparisonMode === COMPARISON_MODE.ALL
+            ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
+            : state.falsePositiveRate;
+
+        const sample = Math.ceil(sampleFormula({
+            base_rate: state.baseRate,
+            effect_size: newImpact,
+            sd_rate: state.standardDeviation,
+            alpha,
+            beta: 1 - state.targetPower,
+            variants: state.variants,
+            alternative: getAlternative(state.isNonInferiority),
+            mu: 0, // if it isn't non-inferiority, it is always 0
+            opts: {}, // emtpy if it isn't non-inferiority
+          }));
+
+        if (lockedField === BLOCKED.DAYS) {
+          state.runtime = Math.ceil(sample / state.visitorsPerDay);
+        } else {
+          state.visitorsPerDay = Math.ceil(sample / state.runtime);
+        }
+
+        state.relativeImpact = newImpact;
+        state.absoluteImpact = getAbsoluteImpact(state.baseRate, newImpact);
+        state.sample = sample;
+      },
+
+      // This is only triggered when non-inferity == true and focusedBlock === sample
+      SET_THRESHOLD(state, { threshold, isAbsolute, lockedField }) {
+        if (
+          // Disallow not numbers
+          isNaN(threshold) ||
+          // Not values lower than 0 in general
+          threshold <= 0 ||
+          // If it is relative, do not allow 100 or more.
+          (!isAbsolute && threshold >= 100)
+        ) {
+          return
+        }
+
+        const baseRate = state.baseRate;
+        const visitorsPerDay = state.visitorsPerDay;
+
+        // eslint-disable-next-line no-nested-ternary
+        const normaliseThreshold = isAbsolute
+          ? state.trafficMode === TRAFFIC_MODE.TOTAL
+            ? threshold / state.runtime
+            : threshold
+          : threshold / 100;
+
+        const impact = state.isNonInferiority ? 0 : state.relativeImpact;
+        const opts = {
+          type: isAbsolute ? 'absolutePerDay' : 'relative',
+          alternative: getAlternative(state.isNonInferiority),
+          calculating: lockedField,
+          runtime: state.runtime,
+          threshold: -normaliseThreshold,
+          visitors_per_day: visitorsPerDay,
+          base_rate: baseRate,
+        };
+
+        const mu = isAbsolute
+          ? math.getMuFromAbsolutePerDay(opts)
+          : math.getMuFromRelativeDifference(opts);
+
+        const type = state.testType;
+        const sampleFormula = math[type].sample;
+        const alpha =
+          state.comparisonMode === COMPARISON_MODE.ALL
+            ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
+            : state.falsePositiveRate;
+
+        const sample = Math.ceil(sampleFormula({
+            base_rate: baseRate,
+            effect_size: impact,
+            sd_rate: state.standardDeviation,
+            alpha,
+            beta: 1 - state.targetPower,
+            variants: state.variants,
+            alternative: getAlternative(state.isNonInferiority),
+            mu,
+            opts,
+          }));
+
+        if (lockedField === BLOCKED.DAYS) {
+          state.runtime = Math.ceil(sample / visitorsPerDay);
+        } else {
+          state.visitorsPerDay = Math.ceil(sample / state.runtime);
+        }
+
+        state.sample = sample;
+
+        if (isAbsolute) {
+          state.absoluteThreshold = threshold;
+          state.relativeThreshold = getRelativeThreshold({
+            ...state,
+            sample,
+            absoluteThreshold: threshold,
+          });
+        } else {
+          state.relativeThreshold = normaliseThreshold;
+          state.absoluteThreshold = getAbsoluteThreshold({
+            ...state,
+            sample,
+            relativeThreshold: normaliseThreshold,
+          });
+        }
+      },
     },
     getters: {
       // UI getters
       // Configuration
-      variants: state => state.variants - 1,
-      falsePositiveRate: state => state.falsePositiveRate * 100,
-      targetPower: state => state.targetPower * 100,
-      isNonInferiority: state => state.isNonInferiority,
-      testType: state => state.testType,
-      comparisonMode: state => state.comparisonMode,
-      trafficMode: state => state.trafficMode,
+      variants: (state) => state.variants,
+      falsePositiveRate: (state) => displayValue(state.falsePositiveRate, 'percentage'),
+      targetPower: (state) => displayValue(state.targetPower, 'percentage'),
+      isNonInferiority: (state) => state.isNonInferiority,
+      testType: (state) => state.testType,
+      comparisonMode: (state) => state.comparisonMode,
+      trafficMode: (state) => state.trafficMode,
 
       // Base rate
-      baseRate: state => state.baseRate * 100,
-      standardDeviation: state => state.standardDevation * 100,
-      metricTotal: state  => {
-        if (state.isNonInferiority) {
-          return '-'
-        }
-        
-        const multiplier = state.testType === TEST_TYPE.BINOMIAL ? 1 : 100;
-        return (state.sample * state.baseRate * multiplier).toFixed(0)
-      },
+      baseRate: (state) => displayValue(
+          state.baseRate,
+          state.testType === TEST_TYPE.BINOMIAL ? 'percentage' : 'float'
+        ),
+      standardDeviation: (state) => displayValue(state.standardDeviation, 'float'),
+      metricTotal: (state) => (state.sample * state.baseRate).toFixed(0),
 
       // Sample
-      visitorsPerDay: state => Math.ceil(state.sample / state.runtime),
-      sample: state => state.sample,
-      runtime: state => state.runtime,
+      visitorsPerDay: (state) => displayValue(state.visitorsPerDay, 'int'),
+      sample: (state) => {
+        if (
+          (state.isNonInferiority && state.relativeThreshold === 0) ||
+          (!state.isNonInferiority && state.relativeImpact === 0)
+        ) {
+          return '-'
+        }
+        return displayValue(Math.ceil(state.sample), 'int')
+      },
+      runtime: (state) => {
+        if (
+          (state.isNonInferiority && state.relativeThreshold === 0) ||
+          (!state.isNonInferiority && state.relativeImpact === 0)
+        ) {
+          return '-'
+        }
+        return displayValue(Math.ceil(state.runtime), 'int')
+      },
 
       // Impact
-      relativeImpact: state => state.impact * 100,
-      absoluteImpact: state => {
-        const { value } = statFormulas.getAbsoluteImpactInMetricHash({
+      relativeImpact: (state) => displayValue(state.relativeImpact, 'percentage'),
+      absoluteImpact: (state) => displayValue(state.absoluteImpact, 'percentage'),
+      minAbsoluteImpact: (state) => {
+        const { min } = math.getAbsoluteImpactInMetricHash({
           base_rate: state.baseRate,
-          effect_size: state.impact
-        }); 
-        return displayValue(value, 'percentage')
-      },
-      minAbsoluteImpact: state => { 
-        const { min } = statFormulas.getAbsoluteImpactInMetricHash({
-          base_rate: state.baseRate,
-          effect_size: state.impact
-        }); 
+          effect_size: state.relativeImpact,
+        });
         return displayValue(min, 'percentage')
       },
-      maxAbsoluteImpact: state => {
-        const { max } = statFormulas.getAbsoluteImpactInMetricHash({
+      maxAbsoluteImpact: (state) => {
+        const { max } = math.getAbsoluteImpactInMetricHash({
           base_rate: state.baseRate,
-          effect_size: state.impact
-        }); 
+          effect_size: state.relativeImpact,
+        });
         return displayValue(max, 'percentage')
       },
-      absoluteImpactPerVisitor: state => {
-        const impactPerVisitor = statFormulas.getAbsoluteImpactInVisitors({
+      absoluteImpactPerVisitor: (state) => {
+        const impactPerVisitor = math.getAbsoluteImpactInVisitors({
           base_rate: state.baseRate,
-          effect_size: state.impact,
-          total_sample_size: state.sample
+          effect_size: state.relativeImpact,
+          total_sample_size: state.sample,
         });
 
         return displayValue(impactPerVisitor, 'int')
       },
-      absoluteImpactPerVisitorPerDay: state => {
-        const impactPerVisitor = statFormulas.getAbsoluteImpactInVisitors({
+      absoluteImpactPerVisitorPerDay: (state) => {
+        const impactPerVisitor = math.getAbsoluteImpactInVisitors({
           base_rate: state.baseRate,
-          effect_size: state.impact,
-          total_sample_size: state.sample
+          effect_size: state.relativeImpact,
+          total_sample_size: state.sample,
         });
-        return displayValue(Math.floor(impactPerVisitor / state.runtime), 'int') 
-      }
+        // We need to use the parsed display value for consistency
+        return displayValue(Math.floor(impactPerVisitor / state.runtime), 'int')
+      },
+
+      // THRESHOLD
+      relativeThreshold: (state) => displayValue(state.relativeThreshold, 'percentage'),
+      absoluteThreshold: (state) => displayValue(state.absoluteThreshold, 'float'),
     },
-    actions: {
-      calculatePower({ state, getters }) {},
-      calculateSample({ state, getters }) {},
-      calculateEffectSize({ state, getters }) {}
-    }
   };
 
   //
 
-  const DEBOUNCE = 500;
+  const DEBOUNCE$3 = 500;
 
-  var script$3 = {
-    props: ['focusedBlock', 'blockName'],
-    extends: __vue_component__$2,
+  var script$5 = {
+    extends: __vue_component__$6,
     template: '#base-comp',
-    data() {
-      return {
-        baseDebouncer: null,
-        sdRateDebouncer: null,
-      }
-    },
+    data: () => ({
+      baseDebouncer: null,
+      sdRateDebouncer: null,
+    }),
     computed: {
       TEST_TYPE: () => TEST_TYPE,
-      isBlockFocused() {
-        return this.focusedBlock === this.blockName
-      },
-      isReadOnly() {
-        return this.calculateProp == this.blockName
-      },
       base: {
         get() {
           return this.$store.getters.baseRate
@@ -6266,8 +6836,14 @@
             clearTimeout(this.baseDebouncer);
           }
           this.baseDebouncer = setTimeout(() => {
-            this.$store.commit('SET_BASE_RATE', val);
-          }, DEBOUNCE);
+            if (this.$store.getters.baseRate !== val) {
+              this.$store.commit('SET_BASE_RATE', {
+                baseRate: val,
+                lockedField: this.lockedField,
+                focusedBlock: this.focusedBlock,
+              });
+            }
+          }, DEBOUNCE$3);
         },
       },
       sdRate: {
@@ -6280,16 +6856,17 @@
           }
           this.sdRateDebouncer = setTimeout(() => {
             this.$store.commit('SET_STANDARD_DEVIATION', val);
-          }, DEBOUNCE);
+            // Little hack to not rewrite everything again.
+            this.$store.commit('SET_BASE_RATE', {
+              baseRate: this.base,
+              lockedField: this.lockedField,
+              focusedBlock: this.focusedBlock,
+            });
+          }, DEBOUNCE$3);
         },
       },
-      visitorsWithGoals: {
-        get() {
-          return this.$store.getters.metricTotal
-        },
-        set(val) {
-          if (this.$store.getters.isNonInferiority) return
-        },
+      visitorsWithGoals() {
+        return this.$store.getters.metricTotal
       },
       sample() {
         return this.$store.getters.sample
@@ -6301,175 +6878,38 @@
   };
 
   /* script */
-  const __vue_script__$3 = script$3;
+  const __vue_script__$5 = script$5;
 
   /* template */
-  var __vue_render__$3 = function() {
-    var _vm = this;
-    var _h = _vm.$createElement;
-    var _c = _vm._self._c || _h;
-    return _c(
-      "div",
-      {
-        staticClass: "pc-block pc-block--base",
-        class: { "pc-block-focused": _vm.focusedBlock === _vm.fieldFromBlock }
-      },
-      [
-        _c("pc-svg-chain", {
-          attrs: { fieldFromBlock: _vm.blockName, focusedBlock: _vm.focusedBlock }
-        }),
-        _vm._v(" "),
-        _vm.testType == "gTest"
-          ? _c("div", { staticClass: "pc-header" }, [_vm._v("Base Rate")])
-          : _c("div", { staticClass: "pc-header" }, [_vm._v("Base Average")]),
-        _vm._v(" "),
-        _c("ul", { staticClass: "pc-inputs" }, [
-          _c("li", { staticClass: "pc-input-item pc-input-left" }, [
-            _c(
-              "label",
-              [
-                _c("span", { staticClass: "pc-input-title" }, [
-                  _vm._v(
-                    _vm._s(
-                      _vm.testType == "gTest" ? "Base Rate" : "Base Average"
-                    ) + "\n          "
-                  ),
-                  _c("small", { staticClass: "pc-input-sub-title" }, [
-                    _vm._v("conversion")
-                  ])
-                ]),
-                _vm._v(" "),
-                _c("pc-block-field", {
-                  attrs: {
-                    fieldProp: "base",
-                    suffix: _vm.testType === _vm.TEST_TYPE.BINOMIAL ? "%" : "",
-                    fieldValue: _vm.base,
-                    isReadOnly: _vm.isReadOnly,
-                    isBlockFocused: _vm.isBlockFocused,
-                    enableEdit: "true"
-                  },
-                  on: {
-                    "update:fieldValue": function($event) {
-                      _vm.base = $event;
-                    },
-                    "update:field-value": function($event) {
-                      _vm.base = $event;
-                    }
-                  }
-                })
-              ],
-              1
-            )
-          ]),
-          _vm._v(" "),
-          _c("li", { staticClass: "pc-input-item pc-input-right" }, [
-            _c(
-              "label",
-              [
-                _vm._m(0),
-                _vm._v(" "),
-                _c("pc-block-field", {
-                  attrs: {
-                    fieldProp: "visitorsWithGoals",
-                    fieldValue: _vm.visitorsWithGoals,
-                    fieldFromBlock: _vm.fieldFromBlock,
-                    isBlockFocused: _vm.isBlockFocused,
-                    isReadOnly: _vm.isReadOnly,
-                    enableEdit: this.focusedBlock != "sample"
-                  },
-                  on: {
-                    "update:fieldValue": function($event) {
-                      _vm.visitorsWithGoals = $event;
-                    },
-                    "update:field-value": function($event) {
-                      _vm.visitorsWithGoals = $event;
-                    }
-                  }
-                })
-              ],
-              1
-            )
-          ]),
-          _vm._v(" "),
-          _vm.testType == "tTest"
-            ? _c("li", { staticClass: "pc-input-item pc-input-sd-rate" }, [
-                _c(
-                  "label",
-                  [
-                    _c("pc-block-field", {
-                      attrs: {
-                        prefix: "±",
-                        fieldProp: "sdRate",
-                        fieldFromBlock: "base",
-                        fieldValue: _vm.sdRate,
-                        isReadOnly: _vm.isReadOnly,
-                        isBlockFocused: _vm.isBlockFocused,
-                        enableEdit: "true"
-                      },
-                      on: {
-                        "update:fieldValue": function($event) {
-                          _vm.sdRate = $event;
-                        },
-                        "update:field-value": function($event) {
-                          _vm.sdRate = $event;
-                        }
-                      }
-                    }),
-                    _vm._v(" "),
-                    _c("span", { staticClass: "pc-input-details" }, [
-                      _vm._v("Base Standard deviation")
-                    ])
-                  ],
-                  1
-                )
-              ])
-            : _vm._e()
-        ])
-      ],
-      1
-    )
-  };
-  var __vue_staticRenderFns__$3 = [
-    function() {
-      var _vm = this;
-      var _h = _vm.$createElement;
-      var _c = _vm._self._c || _h;
-      return _c("span", { staticClass: "pc-input-title" }, [
-        _vm._v("Metric Totals"),
-        _c("small", { staticClass: "pc-input-sub-title" }, [
-          _vm._v("visitors reached goal")
-        ])
-      ])
-    }
-  ];
-  __vue_render__$3._withStripped = true;
+  var __vue_render__$5 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-block pc-block--base",class:{ 'pc-block-focused': _vm.isBlockFocused }},[_c('pc-svg-chain',{attrs:{"isBlockFocused":_vm.isBlockFocused}}),_vm._v(" "),(_vm.testType == 'gTest')?_c('div',{staticClass:"pc-header"},[_vm._v("Base Rate")]):_c('div',{staticClass:"pc-header"},[_vm._v("Base Average")]),_vm._v(" "),_c('ul',{staticClass:"pc-inputs"},[_c('li',{staticClass:"pc-input-item pc-input-left"},[_c('label',[_c('span',{staticClass:"pc-input-title"},[_vm._v(_vm._s(_vm.testType == 'gTest' ? 'Base Rate' : 'Base Average')+"\n          "),_c('small',{staticClass:"pc-input-sub-title"},[_vm._v("conversion")])]),_vm._v(" "),_c('pc-block-field',{attrs:{"fieldProp":"base","suffix":_vm.testType === _vm.TEST_TYPE.BINOMIAL ? '%' : '',"fieldValue":_vm.base,"isReadOnly":_vm.isReadOnly,"isBlockFocused":_vm.isBlockFocused,"enableEdit":"true"},on:{"update:fieldValue":function($event){_vm.base=$event;},"update:field-value":function($event){_vm.base=$event;}}})],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right"},[_c('label',[_vm._m(0),_vm._v(" "),_c('pc-block-field',{attrs:{"fieldProp":"visitorsWithGoals","fieldValue":_vm.visitorsWithGoals,"isBlockFocused":_vm.isBlockFocused,"isReadOnly":true,"enableEdit":false}})],1)]),_vm._v(" "),(_vm.testType == 'tTest')?_c('li',{staticClass:"pc-input-item pc-input-sd-rate"},[_c('label',[_c('pc-block-field',{attrs:{"prefix":"±","fieldProp":"sdRate","fieldValue":_vm.sdRate,"isReadOnly":_vm.isReadOnly,"isBlockFocused":_vm.isBlockFocused,"enableEdit":"true"},on:{"update:fieldValue":function($event){_vm.sdRate=$event;},"update:field-value":function($event){_vm.sdRate=$event;}}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v("Base Standard deviation")])],1)]):_vm._e()])],1)};
+  var __vue_staticRenderFns__$5 = [function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('span',{staticClass:"pc-input-title"},[_vm._v("Metric Totals"),_c('small',{staticClass:"pc-input-sub-title"},[_vm._v("visitors reached goal")])])}];
 
     /* style */
-    const __vue_inject_styles__$3 = function (inject) {
+    const __vue_inject_styles__$5 = function (inject) {
       if (!inject) return
-      inject("data-v-bd0ba0f6_0", { source: "\n.pc-input-sd-rate {\n  margin-top: -10px;\n  z-index: 1;\n  position: relative;\n  text-align: center;\n}\n.pc-field-sdRate {\n  width: 90%;\n  display: inline-block;\n}\n", map: {"version":3,"sources":["/Users/amartinezdem/git_tree/github/bookingcom/powercalculator/src/components/base-comp.vue"],"names":[],"mappings":";AA0IA;EACA,iBAAA;EACA,UAAA;EACA,kBAAA;EACA,kBAAA;AACA;AAEA;EACA,UAAA;EACA,qBAAA;AACA","file":"base-comp.vue","sourcesContent":["<template id=\"base-comp\">\n  <div\n    class=\"pc-block pc-block--base\"\n    :class=\"{ 'pc-block-focused': focusedBlock === fieldFromBlock }\"\n  >\n    <pc-svg-chain\n      :fieldFromBlock=\"blockName\"\n      :focusedBlock=\"focusedBlock\"\n    ></pc-svg-chain>\n\n    <div class=\"pc-header\" v-if=\"testType == 'gTest'\">Base Rate</div>\n    <div class=\"pc-header\" v-else>Base Average</div>\n\n    <ul class=\"pc-inputs\">\n      <li class=\"pc-input-item pc-input-left\">\n        <label>\n          <span class=\"pc-input-title\"\n            >{{ testType == 'gTest' ? 'Base Rate' : 'Base Average' }}\n            <small class=\"pc-input-sub-title\">conversion</small></span\n          >\n\n          <pc-block-field\n            fieldProp=\"base\"\n            :suffix=\"testType === TEST_TYPE.BINOMIAL ? '%' : ''\"\n            :fieldValue.sync=\"base\"\n            :isReadOnly=\"isReadOnly\"\n            :isBlockFocused=\"isBlockFocused\"\n            enableEdit=\"true\"\n          ></pc-block-field>\n        </label>\n      </li>\n\n      <li class=\"pc-input-item pc-input-right\">\n        <label>\n          <span class=\"pc-input-title\"\n            >Metric Totals<small class=\"pc-input-sub-title\"\n              >visitors reached goal</small\n            ></span\n          >\n\n          <pc-block-field\n            fieldProp=\"visitorsWithGoals\"\n            :fieldValue.sync=\"visitorsWithGoals\"\n            :fieldFromBlock=\"fieldFromBlock\"\n            :isBlockFocused=\"isBlockFocused\"\n            :isReadOnly=\"isReadOnly\"\n            :enableEdit=\"this.focusedBlock != 'sample'\"\n          ></pc-block-field>\n        </label>\n      </li>\n\n      <li class=\"pc-input-item pc-input-sd-rate\" v-if=\"testType == 'tTest'\">\n        <label>\n          <pc-block-field\n            prefix=\"±\"\n            fieldProp=\"sdRate\"\n            fieldFromBlock=\"base\"\n            :fieldValue.sync=\"sdRate\"\n            :isReadOnly=\"isReadOnly\"\n            :isBlockFocused=\"isBlockFocused\"\n            enableEdit=\"true\"\n          ></pc-block-field>\n          <span class=\"pc-input-details\">Base Standard deviation</span>\n        </label>\n      </li>\n    </ul>\n  </div>\n</template>\n\n<script>\nimport pcBlock from './pc-block.vue'\nimport { TEST_TYPE } from '../store/modules/calculator'\n\nconst DEBOUNCE = 500\n\nexport default {\n  props: ['focusedBlock', 'blockName'],\n  extends: pcBlock,\n  template: '#base-comp',\n  data() {\n    return {\n      baseDebouncer: null,\n      sdRateDebouncer: null,\n    }\n  },\n  computed: {\n    TEST_TYPE: () => TEST_TYPE,\n    isBlockFocused() {\n      return this.focusedBlock === this.blockName\n    },\n    isReadOnly() {\n      return this.calculateProp == this.blockName\n    },\n    base: {\n      get() {\n        return this.$store.getters.baseRate\n      },\n      set(val) {\n        if (this.baseDebouncer != null) {\n          clearTimeout(this.baseDebouncer)\n        }\n        this.baseDebouncer = setTimeout(() => {\n          this.$store.commit('SET_BASE_RATE', val)\n        }, DEBOUNCE)\n      },\n    },\n    sdRate: {\n      get() {\n        return this.$store.getters.standardDeviation\n      },\n      set(val) {\n        if (this.sdRateDebouncer != null) {\n          clearTimeout(this.sdRateDebouncer)\n        }\n        this.sdRateDebouncer = setTimeout(() => {\n          this.$store.commit('SET_STANDARD_DEVIATION', val)\n        }, DEBOUNCE)\n      },\n    },\n    visitorsWithGoals: {\n      get() {\n        return this.$store.getters.metricTotal\n      },\n      set(val) {\n        if (this.$store.getters.isNonInferiority) return\n      },\n    },\n    sample() {\n      return this.$store.getters.sample\n    },\n    testType() {\n      return this.$store.getters.testType\n    },\n  },\n}\n</script>\n\n<style>\n.pc-input-sd-rate {\n  margin-top: -10px;\n  z-index: 1;\n  position: relative;\n  text-align: center;\n}\n\n.pc-field-sdRate {\n  width: 90%;\n  display: inline-block;\n}\n</style>\n\n<style scoped>\n.pc-input-left {\n  position: relative;\n  z-index: 2;\n}\n</style>\n"]}, media: undefined })
-  ,inject("data-v-bd0ba0f6_1", { source: "\n.pc-input-left[data-v-bd0ba0f6] {\n  position: relative;\n  z-index: 2;\n}\n", map: {"version":3,"sources":["/Users/amartinezdem/git_tree/github/bookingcom/powercalculator/src/components/base-comp.vue"],"names":[],"mappings":";AAwJA;EACA,kBAAA;EACA,UAAA;AACA","file":"base-comp.vue","sourcesContent":["<template id=\"base-comp\">\n  <div\n    class=\"pc-block pc-block--base\"\n    :class=\"{ 'pc-block-focused': focusedBlock === fieldFromBlock }\"\n  >\n    <pc-svg-chain\n      :fieldFromBlock=\"blockName\"\n      :focusedBlock=\"focusedBlock\"\n    ></pc-svg-chain>\n\n    <div class=\"pc-header\" v-if=\"testType == 'gTest'\">Base Rate</div>\n    <div class=\"pc-header\" v-else>Base Average</div>\n\n    <ul class=\"pc-inputs\">\n      <li class=\"pc-input-item pc-input-left\">\n        <label>\n          <span class=\"pc-input-title\"\n            >{{ testType == 'gTest' ? 'Base Rate' : 'Base Average' }}\n            <small class=\"pc-input-sub-title\">conversion</small></span\n          >\n\n          <pc-block-field\n            fieldProp=\"base\"\n            :suffix=\"testType === TEST_TYPE.BINOMIAL ? '%' : ''\"\n            :fieldValue.sync=\"base\"\n            :isReadOnly=\"isReadOnly\"\n            :isBlockFocused=\"isBlockFocused\"\n            enableEdit=\"true\"\n          ></pc-block-field>\n        </label>\n      </li>\n\n      <li class=\"pc-input-item pc-input-right\">\n        <label>\n          <span class=\"pc-input-title\"\n            >Metric Totals<small class=\"pc-input-sub-title\"\n              >visitors reached goal</small\n            ></span\n          >\n\n          <pc-block-field\n            fieldProp=\"visitorsWithGoals\"\n            :fieldValue.sync=\"visitorsWithGoals\"\n            :fieldFromBlock=\"fieldFromBlock\"\n            :isBlockFocused=\"isBlockFocused\"\n            :isReadOnly=\"isReadOnly\"\n            :enableEdit=\"this.focusedBlock != 'sample'\"\n          ></pc-block-field>\n        </label>\n      </li>\n\n      <li class=\"pc-input-item pc-input-sd-rate\" v-if=\"testType == 'tTest'\">\n        <label>\n          <pc-block-field\n            prefix=\"±\"\n            fieldProp=\"sdRate\"\n            fieldFromBlock=\"base\"\n            :fieldValue.sync=\"sdRate\"\n            :isReadOnly=\"isReadOnly\"\n            :isBlockFocused=\"isBlockFocused\"\n            enableEdit=\"true\"\n          ></pc-block-field>\n          <span class=\"pc-input-details\">Base Standard deviation</span>\n        </label>\n      </li>\n    </ul>\n  </div>\n</template>\n\n<script>\nimport pcBlock from './pc-block.vue'\nimport { TEST_TYPE } from '../store/modules/calculator'\n\nconst DEBOUNCE = 500\n\nexport default {\n  props: ['focusedBlock', 'blockName'],\n  extends: pcBlock,\n  template: '#base-comp',\n  data() {\n    return {\n      baseDebouncer: null,\n      sdRateDebouncer: null,\n    }\n  },\n  computed: {\n    TEST_TYPE: () => TEST_TYPE,\n    isBlockFocused() {\n      return this.focusedBlock === this.blockName\n    },\n    isReadOnly() {\n      return this.calculateProp == this.blockName\n    },\n    base: {\n      get() {\n        return this.$store.getters.baseRate\n      },\n      set(val) {\n        if (this.baseDebouncer != null) {\n          clearTimeout(this.baseDebouncer)\n        }\n        this.baseDebouncer = setTimeout(() => {\n          this.$store.commit('SET_BASE_RATE', val)\n        }, DEBOUNCE)\n      },\n    },\n    sdRate: {\n      get() {\n        return this.$store.getters.standardDeviation\n      },\n      set(val) {\n        if (this.sdRateDebouncer != null) {\n          clearTimeout(this.sdRateDebouncer)\n        }\n        this.sdRateDebouncer = setTimeout(() => {\n          this.$store.commit('SET_STANDARD_DEVIATION', val)\n        }, DEBOUNCE)\n      },\n    },\n    visitorsWithGoals: {\n      get() {\n        return this.$store.getters.metricTotal\n      },\n      set(val) {\n        if (this.$store.getters.isNonInferiority) return\n      },\n    },\n    sample() {\n      return this.$store.getters.sample\n    },\n    testType() {\n      return this.$store.getters.testType\n    },\n  },\n}\n</script>\n\n<style>\n.pc-input-sd-rate {\n  margin-top: -10px;\n  z-index: 1;\n  position: relative;\n  text-align: center;\n}\n\n.pc-field-sdRate {\n  width: 90%;\n  display: inline-block;\n}\n</style>\n\n<style scoped>\n.pc-input-left {\n  position: relative;\n  z-index: 2;\n}\n</style>\n"]}, media: undefined });
+      inject("data-v-150e359e_0", { source: ".pc-input-sd-rate{margin-top:-10px;z-index:1;position:relative;text-align:center}.pc-field-sdRate{width:90%;display:inline-block}", map: undefined, media: undefined })
+  ,inject("data-v-150e359e_1", { source: ".pc-input-left[data-v-150e359e]{position:relative;z-index:2}", map: undefined, media: undefined });
 
     };
     /* scoped */
-    const __vue_scope_id__$3 = "data-v-bd0ba0f6";
+    const __vue_scope_id__$5 = "data-v-150e359e";
     /* module identifier */
-    const __vue_module_identifier__$3 = undefined;
+    const __vue_module_identifier__$5 = undefined;
     /* functional template */
-    const __vue_is_functional_template__$3 = false;
+    const __vue_is_functional_template__$5 = false;
     /* style inject SSR */
     
     /* style inject shadow dom */
     
 
     
-    const __vue_component__$3 = /*#__PURE__*/normalizeComponent(
-      { render: __vue_render__$3, staticRenderFns: __vue_staticRenderFns__$3 },
-      __vue_inject_styles__$3,
-      __vue_script__$3,
-      __vue_scope_id__$3,
-      __vue_is_functional_template__$3,
-      __vue_module_identifier__$3,
+    const __vue_component__$5 = /*#__PURE__*/normalizeComponent(
+      { render: __vue_render__$5, staticRenderFns: __vue_staticRenderFns__$5 },
+      __vue_inject_styles__$5,
+      __vue_script__$5,
+      __vue_scope_id__$5,
+      __vue_is_functional_template__$5,
+      __vue_module_identifier__$5,
       false,
       createInjector,
       undefined,
@@ -6478,16 +6918,17 @@
 
   //
 
+  const DEBOUNCE$2 = 500;
+
   var script$4 = {
-    extends: __vue_component__$2,
+    extends: __vue_component__$6,
     template: '#impact-comp',
-    props: ['focusedBlock', 'blockName'],
-    data() {
-      return {
-      }
-    },
+    data: () => ({
+      absoluteImpactDebouncer: null,
+      relativeImpactDebouncer: null,
+    }),
     computed: {
-      isSelected: {
+      isFocused: {
         get() {
           return this.focusedBlock
         },
@@ -6497,28 +6938,51 @@
           }
         },
       },
-      enableEdit() {
-        return this.focusedBlock === this.blockName
-      },
       isNonInferiority() {
         return this.$store.getters.isNonInferiority
       },
       relativeImpact: {
         get() {
           return this.$store.getters.relativeImpact
-        }, 
+        },
         set(val) {
-          if (this.focusedBlock !== this.blockName) {
-            this.$store.commit('SET_RELATIVE_IMPACT', val);
-            // SET_SAMPLE_SIZE
+          if (this.focusedBlock === FOCUS.SAMPLE) {
+            if (this.relativeImpactDebouncer != null) {
+              clearTimeout(this.relativeImpactDebouncer);
+            }
+            this.relativeImpactDebouncer = setTimeout(() => {
+              this.$emit('update:selected', SELECTED.RELATIVE);
+              this.$store.commit('SET_IMPACT', {
+                impact: val,
+                isAbsolute: false,
+                lockedField: this.lockedField,
+              });
+            }, DEBOUNCE$2);
           }
-        }
+        },
       },
       baseRate() {
         return this.$store.getters.baseRate
       },
-      absoluteImpact() {
-        return this.$store.getters.absoluteImpact
+      absoluteImpact: {
+        get() {
+          return this.$store.getters.absoluteImpact
+        },
+        set(val) {
+          if (this.focusedBlock === FOCUS.SAMPLE) {
+            if (this.absoluteImpactDebouncer != null) {
+              clearTimeout(this.absoluteImpactDebouncer);
+            }
+            this.absoluteImpactDebouncer = setTimeout(() => {
+              this.$emit('update:selected', SELECTED.ABSOLUTE);
+              this.$store.commit('SET_IMPACT', {
+                impact: val,
+                isAbsolute: true,
+                lockedField: this.lockedField,
+              });
+            }, DEBOUNCE$2);
+          }
+        },
       },
       minAbsoluteImpact() {
         return this.$store.getters.minAbsoluteImpact
@@ -6546,233 +7010,34 @@
           result += '%';
         }
         return result
-      }
-    }
-    // TODO: Add a watcher on the changes of the sample size to calculate the right one
+      },
+    },
   };
 
   /* script */
   const __vue_script__$4 = script$4;
 
   /* template */
-  var __vue_render__$4 = function() {
-    var _vm = this;
-    var _h = _vm.$createElement;
-    var _c = _vm._self._c || _h;
-    return _c(
-      "div",
-      {
-        staticClass: "pc-block pc-block--impact",
-        class: {
-          "pc-block-focused": _vm.focusedBlock == _vm.blockName,
-          "pc-block-to-calculate": _vm.focusedBlock === _vm.blockName
-        }
-      },
-      [
-        _c("pc-svg-chain", {
-          attrs: { focusedBlock: _vm.focusedBlock, fieldFromBlock: _vm.blockName }
-        }),
-        _vm._v(" "),
-        _c(
-          "label",
-          {
-            staticClass: "pc-calc-radio pc-calc-radio--impact",
-            class: {
-              "pc-calc-radio--active": _vm.focusedBlock === _vm.blockName
-            },
-            attrs: { slot: "text" },
-            slot: "text"
-          },
-          [
-            _c("input", {
-              directives: [
-                {
-                  name: "model",
-                  rawName: "v-model",
-                  value: _vm.isSelected,
-                  expression: "isSelected"
-                }
-              ],
-              attrs: { type: "radio" },
-              domProps: {
-                value: _vm.blockName,
-                checked: _vm._q(_vm.isSelected, _vm.blockName)
-              },
-              on: {
-                change: function($event) {
-                  _vm.isSelected = _vm.blockName;
-                }
-              }
-            }),
-            _vm._v(
-              "\n    " +
-                _vm._s(
-                  _vm.focusedBlock === _vm.blockName ? "Calculating" : "Calculate"
-                ) +
-                "\n  "
-            )
-          ]
-        ),
-        _vm._v(" "),
-        _c("div", { staticClass: "pc-header" }, [_vm._v("\n    Impact\n  ")]),
-        _vm._v(" "),
-        _c("ul", { staticClass: "pc-inputs" }, [
-          _c("li", { staticClass: "pc-input-item pc-input-left" }, [
-            _c(
-              "label",
-              [
-                _c("span", { staticClass: "pc-input-title" }, [
-                  _vm._v("Relative")
-                ]),
-                _vm._v(" "),
-                _c("pc-block-field", {
-                  staticClass: "pc-input-field",
-                  attrs: {
-                    prefix: _vm.isNonInferiority ? "" : "±",
-                    suffix: "%",
-                    fieldProp: "impact",
-                    fieldValue: _vm.relativeImpact,
-                    testType: _vm.testType,
-                    isReadOnly: _vm.focusedBlock === _vm.blockName,
-                    isBlockFocused: _vm.focusedBlock === _vm.blockName,
-                    enableEdit: "true"
-                  },
-                  on: {
-                    "update:fieldValue": function($event) {
-                      _vm.relativeImpact = $event;
-                    },
-                    "update:field-value": function($event) {
-                      _vm.relativeImpact = $event;
-                    }
-                  }
-                })
-              ],
-              1
-            )
-          ]),
-          _vm._v(" "),
-          _c("li", { staticClass: "pc-input-item pc-input-right" }, [
-            _c(
-              "label",
-              [
-                _c("span", { staticClass: "pc-input-title" }, [
-                  _vm._v("Absolute")
-                ]),
-                _vm._v(" "),
-                _c("pc-block-field", {
-                  staticClass: "pc-input-field",
-                  attrs: {
-                    fieldProp: "impactByMetricValue",
-                    suffix: _vm.testType == "gTest" ? "%" : "",
-                    fieldValue: _vm.absoluteImpact,
-                    testType: _vm.testType,
-                    isReadOnly: _vm.focusedBlock === _vm.blockName,
-                    isBlockFocused: _vm.focusedBlock === _vm.blockName,
-                    enableEdit: "true",
-                    "aria-label": "visitors with goals"
-                  }
-                }),
-                _vm._v(" "),
-                _c("span", { staticClass: "pc-input-details" }, [
-                  _vm._v(
-                    "\n          going from " +
-                      _vm._s(_vm.addPercentToString(_vm.baseRate)) +
-                      " to either\n          " +
-                      _vm._s(_vm.addPercentToString(_vm.minAbsoluteImpact)) +
-                      " or\n          " +
-                      _vm._s(_vm.addPercentToString(_vm.maxAbsoluteImpact)) +
-                      "\n        "
-                  )
-                ])
-              ],
-              1
-            )
-          ]),
-          _vm._v(" "),
-          _c("li", { staticClass: "pc-input-item pc-input-bottom-left" }, [
-            _c(
-              "label",
-              [
-                _c("pc-block-field", {
-                  staticClass: "pc-input-field",
-                  attrs: {
-                    fieldProp: "impactByVisitors",
-                    fieldValue: _vm.absoluteImpactPerVisitor,
-                    testType: _vm.testType,
-                    isReadOnly: "true",
-                    isBlockFocused: _vm.focusedBlock === _vm.blockName,
-                    enableEdit: "false"
-                  }
-                }),
-                _vm._v(" "),
-                _c("span", { staticClass: "pc-input-details" }, [
-                  _vm._v(
-                    "\n          " +
-                      _vm._s(
-                        _vm.testType == "gTest"
-                          ? " Incremental units"
-                          : " Incremental change in the metric"
-                      ) +
-                      "\n        "
-                  )
-                ])
-              ],
-              1
-            )
-          ]),
-          _vm._v(" "),
-          !_vm.onlyTotalVisitors
-            ? _c("li", { staticClass: "pc-input-item pc-input-bottom-right" }, [
-                _c(
-                  "label",
-                  [
-                    _c("pc-block-field", {
-                      attrs: {
-                        fieldProp: "impactByVisitorsPerDay",
-                        fieldValue: _vm.absoluteImpactPerVisitorPerDay,
-                        testType: _vm.testType,
-                        isReadOnly: "true",
-                        isBlockFocused: _vm.focusedBlock === _vm.blockName,
-                        enableEdit: "false"
-                      }
-                    }),
-                    _vm._v(" "),
-                    _c("span", { staticClass: "pc-input-details" }, [
-                      _vm._v(
-                        "\n          " +
-                          _vm._s(
-                            _vm.testType == "gTest"
-                              ? " Incremental units per day"
-                              : " Incremental change in the metric per day"
-                          ) +
-                          "\n        "
-                      )
-                    ])
-                  ],
-                  1
-                )
-              ])
-            : _vm._e()
-        ])
-      ],
-      1
-    )
-  };
+  var __vue_render__$4 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-block pc-block--impact",class:{
+      'pc-block-focused': _vm.isBlockFocused,
+      'pc-block-to-calculate': _vm.isBlockFocused,
+    }},[_c('pc-svg-chain',{attrs:{"isBlockFocused":_vm.isBlockFocused}}),_vm._v(" "),_c('label',{staticClass:"pc-calc-radio pc-calc-radio--impact",class:{ 'pc-calc-radio--active': _vm.isBlockFocused },attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.isFocused),expression:"isFocused"}],attrs:{"type":"radio"},domProps:{"value":_vm.blockName,"checked":_vm._q(_vm.isFocused,_vm.blockName)},on:{"change":function($event){_vm.isFocused=_vm.blockName;}}}),_vm._v("\n    "+_vm._s(_vm.isBlockFocused ? 'Calculating' : 'Calculate')+"\n  ")]),_vm._v(" "),_c('div',{staticClass:"pc-header"},[_vm._v("Impact")]),_vm._v(" "),_c('ul',{staticClass:"pc-inputs"},[_c('li',{staticClass:"pc-input-item pc-input-left"},[_c('label',[_c('span',{staticClass:"pc-input-title"},[_vm._v("Relative")]),_vm._v(" "),_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"prefix":_vm.isNonInferiority ? '' : '±',"suffix":"%","fieldProp":"impact","fieldValue":_vm.relativeImpact,"isReadOnly":_vm.isBlockFocused,"isBlockFocused":_vm.isBlockFocused,"enableEdit":"true"},on:{"update:fieldValue":function($event){_vm.relativeImpact=$event;},"update:field-value":function($event){_vm.relativeImpact=$event;}}})],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right"},[_c('label',[_c('span',{staticClass:"pc-input-title"},[_vm._v("Absolute")]),_vm._v(" "),_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"fieldProp":"impactByMetricValue","suffix":_vm.testType == 'gTest' ? '%' : '',"fieldValue":_vm.absoluteImpact,"isReadOnly":_vm.isBlockFocused,"isBlockFocused":_vm.isBlockFocused,"enableEdit":"true","aria-label":"visitors with goals"},on:{"update:fieldValue":function($event){_vm.absoluteImpact=$event;},"update:field-value":function($event){_vm.absoluteImpact=$event;}}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v("\n          going from "+_vm._s(_vm.addPercentToString(_vm.baseRate))+" to either\n          "+_vm._s(_vm.addPercentToString(_vm.minAbsoluteImpact))+" or\n          "+_vm._s(_vm.addPercentToString(_vm.maxAbsoluteImpact))+"\n        ")])],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-bottom-left"},[_c('label',[_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"fieldProp":"impactByVisitors","fieldValue":_vm.absoluteImpactPerVisitor,"isReadOnly":"true","isBlockFocused":_vm.isBlockFocused,"enableEdit":false}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v("\n          "+_vm._s(_vm.testType == 'gTest'
+                ? ' Incremental units'
+                : ' Incremental change in the metric')+"\n        ")])],1)]),_vm._v(" "),(!_vm.onlyTotalVisitors)?_c('li',{staticClass:"pc-input-item pc-input-bottom-right"},[_c('label',[_c('pc-block-field',{attrs:{"fieldProp":"impactByVisitorsPerDay","fieldValue":_vm.absoluteImpactPerVisitorPerDay,"isReadOnly":"true","isBlockFocused":_vm.isBlockFocused,"enableEdit":false}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v("\n          "+_vm._s(_vm.testType == 'gTest'
+                ? ' Incremental units per day'
+                : ' Incremental change in the metric per day')+"\n        ")])],1)]):_vm._e()])],1)};
   var __vue_staticRenderFns__$4 = [];
-  __vue_render__$4._withStripped = true;
 
     /* style */
-    const __vue_inject_styles__$4 = function (inject) {
-      if (!inject) return
-      inject("data-v-7e3c0d72_0", { source: "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", map: {"version":3,"sources":[],"names":[],"mappings":"","file":"impact-comp.vue"}, media: undefined });
-
-    };
+    const __vue_inject_styles__$4 = undefined;
     /* scoped */
     const __vue_scope_id__$4 = undefined;
     /* module identifier */
     const __vue_module_identifier__$4 = undefined;
     /* functional template */
     const __vue_is_functional_template__$4 = false;
+    /* style inject */
+    
     /* style inject SSR */
     
     /* style inject shadow dom */
@@ -6787,545 +7052,186 @@
       __vue_is_functional_template__$4,
       __vue_module_identifier__$4,
       false,
-      createInjector,
+      undefined,
       undefined,
       undefined
     );
 
   //
-  //
-  //
-  //
-  //
-  //
-  //
-  //
-  //
 
-  var script$5 = {
-    props: ['lockedField'],
-    data: () => ({}),
+  const DEBOUNCE$1 = 500;
+
+  var script$3 = {
+    extends: __vue_component__$6,
+    template: '#base-comp',
+    data: () => ({
+      relativeDebouncer: null,
+      absoluteDebouncer: null,
+    }),
     computed: {
-      enabled: {
+      FOCUS: () => FOCUS,
+      isFocused: {
         get() {
-          return this.$store.getters.isNonInferiority
+          return this.focusedBlock
         },
-        set(newValue) {
-          this.$store.commit('SET_IS_NON_INFERIORITY', newValue);
+        set(val) {
+          if (val === this.blockName) {
+            this.$emit('update:focusedBlock', this.blockName);
+          }
         },
       },
-    },
-  };
-
-  /* script */
-  const __vue_script__$5 = script$5;
-
-  /* template */
-  var __vue_render__$5 = function() {
-    var _vm = this;
-    var _h = _vm.$createElement;
-    var _c = _vm._self._c || _h;
-    return _c("div", { staticClass: "pc-non-inferiority" }, [
-      _c("label", { staticClass: "pc-non-inf-label" }, [
-        _c("input", {
-          directives: [
-            {
-              name: "model",
-              rawName: "v-model",
-              value: _vm.enabled,
-              expression: "enabled"
-            }
-          ],
-          attrs: { type: "checkbox" },
-          domProps: {
-            checked: Array.isArray(_vm.enabled)
-              ? _vm._i(_vm.enabled, null) > -1
-              : _vm.enabled
-          },
-          on: {
-            change: function($event) {
-              var $$a = _vm.enabled,
-                $$el = $event.target,
-                $$c = $$el.checked ? true : false;
-              if (Array.isArray($$a)) {
-                var $$v = null,
-                  $$i = _vm._i($$a, $$v);
-                if ($$el.checked) {
-                  $$i < 0 && (_vm.enabled = $$a.concat([$$v]));
-                } else {
-                  $$i > -1 &&
-                    (_vm.enabled = $$a.slice(0, $$i).concat($$a.slice($$i + 1)));
-                }
-              } else {
-                _vm.enabled = $$c;
-              }
-            }
-          }
-        }),
-        _vm._v("\n    Use non inferiority test\n  ")
-      ])
-    ])
-  };
-  var __vue_staticRenderFns__$5 = [];
-  __vue_render__$5._withStripped = true;
-
-    /* style */
-    const __vue_inject_styles__$5 = function (inject) {
-      if (!inject) return
-      inject("data-v-1a755bd5_0", { source: "\n.pc-non-inf-label {\n  white-space: nowrap;\n}\n.pc-non-inf-treshold {\n  display: flex;\n  align-items: center;\n}\n.pc-non-inf-treshold-input {\n  margin-left: 5px;\n}\n", map: {"version":3,"sources":["/Users/amartinezdem/git_tree/github/bookingcom/powercalculator/src/components/non-inferiority.vue"],"names":[],"mappings":";AA2BA;EACA,mBAAA;AACA;AAEA;EACA,aAAA;EACA,mBAAA;AACA;AAEA;EACA,gBAAA;AACA","file":"non-inferiority.vue","sourcesContent":["<template>\n  <div class=\"pc-non-inferiority\">\n    <label class=\"pc-non-inf-label\">\n      <input type=\"checkbox\" v-model=\"enabled\" />\n      Use non inferiority test\n    </label>\n  </div>\n</template>\n\n<script>\nexport default {\n  props: ['lockedField'],\n  data: () => ({}),\n  computed: {\n    enabled: {\n      get() {\n        return this.$store.getters.isNonInferiority\n      },\n      set(newValue) {\n        this.$store.commit('SET_IS_NON_INFERIORITY', newValue)\n      },\n    },\n  },\n}\n</script>\n\n<style>\n.pc-non-inf-label {\n  white-space: nowrap;\n}\n\n.pc-non-inf-treshold {\n  display: flex;\n  align-items: center;\n}\n\n.pc-non-inf-treshold-input {\n  margin-left: 5px;\n}\n</style>\n"]}, media: undefined });
-
-    };
-    /* scoped */
-    const __vue_scope_id__$5 = undefined;
-    /* module identifier */
-    const __vue_module_identifier__$5 = undefined;
-    /* functional template */
-    const __vue_is_functional_template__$5 = false;
-    /* style inject SSR */
-    
-    /* style inject shadow dom */
-    
-
-    
-    const __vue_component__$5 = /*#__PURE__*/normalizeComponent(
-      { render: __vue_render__$5, staticRenderFns: __vue_staticRenderFns__$5 },
-      __vue_inject_styles__$5,
-      __vue_script__$5,
-      __vue_scope_id__$5,
-      __vue_is_functional_template__$5,
-      __vue_module_identifier__$5,
-      false,
-      createInjector,
-      undefined,
-      undefined
-    );
-
-  //
-
-  var script$6 = {
-    props: ['enableEdit', 'fieldFromBlock', 'isBlockFocused'],
-    extends: __vue_component__$2,
-    template: '#base-comp',
-    data() {
-      return {
-        focusedBlock: '',
-        options: [
-          {
-            text: 'relative',
-            value: 'relative'
-          },
-          {
-            text: 'absolute',
-            value: 'absolutePerDay'
-          }
-        ]
-      }
-    },
-    computed: {
       enabled() {
         return this.$store.getters.isNonInferiority
       },
-      threshold() {
-        return // this.$store.state.nonInferiority.threshold
+      thresholdRelative: {
+        get() {
+          return this.$store.getters.relativeThreshold
+        },
+        set(threshold) {
+          if (this.focusedBlock === FOCUS.SAMPLE) {
+            if (this.relativeDebouncer != null) {
+              clearTimeout(this.relativeDebouncer);
+            }
+            this.relativeDebouncer = setTimeout(() => {
+              this.$emit('update:selected', SELECTED.RELATIVE);
+              this.$store.commit('SET_THRESHOLD', {
+                threshold,
+                isAbsolute: false,
+                lockedField: this.lockedField,
+              });
+            }, DEBOUNCE$1);
+          }
+        },
       },
-      thresholdRelative() {
-        return // this.$store.state.nonInferiority.thresholdRelative
-      },
-      thresholdAbsolute() {
-        /*
-        const thresholdPerDay = this.$store.state.nonInferiority.thresholdAbsolute
-        if (this.$store.state.attributes.onlyTotalVisitors) {
-          const runtime = this.$store.getters.runtime
-          return thresholdPerDay * runtime
-        }
-        return thresholdPerDay
-        */
-      },
-      isRelative() {
-        return // this.$store.state.nonInferiority.selected == 'relative'
+      thresholdAbsolute: {
+        get() {
+          return this.$store.getters.absoluteThreshold
+        },
+        set(threshold) {
+          if (this.focusedBlock === FOCUS.SAMPLE) {
+            if (this.absoluteDebouncer != null) {
+              clearTimeout(this.absoluteDebouncer);
+            }
+            this.absoluteDebouncer = setTimeout(() => {
+              this.$emit('update:selected', SELECTED.ABSOLUTE);
+              this.$store.commit('SET_THRESHOLD', {
+                threshold,
+                isAbsolute: true,
+                lockedField: this.lockedField,
+              });
+            }, DEBOUNCE$1);
+          }
+        },
       },
       onlyTotalVisitors() {
-        return // this.$store.state.attributes.onlyTotalVisitors
+        return this.$store.getters.trafficMode === TRAFFIC_MODE.TOTAL
       },
       testType() {
         return this.$store.getters.testType
       },
-      isReadOnly() {
-        return // this.calculateProp == 'non-inferiority'
-      },
-      selected: {
-        get() {
-          return // this.$store.state.nonInferiority.selected
-        },
-        set(newValue) {
-          /*
-          this.$store.dispatch('change:noninferiority', {
-            prop: 'selected',
-            value: newValue
-          })
-          */
-        }
-      },
-      expectedChange: {
-        get() {
-          return // this.$store.state.nonInferiority.expectedChange
-        },
-        set(newValue) {
-          /*
-          this.$store.dispatch('field:change', {
-            prop: 'expectedChange',
-            value: newValue
-          })
-          */
-        }
+    },
+  };
+
+  /* script */
+  const __vue_script__$3 = script$3;
+
+  /* template */
+  var __vue_render__$3 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-block pc-block--noninferiority",class:{
+      'pc-block-focused': _vm.isBlockFocused,
+      'pc-block-to-calculate': _vm.isBlockFocused,
+    }},[_c('pc-svg-chain',{attrs:{"isBlockFocused":_vm.isBlockFocused}}),_vm._v(" "),_c('label',{staticClass:"pc-calc-radio pc-calc-radio--impact",class:{ 'pc-calc-radio--active': _vm.isBlockFocused },attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.isFocused),expression:"isFocused"}],attrs:{"type":"radio"},domProps:{"value":_vm.blockName,"checked":_vm._q(_vm.isFocused,_vm.blockName)},on:{"change":function($event){_vm.isFocused=_vm.blockName;}}}),_vm._v("\n    "+_vm._s(_vm.isBlockFocused ? 'Calculating' : 'Calculate')+"\n  ")]),_vm._v(" "),_c('div',{staticClass:"pc-header"},[_vm._v("Acceptable Cost")]),_vm._v(" "),_c('ul',{staticClass:"pc-inputs"},[_c('li',{staticClass:"pc-input-item pc-input-left"},[_c('label',[_vm._m(0),_vm._v(" "),_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"fieldProp":"thresholdRelative","suffix":"%","fieldValue":_vm.thresholdRelative,"isBlockFocused":_vm.isBlockFocused,"isReadOnly":_vm.isBlockFocused,"enableEdit":"true"},on:{"update:fieldValue":function($event){_vm.thresholdRelative=$event;},"update:field-value":function($event){_vm.thresholdRelative=$event;}}})],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right"},[_c('label',[_c('span',{staticClass:"pc-input-title"},[_vm._v("Absolute\n          "),(!_vm.onlyTotalVisitors)?_c('small',{staticClass:"pc-input-sub-title"},[_vm._v("impact per day")]):_vm._e()]),_vm._v(" "),_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"fieldProp":"thresholdAbsolute","suffix":"","fieldValue":_vm.thresholdAbsolute,"isBlockFocused":_vm.isBlockFocused,"isReadOnly":_vm.isBlockFocused,"enableEdit":"true"},on:{"update:fieldValue":function($event){_vm.thresholdAbsolute=$event;},"update:field-value":function($event){_vm.thresholdAbsolute=$event;}}})],1)])])],1)};
+  var __vue_staticRenderFns__$3 = [function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('span',{staticClass:"pc-input-title"},[_vm._v("Relative "),_c('small',{staticClass:"pc-input-sub-title"},[_vm._v("change")])])}];
+
+    /* style */
+    const __vue_inject_styles__$3 = function (inject) {
+      if (!inject) return
+      inject("data-v-199efaae_0", { source: ".pc-non-inf-select{--base-padding:5px;font-size:inherit;line-height:28px;border:none;display:block;position:relative;box-sizing:border-box;width:100%;filter:drop-shadow(0 4px 2px rgba(0, 0, 0, .1));border-radius:5px;background:var(--white);padding:var(--base-padding);overflow:hidden;-webkit-appearance:none;-moz-appearance:none;appearance:none}.pc-non-inf-select:focus{outline:0;box-shadow:inset 0 0 0 1px var(--dark-blue)}.pc-non-inf-select-wrapper{position:relative}.pc-non-inf-select-wrapper:after{--border-size:7px;content:'';position:absolute;right:5px;bottom:0;pointer-events:none;border:var(--border-size) solid transparent;border-top:var(--border-size) solid var(--gray);transform:translateY(calc(-50% - var(--border-size)/ 2))}.no-sub-title{margin:15px 0 10px 0}", map: undefined, media: undefined });
+
+    };
+    /* scoped */
+    const __vue_scope_id__$3 = undefined;
+    /* module identifier */
+    const __vue_module_identifier__$3 = undefined;
+    /* functional template */
+    const __vue_is_functional_template__$3 = false;
+    /* style inject SSR */
+    
+    /* style inject shadow dom */
+    
+
+    
+    const __vue_component__$3 = /*#__PURE__*/normalizeComponent(
+      { render: __vue_render__$3, staticRenderFns: __vue_staticRenderFns__$3 },
+      __vue_inject_styles__$3,
+      __vue_script__$3,
+      __vue_scope_id__$3,
+      __vue_is_functional_template__$3,
+      __vue_module_identifier__$3,
+      false,
+      createInjector,
+      undefined,
+      undefined
+    );
+
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+
+  var script$2 = {
+    template: '#pc-tooltip',
+    data() {
+      return {
+        isTooltipShown: false,
       }
     },
     methods: {
-      enableInput() {
-        // this.$emit('edit:update', { prop: 'base' })
+      showTooltip(bool) {
+        this.isTooltipShown = bool;
       },
-      updateFocus({ fieldProp, value }) {
-        if (this.focusedBlock == fieldProp && value === false) {
-          this.focusedBlock = '';
-        } else if (value === true) {
-          this.focusedBlock = fieldProp;
-        }
-
-        // this.$emit('update:focus', {
-        //  fieldProp: this.fieldFromBlock,
-         // value: value
-        //})
-      }
-    }
-  };
-
-  /* script */
-  const __vue_script__$6 = script$6;
-
-  /* template */
-  var __vue_render__$6 = function() {
-    var _vm = this;
-    var _h = _vm.$createElement;
-    var _c = _vm._self._c || _h;
-    return _c(
-      "div",
-      {
-        staticClass: "pc-block pc-block--noninferiority",
-        class: {
-          "pc-block-focused": _vm.isBlockFocused,
-          "pc-block-to-calculate": _vm.calculateProp == "non-inferiority"
-        }
-      },
-      [
-        _c("pc-svg-chain", {
-          attrs: {
-            calculateProp: _vm.calculateProp,
-            fieldFromBlock: _vm.fieldFromBlock
-          }
-        }),
-        _vm._v(" "),
-        _c(
-          "label",
-          {
-            staticClass: "pc-calc-radio pc-calc-radio--impact",
-            class: { "pc-calc-radio--active": _vm.isCalculated },
-            attrs: { slot: "text" },
-            slot: "text"
-          },
-          [
-            _c("input", {
-              directives: [
-                {
-                  name: "model",
-                  rawName: "v-model",
-                  value: _vm.isCalculated,
-                  expression: "isCalculated"
-                }
-              ],
-              attrs: { type: "radio" },
-              domProps: { value: true, checked: _vm._q(_vm.isCalculated, true) },
-              on: {
-                change: function($event) {
-                  _vm.isCalculated = true;
-                }
-              }
-            }),
-            _vm._v(
-              "\n    " +
-                _vm._s(_vm.isCalculated ? "Calculating" : "Calculate") +
-                "\n  "
-            )
-          ]
-        ),
-        _vm._v(" "),
-        _c("div", { staticClass: "pc-header" }, [
-          _vm._v("\n    Non Inferiority\n  ")
-        ]),
-        _vm._v(" "),
-        _c("ul", { staticClass: "pc-inputs" }, [
-          _c("li", { staticClass: "pc-input-item pc-input-left" }, [
-            _c(
-              "label",
-              [
-                _vm._m(0),
-                _vm._v(" "),
-                _c("pc-block-field", {
-                  staticClass: "pc-input-field",
-                  attrs: {
-                    fieldProp: "thresholdRelative",
-                    suffix: "%",
-                    fieldValue: _vm.thresholdRelative,
-                    fieldFromBlock: _vm.fieldFromBlock,
-                    isBlockFocused: _vm.isBlockFocused,
-                    isReadOnly: _vm.isReadOnly,
-                    enableEdit: _vm.enableEdit
-                  },
-                  on: { "update:focus": _vm.updateFocus }
-                })
-              ],
-              1
-            )
-          ]),
-          _vm._v(" "),
-          _c("li", { staticClass: "pc-input-item pc-input-right" }, [
-            _c(
-              "label",
-              [
-                _c("span", { staticClass: "pc-input-title" }, [
-                  _vm._v("Absolute\n          "),
-                  !_vm.onlyTotalVisitors
-                    ? _c("small", { staticClass: "pc-input-sub-title" }, [
-                        _vm._v("impact per day")
-                      ])
-                    : _vm._e()
-                ]),
-                _vm._v(" "),
-                _c("pc-block-field", {
-                  staticClass: "pc-input-field",
-                  attrs: {
-                    fieldProp: "thresholdAbsolute",
-                    suffix: "",
-                    fieldValue: _vm.thresholdAbsolute,
-                    fieldFromBlock: _vm.fieldFromBlock,
-                    isBlockFocused: _vm.isBlockFocused,
-                    isReadOnly: _vm.isReadOnly,
-                    enableEdit: _vm.enableEdit
-                  },
-                  on: { "update:focus": _vm.updateFocus }
-                })
-              ],
-              1
-            )
-          ]),
-          _vm._v(" "),
-          _c("li", { staticClass: "pc-input-item pc-input-left-bottom" }, [
-            _c("label", [
-              _vm._m(1),
-              _vm._v(" "),
-              _c("div", { staticClass: "pc-non-inf-select-wrapper" }, [
-                _c(
-                  "select",
-                  {
-                    directives: [
-                      {
-                        name: "model",
-                        rawName: "v-model",
-                        value: _vm.expectedChange,
-                        expression: "expectedChange"
-                      }
-                    ],
-                    staticClass: "pc-non-inf-select",
-                    attrs: { disabled: _vm.isReadOnly },
-                    on: {
-                      change: function($event) {
-                        var $$selectedVal = Array.prototype.filter
-                          .call($event.target.options, function(o) {
-                            return o.selected
-                          })
-                          .map(function(o) {
-                            var val = "_value" in o ? o._value : o.value;
-                            return val
-                          });
-                        _vm.expectedChange = $event.target.multiple
-                          ? $$selectedVal
-                          : $$selectedVal[0];
-                      }
-                    }
-                  },
-                  [
-                    _c("option", { attrs: { value: "nochange" } }, [
-                      _vm._v("\n              No Change\n            ")
-                    ]),
-                    _vm._v(" "),
-                    _c("option", { attrs: { value: "degradation" } }, [
-                      _vm._v("\n              Degradation\n            ")
-                    ]),
-                    _vm._v(" "),
-                    _c("option", { attrs: { value: "improvement" } }, [
-                      _vm._v("\n              Improvement\n            ")
-                    ])
-                  ]
-                )
-              ])
-            ])
-          ])
-        ])
-      ],
-      1
-    )
-  };
-  var __vue_staticRenderFns__$6 = [
-    function() {
-      var _vm = this;
-      var _h = _vm.$createElement;
-      var _c = _vm._self._c || _h;
-      return _c("span", { staticClass: "pc-input-title" }, [
-        _vm._v("Relative "),
-        _c("small", { staticClass: "pc-input-sub-title" }, [_vm._v("change")])
-      ])
     },
-    function() {
-      var _vm = this;
-      var _h = _vm.$createElement;
-      var _c = _vm._self._c || _h;
-      return _c("span", { staticClass: "pc-input-title no-sub-title" }, [
-        _vm._v("\n          Expected Change\n          "),
-        _c("small", { staticClass: "pc-input-sub-title" })
-      ])
-    }
-  ];
-  __vue_render__$6._withStripped = true;
-
-    /* style */
-    const __vue_inject_styles__$6 = function (inject) {
-      if (!inject) return
-      inject("data-v-0afe95f0_0", { source: "\n.pc-non-inf-select {\n  --base-padding: 5px;\n  font-size: inherit;\n  line-height: 28px;\n  border: none;\n  display: block;\n  position: relative;\n  box-sizing: border-box;\n  width: 100%;\n  filter: drop-shadow(0 4px 2px rgba(0, 0, 0, 0.1));\n  border-radius: 5px;\n  background: var(--white);\n  padding: var(--base-padding);\n\n  overflow: hidden;\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  appearance: none;\n}\n.pc-non-inf-select:focus {\n  outline: 0;\n  box-shadow: inset 0 0 0 1px var(--dark-blue);\n}\n.pc-non-inf-select-wrapper {\n  position: relative;\n}\n.pc-non-inf-select-wrapper:after {\n  --border-size: 7px;\n  content: '';\n  position: absolute;\n  right: 5px;\n  bottom: 0;\n  pointer-events: none;\n  border: var(--border-size) solid transparent;\n  border-top: var(--border-size) solid var(--gray);\n  transform: translateY(calc(-50% - var(--border-size) / 2));\n}\n.no-sub-title {\n  margin: 15px 0 10px 0;\n}\n", map: {"version":3,"sources":["/Users/amartinezdem/git_tree/github/bookingcom/powercalculator/src/components/non-inferiority-comp.vue"],"names":[],"mappings":";AAuMA;EACA,mBAAA;EACA,kBAAA;EACA,iBAAA;EACA,YAAA;EACA,cAAA;EACA,kBAAA;EACA,sBAAA;EACA,WAAA;EACA,iDAAA;EACA,kBAAA;EACA,wBAAA;EACA,4BAAA;;EAEA,gBAAA;EACA,wBAAA;EACA,qBAAA;EACA,gBAAA;AACA;AAEA;EACA,UAAA;EACA,4CAAA;AACA;AAEA;EACA,kBAAA;AACA;AAEA;EACA,kBAAA;EACA,WAAA;EACA,kBAAA;EACA,UAAA;EACA,SAAA;EACA,oBAAA;EACA,4CAAA;EACA,gDAAA;EACA,0DAAA;AACA;AAEA;EACA,qBAAA;AACA","file":"non-inferiority-comp.vue","sourcesContent":["<template id=\"noninferiority-comp\">\n  <div\n    class=\"pc-block pc-block--noninferiority\"\n    :class=\"{\n      'pc-block-focused': isBlockFocused,\n      'pc-block-to-calculate': calculateProp == 'non-inferiority'\n    }\"\n  >\n    <pc-svg-chain\n      v-bind:calculateProp=\"calculateProp\"\n      v-bind:fieldFromBlock=\"fieldFromBlock\"\n    ></pc-svg-chain>\n\n    <label\n      slot=\"text\"\n      class=\"pc-calc-radio pc-calc-radio--impact\"\n      :class=\"{ 'pc-calc-radio--active': isCalculated }\"\n    >\n      <input type=\"radio\" v-model=\"isCalculated\" :value=\"true\" />\n      {{ isCalculated ? 'Calculating' : 'Calculate' }}\n    </label>\n\n    <div class=\"pc-header\">\n      Non Inferiority\n    </div>\n\n    <ul class=\"pc-inputs\">\n      <li class=\"pc-input-item pc-input-left\">\n        <label>\n          <span class=\"pc-input-title\"\n            >Relative <small class=\"pc-input-sub-title\">change</small></span\n          >\n\n          <pc-block-field\n            class=\"pc-input-field\"\n            fieldProp=\"thresholdRelative\"\n            suffix=\"%\"\n            v-bind:fieldValue=\"thresholdRelative\"\n            v-bind:fieldFromBlock=\"fieldFromBlock\"\n            v-bind:isBlockFocused=\"isBlockFocused\"\n            v-bind:isReadOnly=\"isReadOnly\"\n            v-bind:enableEdit=\"enableEdit\"\n            v-on:update:focus=\"updateFocus\"\n          ></pc-block-field>\n        </label>\n      </li>\n\n      <li class=\"pc-input-item pc-input-right\">\n        <label>\n          <span class=\"pc-input-title\"\n            >Absolute\n            <small v-if=\"!onlyTotalVisitors\" class=\"pc-input-sub-title\"\n              >impact per day</small\n            ></span\n          >\n\n          <pc-block-field\n            class=\"pc-input-field\"\n            fieldProp=\"thresholdAbsolute\"\n            suffix=\"\"\n            v-bind:fieldValue=\"thresholdAbsolute\"\n            v-bind:fieldFromBlock=\"fieldFromBlock\"\n            v-bind:isBlockFocused=\"isBlockFocused\"\n            v-bind:isReadOnly=\"isReadOnly\"\n            v-bind:enableEdit=\"enableEdit\"\n            v-on:update:focus=\"updateFocus\"\n          ></pc-block-field>\n        </label>\n      </li>\n\n      <li class=\"pc-input-item pc-input-left-bottom\">\n        <label>\n          <span class=\"pc-input-title no-sub-title\">\n            Expected Change\n            <small class=\"pc-input-sub-title\"> </small>\n          </span>\n\n          <div class=\"pc-non-inf-select-wrapper\">\n            <select v-model=\"expectedChange\" class=\"pc-non-inf-select\"\n              :disabled=\"isReadOnly\">\n              <option value=\"nochange\">\n                No Change\n              </option>\n              <option value=\"degradation\">\n                Degradation\n              </option>\n              <option value=\"improvement\">\n                Improvement\n              </option>\n            </select>\n          </div>\n        </label>\n      </li>\n    </ul>\n  </div>\n</template>\n\n<script>\nimport pcBlock from './pc-block.vue'\n\nexport default {\n  props: ['enableEdit', 'fieldFromBlock', 'isBlockFocused'],\n  extends: pcBlock,\n  template: '#base-comp',\n  data() {\n    return {\n      focusedBlock: '',\n      options: [\n        {\n          text: 'relative',\n          value: 'relative'\n        },\n        {\n          text: 'absolute',\n          value: 'absolutePerDay'\n        }\n      ]\n    }\n  },\n  computed: {\n    enabled() {\n      return this.$store.getters.isNonInferiority\n    },\n    threshold() {\n      return // this.$store.state.nonInferiority.threshold\n    },\n    thresholdRelative() {\n      return // this.$store.state.nonInferiority.thresholdRelative\n    },\n    thresholdAbsolute() {\n      /*\n      const thresholdPerDay = this.$store.state.nonInferiority.thresholdAbsolute\n      if (this.$store.state.attributes.onlyTotalVisitors) {\n        const runtime = this.$store.getters.runtime\n        return thresholdPerDay * runtime\n      }\n      return thresholdPerDay\n      */\n    },\n    isRelative() {\n      return // this.$store.state.nonInferiority.selected == 'relative'\n    },\n    onlyTotalVisitors() {\n      return // this.$store.state.attributes.onlyTotalVisitors\n    },\n    testType() {\n      return this.$store.getters.testType\n    },\n    isReadOnly() {\n      return // this.calculateProp == 'non-inferiority'\n    },\n    selected: {\n      get() {\n        return // this.$store.state.nonInferiority.selected\n      },\n      set(newValue) {\n        /*\n        this.$store.dispatch('change:noninferiority', {\n          prop: 'selected',\n          value: newValue\n        })\n        */\n      }\n    },\n    expectedChange: {\n      get() {\n        return // this.$store.state.nonInferiority.expectedChange\n      },\n      set(newValue) {\n        /*\n        this.$store.dispatch('field:change', {\n          prop: 'expectedChange',\n          value: newValue\n        })\n        */\n      }\n    }\n  },\n  methods: {\n    enableInput() {\n      // this.$emit('edit:update', { prop: 'base' })\n    },\n    updateFocus({ fieldProp, value }) {\n      if (this.focusedBlock == fieldProp && value === false) {\n        this.focusedBlock = ''\n      } else if (value === true) {\n        this.focusedBlock = fieldProp\n      }\n\n      // this.$emit('update:focus', {\n      //  fieldProp: this.fieldFromBlock,\n       // value: value\n      //})\n    }\n  }\n}\n</script>\n\n<style>\n.pc-non-inf-select {\n  --base-padding: 5px;\n  font-size: inherit;\n  line-height: 28px;\n  border: none;\n  display: block;\n  position: relative;\n  box-sizing: border-box;\n  width: 100%;\n  filter: drop-shadow(0 4px 2px rgba(0, 0, 0, 0.1));\n  border-radius: 5px;\n  background: var(--white);\n  padding: var(--base-padding);\n\n  overflow: hidden;\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  appearance: none;\n}\n\n.pc-non-inf-select:focus {\n  outline: 0;\n  box-shadow: inset 0 0 0 1px var(--dark-blue);\n}\n\n.pc-non-inf-select-wrapper {\n  position: relative;\n}\n\n.pc-non-inf-select-wrapper:after {\n  --border-size: 7px;\n  content: '';\n  position: absolute;\n  right: 5px;\n  bottom: 0;\n  pointer-events: none;\n  border: var(--border-size) solid transparent;\n  border-top: var(--border-size) solid var(--gray);\n  transform: translateY(calc(-50% - var(--border-size) / 2));\n}\n\n.no-sub-title {\n  margin: 15px 0 10px 0;\n}\n</style>\n"]}, media: undefined });
-
-    };
-    /* scoped */
-    const __vue_scope_id__$6 = undefined;
-    /* module identifier */
-    const __vue_module_identifier__$6 = undefined;
-    /* functional template */
-    const __vue_is_functional_template__$6 = false;
-    /* style inject SSR */
-    
-    /* style inject shadow dom */
-    
-
-    
-    const __vue_component__$6 = /*#__PURE__*/normalizeComponent(
-      { render: __vue_render__$6, staticRenderFns: __vue_staticRenderFns__$6 },
-      __vue_inject_styles__$6,
-      __vue_script__$6,
-      __vue_scope_id__$6,
-      __vue_is_functional_template__$6,
-      __vue_module_identifier__$6,
-      false,
-      createInjector,
-      undefined,
-      undefined
-    );
-
-  //
-  //
-  //
-  //
-  //
-  //
-  //
-  //
-  //
-  //
-  //
-  //
-
-  var script$7 = {
-      template: '#pc-tooltip',
-      data () {
-          return {
-              isTooltipShown: false
-          }
-      },
-      methods: {
-          showTooltip (bool) {
-              this.isTooltipShown = bool;
-          }
-      }
-
   };
 
   /* script */
-  const __vue_script__$7 = script$7;
+  const __vue_script__$2 = script$2;
 
   /* template */
-  var __vue_render__$7 = function() {
-    var _vm = this;
-    var _h = _vm.$createElement;
-    var _c = _vm._self._c || _h;
-    return _c("div", { staticClass: "pc-tooltip" }, [
-      _c(
-        "div",
-        {
-          on: {
-            mouseover: function($event) {
-              return _vm.showTooltip(true)
-            },
-            mouseout: function($event) {
-              return _vm.showTooltip(false)
-            }
-          }
-        },
-        [_vm._t("text")],
-        2
-      ),
-      _vm._v(" "),
-      _c(
-        "div",
-        {
-          directives: [
-            {
-              name: "show",
-              rawName: "v-show",
-              value: _vm.isTooltipShown,
-              expression: "isTooltipShown"
-            }
-          ],
-          staticClass: "tooltip-wrapper"
-        },
-        [_vm._t("tooltip")],
-        2
-      )
-    ])
-  };
-  var __vue_staticRenderFns__$7 = [];
-  __vue_render__$7._withStripped = true;
+  var __vue_render__$2 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-tooltip"},[_c('div',{on:{"mouseover":function($event){return _vm.showTooltip(true)},"mouseout":function($event){return _vm.showTooltip(false)}}},[_vm._t("text")],2),_vm._v(" "),_c('div',{directives:[{name:"show",rawName:"v-show",value:(_vm.isTooltipShown),expression:"isTooltipShown"}],staticClass:"tooltip-wrapper"},[_vm._t("tooltip")],2)])};
+  var __vue_staticRenderFns__$2 = [];
 
     /* style */
-    const __vue_inject_styles__$7 = function (inject) {
+    const __vue_inject_styles__$2 = function (inject) {
       if (!inject) return
-      inject("data-v-2dd0c8a0_0", { source: "\n.pc-tooltip {\n    --tooltip-background-color: var(--black);\n    position: relative;\n}\n.tooltip-wrapper {\n    position: absolute;\n    left: 0;\n    top: calc(100% + 10px);\n    background: var(--tooltip-background-color);\n    color: var(--light-gray);\n    padding: 5px;\n    border-radius: 4px;\n    z-index: 10;\n    width: 400px;\n    white-space: normal;\n    pointer-events: none;\n}\n.tooltip-wrapper:after {\n    --size: 5px;\n\n    content: '';\n    position: absolute;\n    left: 50px;\n    bottom: calc(100% - var(--size));\n    transform: translate(-50%, 0) rotateZ(45deg);\n\n    border: var(--size) solid var(--tooltip-background-color);\n    border-right-color: transparent;\n    border-bottom-color: transparent;\n}\n", map: {"version":3,"sources":["/Users/amartinezdem/git_tree/github/bookingcom/powercalculator/src/components/pc-tooltip.vue"],"names":[],"mappings":";AA8BA;IACA,wCAAA;IACA,kBAAA;AACA;AAEA;IACA,kBAAA;IACA,OAAA;IACA,sBAAA;IACA,2CAAA;IACA,wBAAA;IACA,YAAA;IACA,kBAAA;IACA,WAAA;IACA,YAAA;IACA,mBAAA;IACA,oBAAA;AACA;AAEA;IACA,WAAA;;IAEA,WAAA;IACA,kBAAA;IACA,UAAA;IACA,gCAAA;IACA,4CAAA;;IAEA,yDAAA;IACA,+BAAA;IACA,gCAAA;AACA","file":"pc-tooltip.vue","sourcesContent":["<template id=\"pc-tooltip\">\n    <div class=\"pc-tooltip\">\n        <div v-on:mouseover=\"showTooltip(true)\" v-on:mouseout=\"showTooltip(false)\">\n            <slot name=\"text\"></slot>\n        </div>\n\n        <div class=\"tooltip-wrapper\" v-show=\"isTooltipShown\">\n            <slot name=\"tooltip\"></slot>\n        </div>\n    </div>\n</template>\n\n<script>\nexport default {\n    template: '#pc-tooltip',\n    data () {\n        return {\n            isTooltipShown: false\n        }\n    },\n    methods: {\n        showTooltip (bool) {\n            this.isTooltipShown = bool;\n        }\n    }\n\n}\n</script>\n\n<style>\n.pc-tooltip {\n    --tooltip-background-color: var(--black);\n    position: relative;\n}\n\n.tooltip-wrapper {\n    position: absolute;\n    left: 0;\n    top: calc(100% + 10px);\n    background: var(--tooltip-background-color);\n    color: var(--light-gray);\n    padding: 5px;\n    border-radius: 4px;\n    z-index: 10;\n    width: 400px;\n    white-space: normal;\n    pointer-events: none;\n}\n\n.tooltip-wrapper:after {\n    --size: 5px;\n\n    content: '';\n    position: absolute;\n    left: 50px;\n    bottom: calc(100% - var(--size));\n    transform: translate(-50%, 0) rotateZ(45deg);\n\n    border: var(--size) solid var(--tooltip-background-color);\n    border-right-color: transparent;\n    border-bottom-color: transparent;\n}\n</style>\n"]}, media: undefined });
+      inject("data-v-cb374198_0", { source: ".pc-tooltip{--tooltip-background-color:var(--black);position:relative}.tooltip-wrapper{position:absolute;left:0;top:calc(100% + 10px);background:var(--tooltip-background-color);color:var(--light-gray);padding:5px;border-radius:4px;z-index:10;width:400px;white-space:normal;pointer-events:none}.tooltip-wrapper:after{--size:5px;content:'';position:absolute;left:50px;bottom:calc(100% - var(--size));transform:translate(-50%,0) rotateZ(45deg);border:var(--size) solid var(--tooltip-background-color);border-right-color:transparent;border-bottom-color:transparent}", map: undefined, media: undefined });
 
     };
     /* scoped */
-    const __vue_scope_id__$7 = undefined;
+    const __vue_scope_id__$2 = undefined;
     /* module identifier */
-    const __vue_module_identifier__$7 = undefined;
+    const __vue_module_identifier__$2 = undefined;
     /* functional template */
-    const __vue_is_functional_template__$7 = false;
+    const __vue_is_functional_template__$2 = false;
     /* style inject SSR */
     
     /* style inject shadow dom */
     
 
     
-    const __vue_component__$7 = /*#__PURE__*/normalizeComponent(
-      { render: __vue_render__$7, staticRenderFns: __vue_staticRenderFns__$7 },
-      __vue_inject_styles__$7,
-      __vue_script__$7,
-      __vue_scope_id__$7,
-      __vue_is_functional_template__$7,
-      __vue_module_identifier__$7,
+    const __vue_component__$2 = /*#__PURE__*/normalizeComponent(
+      { render: __vue_render__$2, staticRenderFns: __vue_staticRenderFns__$2 },
+      __vue_inject_styles__$2,
+      __vue_script__$2,
+      __vue_scope_id__$2,
+      __vue_is_functional_template__$2,
+      __vue_module_identifier__$2,
       false,
       createInjector,
       undefined,
@@ -7334,25 +7240,16 @@
 
   //
 
-  const BLOCKED = Object.freeze({
-    VISITORS_PER_DAY: 'visitorsPerDay',
-    DAYS: 'days',
-  });
+  const DEBOUNCE = 500;
 
-  const DEBOUNCE$1 = 500;
-
-  var script$8 = {
-    props: ['focusedBlock', 'blockName'],
+  var script$1 = {
     template: '#sample-comp',
-    extends: __vue_component__$2,
-    data() {
-      return {
-        lockedField: BLOCKED.DAYS,
-        runtimeDebouncer: null,
-        visitorsPerDayDebouncer: null,
-        sampleDebouncer: null,
-      }
-    },
+    extends: __vue_component__$6,
+    data: () => ({
+      sampleDebouncer: null,
+      runtimeDebouncer: null,
+      visitorsDebouncer: null,
+    }),
     computed: {
       BLOCKED: () => BLOCKED,
       isSelected: {
@@ -7365,31 +7262,49 @@
           }
         },
       },
-      sample() {
-        return this.$store.getters.sample
+      sample: {
+        get() {
+          return this.$store.getters.sample
+        },
+        set(val) {
+          if (this.sampleDebouncer != null) {
+            clearTimeout(this.sampleDebouncer);
+          }
+          this.sampleDebouncer = setTimeout(() => {
+            if (
+              this.focusedBlock !== FOCUS.SAMPLE &&
+              this.$store.getters.trafficMode === TRAFFIC_MODE.TOTAL &&
+              val !== this.$store.getters.sample
+            ) {
+              this.$store.commit('SET_SAMPLE', {
+                sample: val,
+                lockedField: this.lockedField,
+                focusedBlock: this.focusedBlock,
+              });
+            }
+          }, DEBOUNCE);
+        },
       },
       visitorsPerDay: {
         get() {
           return this.$store.getters.visitorsPerDay
         },
         set(val) {
-          if (this.visitorsPerDayDebouncer != null) {
-            clearTimeout(this.visitorsPerDayDebouncer);
+          if (this.visitorsDebouncer != null) {
+            clearTimeout(this.visitorsDebouncer);
           }
-          setTimeout(() => {
-            // Calculating this block (sample)
-            if (this.focusedBlock === this.blockName) {
-              if (
-                this.lockedField === BLOCKED.DAYS &&
-                val !== this.$store.getters.visitorsPerDay
-              ) {
-                this.$store.commit(
-                  'SET_VISITORS_PER_DAY_AND_RUNTIME_BY_FIXED_SAMPLE',
-                  val
-                );
-              }
+          this.visitorsDebouncer = setTimeout(() => {
+            if (
+              this.lockedField === BLOCKED.DAYS &&
+              val !== this.$store.getters.visitorsPerDay
+            ) {
+              this.$store.commit('SET_VISITORS_PER_DAY', {
+                visitorsPerDay: val,
+                focusedBlock: this.focusedBlock,
+                lockedField: this.lockedField,
+              });
             }
-          }, DEBOUNCE$1);
+          }, DEBOUNCE);
         },
       },
       runtime: {
@@ -7400,33 +7315,33 @@
           if (this.runtimeDebouncer != null) {
             clearTimeout(this.runtimeDebouncer);
           }
-
           this.runtimeDebouncer = setTimeout(() => {
-            // Calculating this block (sample)
-            if (this.focusedBlock === this.blockName) {
-              if (
-                this.lockedField === BLOCKED.VISITORS_PER_DAY &&
-                val !== this.$store.getters.runtime
-              ) {
-                this.$store.commit(
-                  'SET_RUNTIME_AND_VISITORS_PER_DAY_BY_FIXED_SAMPLE',
-                  val
-                );
-              }
+            if (
+              this.lockedField === BLOCKED.VISITORS_PER_DAY &&
+              val !== this.$store.getters.runtime
+            ) {
+              this.$store.commit('SET_RUNTIME', {
+                runtime: val,
+                focusedBlock: this.focusedBlock,
+                lockedField: this.lockedField,
+              });
             }
-          }, DEBOUNCE$1);
+          }, DEBOUNCE);
         },
       },
       onlyTotalVisitors() {
         return this.$store.getters.trafficMode === TRAFFIC_MODE.TOTAL
       },
+      isNonInferiority() {
+        return this.$store.getters.isNonInferiority
+      },
     },
     methods: {
       switchLockedField() {
         if (this.lockedField === BLOCKED.DAYS) {
-          this.lockedField = BLOCKED.VISITORS_PER_DAY;
+          this.$emit('update:lockedField', BLOCKED.VISITORS_PER_DAY);
         } else {
-          this.lockedField = BLOCKED.DAYS;
+          this.$emit('update:lockedField', BLOCKED.DAYS);
         }
       },
       getLockedStateClass(param) {
@@ -7438,909 +7353,47 @@
   };
 
   /* script */
-  const __vue_script__$8 = script$8;
+  const __vue_script__$1 = script$1;
 
   /* template */
-  var __vue_render__$8 = function() {
-    var _vm = this;
-    var _h = _vm.$createElement;
-    var _c = _vm._self._c || _h;
-    return _c(
-      "div",
-      {
-        staticClass: "pc-block pc-block--sample",
-        class: {
-          "pc-block-focused": _vm.focusedBlock == _vm.blockName,
-          "pc-block-to-calculate": _vm.focusedBlock === _vm.blockName
-        }
-      },
-      [
-        _c("pc-svg-chain", {
-          attrs: { focusedBlock: _vm.focusedBlock, fieldFromBlock: _vm.blockName }
-        }),
-        _vm._v(" "),
-        _c(
-          "label",
-          {
-            staticClass: "pc-calc-radio pc-calc-radio--sample",
-            class: {
-              "pc-calc-radio--active": _vm.focusedBlock === _vm.blockName
-            },
-            attrs: { slot: "text" },
-            slot: "text"
-          },
-          [
-            _c("input", {
-              directives: [
-                {
-                  name: "model",
-                  rawName: "v-model",
-                  value: _vm.isSelected,
-                  expression: "isSelected"
-                }
-              ],
-              attrs: { type: "radio" },
-              domProps: {
-                value: _vm.blockName,
-                checked: _vm._q(_vm.isSelected, _vm.blockName)
-              },
-              on: {
-                change: function($event) {
-                  _vm.isSelected = _vm.blockName;
-                }
-              }
-            }),
-            _vm._v(
-              "\n    " +
-                _vm._s(
-                  _vm.focusedBlock === _vm.blockName ? "Calculating" : "Calculate"
-                ) +
-                "\n  "
-            )
-          ]
-        ),
-        _vm._v(" "),
-        _c("div", { staticClass: "pc-header" }, [_vm._v("Sample Size")]),
-        _vm._v(" "),
-        _c(
-          "ul",
-          {
-            staticClass: "pc-inputs",
-            class: { "pc-inputs-no-grid": _vm.onlyTotalVisitors }
-          },
-          [
-            _c("li", { staticClass: "pc-input-item pc-input-left" }, [
-              _c(
-                "label",
-                [
-                  _vm._m(0),
-                  _vm._v(" "),
-                  _c("pc-block-field", {
-                    attrs: {
-                      fieldProp: "sample",
-                      fieldValue: _vm.sample,
-                      isReadOnly: _vm.focusedBlock === _vm.blockName,
-                      enableEdit: "true"
-                    }
-                  })
-                ],
-                1
-              )
-            ]),
-            _vm._v(" "),
-            _c(
-              "li",
-              {
-                staticClass:
-                  "pc-input-item pc-input-right pc-value-field--lockable",
-                class: [
-                  _vm.getLockedStateClass(_vm.BLOCKED.VISITORS_PER_DAY),
-                  { "pc-hidden": _vm.onlyTotalVisitors }
-                ]
-              },
-              [
-                _c(
-                  "label",
-                  [
-                    _vm._m(1),
-                    _vm._v(" "),
-                    _c("pc-block-field", {
-                      attrs: {
-                        fieldProp: "visitorsPerDay",
-                        fieldValue: _vm.visitorsPerDay,
-                        isReadOnly:
-                          _vm.lockedField === _vm.BLOCKED.VISITORS_PER_DAY,
-                        isBlockFocused: _vm.focusedBlock === _vm.blockName,
-                        enableEdit: "true",
-                        lockedField: _vm.lockedField
-                      },
-                      on: {
-                        "update:fieldValue": function($event) {
-                          _vm.visitorsPerDay = $event;
-                        },
-                        "update:field-value": function($event) {
-                          _vm.visitorsPerDay = $event;
-                        }
-                      }
-                    })
-                  ],
-                  1
-                ),
-                _vm._v(" "),
-                _c(
-                  "button",
-                  {
-                    staticClass: "pc-swap-button",
-                    attrs: { type: "button" },
-                    on: { click: _vm.switchLockedField }
-                  },
-                  [
-                    _c(
-                      "svg",
-                      {
-                        attrs: {
-                          width: "20px",
-                          height: "20px",
-                          viewBox: "0 0 20 20",
-                          version: "1.1",
-                          xmlns: "http://www.w3.org/2000/svg",
-                          "xmlns:xlink": "http://www.w3.org/1999/xlink"
-                        }
-                      },
-                      [
-                        _c("desc", [
-                          _vm._v(
-                            "\n            Lock\n            " +
-                              _vm._s(
-                                _vm.lockedField === _vm.BLOCKED.DAYS
-                                  ? "number of days"
-                                  : "visitors per day"
-                              ) +
-                              "\n          "
-                          )
-                        ]),
-                        _vm._v(" "),
-                        _c("defs", [
-                          _c("circle", {
-                            attrs: { id: "path-1", cx: "13", cy: "13", r: "10" }
-                          }),
-                          _vm._v(" "),
-                          _c(
-                            "filter",
-                            {
-                              attrs: {
-                                x: "-5.0%",
-                                y: "-5.0%",
-                                width: "110.0%",
-                                height: "110.0%",
-                                filterUnits: "objectBoundingBox",
-                                id: "filter-2"
-                              }
-                            },
-                            [
-                              _c("feGaussianBlur", {
-                                attrs: {
-                                  stdDeviation: "0.5",
-                                  in: "SourceAlpha",
-                                  result: "shadowBlurInner1"
-                                }
-                              }),
-                              _vm._v(" "),
-                              _c("feOffset", {
-                                attrs: {
-                                  dx: "0",
-                                  dy: "1",
-                                  in: "shadowBlurInner1",
-                                  result: "shadowOffsetInner1"
-                                }
-                              }),
-                              _vm._v(" "),
-                              _c("feComposite", {
-                                attrs: {
-                                  in: "shadowOffsetInner1",
-                                  in2: "SourceAlpha",
-                                  operator: "arithmetic",
-                                  k2: "-1",
-                                  k3: "1",
-                                  result: "shadowInnerInner1"
-                                }
-                              }),
-                              _vm._v(" "),
-                              _c("feColorMatrix", {
-                                attrs: {
-                                  values:
-                                    "0 0 0 0 0.489716199   0 0 0 0 0.489716199   0 0 0 0 0.489716199  0 0 0 0.5 0",
-                                  type: "matrix",
-                                  in: "shadowInnerInner1"
-                                }
-                              })
-                            ],
-                            1
-                          )
-                        ]),
-                        _vm._v(" "),
-                        _c(
-                          "g",
-                          {
-                            attrs: {
-                              id: "Page-1",
-                              stroke: "none",
-                              "stroke-width": "1",
-                              fill: "none",
-                              "fill-rule": "evenodd"
-                            }
-                          },
-                          [
-                            _c(
-                              "g",
-                              {
-                                attrs: {
-                                  id: "Power-Calculator",
-                                  transform: "translate(-550.000000, -522.000000)"
-                                }
-                              },
-                              [
-                                _c(
-                                  "g",
-                                  {
-                                    attrs: {
-                                      id: "Switcher",
-                                      transform:
-                                        "translate(547.000000, 519.000000)"
-                                    }
-                                  },
-                                  [
-                                    _c("g", { attrs: { id: "Oval-3" } }, [
-                                      _c("use", {
-                                        attrs: {
-                                          fill: "#EFEFEF",
-                                          "fill-rule": "evenodd",
-                                          "xlink:href": "#path-1"
-                                        }
-                                      }),
-                                      _vm._v(" "),
-                                      _c("use", {
-                                        attrs: {
-                                          fill: "black",
-                                          "fill-opacity": "1",
-                                          filter: "url(#filter-2)",
-                                          "xlink:href": "#path-1"
-                                        }
-                                      })
-                                    ]),
-                                    _vm._v(" "),
-                                    _c(
-                                      "g",
-                                      {
-                                        attrs: {
-                                          id: "Group",
-                                          "stroke-width": "1",
-                                          "fill-rule": "evenodd",
-                                          transform:
-                                            "translate(7.000000, 7.000000)",
-                                          fill: "#155EAB"
-                                        }
-                                      },
-                                      [
-                                        _c("path", {
-                                          attrs: {
-                                            d:
-                                              "M4.5,4.20404051 L4.5,9.9127641 L2.5,9.9127641 L2.5,4.20404051 L0.5,4.20404051 L3.5,0.70872359 L6.5,4.20404051 L4.5,4.20404051 Z",
-                                            id: "Combined-Shape"
-                                          }
-                                        }),
-                                        _vm._v(" "),
-                                        _c("path", {
-                                          attrs: {
-                                            d:
-                                              "M9.5,5.49531692 L9.5,11.2040405 L7.5,11.2040405 L7.5,5.49531692 L5.5,5.49531692 L8.5,2 L11.5,5.49531692 L9.5,5.49531692 Z",
-                                            id: "Combined-Shape",
-                                            transform:
-                                              "translate(8.500000, 6.602020) scale(1, -1) translate(-8.500000, -6.602020) "
-                                          }
-                                        })
-                                      ]
-                                    )
-                                  ]
-                                )
-                              ]
-                            )
-                          ]
-                        )
-                      ]
-                    )
-                  ]
-                )
-              ]
-            ),
-            _vm._v(" "),
-            _c(
-              "li",
-              {
-                staticClass:
-                  "pc-input-item pc-input-right-swap pc-value-field--lockable",
-                class: [
-                  _vm.getLockedStateClass(_vm.BLOCKED.DAYS),
-                  { "pc-hidden": _vm.onlyTotalVisitors }
-                ]
-              },
-              [
-                _c(
-                  "label",
-                  [
-                    _c("pc-block-field", {
-                      attrs: {
-                        fieldProp: "runtime",
-                        prefix: "",
-                        suffix: " days",
-                        fieldValue: _vm.runtime,
-                        isReadOnly: _vm.lockedField === _vm.BLOCKED.DAYS,
-                        isBlockFocused: _vm.focusedBlock === _vm.blockName,
-                        enableEdit: "true",
-                        lockedField: _vm.lockedField,
-                        "aria-label": "Days"
-                      },
-                      on: {
-                        "update:fieldValue": function($event) {
-                          _vm.runtime = $event;
-                        },
-                        "update:field-value": function($event) {
-                          _vm.runtime = $event;
-                        }
-                      }
-                    })
-                  ],
-                  1
-                )
-              ]
-            )
-          ]
-        )
-      ],
-      1
-    )
-  };
-  var __vue_staticRenderFns__$8 = [
-    function() {
-      var _vm = this;
-      var _h = _vm.$createElement;
-      var _c = _vm._self._c || _h;
-      return _c("span", { staticClass: "pc-input-title" }, [
-        _vm._v("Total #\n          "),
-        _c("small", { staticClass: "pc-input-sub-title" }, [
-          _vm._v("of new visitors")
-        ])
-      ])
-    },
-    function() {
-      var _vm = this;
-      var _h = _vm.$createElement;
-      var _c = _vm._self._c || _h;
-      return _c("span", { staticClass: "pc-input-title" }, [
-        _vm._v("Daily #\n          "),
-        _c("small", { staticClass: "pc-input-sub-title" }, [
-          _vm._v("of new visitors")
-        ])
-      ])
-    }
-  ];
-  __vue_render__$8._withStripped = true;
+  var __vue_render__$1 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-block pc-block--sample",class:{
+      'pc-block-focused': _vm.isBlockFocused,
+      'pc-block-to-calculate': _vm.isBlockFocused,
+    }},[_c('pc-svg-chain',{attrs:{"isBlockFocused":_vm.isBlockFocused}}),_vm._v(" "),_c('label',{staticClass:"pc-calc-radio pc-calc-radio--sample",class:{ 'pc-calc-radio--active': _vm.isBlockFocused },attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.isSelected),expression:"isSelected"}],attrs:{"type":"radio"},domProps:{"value":_vm.blockName,"checked":_vm._q(_vm.isSelected,_vm.blockName)},on:{"change":function($event){_vm.isSelected=_vm.blockName;}}}),_vm._v("\n    "+_vm._s(_vm.isBlockFocused ? 'Calculating' : 'Calculate')+"\n  ")]),_vm._v(" "),_c('div',{staticClass:"pc-header"},[_vm._v("Sample Size")]),_vm._v(" "),_c('ul',{staticClass:"pc-inputs",class:{ 'pc-inputs-no-grid': _vm.onlyTotalVisitors }},[_c('li',{staticClass:"pc-input-item pc-input-left"},[_c('label',[_vm._m(0),_vm._v(" "),_c('pc-block-field',{attrs:{"fieldProp":"sample","fieldValue":_vm.sample,"isReadOnly":!(_vm.onlyTotalVisitors && !_vm.isBlockFocused),"enableEdit":_vm.onlyTotalVisitors || _vm.isBlockFocused},on:{"update:fieldValue":function($event){_vm.sample=$event;},"update:field-value":function($event){_vm.sample=$event;}}})],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right pc-value-field--lockable",class:[
+          _vm.getLockedStateClass(_vm.BLOCKED.VISITORS_PER_DAY),
+          { 'pc-hidden': _vm.onlyTotalVisitors } ]},[_c('label',[_vm._m(1),_vm._v(" "),_c('pc-block-field',{attrs:{"fieldProp":"visitorsPerDay","fieldValue":_vm.visitorsPerDay,"isReadOnly":_vm.lockedField === _vm.BLOCKED.VISITORS_PER_DAY,"isBlockFocused":_vm.isBlockFocused,"enableEdit":"true","lockedField":_vm.lockedField},on:{"update:fieldValue":function($event){_vm.visitorsPerDay=$event;},"update:field-value":function($event){_vm.visitorsPerDay=$event;}}})],1),_vm._v(" "),_c('button',{staticClass:"pc-swap-button",attrs:{"type":"button"},on:{"click":_vm.switchLockedField}},[_c('svg',{attrs:{"width":"20px","height":"20px","viewBox":"0 0 20 20","version":"1.1","xmlns":"http://www.w3.org/2000/svg","xmlns:xlink":"http://www.w3.org/1999/xlink"}},[_c('desc',[_vm._v("\n            Lock\n            "+_vm._s(_vm.lockedField === _vm.BLOCKED.DAYS
+                  ? 'number of days'
+                  : 'visitors per day')+"\n          ")]),_vm._v(" "),_c('defs',[_c('circle',{attrs:{"id":"path-1","cx":"13","cy":"13","r":"10"}}),_vm._v(" "),_c('filter',{attrs:{"x":"-5.0%","y":"-5.0%","width":"110.0%","height":"110.0%","filterUnits":"objectBoundingBox","id":"filter-2"}},[_c('feGaussianBlur',{attrs:{"stdDeviation":"0.5","in":"SourceAlpha","result":"shadowBlurInner1"}}),_vm._v(" "),_c('feOffset',{attrs:{"dx":"0","dy":"1","in":"shadowBlurInner1","result":"shadowOffsetInner1"}}),_vm._v(" "),_c('feComposite',{attrs:{"in":"shadowOffsetInner1","in2":"SourceAlpha","operator":"arithmetic","k2":"-1","k3":"1","result":"shadowInnerInner1"}}),_vm._v(" "),_c('feColorMatrix',{attrs:{"values":"0 0 0 0 0.489716199   0 0 0 0 0.489716199   0 0 0 0 0.489716199  0 0 0 0.5 0","type":"matrix","in":"shadowInnerInner1"}})],1)]),_vm._v(" "),_c('g',{attrs:{"id":"Page-1","stroke":"none","stroke-width":"1","fill":"none","fill-rule":"evenodd"}},[_c('g',{attrs:{"id":"Power-Calculator","transform":"translate(-550.000000, -522.000000)"}},[_c('g',{attrs:{"id":"Switcher","transform":"translate(547.000000, 519.000000)"}},[_c('g',{attrs:{"id":"Oval-3"}},[_c('use',{attrs:{"fill":"#EFEFEF","fill-rule":"evenodd","xlink:href":"#path-1"}}),_vm._v(" "),_c('use',{attrs:{"fill":"black","fill-opacity":"1","filter":"url(#filter-2)","xlink:href":"#path-1"}})]),_vm._v(" "),_c('g',{attrs:{"id":"Group","stroke-width":"1","fill-rule":"evenodd","transform":"translate(7.000000, 7.000000)","fill":"#155EAB"}},[_c('path',{attrs:{"d":"M4.5,4.20404051 L4.5,9.9127641 L2.5,9.9127641 L2.5,4.20404051 L0.5,4.20404051 L3.5,0.70872359 L6.5,4.20404051 L4.5,4.20404051 Z","id":"Combined-Shape"}}),_vm._v(" "),_c('path',{attrs:{"d":"M9.5,5.49531692 L9.5,11.2040405 L7.5,11.2040405 L7.5,5.49531692 L5.5,5.49531692 L8.5,2 L11.5,5.49531692 L9.5,5.49531692 Z","id":"Combined-Shape","transform":"translate(8.500000, 6.602020) scale(1, -1) translate(-8.500000, -6.602020) "}})])])])])])])]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right-swap pc-value-field--lockable",class:[
+          _vm.getLockedStateClass(_vm.BLOCKED.DAYS),
+          { 'pc-hidden': _vm.onlyTotalVisitors } ]},[_c('label',[_c('pc-block-field',{attrs:{"fieldProp":"runtime","prefix":"","suffix":" days","fieldValue":_vm.runtime,"isReadOnly":_vm.lockedField === _vm.BLOCKED.DAYS,"isBlockFocused":_vm.isBlockFocused,"enableEdit":"true","lockedField":_vm.lockedField,"aria-label":"Days"},on:{"update:fieldValue":function($event){_vm.runtime=$event;},"update:field-value":function($event){_vm.runtime=$event;}}})],1)])])],1)};
+  var __vue_staticRenderFns__$1 = [function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('span',{staticClass:"pc-input-title"},[_vm._v("Total #\n          "),_c('small',{staticClass:"pc-input-sub-title"},[_vm._v("of new visitors")])])},function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('span',{staticClass:"pc-input-title"},[_vm._v("Daily #\n          "),_c('small',{staticClass:"pc-input-sub-title"},[_vm._v("of new visitors")])])}];
 
     /* style */
-    const __vue_inject_styles__$8 = function (inject) {
+    const __vue_inject_styles__$1 = function (inject) {
       if (!inject) return
-      inject("data-v-0cde738a_0", { source: "\n.pc-swap-button {\n  -webkit-appearance: none;\n  background: none;\n  border: 0;\n  margin: 0;\n  padding: 0;\n  position: absolute;\n  top: calc(100% - 10px);\n  left: 5px;\n  z-index: 5;\n}\n.pc-value-field--unlocked .pc-value-field-wrapper {\n  z-index: 1;\n}\n.pc-block-to-calculate .pc-value-field--locked .pc-value-formatting:before,\n.pc-block-to-calculate .pc-value-field--locked .pc-value-formatting:after,\n.pc-value-field--locked .pc-value-formatting:before,\n.pc-value-field--locked .pc-value-formatting:after,\n.pc-value-field--locked .pc-value-field-wrapper {\n  color: var(--dark-gray);\n}\n", map: {"version":3,"sources":["/Users/amartinezdem/git_tree/github/bookingcom/powercalculator/src/components/sample-comp.vue"],"names":[],"mappings":";AA8SA;EACA,wBAAA;EACA,gBAAA;EACA,SAAA;EACA,SAAA;EACA,UAAA;EACA,kBAAA;EACA,sBAAA;EACA,SAAA;EACA,UAAA;AACA;AAEA;EACA,UAAA;AACA;AAEA;;;;;EAKA,uBAAA;AACA","file":"sample-comp.vue","sourcesContent":["<template id=\"sample-comp\">\n  <div\n    class=\"pc-block pc-block--sample\"\n    :class=\"{\n      'pc-block-focused': focusedBlock == blockName,\n      'pc-block-to-calculate': focusedBlock === blockName,\n    }\"\n  >\n    <pc-svg-chain\n      :focusedBlock=\"focusedBlock\"\n      :fieldFromBlock=\"blockName\"\n    ></pc-svg-chain>\n\n    <label\n      slot=\"text\"\n      class=\"pc-calc-radio pc-calc-radio--sample\"\n      :class=\"{ 'pc-calc-radio--active': focusedBlock === blockName }\"\n    >\n      <input type=\"radio\" :value=\"blockName\" v-model=\"isSelected\" />\n      {{ focusedBlock === blockName ? 'Calculating' : 'Calculate' }}\n    </label>\n\n    <div class=\"pc-header\">Sample Size</div>\n\n    <ul class=\"pc-inputs\" :class=\"{ 'pc-inputs-no-grid': onlyTotalVisitors }\">\n      <li class=\"pc-input-item pc-input-left\">\n        <label>\n          <span class=\"pc-input-title\"\n            >Total #\n            <small class=\"pc-input-sub-title\">of new visitors</small></span\n          >\n\n          <pc-block-field\n            fieldProp=\"sample\"\n            :fieldValue=\"sample\"\n            :isReadOnly=\"focusedBlock === blockName\"\n            enableEdit=\"true\"\n          ></pc-block-field>\n        </label>\n      </li>\n      <li\n        class=\"pc-input-item pc-input-right pc-value-field--lockable\"\n        :class=\"[\n          getLockedStateClass(BLOCKED.VISITORS_PER_DAY),\n          { 'pc-hidden': onlyTotalVisitors },\n        ]\"\n      >\n        <label>\n          <span class=\"pc-input-title\"\n            >Daily #\n            <small class=\"pc-input-sub-title\">of new visitors</small></span\n          >\n\n          <pc-block-field\n            fieldProp=\"visitorsPerDay\"\n            :fieldValue.sync=\"visitorsPerDay\"\n            :isReadOnly=\"lockedField === BLOCKED.VISITORS_PER_DAY\"\n            :isBlockFocused=\"focusedBlock === blockName\"\n            enableEdit=\"true\"\n            v-bind:lockedField=\"lockedField\"\n          ></pc-block-field>\n        </label>\n\n        <button\n          type=\"button\"\n          class=\"pc-swap-button\"\n          v-on:click=\"switchLockedField\"\n        >\n          <svg\n            width=\"20px\"\n            height=\"20px\"\n            viewBox=\"0 0 20 20\"\n            version=\"1.1\"\n            xmlns=\"http://www.w3.org/2000/svg\"\n            xmlns:xlink=\"http://www.w3.org/1999/xlink\"\n          >\n            <desc>\n              Lock\n              {{\n                lockedField === BLOCKED.DAYS\n                  ? 'number of days'\n                  : 'visitors per day'\n              }}\n            </desc>\n            <defs>\n              <circle id=\"path-1\" cx=\"13\" cy=\"13\" r=\"10\"></circle>\n              <filter\n                x=\"-5.0%\"\n                y=\"-5.0%\"\n                width=\"110.0%\"\n                height=\"110.0%\"\n                filterUnits=\"objectBoundingBox\"\n                id=\"filter-2\"\n              >\n                <feGaussianBlur\n                  stdDeviation=\"0.5\"\n                  in=\"SourceAlpha\"\n                  result=\"shadowBlurInner1\"\n                ></feGaussianBlur>\n                <feOffset\n                  dx=\"0\"\n                  dy=\"1\"\n                  in=\"shadowBlurInner1\"\n                  result=\"shadowOffsetInner1\"\n                ></feOffset>\n                <feComposite\n                  in=\"shadowOffsetInner1\"\n                  in2=\"SourceAlpha\"\n                  operator=\"arithmetic\"\n                  k2=\"-1\"\n                  k3=\"1\"\n                  result=\"shadowInnerInner1\"\n                ></feComposite>\n                <feColorMatrix\n                  values=\"0 0 0 0 0.489716199   0 0 0 0 0.489716199   0 0 0 0 0.489716199  0 0 0 0.5 0\"\n                  type=\"matrix\"\n                  in=\"shadowInnerInner1\"\n                ></feColorMatrix>\n              </filter>\n            </defs>\n            <g\n              id=\"Page-1\"\n              stroke=\"none\"\n              stroke-width=\"1\"\n              fill=\"none\"\n              fill-rule=\"evenodd\"\n            >\n              <g\n                id=\"Power-Calculator\"\n                transform=\"translate(-550.000000, -522.000000)\"\n              >\n                <g id=\"Switcher\" transform=\"translate(547.000000, 519.000000)\">\n                  <g id=\"Oval-3\">\n                    <use\n                      fill=\"#EFEFEF\"\n                      fill-rule=\"evenodd\"\n                      xlink:href=\"#path-1\"\n                    ></use>\n                    <use\n                      fill=\"black\"\n                      fill-opacity=\"1\"\n                      filter=\"url(#filter-2)\"\n                      xlink:href=\"#path-1\"\n                    ></use>\n                  </g>\n                  <g\n                    id=\"Group\"\n                    stroke-width=\"1\"\n                    fill-rule=\"evenodd\"\n                    transform=\"translate(7.000000, 7.000000)\"\n                    fill=\"#155EAB\"\n                  >\n                    <path\n                      d=\"M4.5,4.20404051 L4.5,9.9127641 L2.5,9.9127641 L2.5,4.20404051 L0.5,4.20404051 L3.5,0.70872359 L6.5,4.20404051 L4.5,4.20404051 Z\"\n                      id=\"Combined-Shape\"\n                    ></path>\n                    <path\n                      d=\"M9.5,5.49531692 L9.5,11.2040405 L7.5,11.2040405 L7.5,5.49531692 L5.5,5.49531692 L8.5,2 L11.5,5.49531692 L9.5,5.49531692 Z\"\n                      id=\"Combined-Shape\"\n                      transform=\"translate(8.500000, 6.602020) scale(1, -1) translate(-8.500000, -6.602020) \"\n                    ></path>\n                  </g>\n                </g>\n              </g>\n            </g>\n          </svg>\n        </button>\n      </li>\n      <li\n        class=\"pc-input-item pc-input-right-swap pc-value-field--lockable\"\n        :class=\"[\n          getLockedStateClass(BLOCKED.DAYS),\n          { 'pc-hidden': onlyTotalVisitors },\n        ]\"\n      >\n        <label>\n          <pc-block-field\n            fieldProp=\"runtime\"\n            prefix=\"\"\n            suffix=\" days\"\n            :fieldValue.sync=\"runtime\"\n            v-bind:isReadOnly=\"lockedField === BLOCKED.DAYS\"\n            v-bind:isBlockFocused=\"focusedBlock === blockName\"\n            enableEdit=\"true\"\n            v-bind:lockedField=\"lockedField\"\n            aria-label=\"Days\"\n          ></pc-block-field>\n        </label>\n      </li>\n    </ul>\n  </div>\n</template>\n\n<script>\nimport pcBlock from './pc-block.vue'\nimport { TRAFFIC_MODE } from '../store/modules/calculator'\n\nconst BLOCKED = Object.freeze({\n  VISITORS_PER_DAY: 'visitorsPerDay',\n  DAYS: 'days',\n})\n\nconst DEBOUNCE = 500\n\nexport default {\n  props: ['focusedBlock', 'blockName'],\n  template: '#sample-comp',\n  extends: pcBlock,\n  data() {\n    return {\n      lockedField: BLOCKED.DAYS,\n      runtimeDebouncer: null,\n      visitorsPerDayDebouncer: null,\n      sampleDebouncer: null,\n    }\n  },\n  computed: {\n    BLOCKED: () => BLOCKED,\n    isSelected: {\n      get() {\n        return this.focusedBlock\n      },\n      set(val) {\n        if (val === this.blockName) {\n          this.$emit('update:focusedBlock', this.blockName)\n        }\n      },\n    },\n    sample() {\n      return this.$store.getters.sample\n    },\n    visitorsPerDay: {\n      get() {\n        return this.$store.getters.visitorsPerDay\n      },\n      set(val) {\n        if (this.visitorsPerDayDebouncer != null) {\n          clearTimeout(this.visitorsPerDayDebouncer)\n        }\n        setTimeout(() => {\n          // Calculating this block (sample)\n          if (this.focusedBlock === this.blockName) {\n            if (\n              this.lockedField === BLOCKED.DAYS &&\n              val !== this.$store.getters.visitorsPerDay\n            ) {\n              this.$store.commit(\n                'SET_VISITORS_PER_DAY_AND_RUNTIME_BY_FIXED_SAMPLE',\n                val\n              )\n            }\n          }\n        }, DEBOUNCE)\n      },\n    },\n    runtime: {\n      get() {\n        return this.$store.getters.runtime\n      },\n      set(val) {\n        if (this.runtimeDebouncer != null) {\n          clearTimeout(this.runtimeDebouncer)\n        }\n\n        this.runtimeDebouncer = setTimeout(() => {\n          // Calculating this block (sample)\n          if (this.focusedBlock === this.blockName) {\n            if (\n              this.lockedField === BLOCKED.VISITORS_PER_DAY &&\n              val !== this.$store.getters.runtime\n            ) {\n              this.$store.commit(\n                'SET_RUNTIME_AND_VISITORS_PER_DAY_BY_FIXED_SAMPLE',\n                val\n              )\n            }\n          }\n        }, DEBOUNCE)\n      },\n    },\n    onlyTotalVisitors() {\n      return this.$store.getters.trafficMode === TRAFFIC_MODE.TOTAL\n    },\n  },\n  methods: {\n    switchLockedField() {\n      if (this.lockedField === BLOCKED.DAYS) {\n        this.lockedField = BLOCKED.VISITORS_PER_DAY\n      } else {\n        this.lockedField = BLOCKED.DAYS\n      }\n    },\n    getLockedStateClass(param) {\n      return this.lockedField == param\n        ? 'pc-value-field--locked'\n        : 'pc-value-field--unlocked'\n    },\n  },\n}\n</script>\n\n<style>\n.pc-swap-button {\n  -webkit-appearance: none;\n  background: none;\n  border: 0;\n  margin: 0;\n  padding: 0;\n  position: absolute;\n  top: calc(100% - 10px);\n  left: 5px;\n  z-index: 5;\n}\n\n.pc-value-field--unlocked .pc-value-field-wrapper {\n  z-index: 1;\n}\n\n.pc-block-to-calculate .pc-value-field--locked .pc-value-formatting:before,\n.pc-block-to-calculate .pc-value-field--locked .pc-value-formatting:after,\n.pc-value-field--locked .pc-value-formatting:before,\n.pc-value-field--locked .pc-value-formatting:after,\n.pc-value-field--locked .pc-value-field-wrapper {\n  color: var(--dark-gray);\n}\n</style>\n\n<style scoped>\n.pc-inputs {\n  grid-template-areas:\n    'pc-input-left pc-input-right'\n    'pc-input-left-swap pc-input-right-swap';\n}\n\n.pc-input-right-swap,\n.pc-input-right {\n  position: relative;\n}\n\n.pc-input-right-swap {\n  grid-area: pc-input-right-swap;\n  margin-top: -10px;\n  filter: drop-shadow(0 4px 2px rgba(0, 0, 0, 0.1))\n    drop-shadow(0 -4px 2px rgba(0, 0, 0, 0.1));\n}\n\n.pc-input-right-swap .pc-value-field-wrapper {\n  filter: none;\n}\n\n.pc-value-formatting:after {\n  font-size: 14px;\n}\n\n.pc-block-to-calculate .pc-field-visitorsPerDay,\n.pc-block-to-calculate .pc-field-runtime {\n  background: var(--white);\n}\n\n.pc-value-field--lockable.pc-value-field--locked .pc-value-field-wrapper {\n  background: linear-gradient(0deg, var(--light-gray) 0%, var(--white) 100%);\n}\n\n.pc-inputs-no-grid {\n  display: block;\n}\n</style>\n"]}, media: undefined })
-  ,inject("data-v-0cde738a_1", { source: "\n.pc-inputs[data-v-0cde738a] {\n  grid-template-areas:\n    'pc-input-left pc-input-right'\n    'pc-input-left-swap pc-input-right-swap';\n}\n.pc-input-right-swap[data-v-0cde738a],\n.pc-input-right[data-v-0cde738a] {\n  position: relative;\n}\n.pc-input-right-swap[data-v-0cde738a] {\n  grid-area: pc-input-right-swap;\n  margin-top: -10px;\n  filter: drop-shadow(0 4px 2px rgba(0, 0, 0, 0.1))\n    drop-shadow(0 -4px 2px rgba(0, 0, 0, 0.1));\n}\n.pc-input-right-swap .pc-value-field-wrapper[data-v-0cde738a] {\n  filter: none;\n}\n.pc-value-formatting[data-v-0cde738a]:after {\n  font-size: 14px;\n}\n.pc-block-to-calculate .pc-field-visitorsPerDay[data-v-0cde738a],\n.pc-block-to-calculate .pc-field-runtime[data-v-0cde738a] {\n  background: var(--white);\n}\n.pc-value-field--lockable.pc-value-field--locked .pc-value-field-wrapper[data-v-0cde738a] {\n  background: linear-gradient(0deg, var(--light-gray) 0%, var(--white) 100%);\n}\n.pc-inputs-no-grid[data-v-0cde738a] {\n  display: block;\n}\n", map: {"version":3,"sources":["/Users/amartinezdem/git_tree/github/bookingcom/powercalculator/src/components/sample-comp.vue"],"names":[],"mappings":";AAwUA;EACA;;4CAEA;AACA;AAEA;;EAEA,kBAAA;AACA;AAEA;EACA,8BAAA;EACA,iBAAA;EACA;8CACA;AACA;AAEA;EACA,YAAA;AACA;AAEA;EACA,eAAA;AACA;AAEA;;EAEA,wBAAA;AACA;AAEA;EACA,0EAAA;AACA;AAEA;EACA,cAAA;AACA","file":"sample-comp.vue","sourcesContent":["<template id=\"sample-comp\">\n  <div\n    class=\"pc-block pc-block--sample\"\n    :class=\"{\n      'pc-block-focused': focusedBlock == blockName,\n      'pc-block-to-calculate': focusedBlock === blockName,\n    }\"\n  >\n    <pc-svg-chain\n      :focusedBlock=\"focusedBlock\"\n      :fieldFromBlock=\"blockName\"\n    ></pc-svg-chain>\n\n    <label\n      slot=\"text\"\n      class=\"pc-calc-radio pc-calc-radio--sample\"\n      :class=\"{ 'pc-calc-radio--active': focusedBlock === blockName }\"\n    >\n      <input type=\"radio\" :value=\"blockName\" v-model=\"isSelected\" />\n      {{ focusedBlock === blockName ? 'Calculating' : 'Calculate' }}\n    </label>\n\n    <div class=\"pc-header\">Sample Size</div>\n\n    <ul class=\"pc-inputs\" :class=\"{ 'pc-inputs-no-grid': onlyTotalVisitors }\">\n      <li class=\"pc-input-item pc-input-left\">\n        <label>\n          <span class=\"pc-input-title\"\n            >Total #\n            <small class=\"pc-input-sub-title\">of new visitors</small></span\n          >\n\n          <pc-block-field\n            fieldProp=\"sample\"\n            :fieldValue=\"sample\"\n            :isReadOnly=\"focusedBlock === blockName\"\n            enableEdit=\"true\"\n          ></pc-block-field>\n        </label>\n      </li>\n      <li\n        class=\"pc-input-item pc-input-right pc-value-field--lockable\"\n        :class=\"[\n          getLockedStateClass(BLOCKED.VISITORS_PER_DAY),\n          { 'pc-hidden': onlyTotalVisitors },\n        ]\"\n      >\n        <label>\n          <span class=\"pc-input-title\"\n            >Daily #\n            <small class=\"pc-input-sub-title\">of new visitors</small></span\n          >\n\n          <pc-block-field\n            fieldProp=\"visitorsPerDay\"\n            :fieldValue.sync=\"visitorsPerDay\"\n            :isReadOnly=\"lockedField === BLOCKED.VISITORS_PER_DAY\"\n            :isBlockFocused=\"focusedBlock === blockName\"\n            enableEdit=\"true\"\n            v-bind:lockedField=\"lockedField\"\n          ></pc-block-field>\n        </label>\n\n        <button\n          type=\"button\"\n          class=\"pc-swap-button\"\n          v-on:click=\"switchLockedField\"\n        >\n          <svg\n            width=\"20px\"\n            height=\"20px\"\n            viewBox=\"0 0 20 20\"\n            version=\"1.1\"\n            xmlns=\"http://www.w3.org/2000/svg\"\n            xmlns:xlink=\"http://www.w3.org/1999/xlink\"\n          >\n            <desc>\n              Lock\n              {{\n                lockedField === BLOCKED.DAYS\n                  ? 'number of days'\n                  : 'visitors per day'\n              }}\n            </desc>\n            <defs>\n              <circle id=\"path-1\" cx=\"13\" cy=\"13\" r=\"10\"></circle>\n              <filter\n                x=\"-5.0%\"\n                y=\"-5.0%\"\n                width=\"110.0%\"\n                height=\"110.0%\"\n                filterUnits=\"objectBoundingBox\"\n                id=\"filter-2\"\n              >\n                <feGaussianBlur\n                  stdDeviation=\"0.5\"\n                  in=\"SourceAlpha\"\n                  result=\"shadowBlurInner1\"\n                ></feGaussianBlur>\n                <feOffset\n                  dx=\"0\"\n                  dy=\"1\"\n                  in=\"shadowBlurInner1\"\n                  result=\"shadowOffsetInner1\"\n                ></feOffset>\n                <feComposite\n                  in=\"shadowOffsetInner1\"\n                  in2=\"SourceAlpha\"\n                  operator=\"arithmetic\"\n                  k2=\"-1\"\n                  k3=\"1\"\n                  result=\"shadowInnerInner1\"\n                ></feComposite>\n                <feColorMatrix\n                  values=\"0 0 0 0 0.489716199   0 0 0 0 0.489716199   0 0 0 0 0.489716199  0 0 0 0.5 0\"\n                  type=\"matrix\"\n                  in=\"shadowInnerInner1\"\n                ></feColorMatrix>\n              </filter>\n            </defs>\n            <g\n              id=\"Page-1\"\n              stroke=\"none\"\n              stroke-width=\"1\"\n              fill=\"none\"\n              fill-rule=\"evenodd\"\n            >\n              <g\n                id=\"Power-Calculator\"\n                transform=\"translate(-550.000000, -522.000000)\"\n              >\n                <g id=\"Switcher\" transform=\"translate(547.000000, 519.000000)\">\n                  <g id=\"Oval-3\">\n                    <use\n                      fill=\"#EFEFEF\"\n                      fill-rule=\"evenodd\"\n                      xlink:href=\"#path-1\"\n                    ></use>\n                    <use\n                      fill=\"black\"\n                      fill-opacity=\"1\"\n                      filter=\"url(#filter-2)\"\n                      xlink:href=\"#path-1\"\n                    ></use>\n                  </g>\n                  <g\n                    id=\"Group\"\n                    stroke-width=\"1\"\n                    fill-rule=\"evenodd\"\n                    transform=\"translate(7.000000, 7.000000)\"\n                    fill=\"#155EAB\"\n                  >\n                    <path\n                      d=\"M4.5,4.20404051 L4.5,9.9127641 L2.5,9.9127641 L2.5,4.20404051 L0.5,4.20404051 L3.5,0.70872359 L6.5,4.20404051 L4.5,4.20404051 Z\"\n                      id=\"Combined-Shape\"\n                    ></path>\n                    <path\n                      d=\"M9.5,5.49531692 L9.5,11.2040405 L7.5,11.2040405 L7.5,5.49531692 L5.5,5.49531692 L8.5,2 L11.5,5.49531692 L9.5,5.49531692 Z\"\n                      id=\"Combined-Shape\"\n                      transform=\"translate(8.500000, 6.602020) scale(1, -1) translate(-8.500000, -6.602020) \"\n                    ></path>\n                  </g>\n                </g>\n              </g>\n            </g>\n          </svg>\n        </button>\n      </li>\n      <li\n        class=\"pc-input-item pc-input-right-swap pc-value-field--lockable\"\n        :class=\"[\n          getLockedStateClass(BLOCKED.DAYS),\n          { 'pc-hidden': onlyTotalVisitors },\n        ]\"\n      >\n        <label>\n          <pc-block-field\n            fieldProp=\"runtime\"\n            prefix=\"\"\n            suffix=\" days\"\n            :fieldValue.sync=\"runtime\"\n            v-bind:isReadOnly=\"lockedField === BLOCKED.DAYS\"\n            v-bind:isBlockFocused=\"focusedBlock === blockName\"\n            enableEdit=\"true\"\n            v-bind:lockedField=\"lockedField\"\n            aria-label=\"Days\"\n          ></pc-block-field>\n        </label>\n      </li>\n    </ul>\n  </div>\n</template>\n\n<script>\nimport pcBlock from './pc-block.vue'\nimport { TRAFFIC_MODE } from '../store/modules/calculator'\n\nconst BLOCKED = Object.freeze({\n  VISITORS_PER_DAY: 'visitorsPerDay',\n  DAYS: 'days',\n})\n\nconst DEBOUNCE = 500\n\nexport default {\n  props: ['focusedBlock', 'blockName'],\n  template: '#sample-comp',\n  extends: pcBlock,\n  data() {\n    return {\n      lockedField: BLOCKED.DAYS,\n      runtimeDebouncer: null,\n      visitorsPerDayDebouncer: null,\n      sampleDebouncer: null,\n    }\n  },\n  computed: {\n    BLOCKED: () => BLOCKED,\n    isSelected: {\n      get() {\n        return this.focusedBlock\n      },\n      set(val) {\n        if (val === this.blockName) {\n          this.$emit('update:focusedBlock', this.blockName)\n        }\n      },\n    },\n    sample() {\n      return this.$store.getters.sample\n    },\n    visitorsPerDay: {\n      get() {\n        return this.$store.getters.visitorsPerDay\n      },\n      set(val) {\n        if (this.visitorsPerDayDebouncer != null) {\n          clearTimeout(this.visitorsPerDayDebouncer)\n        }\n        setTimeout(() => {\n          // Calculating this block (sample)\n          if (this.focusedBlock === this.blockName) {\n            if (\n              this.lockedField === BLOCKED.DAYS &&\n              val !== this.$store.getters.visitorsPerDay\n            ) {\n              this.$store.commit(\n                'SET_VISITORS_PER_DAY_AND_RUNTIME_BY_FIXED_SAMPLE',\n                val\n              )\n            }\n          }\n        }, DEBOUNCE)\n      },\n    },\n    runtime: {\n      get() {\n        return this.$store.getters.runtime\n      },\n      set(val) {\n        if (this.runtimeDebouncer != null) {\n          clearTimeout(this.runtimeDebouncer)\n        }\n\n        this.runtimeDebouncer = setTimeout(() => {\n          // Calculating this block (sample)\n          if (this.focusedBlock === this.blockName) {\n            if (\n              this.lockedField === BLOCKED.VISITORS_PER_DAY &&\n              val !== this.$store.getters.runtime\n            ) {\n              this.$store.commit(\n                'SET_RUNTIME_AND_VISITORS_PER_DAY_BY_FIXED_SAMPLE',\n                val\n              )\n            }\n          }\n        }, DEBOUNCE)\n      },\n    },\n    onlyTotalVisitors() {\n      return this.$store.getters.trafficMode === TRAFFIC_MODE.TOTAL\n    },\n  },\n  methods: {\n    switchLockedField() {\n      if (this.lockedField === BLOCKED.DAYS) {\n        this.lockedField = BLOCKED.VISITORS_PER_DAY\n      } else {\n        this.lockedField = BLOCKED.DAYS\n      }\n    },\n    getLockedStateClass(param) {\n      return this.lockedField == param\n        ? 'pc-value-field--locked'\n        : 'pc-value-field--unlocked'\n    },\n  },\n}\n</script>\n\n<style>\n.pc-swap-button {\n  -webkit-appearance: none;\n  background: none;\n  border: 0;\n  margin: 0;\n  padding: 0;\n  position: absolute;\n  top: calc(100% - 10px);\n  left: 5px;\n  z-index: 5;\n}\n\n.pc-value-field--unlocked .pc-value-field-wrapper {\n  z-index: 1;\n}\n\n.pc-block-to-calculate .pc-value-field--locked .pc-value-formatting:before,\n.pc-block-to-calculate .pc-value-field--locked .pc-value-formatting:after,\n.pc-value-field--locked .pc-value-formatting:before,\n.pc-value-field--locked .pc-value-formatting:after,\n.pc-value-field--locked .pc-value-field-wrapper {\n  color: var(--dark-gray);\n}\n</style>\n\n<style scoped>\n.pc-inputs {\n  grid-template-areas:\n    'pc-input-left pc-input-right'\n    'pc-input-left-swap pc-input-right-swap';\n}\n\n.pc-input-right-swap,\n.pc-input-right {\n  position: relative;\n}\n\n.pc-input-right-swap {\n  grid-area: pc-input-right-swap;\n  margin-top: -10px;\n  filter: drop-shadow(0 4px 2px rgba(0, 0, 0, 0.1))\n    drop-shadow(0 -4px 2px rgba(0, 0, 0, 0.1));\n}\n\n.pc-input-right-swap .pc-value-field-wrapper {\n  filter: none;\n}\n\n.pc-value-formatting:after {\n  font-size: 14px;\n}\n\n.pc-block-to-calculate .pc-field-visitorsPerDay,\n.pc-block-to-calculate .pc-field-runtime {\n  background: var(--white);\n}\n\n.pc-value-field--lockable.pc-value-field--locked .pc-value-field-wrapper {\n  background: linear-gradient(0deg, var(--light-gray) 0%, var(--white) 100%);\n}\n\n.pc-inputs-no-grid {\n  display: block;\n}\n</style>\n"]}, media: undefined });
+      inject("data-v-03548728_0", { source: ".pc-swap-button{-webkit-appearance:none;background:0 0;border:0;margin:0;padding:0;position:absolute;top:calc(100% - 10px);left:5px;z-index:5}.pc-value-field--unlocked .pc-value-field-wrapper{z-index:1}.pc-block-to-calculate .pc-value-field--locked .pc-value-formatting:after,.pc-block-to-calculate .pc-value-field--locked .pc-value-formatting:before,.pc-value-field--locked .pc-value-field-wrapper,.pc-value-field--locked .pc-value-formatting:after,.pc-value-field--locked .pc-value-formatting:before{color:var(--dark-gray)}", map: undefined, media: undefined })
+  ,inject("data-v-03548728_1", { source: ".pc-inputs[data-v-03548728]{grid-template-areas:'pc-input-left pc-input-right' 'pc-input-left-swap pc-input-right-swap'}.pc-input-right[data-v-03548728],.pc-input-right-swap[data-v-03548728]{position:relative}.pc-input-right-swap[data-v-03548728]{grid-area:pc-input-right-swap;margin-top:-10px;filter:drop-shadow(0 4px 2px rgba(0, 0, 0, .1)) drop-shadow(0 -4px 2px rgba(0, 0, 0, .1))}.pc-input-right-swap .pc-value-field-wrapper[data-v-03548728]{filter:none}.pc-value-formatting[data-v-03548728]:after{font-size:14px}.pc-block-to-calculate .pc-field-runtime[data-v-03548728],.pc-block-to-calculate .pc-field-visitorsPerDay[data-v-03548728]{background:var(--white)}.pc-value-field--lockable.pc-value-field--locked .pc-value-field-wrapper[data-v-03548728]{background:linear-gradient(0deg,var(--light-gray) 0,var(--white) 100%)}.pc-inputs-no-grid[data-v-03548728]{display:block}", map: undefined, media: undefined });
 
     };
     /* scoped */
-    const __vue_scope_id__$8 = "data-v-0cde738a";
+    const __vue_scope_id__$1 = "data-v-03548728";
     /* module identifier */
-    const __vue_module_identifier__$8 = undefined;
+    const __vue_module_identifier__$1 = undefined;
     /* functional template */
-    const __vue_is_functional_template__$8 = false;
+    const __vue_is_functional_template__$1 = false;
     /* style inject SSR */
     
     /* style inject shadow dom */
     
 
     
-    const __vue_component__$8 = /*#__PURE__*/normalizeComponent(
-      { render: __vue_render__$8, staticRenderFns: __vue_staticRenderFns__$8 },
-      __vue_inject_styles__$8,
-      __vue_script__$8,
-      __vue_scope_id__$8,
-      __vue_is_functional_template__$8,
-      __vue_module_identifier__$8,
-      false,
-      createInjector,
-      undefined,
-      undefined
-    );
-
-  var _impact = {
-      getGraphYTicks () {
-          let impact = isNaN(this.impact) ? 0 : this.impact,
-              arr = [impact/1.50, impact/1.25, impact, impact*1.25, impact*1.50];
-          return arr
-      },
-      getGraphYTicksFormatted (y) {
-          let num = window.parseFloat(y);
-          if ((num % 1) !== 0) {
-              num = num.toFixed(2);
-          }
-
-          if (isNaN(num)) {
-              num = 0;
-          }
-
-          return `${num}%`
-      },
-      updateClonedValues (clonedObj, value) {
-          clonedObj.effect_size = this.$store.getters.extractValue('impact', value);
-
-          return clonedObj;
-      },
-      getCurrentYValue () {
-          return this.impact
-      },
-      getGraphXTicksFormatted (x) {
-          let result = x;
-
-          result += '%';
-
-          return result
-      },
-  };
-
-  var _incrementalTrials = {
-      getGraphYTicks () {
-          let impact = isNaN(this.impact) ? 0 : this.impact,
-              arr = [impact/1.50, impact/1.25, impact, impact*1.25, impact*1.50];
-
-          return arr
-      },
-      getGraphYTicksFormatted (y) {
-          let sample = this.sample,
-              base = this.base,
-
-              result = statFormulas.getAbsoluteImpactInVisitors({
-                  total_sample_size: this.$store.getters.extractValue('sample', sample),
-                  base_rate: this.$store.getters.extractValue('base', base),
-                  effect_size: this.$store.getters.extractValue('impact', y)
-              });
-
-          return this.$store.getters.displayValue('impactByVisitors', result);
-      },
-      updateClonedValues (clonedObj, value) {
-          clonedObj.effect_size = this.$store.getters.extractValue('impact', value);
-
-          return clonedObj;
-      },
-      getCurrentYValue () {
-          return this.impact
-      },
-      getGraphXTicksFormatted (x) {
-          let { displayValue } = this,
-              result = x / this.runtime;
-
-          result = displayValue('impactByVisitors', result);
-          if (result >= 1000) {
-              result = window.parseInt(result / 1000) + 'k';
-          }
-
-          return result
-      },
-      getGraphXValueForClonedValues (clonedValues) {
-          let {total_sample_size, base_rate, effect_size} = clonedValues,
-
-              impactByVisitor = statFormulas.getAbsoluteImpactInVisitors({
-                  total_sample_size,
-                  base_rate,
-                  effect_size,
-              });
-
-          return this.$store.getters.displayValue('impactByVisitors', impactByVisitor);
-      }
-  };
-
-  var _incrementalTrialsPerDay = {
-      getGraphYTicks () {
-          let impact = isNaN(this.impact) ? 0 : this.impact,
-              arr = [impact/1.50, impact/1.25, impact, impact*1.25, impact*1.50];
-
-          return arr
-      },
-      getGraphYTicksFormatted (y) {
-          let sample = this.sample,
-              base = this.base,
-
-              result = statFormulas.getAbsoluteImpactInVisitors({
-                  total_sample_size: this.$store.getters.extractValue('sample', sample / this.runtime),
-                  base_rate: this.$store.getters.extractValue('base', base),
-                  effect_size: this.$store.getters.extractValue('impact', y)
-              });
-
-          if (isNaN(result)) {
-              result = 0;
-          }
-
-          return this.$store.getters.displayValue('impactByVisitors', result);
-      },
-      updateClonedValues (clonedObj, value) {
-          clonedObj.effect_size = this.$store.getters.extractValue('impact', value);
-
-          return clonedObj;
-      },
-      getCurrentYValue () {
-          return this.impact
-      },
-      getGraphXTicksFormatted (x) {
-          let { displayValue } = this,
-              result = x / this.runtime;
-
-          result = displayValue('impactByVisitors', result);
-          if (result >= 1000) {
-              result = window.parseInt(result / 1000) + 'k';
-          }
-
-          return result
-      },
-      getGraphXValueForClonedValues (clonedValues) {
-          let {total_sample_size, base_rate, effect_size} = clonedValues,
-
-              impactByVisitor = statFormulas.getAbsoluteImpactInVisitors({
-                  total_sample_size,
-                  base_rate,
-                  effect_size,
-              });
-
-          return this.$store.getters.displayValue('impactByVisitors', impactByVisitor);
-      }
-  };
-
-  var _days = {
-      getGraphXTicksFormatted (x) {
-          let samplePerDay = this.sample / this.runtime,
-              result = x / samplePerDay;
-          result = this.$store.getters.displayValue('sample', result);
-          if (result >= 1000) {
-              result = window.parseInt(result / 1000) + 'k';
-          }
-
-          return result
-      },
-      getGraphXValueForClonedValues (clonedValues) {
-          let graphX = 'sample';
-          return this.$store.getters.displayValue(graphX, (this.math[graphX](clonedValues)));
-      }
-  };
-
-  var _sample = {
-      getGraphXTicksFormatted (x) {
-          let result = x;
-
-          result = this.$store.getters.displayValue('sample', result);
-          if (result >= 1000) {
-              result = window.parseInt(result / 1000) + 'k';
-          }
-
-          return result
-      }
-  };
-
-  var _samplePerDay = {
-      getGraphXTicksFormatted (x) {
-          let result = x / this.runtime;
-          result = this.$store.getters.displayValue('sample', result);
-          if (result >= 1000) {
-              result = window.parseInt(result / 1000) + 'k';
-          }
-
-          return result
-      },
-      getGraphXValueForClonedValues (clonedValues) {
-          let graphX = 'sample';
-          return this.$store.getters.displayValue(graphX, (this.math[graphX](clonedValues)));
-      }
-  };
-
-  var _power = {
-      getGraphYTicks () {
-          let arr = [10, 25, 50, 75, 100];
-          return arr
-      },
-      getGraphYTicksFormatted (y) {
-          return `${y}%`
-      },
-      updateClonedValues (clonedObj, value) {
-          clonedObj.beta = 1 - this.$store.getters.extractValue('power', value);
-
-          return clonedObj;
-      },
-      getCurrentYValue () {
-          return this.power
-      },
-      getGraphXTicksFormatted () {
-          // not needed yet
-      },
-  };
-
-  var _threshold = {
-      getGraphYTicks () {
-          let threshold = isNaN(this.$store.state.nonInferiority.threshold) ? 0 : this.$store.state.nonInferiority.threshold,
-              arr = [threshold/1.50, threshold/1.25, threshold, threshold*1.25, threshold*1.50];
-          return arr
-      },
-      getGraphYTicksFormatted (y) {
-          let num = window.parseFloat(y);
-          if ((num % 1) !== 0) {
-              num = num.toFixed(2);
-          }
-
-          if (isNaN(num)) {
-              num = 0;
-          }
-
-          const suffix = this.$store.state.nonInferiority.selected == 'relative' ? '%' : '';
-
-          return `${num}${suffix}`
-      },
-      getCurrentYValue () {
-          return this.$store.state.nonInferiority.threshold
-      },
-      updateClonedValues (clonedObj, value) {
-          let { getters, state } = this.$store,
-              { customMu, customOpts, customAlternative, customThresholdCorrectedValue } = getters;
-
-          const thresholdCorrectedValue = customThresholdCorrectedValue({
-              threshold: value,
-              selected: state.nonInferiority.selected
-          });
-
-          const mu = customMu({
-              runtime: getters.runtime,
-              thresholdCorrectedValue: thresholdCorrectedValue,
-              visitors_per_day: getters.visitorsPerDay,
-              base_rate: getters.extractValue('base'),
-          });
-
-          const opts = customOpts({
-              selected: state.nonInferiority.selected,
-              lockedField: getters.lockedField,
-              thresholdCorrectedValue: thresholdCorrectedValue,
-              runtime: getters.runtime,
-              visitorsPerDay: getters.visitorsPerDay,
-          });
-
-          const alternative = customAlternative({ type: 'noninferiority' });
-
-          Object.assign(clonedObj, {
-              mu,
-              opts,
-              alternative
-          });
-
-          return clonedObj;
-      },
-  };
-
-  // name convention is the name used to set the graphY and graphX with a underscore before it
-
-
-  var defaultConfig = {
-      getGraphYTicks () {
-          throw Error (`getGraphYTicks not defined for ${this.graphY}`)
-      },
-      getGraphYTicksFormatted () {
-          throw Error (`getGraphYTicksFormatted not defined for ${this.graphY}`)
-      },
-      getGraphYDataSet ({amount}) {
-          let yTicks = this.getGraphYTicks(),
-              curYValue = this.getCurrentYValue(),
-              firstTick = yTicks[0],
-              lastTick = yTicks[yTicks.length - 1],
-              ratio = (lastTick - firstTick) / amount,
-              result = Array.from(new Array(amount));
-
-          result = result.map((cur, i, arr) => {
-              let value = firstTick + ratio * i;
-              return value
-          });
-
-          // add the current value in case it isn't there
-          result.push(curYValue);
-
-          // sort current value
-          result.sort((a,b) => { return a - b});
-
-          // remove duplicates
-          result = [...new Set(result)];
-
-          return result
-      },
-      updateClonedValues () {
-          throw Error (`updateClonedValues not defined for ${this.graphY}`)
-      },
-      getCurrentYValue () {
-          throw Error (`getCurrentYValue not defined for ${this.graphY}`)
-      },
-      getGraphXTicksFormatted () {
-          throw Error (`getGraphXTicksFormatted not defined for ${this.graphY}`)
-      },
-      getGraphXValueForClonedValues (clonedValues) {
-          if (!this.math[this.graphX]) {
-              throw Error (`getGraphXValueForClonedValues didn't find math formula for ${this.graphX}`)
-          }
-          return this.$store.getters.displayValue(this.graphX, (this.math[this.graphX](clonedValues)));
-      }
-  };
-
-
-
-  var graphDataMixin = {
-      beforeCreate () {
-          // register configurations for metric params
-          // this is done to agregate different pieces of configuration that need to work in harmony
-          // for the svg graph
-          Object.assign(this, {
-              _sample:                    Object.assign({}, defaultConfig, _sample),
-              _samplePerDay:              Object.assign({}, defaultConfig, _samplePerDay),
-              _impact:                    Object.assign({}, defaultConfig, _impact),
-              _incrementalTrials:         Object.assign({}, defaultConfig, _incrementalTrials),
-              _power:                     Object.assign({}, defaultConfig, _power),
-              _incrementalTrialsPerDay:   Object.assign({}, defaultConfig, _incrementalTrialsPerDay),
-              _days:                      Object.assign({}, defaultConfig, _days),
-              _threshold:                 Object.assign({}, defaultConfig, _threshold),
-          });
-      },
-      methods: {
-          getGraphYTicks () {
-              return this._getGraphY().getGraphYTicks.apply(this, []);
-          },
-          getGraphYTicksFormatted () {
-              return this._getGraphY().getGraphYTicksFormatted.apply(this, [...arguments]);
-          },
-          getGraphYDataSet () {
-              return this._getGraphY().getGraphYDataSet.apply(this, [...arguments]);
-          },
-          updateClonedValues () {
-              return this._getGraphY().updateClonedValues.apply(this, [...arguments]);
-          },
-          getCurrentYValue () {
-              return this._getGraphY().getCurrentYValue.apply(this, [...arguments]);
-          },
-          getGraphXValueForClonedValues () {
-              return this._getGraphX().getGraphXValueForClonedValues.apply(this, [...arguments]);
-          },
-          getGraphXTicksFormatted () {
-              return this._getGraphX().getGraphXTicksFormatted.apply(this, [...arguments]);
-          },
-          _getGraphX () {
-              let graphX = this[`_${this.graphX}`];
-
-              if (!graphX) {
-                  throw Error (`_${this.graphX} is not registered`);
-              }
-
-              return graphX
-          },
-          _getGraphY () {
-              let graphY = this[`_${this.graphY}`];
-
-              if (!graphY) {
-                  throw Error (`_${this.graphY} is not registered`);
-              }
-
-              return graphY
-          }
-      }
-  };
-
-  //
-  //
-  //
-  //
-  //
-  //
-  //
-  //
-
-  var script$9 = {
-      props: ['graphType', 'graphX', 'graphY', 'getMetricDisplayName'],
-      data () {
-          return {
-          }
-      },
-      computed: {
-          graphName () {
-              const graphXDisplay = this.getMetricDisplayName(this.graphX);
-              const graphYDisplay = this.getMetricDisplayName(this.graphY);
-              return `${graphYDisplay} / ${graphXDisplay}`
-          },
-          value () {
-              return `${this.graphX}-${this.graphY}`
-          },
-          spanClass () {
-              return {
-                  'pc-graph-radio-selected': this.graphType == this.value
-              }
-          },
-          graphTypeSynced: {
-              get () {
-                  return this.graphType
-              },
-              set (newValue) {
-                  // this.$emit('update:graphType', newValue)
-              }
-          }
-      }
-  };
-
-  /* script */
-  const __vue_script__$9 = script$9;
-
-  /* template */
-  var __vue_render__$9 = function() {
-    var _vm = this;
-    var _h = _vm.$createElement;
-    var _c = _vm._self._c || _h;
-    return _c("label", { staticClass: "pc-graph-radio-label" }, [
-      _c("input", {
-        directives: [
-          {
-            name: "model",
-            rawName: "v-model",
-            value: _vm.graphTypeSynced,
-            expression: "graphTypeSynced"
-          }
-        ],
-        staticClass: "pc-graph-radio-input",
-        attrs: { type: "radio", name: "graph" },
-        domProps: {
-          value: _vm.value,
-          checked: _vm._q(_vm.graphTypeSynced, _vm.value)
-        },
-        on: {
-          change: function($event) {
-            _vm.graphTypeSynced = _vm.value;
-          }
-        }
-      }),
-      _vm._v(" "),
-      _c("span", { staticClass: "pc-graph-radio-text", class: _vm.spanClass }, [
-        _vm._v(_vm._s(_vm.graphName))
-      ])
-    ])
-  };
-  var __vue_staticRenderFns__$9 = [];
-  __vue_render__$9._withStripped = true;
-
-    /* style */
-    const __vue_inject_styles__$9 = function (inject) {
-      if (!inject) return
-      inject("data-v-40af7d79_0", { source: "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", map: {"version":3,"sources":[],"names":[],"mappings":"","file":"svg-graph-tab-item.vue"}, media: undefined });
-
-    };
-    /* scoped */
-    const __vue_scope_id__$9 = undefined;
-    /* module identifier */
-    const __vue_module_identifier__$9 = undefined;
-    /* functional template */
-    const __vue_is_functional_template__$9 = false;
-    /* style inject SSR */
-    
-    /* style inject shadow dom */
-    
-
-    
-    const __vue_component__$9 = /*#__PURE__*/normalizeComponent(
-      { render: __vue_render__$9, staticRenderFns: __vue_staticRenderFns__$9 },
-      __vue_inject_styles__$9,
-      __vue_script__$9,
-      __vue_scope_id__$9,
-      __vue_is_functional_template__$9,
-      __vue_module_identifier__$9,
+    const __vue_component__$1 = /*#__PURE__*/normalizeComponent(
+      { render: __vue_render__$1, staticRenderFns: __vue_staticRenderFns__$1 },
+      __vue_inject_styles__$1,
+      __vue_script__$1,
+      __vue_scope_id__$1,
+      __vue_is_functional_template__$1,
+      __vue_module_identifier__$1,
       false,
       createInjector,
       undefined,
@@ -8349,480 +7402,48 @@
 
   //
 
-  let dataDefault = [
-          ['x', 0, 0, 0, 0, 0, 0],
-          ['Sample', 0, 0, 0, 0, 0],
-          ['Current', null, null, 50]
-      ];
-
-  let style = document.createElement('style');
-
-  style.innerHTML = `
-    .pc-graph .c3-axis-y-label {
-        pointer-events: none;
-    }
-
-    .pc-graph .c3-axis {
-        font-size: 16px;
-    }
-`;
-
-  document.querySelector('head').appendChild(style);
-
-
-
-  var script$a = {
-      mixins: [graphDataMixin],
-      props: [],
-      data () {
-          return {
-              width: 100,
-              height: 100,
-              data:  this.dataDefault,
-              graphType: this.getDefaultGraphOption() // x, y
-              // graphX: 'sample' // computed
-              // graphY: 'power' // computed
-          }
-      },
-      computed: {
-          style () {
-              let { width, height } = this;
-
-              return {
-                  width: `${width}px`,
-                  height: `${height}px`
-              }
-          },
-          graphX () {
-              // 'sample'
-              return this.graphType.split('-')[0]
-          },
-          graphY () {
-              // 'power'
-              return this.graphType.split('-')[1]
-          },
-          math () {
-              return // this.$store.getters.formulaToSolveProp
-          },
-          isNonInferiorityEnabled () {
-              return this.$store.getters.isNonInferiority
-          },
-          sample () {
-              return this.$store.getters.sample
-          },
-          impact () {
-              return // this.$store.state.attributes.impact
-          },
-          power () {
-              return // this.$store.state.attributes.power
-          },
-          base () {
-              return this.$store.getters.base
-          },
-          falsePosRate () {
-              return this.$store.getters.falsePositiveRate
-          },
-          sdRate () {
-              return this.$store.getters.standardDeviation
-          },
-          runtime () {
-              return this.$store.getters.runtime
-          },
-          graphList() {
-
-              let list = [
-                  {
-                      name: 'days-incrementalTrialsPerDay',
-                      cond: !this.isNonInferiorityEnabled
-                  },
-                  {
-                      name: 'samplePerDay-incrementalTrials',
-                      cond: !this.isNonInferiorityEnabled
-                  },
-                  {
-                      name: 'sample-impact',
-                      cond: !this.isNonInferiorityEnabled
-                  },
-                  {
-                      name: 'sample-threshold',
-                      cond: this.isNonInferiorityEnabled
-                  },
-                  {
-                      name: 'sample-power',
-                      cond: true
-                  },
-                  {
-                      name: 'samplePerDay-power',
-                      cond: true
-                  },
-                  {
-                      name: 'impact-power',
-                      cond: !this.isNonInferiorityEnabled
-                  },
-              ];
-
-              return list.filter((obj) => {return obj.cond == true}).map((obj) => {
-                      let [graphX, graphY] = obj.name.split('-');
-                      return {
-                          graphX,
-                          graphY
-                      }
-                  })
-          }
-      },
-      methods: {
-          getDefaultGraphOption () {
-              let result = 'days-incrementalTrialsPerDay';
-              if (this.$store.getters.isNonInferiority) {
-                  result = 'sample-threshold';
-              }
-              return result
-          },
-          resize () {
-              let {width, paddingLeft, paddingRight} = window.getComputedStyle(this.$refs['pc-graph-size']);
-
-              // update svg size
-              this.width = window.parseInt(width) - window.parseInt(paddingLeft) - window.parseInt(paddingRight);
-              this.height = 220;
-          },
-          createYList ({ amount, rate = 10, cur }) { //rate of 10 and amount of 10 will reach from 0 to 100
-              let result = [];
-
-              for (let i = 0; i <= amount; i += 1) {
-                  let y = rate * i,
-                      nextY = rate * (i + 1);
-
-                  result.push(y);
-
-                  if (cur > y && cur < nextY) {
-                      result.push(cur);
-                  }
-              }
-
-              return result;
-          },
-          trimInvalidSamples (newData) {
-              let result = newData[0].reduce((prevArr, xValue, i) => {
-
-                  if (i == 0) {
-                      prevArr[0] = [];
-                      prevArr[1] = [];
-                      prevArr[2] = [];
-                  }
-
-                  // i == 0 is the name of the dataset
-                  if (i == 0 || (!isNaN(xValue) && isFinite(xValue))) {
-                      prevArr[0].push(newData[0][i]);
-                      prevArr[1].push(newData[1][i]);
-                      prevArr[2].push(newData[2][i]);
-                  }
-
-                  return prevArr;
-              }, []);
-              return result;
-          },
-          updateGraphData () {
-
-              let clonedValues = this.deepCloneObject(this.$store.getters.convertDisplayedValues),
-                  newData = this.deepCloneObject(dataDefault),
-                  yList = this.getGraphYDataSet({amount: 10}),
-                  curY = this.getCurrentYValue();
-
-              // erase previous values but keep names of datasets
-              newData[0].length = 1;
-              newData[1].length = 1;
-              newData[2].length = 1;
-
-              yList.forEach((yValue, i) => {
-
-                  clonedValues = this.updateClonedValues(clonedValues, yValue);
-
-                  let xValues = this.getGraphXValueForClonedValues(clonedValues, yValue);
-
-                   newData[0][i + 1] = xValues; // x
-                   newData[1][i + 1] = yValue; // line
-                   newData[2][i + 1] = yValue == curY ? yValue : null; // current power dot
-              });
-
-              newData = this.trimInvalidSamples(newData);
-
-              this.chart.axis.labels({x: this.updateXLabel(), y: this.updateYLabel()});
-
-              this.chart.load({
-                  columns: newData
-              });
-          },
-          deepCloneObject (obj) {
-              return JSON.parse(JSON.stringify(obj))
-          },
-          createTooltip (V) {
-
-              return {
-                  grouped: false,
-                  contents ([{x = 0, value = 0, id = ''}]) {
-
-                      let {graphX, graphY, getMetricDisplayName, getGraphXTicksFormatted, getGraphYTicksFormatted} = V,
-                          th = getMetricDisplayName(graphX),
-                          name = getMetricDisplayName(graphY),
-                          xFormatted = getGraphXTicksFormatted(x),
-                          yFormatted = getGraphYTicksFormatted(value);
-
-                      return `
-                        <table class="c3-tooltip">
-                            <tbody>
-                                <tr>
-                                    <th colspan="2">${th}: ${xFormatted}</th>
-                                </tr>
-                                <tr class="c3-tooltip-name--Current">
-                                    <td class="name">
-                                        <span style="background-color:#ff7f0e">
-                                        </span>
-                                        ${name}
-                                    </td>
-                                    <td class="value">${yFormatted}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    `
-                  }
-              }
-          },
-          updateYLabel () {
-              return this.getMetricDisplayName(this.graphY)
-          },
-          updateXLabel () {
-              return this.getMetricDisplayName(this.graphX)
-          },
-          getMetricDisplayName (metric) {
-              return {
-                  sample: 'Sample',
-                  impact: 'Impact',
-                  power: 'Power',
-                  base: 'Base',
-                  falseposrate: 'False Positive Rate',
-                  sdrate: 'Base Standard deviation',
-
-                  samplePerDay: 'Daily Visitors',
-                  incrementalTrials: 'Incremental Trials',
-
-                  days: '# of days',
-                  incrementalTrialsPerDay: 'Inc. Trials per day',
-                  threshold: 'Non Inf. Threshold',
-              }[metric] || ''
-          }
-      },
-      watch: {
-          sample () {
-              this.updateGraphData();
-          },
-          impact () {
-              this.updateGraphData();
-          },
-          power () {
-              this.updateGraphData();
-          },
-          graphY () {
-              this.updateGraphData();
-          },
-          graphX () {
-              this.updateGraphData();
-          },
-          runtime () {
-              this.updateGraphData();
-          },
-          isNonInferiorityEnabled (bool) {
-              if (this.graphList.indexOf(this.graphType) == -1) {
-                  let { graphX, graphY } = this.graphList[0];
-                  this.graphType = `${graphX}-${graphY}`;
-              }
-          }
-      },
-      mounted () {
-          let {resize, createTooltip} = this,
-              vueInstance = this;
-          resize();
-
-          this.dataDefault = dataDefault;
-
-          this.chart = c3.generate({
-              bindto: this.$refs['pc-graph'],
-              size: {
-                  width: this.width,
-                  height: this.height
-              },
-              legend: {
-                  show: false
-              },
-              data: {
-                  x: 'x',
-                  columns: this.dataDefault,
-                  type: 'area'
-              },
-              grid: {
-                  x: {
-                      show: true
-                  },
-                  y: {
-                      show: true
-                  }
-              },
-              axis: {
-                  x: {
-                      label:  this.updateXLabel(),
-                      tick: {
-                          values (minMax) {
-                              let [min, max] = minMax.map((num) => {return window.parseInt(num)}),
-                                  amount = 7,
-                                  ratio = (max - min) / amount,
-                                  result = new Array(amount + 1);
-
-                              // create the values
-                              result = Array.from(result).map((undef, i) => {
-                                  return (min + (ratio * i)).toFixed(2)
-                              });
-
-                              return result
-                          },
-                          format (x) {
-                              return vueInstance.getGraphXTicksFormatted(x)
-                          }
-                      }
-                  },
-                  y: {
-                      label: this.updateYLabel(),
-                      tick: {
-                          values () {
-                              return vueInstance.getGraphYTicks()
-                          },
-                          format (y) {
-                              return vueInstance.getGraphYTicksFormatted(y)
-                          }
-                      }
-                  }
-              },
-              padding: {
-                  top: 20,
-                  left: 70,
-                  right: 20
-              },
-              tooltip: createTooltip(this)
-          });
-
-          this.updateGraphData();
-      },
-      components: {
-          svgGraphTabItem: __vue_component__$9
-      }
-  };
-
-  /* script */
-  const __vue_script__$a = script$a;
-
-  /* template */
-  var __vue_render__$a = function() {
-    var _vm = this;
-    var _h = _vm.$createElement;
-    var _c = _vm._self._c || _h;
-    return _c("div", { staticClass: "pc-block pc-block--graph" }, [
-      _c(
-        "div",
-        { staticClass: "pc-graph-controls" },
-        _vm._l(_vm.graphList, function(graph) {
-          return _c("svgGraphTabItem", {
-            key: graph.graphX + "-" + graph.graphY,
-            attrs: {
-              graphX: graph.graphX,
-              graphY: graph.graphY,
-              getMetricDisplayName: _vm.getMetricDisplayName,
-              graphType: _vm.graphType
-            },
-            on: {
-              "update:graphType": function($event) {
-                _vm.graphType = $event;
-              },
-              "update:graph-type": function($event) {
-                _vm.graphType = $event;
-              }
-            }
-          })
-        }),
-        1
-      ),
-      _vm._v(" "),
-      _c("div", { ref: "pc-graph-size", staticClass: "pc-graph" }, [
-        _c("div", { ref: "pc-graph-wrapper", style: _vm.style }, [
-          _c("div", { ref: "pc-graph" })
-        ])
-      ])
-    ])
-  };
-  var __vue_staticRenderFns__$a = [];
-  __vue_render__$a._withStripped = true;
-
-    /* style */
-    const __vue_inject_styles__$a = function (inject) {
-      if (!inject) return
-      inject("data-v-5597ba60_0", { source: "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/* graph radio styles */\n.pc-graph-controls {\n    display: flex;\n    flex-direction: row;\n    padding: 30px 0 0 60px;\n    margin-bottom: 5px;\n    border-bottom: 1px solid var(--blue);\n}\n.pc-graph-radio-label {\n    position: relative;\n    font-size: 13px;\n    color: var(--blue);\n    margin-right: 20px;\n}\n.pc-graph-radio-input {\n    position: absolute;\n    visibility: hidden;\n}\n.pc-graph-radio-text {\n    display: block;\n    padding: 0 5px 15px;\n    position: relative;\n}\n.pc-graph-radio-input:checked + .pc-graph-radio-text::after {\n    content: '';\n    position: absolute;\n    left: 0;\n    bottom: 0;\n    width: 100%;\n    height: 4px;\n    background: var(--blue);\n}\n\n/* graph layout */\n.pc-graph {\n    padding: 10px;\n    width: 100%;\n    box-sizing: border-box;\n}\n", map: {"version":3,"sources":["/Users/amartinezdem/git_tree/github/bookingcom/powercalculator/src/components/svg-graph.vue"],"names":[],"mappings":";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;AAiZA,uBAAA;AACA;IACA,aAAA;IACA,mBAAA;IACA,sBAAA;IACA,kBAAA;IACA,oCAAA;AACA;AAEA;IACA,kBAAA;IACA,eAAA;IACA,kBAAA;IACA,kBAAA;AACA;AAEA;IACA,kBAAA;IACA,kBAAA;AACA;AAEA;IACA,cAAA;IACA,mBAAA;IACA,kBAAA;AACA;AAEA;IACA,WAAA;IACA,kBAAA;IACA,OAAA;IACA,SAAA;IACA,WAAA;IACA,WAAA;IACA,uBAAA;AACA;;AAEA,iBAAA;AAEA;IACA,aAAA;IACA,WAAA;IACA,sBAAA;AACA","file":"svg-graph.vue","sourcesContent":["<template id=\"svg-graph\">\n    <div class=\"pc-block pc-block--graph\">\n        <div class=\"pc-graph-controls\">\n\n            <svgGraphTabItem\n                v-for=\"graph in graphList\"\n                v-bind:key=\"graph.graphX + '-' + graph.graphY\"\n                v-bind:graphX=\"graph.graphX\"\n                v-bind:graphY=\"graph.graphY\"\n                v-bind:getMetricDisplayName=\"getMetricDisplayName\"\n                v-bind:graphType.sync=\"graphType\"\n            >\n            </svgGraphTabItem>\n\n        </div>\n        <div class=\"pc-graph\" ref=\"pc-graph-size\">\n            <div v-bind:style=\"style\" ref=\"pc-graph-wrapper\">\n                <div ref=\"pc-graph\"></div>\n            </div>\n        </div>\n    </div>\n</template>\n\n\n<script>\n/*global c3*/\n/*eslint no-undef: \"error\"*/\n\nimport graphDataMixin from '../js/graph-data-mixin.js'\nimport svgGraphTabItem from './svg-graph-tab-item.vue'\n\nlet dataDefault = [\n        ['x', 0, 0, 0, 0, 0, 0],\n        ['Sample', 0, 0, 0, 0, 0],\n        ['Current', null, null, 50]\n    ];\n\nlet style = document.createElement('style');\n\nstyle.innerHTML = `\n    .pc-graph .c3-axis-y-label {\n        pointer-events: none;\n    }\n\n    .pc-graph .c3-axis {\n        font-size: 16px;\n    }\n`;\n\ndocument.querySelector('head').appendChild(style);\n\n\n\nexport default {\n    mixins: [graphDataMixin],\n    props: [],\n    data () {\n        return {\n            width: 100,\n            height: 100,\n            data:  this.dataDefault,\n            graphType: this.getDefaultGraphOption() // x, y\n            // graphX: 'sample' // computed\n            // graphY: 'power' // computed\n        }\n    },\n    computed: {\n        style () {\n            let { width, height } = this;\n\n            return {\n                width: `${width}px`,\n                height: `${height}px`\n            }\n        },\n        graphX () {\n            // 'sample'\n            return this.graphType.split('-')[0]\n        },\n        graphY () {\n            // 'power'\n            return this.graphType.split('-')[1]\n        },\n        math () {\n            return // this.$store.getters.formulaToSolveProp\n        },\n        isNonInferiorityEnabled () {\n            return this.$store.getters.isNonInferiority\n        },\n        sample () {\n            return this.$store.getters.sample\n        },\n        impact () {\n            return // this.$store.state.attributes.impact\n        },\n        power () {\n            return // this.$store.state.attributes.power\n        },\n        base () {\n            return this.$store.getters.base\n        },\n        falsePosRate () {\n            return this.$store.getters.falsePositiveRate\n        },\n        sdRate () {\n            return this.$store.getters.standardDeviation\n        },\n        runtime () {\n            return this.$store.getters.runtime\n        },\n        graphList() {\n\n            let list = [\n                {\n                    name: 'days-incrementalTrialsPerDay',\n                    cond: !this.isNonInferiorityEnabled\n                },\n                {\n                    name: 'samplePerDay-incrementalTrials',\n                    cond: !this.isNonInferiorityEnabled\n                },\n                {\n                    name: 'sample-impact',\n                    cond: !this.isNonInferiorityEnabled\n                },\n                {\n                    name: 'sample-threshold',\n                    cond: this.isNonInferiorityEnabled\n                },\n                {\n                    name: 'sample-power',\n                    cond: true\n                },\n                {\n                    name: 'samplePerDay-power',\n                    cond: true\n                },\n                {\n                    name: 'impact-power',\n                    cond: !this.isNonInferiorityEnabled\n                },\n            ];\n\n            return list.filter((obj) => {return obj.cond == true}).map((obj) => {\n                    let [graphX, graphY] = obj.name.split('-');\n                    return {\n                        graphX,\n                        graphY\n                    }\n                })\n        }\n    },\n    methods: {\n        getDefaultGraphOption () {\n            let result = 'days-incrementalTrialsPerDay';\n            if (this.$store.getters.isNonInferiority) {\n                result = 'sample-threshold'\n            }\n            return result\n        },\n        resize () {\n            let {width, paddingLeft, paddingRight} = window.getComputedStyle(this.$refs['pc-graph-size']);\n\n            // update svg size\n            this.width = window.parseInt(width) - window.parseInt(paddingLeft) - window.parseInt(paddingRight);\n            this.height = 220;\n        },\n        createYList ({ amount, rate = 10, cur }) { //rate of 10 and amount of 10 will reach from 0 to 100\n            let result = [];\n\n            for (let i = 0; i <= amount; i += 1) {\n                let y = rate * i,\n                    nextY = rate * (i + 1);\n\n                result.push(y);\n\n                if (cur > y && cur < nextY) {\n                    result.push(cur);\n                }\n            }\n\n            return result;\n        },\n        trimInvalidSamples (newData) {\n            let result = newData[0].reduce((prevArr, xValue, i) => {\n\n                if (i == 0) {\n                    prevArr[0] = [];\n                    prevArr[1] = [];\n                    prevArr[2] = [];\n                }\n\n                // i == 0 is the name of the dataset\n                if (i == 0 || (!isNaN(xValue) && isFinite(xValue))) {\n                    prevArr[0].push(newData[0][i]);\n                    prevArr[1].push(newData[1][i]);\n                    prevArr[2].push(newData[2][i]);\n                }\n\n                return prevArr;\n            }, [])\n            return result;\n        },\n        updateGraphData () {\n\n            let clonedValues = this.deepCloneObject(this.$store.getters.convertDisplayedValues),\n                newData = this.deepCloneObject(dataDefault),\n                yList = this.getGraphYDataSet({amount: 10}),\n                curY = this.getCurrentYValue();\n\n            // erase previous values but keep names of datasets\n            newData[0].length = 1;\n            newData[1].length = 1;\n            newData[2].length = 1;\n\n            yList.forEach((yValue, i) => {\n\n                clonedValues = this.updateClonedValues(clonedValues, yValue);\n\n                let xValues = this.getGraphXValueForClonedValues(clonedValues, yValue);\n\n                 newData[0][i + 1] = xValues; // x\n                 newData[1][i + 1] = yValue; // line\n                 newData[2][i + 1] = yValue == curY ? yValue : null; // current power dot\n            })\n\n            newData = this.trimInvalidSamples(newData);\n\n            this.chart.axis.labels({x: this.updateXLabel(), y: this.updateYLabel()});\n\n            this.chart.load({\n                columns: newData\n            })\n        },\n        deepCloneObject (obj) {\n            return JSON.parse(JSON.stringify(obj))\n        },\n        createTooltip (V) {\n\n            return {\n                grouped: false,\n                contents ([{x = 0, value = 0, id = ''}]) {\n\n                    let {graphX, graphY, getMetricDisplayName, getGraphXTicksFormatted, getGraphYTicksFormatted} = V,\n                        th = getMetricDisplayName(graphX),\n                        name = getMetricDisplayName(graphY),\n                        xFormatted = getGraphXTicksFormatted(x),\n                        yFormatted = getGraphYTicksFormatted(value);\n\n                    return `\n                        <table class=\"c3-tooltip\">\n                            <tbody>\n                                <tr>\n                                    <th colspan=\"2\">${th}: ${xFormatted}</th>\n                                </tr>\n                                <tr class=\"c3-tooltip-name--Current\">\n                                    <td class=\"name\">\n                                        <span style=\"background-color:#ff7f0e\">\n                                        </span>\n                                        ${name}\n                                    </td>\n                                    <td class=\"value\">${yFormatted}</td>\n                                </tr>\n                            </tbody>\n                        </table>\n                    `\n                }\n            }\n        },\n        updateYLabel () {\n            return this.getMetricDisplayName(this.graphY)\n        },\n        updateXLabel () {\n            return this.getMetricDisplayName(this.graphX)\n        },\n        getMetricDisplayName (metric) {\n            return {\n                sample: 'Sample',\n                impact: 'Impact',\n                power: 'Power',\n                base: 'Base',\n                falseposrate: 'False Positive Rate',\n                sdrate: 'Base Standard deviation',\n\n                samplePerDay: 'Daily Visitors',\n                incrementalTrials: 'Incremental Trials',\n\n                days: '# of days',\n                incrementalTrialsPerDay: 'Inc. Trials per day',\n                threshold: 'Non Inf. Threshold',\n            }[metric] || ''\n        }\n    },\n    watch: {\n        sample () {\n            this.updateGraphData();\n        },\n        impact () {\n            this.updateGraphData();\n        },\n        power () {\n            this.updateGraphData();\n        },\n        graphY () {\n            this.updateGraphData();\n        },\n        graphX () {\n            this.updateGraphData();\n        },\n        runtime () {\n            this.updateGraphData();\n        },\n        isNonInferiorityEnabled (bool) {\n            if (this.graphList.indexOf(this.graphType) == -1) {\n                let { graphX, graphY } = this.graphList[0];\n                this.graphType = `${graphX}-${graphY}`;\n            }\n        }\n    },\n    mounted () {\n        let {resize, createTooltip} = this,\n            vueInstance = this;\n        resize();\n\n        this.dataDefault = dataDefault;\n\n        this.chart = c3.generate({\n            bindto: this.$refs['pc-graph'],\n            size: {\n                width: this.width,\n                height: this.height\n            },\n            legend: {\n                show: false\n            },\n            data: {\n                x: 'x',\n                columns: this.dataDefault,\n                type: 'area'\n            },\n            grid: {\n                x: {\n                    show: true\n                },\n                y: {\n                    show: true\n                }\n            },\n            axis: {\n                x: {\n                    label:  this.updateXLabel(),\n                    tick: {\n                        values (minMax) {\n                            let [min, max] = minMax.map((num) => {return window.parseInt(num)}),\n                                amount = 7,\n                                ratio = (max - min) / amount,\n                                result = new Array(amount + 1);\n\n                            // create the values\n                            result = Array.from(result).map((undef, i) => {\n                                return (min + (ratio * i)).toFixed(2)\n                            })\n\n                            return result\n                        },\n                        format (x) {\n                            return vueInstance.getGraphXTicksFormatted(x)\n                        }\n                    }\n                },\n                y: {\n                    label: this.updateYLabel(),\n                    tick: {\n                        values () {\n                            return vueInstance.getGraphYTicks()\n                        },\n                        format (y) {\n                            return vueInstance.getGraphYTicksFormatted(y)\n                        }\n                    }\n                }\n            },\n            padding: {\n                top: 20,\n                left: 70,\n                right: 20\n            },\n            tooltip: createTooltip(this)\n        });\n\n        this.updateGraphData()\n    },\n    components: {\n        svgGraphTabItem\n    }\n}\n\n</script>\n\n<style>\n\n/* graph radio styles */\n.pc-graph-controls {\n    display: flex;\n    flex-direction: row;\n    padding: 30px 0 0 60px;\n    margin-bottom: 5px;\n    border-bottom: 1px solid var(--blue);\n}\n\n.pc-graph-radio-label {\n    position: relative;\n    font-size: 13px;\n    color: var(--blue);\n    margin-right: 20px;\n}\n\n.pc-graph-radio-input {\n    position: absolute;\n    visibility: hidden;\n}\n\n.pc-graph-radio-text {\n    display: block;\n    padding: 0 5px 15px;\n    position: relative;\n}\n\n.pc-graph-radio-input:checked + .pc-graph-radio-text::after {\n    content: '';\n    position: absolute;\n    left: 0;\n    bottom: 0;\n    width: 100%;\n    height: 4px;\n    background: var(--blue);\n}\n\n/* graph layout */\n\n.pc-graph {\n    padding: 10px;\n    width: 100%;\n    box-sizing: border-box;\n}\n</style>\n"]}, media: undefined });
-
-    };
-    /* scoped */
-    const __vue_scope_id__$a = undefined;
-    /* module identifier */
-    const __vue_module_identifier__$a = undefined;
-    /* functional template */
-    const __vue_is_functional_template__$a = false;
-    /* style inject SSR */
-    
-    /* style inject shadow dom */
-    
-
-    
-    const __vue_component__$a = /*#__PURE__*/normalizeComponent(
-      { render: __vue_render__$a, staticRenderFns: __vue_staticRenderFns__$a },
-      __vue_inject_styles__$a,
-      __vue_script__$a,
-      __vue_scope_id__$a,
-      __vue_is_functional_template__$a,
-      __vue_module_identifier__$a,
-      false,
-      createInjector,
-      undefined,
-      undefined
-    );
-
-  //
-
-  const FOCUS = Object.freeze({
-    SAMPLE: 'sample',
-    IMPACT: 'impact',
-    BASE: 'base'
-  });
-
-  var script$b = {
+  var script = {
     props: ['parentmetricdata'],
     data() {
       // values if parent component sends them
-      let importedData = this.parentmetricdata || {};
-
+      const importedData = JSON.parse(JSON.stringify(this.parentmetricdata || {}));
       const data = {
-        focusedBlock: FOCUS.SAMPLE,
-
-        // false means the editable ones are the secondary mode (metric totals, days&daily trials and absolute impact)
-        enabledMainInputs: {
-          base: true,
-          sample: true,
-          impact: true,
-          power: true,
-          'non-inferiority': true,
-        },
+        focusedBlock: importedData.calculateProp || FOCUS.SAMPLE,
+        lockedField: importedData.lockedField || BLOCKED.DAYS,
+        selected: importedData.selected || SELECTED.RELATIVE,
       };
 
-      // mergeComponentData has no array support for now
-      return this.mergeComponentData(
-        data,
-        JSON.parse(JSON.stringify(importedData))
-      )
+      return data
     },
+    created() {
+      const importedData = JSON.parse(JSON.stringify(this.parentmetricdata || {}));
+
+      if (
+        importedData.lockedField &&
+        Object.values(BLOCKED).includes(importedData.lockedField)
+      ) {this.lockedField = importedData.lockedField;}
+
+      if (
+        importedData.focusedBlock &&
+        Object.values(FOCUS).includes(importedData.focusedBlock)
+      ) {this.focusedBlock = importedData.focusedBlock;}
+
+      if (
+        importedData.selected &&
+        Object.values(SELECTED).includes(importedData.selected)
+      ) {this.selected = importedData.selected;}
+
+      // Import the metrics.
+      this.$store.commit('SET_IMPORTED_METRICS', importedData);
+      // Recalculate possible missing values.
+      this.refreshValues();
+      // Trigger the update event.
+      this.updateMetrics();
+      this.$store.subscribe(() => {
+        this.updateMetrics();
+      });
+    },
+
     computed: {
       // Constants
       TEST_TYPE: () => TEST_TYPE,
@@ -8830,20 +7451,16 @@
       COMPARISON_MODE: () => COMPARISON_MODE,
       FOCUS: () => FOCUS,
 
-      // in case parent component needs this information
-      metricData() {
-        let result = {
-          testType: this.testType,
-          calculateProp: this.calculateProp,
-          view: this.view,
-          lockedField: this.lockedField,
-          // nonInferiority: this.nonInferiority,
-          comparisonMode: this.comparisonMode,
-        };
-        return JSON.parse(JSON.stringify(result))
-      },
-      isNonInferiority() {
-        return this.$store.getters.isNonInferiority
+      // Getters
+      isNonInferiority: {
+        get() {
+          return this.$store.getters.isNonInferiority
+        },
+        set(val) {
+          this.$store.commit('SET_IS_NON_INFERIORITY', val);
+          this.refreshValues();
+          this.updateMetrics();
+        },
       },
       falsePositiveRate: {
         get() {
@@ -8851,6 +7468,8 @@
         },
         set(val) {
           this.$store.commit('SET_FALSE_POSITIVE_RATE', val);
+          this.refreshValues();
+          this.updateMetrics();
         },
       },
       power: {
@@ -8859,6 +7478,8 @@
         },
         set(val) {
           this.$store.commit('SET_TARGET_POWER', val);
+          this.refreshValues();
+          this.updateMetrics();
         },
       },
       variants: {
@@ -8867,6 +7488,8 @@
         },
         set(val) {
           this.$store.commit('SET_VARIANTS', val);
+          this.refreshValues();
+          this.updateMetrics();
         },
       },
       testType: {
@@ -8874,7 +7497,12 @@
           return this.$store.getters.testType
         },
         set(val) {
-          this.$store.commit('SET_TEST_TYPE', val);
+          this.$store.commit('SET_TEST_TYPE', {
+            testType: val,
+            focused: this.focusedBlock,
+            lockedField: this.lockedField,
+          });
+          this.updateMetrics();
         },
       },
       comparisonMode: {
@@ -8883,6 +7511,8 @@
         },
         set(val) {
           this.$store.commit('SET_COMPARISON_MODE', val);
+          this.refreshValues();
+          this.updateMetrics();
         },
       },
       trafficMode: {
@@ -8891,1415 +7521,101 @@
         },
         set(val) {
           this.$store.commit('SET_TRAFFIC_MODE', val);
+          this.refreshValues();
+          this.updateMetrics();
         },
       },
     },
     methods: {
-      updateFocus({ fieldProp, value }) {
-        if (this.focusedBlock == fieldProp && value === false) {
-          this.focusedBlock = '';
-        } else if (value === true) {
-          this.focusedBlock = fieldProp;
-        }
+      refreshValues() {
+        this.$store.commit('SET_BASE_RATE', {
+          baseRate: this.$store.getters.baseRate,
+          lockedField: this.lockedField,
+          focusedBlock: this.focusedBlock,
+        });
       },
-      mergeComponentData(base, toClone) {
-        // merges default data with imported one from parent component
-        let result = recursive(base, toClone);
-
-        // no array support for now
-        function recursive(baseRef, cloneRef) {
-          Object.keys(cloneRef).forEach((prop) => {
-            if (typeof cloneRef[prop] == 'object') {
-              baseRef[prop] = recursive(baseRef[prop], cloneRef[prop]);
-            } else {
-              baseRef[prop] = cloneRef[prop];
-            }
-          });
-
-          return baseRef
-        }
-
-        return result
+      updateMetrics() {
+        this.$emit('update:metricdata', {
+          testType: this.$store.getters.testType,
+          focusedBlock: this.focusedBlock,
+          sample: this.$store.getters.sample,
+          baseRate: this.$store.getters.baseRate,
+          impact: this.$store.getters.relativeImpact,
+          absoluteImpact: this.$store.getters.absoluteImpact,
+          targetPower: this.$store.getters.targetPower,
+          falsePositiveRate: this.$store.getters.falsePositiveRate,
+          standardDeviation: this.$store.getters.standardDeviation,
+          runtime: this.$store.getters.runtime,
+          visitorsPerDay: this.$store.getters.visitorsPerDay,
+          threshold: this.$store.getters.thresholdRelative,
+          absoluteThreshold: this.$store.getters.absoluteThreshold,
+          relativeThreshold: this.$store.getters.relativeThreshold,
+          variants: this.$store.getters.variants,
+          comparisonMode: this.$store.getters.comparisonMode,
+          trafficMode: this.$store.getters.trafficMode,
+          lockedField: this.lockedField,
+          selected: this.selected,
+          isNonInferiority: this.$store.getters.isNonInferiority,
+          // expId:              'exp_id',
+        });
       },
     },
-    watch: {
-      // in case parent component needs this information
-      metricData() {
-        this.$emit('update:metricdata', this.metricData);
-      },
-    },
+
     components: {
-      'svg-graph': __vue_component__$a,
-      'pc-block-field': __vue_component__,
-      'pc-tooltip': __vue_component__$7,
-      'sample-comp': __vue_component__$8,
+      'pc-block-field': __vue_component__$8,
+      'pc-tooltip': __vue_component__$2,
+      'sample-comp': __vue_component__$1,
       'impact-comp': __vue_component__$4,
-      'base-comp': __vue_component__$3,
-      'non-inferiority': __vue_component__$5,
-      'non-inferiority-comp': __vue_component__$6
+      'base-comp': __vue_component__$5,
+      'non-inferiority-comp': __vue_component__$3,
     },
   };
 
   /* script */
-  const __vue_script__$b = script$b;
+  const __vue_script__ = script;
 
   /* template */
-  var __vue_render__$b = function() {
-    var _vm = this;
-    var _h = _vm.$createElement;
-    var _c = _vm._self._c || _h;
-    return _c("div", { staticClass: "power-calculator" }, [
-      _c("form", { staticClass: "pc-form", attrs: { action: "." } }, [
-        _c("div", { staticClass: "pc-main-header" }, [
-          _c(
-            "div",
-            { staticClass: "pc-controls-left" },
-            [
-              _c(
-                "div",
-                { staticClass: "pc-test-type" },
-                [
-                  _c(
-                    "pc-tooltip",
-                    { staticClass: "pc-test-type-tooltip-wrapper" },
-                    [
-                      _c(
-                        "label",
-                        {
-                          staticClass: "pc-test-type-labels",
-                          attrs: { slot: "text" },
-                          slot: "text"
-                        },
-                        [
-                          _c("input", {
-                            directives: [
-                              {
-                                name: "model",
-                                rawName: "v-model",
-                                value: _vm.testType,
-                                expression: "testType"
-                              }
-                            ],
-                            attrs: { type: "radio", name: "test-mode" },
-                            domProps: {
-                              value: _vm.TEST_TYPE.BINOMIAL,
-                              checked: _vm._q(
-                                _vm.testType,
-                                _vm.TEST_TYPE.BINOMIAL
-                              )
-                            },
-                            on: {
-                              change: function($event) {
-                                _vm.testType = _vm.TEST_TYPE.BINOMIAL;
-                              }
-                            }
-                          }),
-                          _vm._v("\n              Binomial Metric\n            ")
-                        ]
-                      ),
-                      _vm._v(" "),
-                      _c(
-                        "span",
-                        { attrs: { slot: "tooltip" }, slot: "tooltip" },
-                        [
-                          _vm._v(
-                            "\n              A binomial metric is one that can be only two values like 0 or\n              1, yes or no, converted or not converted\n            "
-                          )
-                        ]
-                      )
-                    ]
-                  ),
-                  _vm._v(" "),
-                  _c(
-                    "pc-tooltip",
-                    { staticClass: "pc-test-type-tooltip-wrapper" },
-                    [
-                      _c(
-                        "label",
-                        {
-                          staticClass: "pc-test-type-labels",
-                          attrs: { slot: "text" },
-                          slot: "text"
-                        },
-                        [
-                          _c("input", {
-                            directives: [
-                              {
-                                name: "model",
-                                rawName: "v-model",
-                                value: _vm.testType,
-                                expression: "testType"
-                              }
-                            ],
-                            attrs: { type: "radio", name: "test-mode" },
-                            domProps: {
-                              value: _vm.TEST_TYPE.CONTINUOUS,
-                              checked: _vm._q(
-                                _vm.testType,
-                                _vm.TEST_TYPE.CONTINUOUS
-                              )
-                            },
-                            on: {
-                              change: function($event) {
-                                _vm.testType = _vm.TEST_TYPE.CONTINUOUS;
-                              }
-                            }
-                          }),
-                          _vm._v(
-                            "\n              Continuous Metric\n            "
-                          )
-                        ]
-                      ),
-                      _vm._v(" "),
-                      _c(
-                        "span",
-                        { attrs: { slot: "tooltip" }, slot: "tooltip" },
-                        [
-                          _vm._v(
-                            "\n              A continuous metric is one that can be any number like time on\n              site or the number of rooms sold\n            "
-                          )
-                        ]
-                      )
-                    ]
-                  )
-                ],
-                1
-              ),
-              _vm._v(" "),
-              _c("div", { staticClass: "pc-traffic-mode" }, [
-                _c(
-                  "label",
-                  {
-                    staticClass: "pc-traffic-mode-labels",
-                    attrs: { slot: "text" },
-                    slot: "text"
-                  },
-                  [
-                    _c("input", {
-                      directives: [
-                        {
-                          name: "model",
-                          rawName: "v-model",
-                          value: _vm.trafficMode,
-                          expression: "trafficMode"
-                        }
-                      ],
-                      attrs: { type: "radio", name: "traffic-mode", checked: "" },
-                      domProps: {
-                        value: _vm.TRAFFIC_MODE.DAILY,
-                        checked: _vm._q(_vm.trafficMode, _vm.TRAFFIC_MODE.DAILY)
-                      },
-                      on: {
-                        change: function($event) {
-                          _vm.trafficMode = _vm.TRAFFIC_MODE.DAILY;
-                        }
-                      }
-                    }),
-                    _vm._v("\n            Daily traffic\n          ")
-                  ]
-                ),
-                _vm._v(" "),
-                _c(
-                  "label",
-                  {
-                    staticClass: "pc-traffic-mode-labels",
-                    attrs: { slot: "text" },
-                    slot: "text"
-                  },
-                  [
-                    _c("input", {
-                      directives: [
-                        {
-                          name: "model",
-                          rawName: "v-model",
-                          value: _vm.trafficMode,
-                          expression: "trafficMode"
-                        }
-                      ],
-                      attrs: { type: "radio", name: "traffic-mode" },
-                      domProps: {
-                        value: _vm.TRAFFIC_MODE.TOTAL,
-                        checked: _vm._q(_vm.trafficMode, _vm.TRAFFIC_MODE.TOTAL)
-                      },
-                      on: {
-                        change: function($event) {
-                          _vm.trafficMode = _vm.TRAFFIC_MODE.TOTAL;
-                        }
-                      }
-                    }),
-                    _vm._v("\n            Total traffic\n          ")
-                  ]
-                )
-              ]),
-              _vm._v(" "),
-              _c("non-inferiority"),
-              _vm._v(" "),
-              _c("div", { staticClass: "pc-comparison-mode" }, [
-                _c(
-                  "label",
-                  {
-                    staticClass: "pc-comparison-mode-labels",
-                    attrs: { slot: "text" },
-                    slot: "text"
-                  },
-                  [
-                    _c("input", {
-                      directives: [
-                        {
-                          name: "model",
-                          rawName: "v-model",
-                          value: _vm.comparisonMode,
-                          expression: "comparisonMode"
-                        }
-                      ],
-                      attrs: { type: "radio", name: "comparison-mode" },
-                      domProps: {
-                        value: _vm.COMPARISON_MODE.ALL,
-                        checked: _vm._q(
-                          _vm.comparisonMode,
-                          _vm.COMPARISON_MODE.ALL
-                        )
-                      },
-                      on: {
-                        change: function($event) {
-                          _vm.comparisonMode = _vm.COMPARISON_MODE.ALL;
-                        }
-                      }
-                    }),
-                    _vm._v("\n            Base vs All variants\n          ")
-                  ]
-                ),
-                _vm._v(" "),
-                _c(
-                  "label",
-                  {
-                    staticClass: "pc-traffic-mode-labels",
-                    attrs: { slot: "text" },
-                    slot: "text"
-                  },
-                  [
-                    _c("input", {
-                      directives: [
-                        {
-                          name: "model",
-                          rawName: "v-model",
-                          value: _vm.comparisonMode,
-                          expression: "comparisonMode"
-                        }
-                      ],
-                      attrs: { type: "radio", name: "comparison-mode" },
-                      domProps: {
-                        value: _vm.COMPARISON_MODE.ONE,
-                        checked: _vm._q(
-                          _vm.comparisonMode,
-                          _vm.COMPARISON_MODE.ONE
-                        )
-                      },
-                      on: {
-                        change: function($event) {
-                          _vm.comparisonMode = _vm.COMPARISON_MODE.ONE;
-                        }
-                      }
-                    }),
-                    _vm._v("\n            Base vs One variant\n          ")
-                  ]
-                )
-              ])
-            ],
-            1
-          ),
-          _vm._v(" "),
-          _vm._m(0),
-          _vm._v(" "),
-          _c("div", { staticClass: "pc-controls-right" }, [
-            _c(
-              "label",
-              { staticClass: "pc-variants" },
-              [
-                _c("pc-block-field", {
-                  staticClass: "pc-variants-input",
-                  attrs: {
-                    fieldProp: "variants",
-                    prefix: "base + ",
-                    fieldValue: _vm.variants,
-                    enableEdit: "true"
-                  },
-                  on: {
-                    "update:fieldValue": function($event) {
-                      _vm.variants = $event;
-                    },
-                    "update:field-value": function($event) {
-                      _vm.variants = $event;
-                    }
-                  }
-                }),
-                _vm._v(
-                  "\n          variant" +
-                    _vm._s(_vm.variants > 1 ? "s" : "") +
-                    "\n        "
-                )
-              ],
-              1
-            ),
-            _vm._v(" "),
-            _c(
-              "label",
-              { staticClass: "pc-false-positive" },
-              [
-                _c("pc-block-field", {
-                  staticClass: "pc-false-positive-input",
-                  class: { "pc-top-fields-error": _vm.falsePositiveRate > 10 },
-                  attrs: {
-                    suffix: "%",
-                    fieldProp: "falsePositiveRate",
-                    fieldValue: _vm.falsePositiveRate,
-                    enableEdit: "true"
-                  },
-                  on: {
-                    "update:fieldValue": function($event) {
-                      _vm.falsePositiveRate = $event;
-                    },
-                    "update:field-value": function($event) {
-                      _vm.falsePositiveRate = $event;
-                    }
-                  }
-                }),
-                _vm._v("\n          false positive rate\n        ")
-              ],
-              1
-            ),
-            _vm._v(" "),
-            _c(
-              "label",
-              { staticClass: "pc-power" },
-              [
-                _c("pc-block-field", {
-                  staticClass: "pc-power-input",
-                  class: { "pc-top-fields-error": _vm.power < 80 },
-                  attrs: {
-                    suffix: "%",
-                    fieldProp: "power",
-                    fieldValue: _vm.power,
-                    enableEdit: "true"
-                  },
-                  on: {
-                    "update:fieldValue": function($event) {
-                      _vm.power = $event;
-                    },
-                    "update:field-value": function($event) {
-                      _vm.power = $event;
-                    }
-                  }
-                }),
-                _vm._v("\n          power\n        ")
-              ],
-              1
-            )
-          ])
-        ]),
-        _vm._v(" "),
-        _c(
-          "div",
-          {
-            staticClass: "pc-blocks-wrapper",
-            class: { "pc-blocks-wrapper-ttest": _vm.testType == "tTest" }
-          },
-          [
-            _c("base-comp", {
-              attrs: { blockName: _vm.FOCUS.BASE, focusedBlock: _vm.focusedBlock }
-            }),
-            _vm._v(" "),
-            _c("sample-comp", {
-              attrs: {
-                blockName: _vm.FOCUS.SAMPLE,
-                focusedBlock: _vm.focusedBlock
-              },
-              on: {
-                "update:focusedBlock": function($event) {
-                  _vm.focusedBlock = $event;
-                },
-                "update:focused-block": function($event) {
-                  _vm.focusedBlock = $event;
-                }
-              }
-            }),
-            _vm._v(" "),
-            !_vm.isNonInferiority
-              ? _c("impact-comp", {
-                  attrs: {
-                    blockName: _vm.FOCUS.IMPACT,
-                    focusedBlock: _vm.focusedBlock
-                  },
-                  on: {
-                    "update:focusedBlock": function($event) {
-                      _vm.focusedBlock = $event;
-                    },
-                    "update:focused-block": function($event) {
-                      _vm.focusedBlock = $event;
-                    }
-                  }
-                })
-              : _vm._e(),
-            _vm._v(" "),
-            _vm.isNonInferiority
-              ? _c("non-inferiority-comp", {
-                  attrs: {
-                    fieldFromBlock: "non-inferiority",
-                    enableEdit: _vm.enabledMainInputs["non-inferiority"],
-                    isBlockFocused: _vm.focusedBlock == "non-inferiority"
-                  },
-                  on: { "update:focus": _vm.updateFocus }
-                })
-              : _vm._e()
-          ],
-          1
-        )
-      ])
-    ])
-  };
-  var __vue_staticRenderFns__$b = [
-    function() {
-      var _vm = this;
-      var _h = _vm.$createElement;
-      var _c = _vm._self._c || _h;
-      return _c("div", { staticClass: "pc-title" }, [
-        _vm._v("\n        Power Calculator "),
-        _c("sup", { staticStyle: { color: "#f00", "font-size": "11px" } }, [
-          _vm._v("BETA")
-        ])
-      ])
-    }
-  ];
-  __vue_render__$b._withStripped = true;
+  var __vue_render__ = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"power-calculator"},[_c('form',{staticClass:"pc-form",attrs:{"action":"."}},[_c('div',{staticClass:"pc-main-header"},[_c('div',{staticClass:"pc-controls-left"},[_c('div',{staticClass:"pc-test-type"},[_c('pc-tooltip',{staticClass:"pc-test-type-tooltip-wrapper"},[_c('label',{staticClass:"pc-test-type-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.testType),expression:"testType"}],attrs:{"type":"radio","name":"test-mode"},domProps:{"value":_vm.TEST_TYPE.BINOMIAL,"checked":_vm._q(_vm.testType,_vm.TEST_TYPE.BINOMIAL)},on:{"change":function($event){_vm.testType=_vm.TEST_TYPE.BINOMIAL;}}}),_vm._v("\n              Binomial Metric\n            ")]),_vm._v(" "),_c('span',{attrs:{"slot":"tooltip"},slot:"tooltip"},[_vm._v("\n              A binomial metric is one that can be only two values like 0 or\n              1, yes or no, converted or not converted\n            ")])]),_vm._v(" "),_c('pc-tooltip',{staticClass:"pc-test-type-tooltip-wrapper"},[_c('label',{staticClass:"pc-test-type-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.testType),expression:"testType"}],attrs:{"type":"radio","name":"test-mode"},domProps:{"value":_vm.TEST_TYPE.CONTINUOUS,"checked":_vm._q(_vm.testType,_vm.TEST_TYPE.CONTINUOUS)},on:{"change":function($event){_vm.testType=_vm.TEST_TYPE.CONTINUOUS;}}}),_vm._v("\n              Continuous Metric\n            ")]),_vm._v(" "),_c('span',{attrs:{"slot":"tooltip"},slot:"tooltip"},[_vm._v("\n              A continuous metric is one that can be any number like time on\n              site or the number of rooms sold\n            ")])])],1),_vm._v(" "),_c('div',{staticClass:"pc-traffic-mode"},[_c('label',{staticClass:"pc-traffic-mode-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.trafficMode),expression:"trafficMode"}],attrs:{"type":"radio","name":"traffic-mode","checked":""},domProps:{"value":_vm.TRAFFIC_MODE.DAILY,"checked":_vm._q(_vm.trafficMode,_vm.TRAFFIC_MODE.DAILY)},on:{"change":function($event){_vm.trafficMode=_vm.TRAFFIC_MODE.DAILY;}}}),_vm._v("\n            Daily traffic\n          ")]),_vm._v(" "),_c('label',{staticClass:"pc-traffic-mode-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.trafficMode),expression:"trafficMode"}],attrs:{"type":"radio","name":"traffic-mode"},domProps:{"value":_vm.TRAFFIC_MODE.TOTAL,"checked":_vm._q(_vm.trafficMode,_vm.TRAFFIC_MODE.TOTAL)},on:{"change":function($event){_vm.trafficMode=_vm.TRAFFIC_MODE.TOTAL;}}}),_vm._v("\n            Total traffic\n          ")])]),_vm._v(" "),_c('div',{staticClass:"pc-non-inferiority"},[_c('label',{staticClass:"pc-non-inf-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.isNonInferiority),expression:"isNonInferiority"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.isNonInferiority)?_vm._i(_vm.isNonInferiority,null)>-1:(_vm.isNonInferiority)},on:{"change":function($event){var $$a=_vm.isNonInferiority,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.isNonInferiority=$$a.concat([$$v]));}else {$$i>-1&&(_vm.isNonInferiority=$$a.slice(0,$$i).concat($$a.slice($$i+1)));}}else {_vm.isNonInferiority=$$c;}}}}),_vm._v("\n            Use non inferiority test\n          ")])]),_vm._v(" "),_c('div',{staticClass:"pc-comparison-mode"},[_c('label',{staticClass:"pc-comparison-mode-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.comparisonMode),expression:"comparisonMode"}],attrs:{"type":"radio","name":"comparison-mode"},domProps:{"value":_vm.COMPARISON_MODE.ALL,"checked":_vm._q(_vm.comparisonMode,_vm.COMPARISON_MODE.ALL)},on:{"change":function($event){_vm.comparisonMode=_vm.COMPARISON_MODE.ALL;}}}),_vm._v("\n            Base vs All variants\n          ")]),_vm._v(" "),_c('label',{staticClass:"pc-traffic-mode-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.comparisonMode),expression:"comparisonMode"}],attrs:{"type":"radio","name":"comparison-mode"},domProps:{"value":_vm.COMPARISON_MODE.ONE,"checked":_vm._q(_vm.comparisonMode,_vm.COMPARISON_MODE.ONE)},on:{"change":function($event){_vm.comparisonMode=_vm.COMPARISON_MODE.ONE;}}}),_vm._v("\n            Base vs One variant\n          ")])])]),_vm._v(" "),_vm._m(0),_vm._v(" "),_c('div',{staticClass:"pc-controls-right"},[_c('label',{staticClass:"pc-variants"},[_c('pc-block-field',{staticClass:"pc-variants-input",attrs:{"fieldProp":"variants","prefix":"base + ","fieldValue":_vm.variants,"enableEdit":"true"},on:{"update:fieldValue":function($event){_vm.variants=$event;},"update:field-value":function($event){_vm.variants=$event;}}}),_vm._v("\n          variant"+_vm._s(_vm.variants > 1 ? 's' : '')+"\n        ")],1),_vm._v(" "),_c('label',{staticClass:"pc-false-positive"},[_c('pc-block-field',{staticClass:"pc-false-positive-input",class:{ 'pc-top-fields-error': _vm.falsePositiveRate > 10 },attrs:{"suffix":"%","fieldProp":"falsePositiveRate","fieldValue":_vm.falsePositiveRate,"enableEdit":"true"},on:{"update:fieldValue":function($event){_vm.falsePositiveRate=$event;},"update:field-value":function($event){_vm.falsePositiveRate=$event;}}}),_vm._v("\n          false positive rate\n        ")],1),_vm._v(" "),_c('label',{staticClass:"pc-power"},[_c('pc-block-field',{staticClass:"pc-power-input",class:{ 'pc-top-fields-error': _vm.power < 80 },attrs:{"suffix":"%","fieldProp":"power","fieldValue":_vm.power,"enableEdit":"true"},on:{"update:fieldValue":function($event){_vm.power=$event;},"update:field-value":function($event){_vm.power=$event;}}}),_vm._v("\n          power\n        ")],1)])]),_vm._v(" "),_c('div',{staticClass:"pc-blocks-wrapper",class:{ 'pc-blocks-wrapper-ttest': _vm.testType == 'tTest' }},[_c('base-comp',{attrs:{"blockName":_vm.FOCUS.BASE,"focusedBlock":_vm.focusedBlock,"lockedField":_vm.lockedField}}),_vm._v(" "),_c('sample-comp',{attrs:{"blockName":_vm.FOCUS.SAMPLE,"focusedBlock":_vm.focusedBlock,"lockedField":_vm.lockedField},on:{"update:focusedBlock":function($event){_vm.focusedBlock=$event;},"update:focused-block":function($event){_vm.focusedBlock=$event;},"update:lockedField":function($event){_vm.lockedField=$event;},"update:locked-field":function($event){_vm.lockedField=$event;}}}),_vm._v(" "),(!_vm.isNonInferiority)?_c('impact-comp',{attrs:{"blockName":_vm.FOCUS.IMPACT,"focusedBlock":_vm.focusedBlock,"lockedField":_vm.lockedField},on:{"update:focusedBlock":function($event){_vm.focusedBlock=$event;},"update:focused-block":function($event){_vm.focusedBlock=$event;},"update:selected":function($event){_vm.selected = $event;}}}):_vm._e(),_vm._v(" "),(_vm.isNonInferiority)?_c('non-inferiority-comp',{attrs:{"blockName":_vm.FOCUS.IMPACT,"focusedBlock":_vm.focusedBlock,"lockedField":_vm.lockedField},on:{"update:focusedBlock":function($event){_vm.focusedBlock=$event;},"update:focused-block":function($event){_vm.focusedBlock=$event;},"update:selected":function($event){_vm.selected = $event;}}}):_vm._e()],1)])])};
+  var __vue_staticRenderFns__ = [function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-title"},[_vm._v("\n        Power Calculator "),_c('sup',{staticStyle:{"color":"#f00","font-size":"11px"}},[_vm._v("β")])])}];
 
     /* style */
-    const __vue_inject_styles__$b = function (inject) {
+    const __vue_inject_styles__ = function (inject) {
       if (!inject) return
-      inject("data-v-bb0c61e8_0", { source: "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/* application styles */\n\n/* colors */\n.power-calculator {\n  --white: #fff;\n  --black: #000;\n\n  --gray: #b5b5b5;\n  --light-gray: #f0f0f0;\n  --dark-gray: #525252;\n\n  --light-blue: #c1cfd8;\n  --pale-blue: #7898ae;\n  --blue: #155eab;\n  --dark-blue: #3d78df;\n\n  --light-yellow: #fef1cb;\n  --dark-yellow: #e2b634;\n  --fade-black: rgba(0, 0, 0, 0.3);\n\n  --red: #f00;\n}\n\n/* layout */\n.pc-main-header {\n  display: grid;\n  grid-template-columns: 33.33% 33.33% 33.33%;\n  grid-template-rows: auto;\n  grid-template-areas: 'controls-left title controls-right';\n  align-items: center;\n\n  margin: 25px 10px;\n}\n.pc-controls-left {\n  grid-area: controls-left;\n  display: grid;\n  grid-template-columns: min-content min-content min-content;\n  grid-template-rows: 2;\n  grid-template-areas:\n    'calc-options calc-options calc-options'\n    'test-type traffic comparison';\n  align-items: center;\n}\n.pc-controls-right {\n  grid-area: controls-right;\n  display: grid;\n  grid-template-columns: auto min-content min-content;\n  grid-template-rows: auto;\n  grid-template-areas: 'variants false-positive power';\n  align-items: center;\n  justify-items: end;\n}\n.pc-title {\n  grid-area: title;\n  font-size: 30px;\n  text-align: center;\n}\n.pc-traffic-mode {\n  grid-area: traffic;\n}\n.pc-non-inf-label,\n.pc-test-type,\n.pc-false-positive,\n.pc-power,\n.pc-traffic-mode,\n.pc-variants,\n.pc-comparison-mode {\n  font-size: 0.8em;\n}\n.pc-test-type {\n  grid-area: test-type;\n}\n.pc-non-inferiority {\n  grid-area: calc-options;\n  margin-bottom: 8px;\n}\n.pc-comparison-mode {\n  grid-area: comparison;\n}\n.pc-test-type-labels,\n.pc-traffic-mode-labels,\n.pc-non-inf-label,\n.pc-comparison-mode-label {\n  white-space: nowrap;\n}\n.pc-non-inferiority,\n.pc-test-type,\n.pc-traffic-mode,\n.pc-comparison-mode {\n  margin-left: 15px;\n}\n.pc-test-type-tooltip-wrapper {\n  display: inline-block;\n}\n.pc-variants {\n  grid-area: variants;\n  white-space: nowrap;\n  align-self: end;\n}\n.pc-false-positive {\n  grid-area: false-positive;\n  margin-left: 15px;\n  white-space: nowrap;\n  align-self: end;\n}\n.pc-power {\n  grid-area: power;\n  margin-left: 15px;\n  margin-right: 15px;\n  white-space: nowrap;\n  align-self: end;\n}\n.pc-blocks-wrapper {\n  grid-area: pc-blocks-wrapper;\n  display: grid;\n  grid-template-columns: 33% 33% 33%;\n  grid-template-rows: auto;\n  grid-template-areas:\n    'block-base block-sample block-impact'\n    'block-graph block-graph block-graph';\n  grid-template-rows: auto;\n  grid-column-gap: 8px;\n  grid-row-gap: 8px;\n}\n.pc-block--base {\n  grid-area: block-base;\n}\n.pc-block--sample {\n  grid-area: block-sample;\n}\n.pc-block--impact {\n  grid-area: block-impact;\n}\n.pc-block--graph {\n  grid-area: block-graph;\n}\n\n/* blocks */\n.pc-block {\n  background: var(--light-gray);\n}\n.pc-header {\n  color: var(--white);\n  text-align: center;\n  font-size: 28px;\n  line-height: 80px;\n  height: 80px;\n  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.29);\n  background: var(--pale-blue);\n  margin-bottom: 25px;\n}\n.pc-calculate {\n  display: inline-block;\n  margin-bottom: 25px;\n  font-weight: bold;\n  font-size: 0.8em;\n}\n.pc-value {\n  display: block;\n  margin-bottom: 25px;\n}\n\n/* block to calculate override rules*/\n.pc-block-to-calculate {\n  background: var(--light-yellow);\n}\n.pc-block-to-calculate .pc-header {\n  background: var(--dark-yellow);\n}\n.pc-hidden {\n  display: none !important;\n}\n", map: {"version":3,"sources":["/Users/amartinezdem/git_tree/github/bookingcom/powercalculator/src/powercalculator.vue"],"names":[],"mappings":";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;AA2UA,uBAAA;;AAEA,WAAA;AAEA;EACA,aAAA;EACA,aAAA;;EAEA,eAAA;EACA,qBAAA;EACA,oBAAA;;EAEA,qBAAA;EACA,oBAAA;EACA,eAAA;EACA,oBAAA;;EAEA,uBAAA;EACA,sBAAA;EACA,gCAAA;;EAEA,WAAA;AACA;;AAEA,WAAA;AAEA;EACA,aAAA;EACA,2CAAA;EACA,wBAAA;EACA,yDAAA;EACA,mBAAA;;EAEA,iBAAA;AACA;AAEA;EACA,wBAAA;EACA,aAAA;EACA,0DAAA;EACA,qBAAA;EACA;;kCAEA;EACA,mBAAA;AACA;AAEA;EACA,yBAAA;EACA,aAAA;EACA,mDAAA;EACA,wBAAA;EACA,oDAAA;EACA,mBAAA;EACA,kBAAA;AACA;AAEA;EACA,gBAAA;EACA,eAAA;EACA,kBAAA;AACA;AAEA;EACA,kBAAA;AACA;AAEA;;;;;;;EAOA,gBAAA;AACA;AAEA;EACA,oBAAA;AACA;AAEA;EACA,uBAAA;EACA,kBAAA;AACA;AAEA;EACA,qBAAA;AACA;AAEA;;;;EAIA,mBAAA;AACA;AAEA;;;;EAIA,iBAAA;AACA;AAEA;EACA,qBAAA;AACA;AAEA;EACA,mBAAA;EACA,mBAAA;EACA,eAAA;AACA;AAEA;EACA,yBAAA;EACA,iBAAA;EACA,mBAAA;EACA,eAAA;AACA;AAEA;EACA,gBAAA;EACA,iBAAA;EACA,kBAAA;EACA,mBAAA;EACA,eAAA;AACA;AAEA;EACA,4BAAA;EACA,aAAA;EACA,kCAAA;EACA,wBAAA;EACA;;yCAEA;EACA,wBAAA;EACA,oBAAA;EACA,iBAAA;AACA;AAEA;EACA,qBAAA;AACA;AAEA;EACA,uBAAA;AACA;AAEA;EACA,uBAAA;AACA;AAEA;EACA,sBAAA;AACA;;AAEA,WAAA;AAEA;EACA,6BAAA;AACA;AAEA;EACA,mBAAA;EACA,kBAAA;EACA,eAAA;EACA,iBAAA;EACA,YAAA;EACA,0CAAA;EACA,4BAAA;EACA,mBAAA;AACA;AAEA;EACA,qBAAA;EACA,mBAAA;EACA,iBAAA;EACA,gBAAA;AACA;AAEA;EACA,cAAA;EACA,mBAAA;AACA;;AAEA,qCAAA;AAEA;EACA,+BAAA;AACA;AAEA;EACA,8BAAA;AACA;AAEA;EACA,wBAAA;AACA","file":"powercalculator.vue","sourcesContent":["<template>\n  <div class=\"power-calculator\">\n    <form action=\".\" class=\"pc-form\">\n      <div class=\"pc-main-header\">\n        <div class=\"pc-controls-left\">\n          <div class=\"pc-test-type\">\n            <pc-tooltip class=\"pc-test-type-tooltip-wrapper\">\n              <label class=\"pc-test-type-labels\" slot=\"text\">\n                <input\n                  type=\"radio\"\n                  name=\"test-mode\"\n                  v-model=\"testType\"\n                  :value=\"TEST_TYPE.BINOMIAL\"\n                />\n                Binomial Metric\n              </label>\n              <span slot=\"tooltip\">\n                A binomial metric is one that can be only two values like 0 or\n                1, yes or no, converted or not converted\n              </span>\n            </pc-tooltip>\n\n            <pc-tooltip class=\"pc-test-type-tooltip-wrapper\">\n              <label class=\"pc-test-type-labels\" slot=\"text\">\n                <input\n                  type=\"radio\"\n                  name=\"test-mode\"\n                  v-model=\"testType\"\n                  :value=\"TEST_TYPE.CONTINUOUS\"\n                />\n                Continuous Metric\n              </label>\n              <span slot=\"tooltip\">\n                A continuous metric is one that can be any number like time on\n                site or the number of rooms sold\n              </span>\n            </pc-tooltip>\n          </div>\n\n          <div class=\"pc-traffic-mode\">\n            <label class=\"pc-traffic-mode-labels\" slot=\"text\">\n              <input\n                type=\"radio\"\n                name=\"traffic-mode\"\n                v-model=\"trafficMode\"\n                :value=\"TRAFFIC_MODE.DAILY\"\n                checked\n              />\n              Daily traffic\n            </label>\n            <label class=\"pc-traffic-mode-labels\" slot=\"text\">\n              <input\n                type=\"radio\"\n                name=\"traffic-mode\"\n                v-model=\"trafficMode\"\n                :value=\"TRAFFIC_MODE.TOTAL\"\n              />\n              Total traffic\n            </label>\n          </div>\n\n          <non-inferiority></non-inferiority>\n\n          <div class=\"pc-comparison-mode\">\n            <label class=\"pc-comparison-mode-labels\" slot=\"text\">\n              <input\n                type=\"radio\"\n                name=\"comparison-mode\"\n                v-model=\"comparisonMode\"\n                :value=\"COMPARISON_MODE.ALL\"\n              />\n              Base vs All variants\n            </label>\n            <label class=\"pc-traffic-mode-labels\" slot=\"text\">\n              <input\n                type=\"radio\"\n                name=\"comparison-mode\"\n                v-model=\"comparisonMode\"\n                :value=\"COMPARISON_MODE.ONE\"\n              />\n              Base vs One variant\n            </label>\n          </div>\n        </div>\n\n        <div class=\"pc-title\">\n          Power Calculator <sup style=\"color: #f00; font-size: 11px\">BETA</sup>\n        </div>\n\n        <div class=\"pc-controls-right\">\n          <label class=\"pc-variants\">\n            <pc-block-field\n              class=\"pc-variants-input\"\n              fieldProp=\"variants\"\n              prefix=\"base + \"\n              :fieldValue.sync=\"variants\"\n              enableEdit=\"true\"\n            ></pc-block-field>\n            variant{{ variants > 1 ? 's' : '' }}\n          </label>\n\n          <label class=\"pc-false-positive\">\n            <pc-block-field\n              class=\"pc-false-positive-input\"\n              :class=\"{ 'pc-top-fields-error': falsePositiveRate > 10 }\"\n              suffix=\"%\"\n              fieldProp=\"falsePositiveRate\"\n              :fieldValue.sync=\"falsePositiveRate\"\n              enableEdit=\"true\"\n            ></pc-block-field>\n            false positive rate\n          </label>\n\n          <label class=\"pc-power\">\n            <pc-block-field\n              class=\"pc-power-input\"\n              suffix=\"%\"\n              :class=\"{ 'pc-top-fields-error': power < 80 }\"\n              fieldProp=\"power\"\n              :fieldValue.sync=\"power\"\n              enableEdit=\"true\"\n            ></pc-block-field>\n            power\n          </label>\n        </div>\n      </div>\n\n      <div\n        class=\"pc-blocks-wrapper\"\n        :class=\"{ 'pc-blocks-wrapper-ttest': testType == 'tTest' }\"\n      >\n        <base-comp\n          :blockName=\"FOCUS.BASE\"\n          :focusedBlock=\"focusedBlock\"\n        >\n        </base-comp>\n\n        <sample-comp\n          :blockName=\"FOCUS.SAMPLE\"\n          :focusedBlock.sync=\"focusedBlock\"\n        >\n        </sample-comp>\n\n        <impact-comp\n          v-if=\"!isNonInferiority\"\n          :blockName=\"FOCUS.IMPACT\"\n          :focusedBlock.sync=\"focusedBlock\"\n        >\n        </impact-comp>\n\n        <non-inferiority-comp\n          v-if=\"isNonInferiority\"\n          fieldFromBlock=\"non-inferiority\"\n          v-bind:enableEdit=\"enabledMainInputs['non-inferiority']\"\n          v-bind:isBlockFocused=\"focusedBlock == 'non-inferiority'\"\n          v-on:update:focus=\"updateFocus\"\n        >\n        </non-inferiority-comp>\n\n        <!-- <svg-graph></svg-graph> -->\n      </div>\n    </form>\n  </div>\n</template>\n\n<script>\nimport baseComp from './components/base-comp.vue'\nimport impactComp from './components/impact-comp.vue'\nimport nonInferiority from './components/non-inferiority.vue'\nimport nonInferiorityComp from './components/non-inferiority-comp.vue'\nimport pcBlockField from './components/pc-block-field.vue'\nimport pcTooltip from './components/pc-tooltip.vue'\nimport sampleComp from './components/sample-comp.vue'\nimport svgGraph from './components/svg-graph.vue'\n\nimport {\n  TEST_TYPE,\n  TRAFFIC_MODE,\n  COMPARISON_MODE,\n} from './store/modules/calculator'\n\nconst FOCUS = Object.freeze({\n  SAMPLE: 'sample',\n  IMPACT: 'impact',\n  BASE: 'base'\n})\n\nexport default {\n  props: ['parentmetricdata'],\n  data() {\n    // values if parent component sends them\n    let importedData = this.parentmetricdata || {}\n\n    const data = {\n      focusedBlock: FOCUS.SAMPLE,\n\n      // false means the editable ones are the secondary mode (metric totals, days&daily trials and absolute impact)\n      enabledMainInputs: {\n        base: true,\n        sample: true,\n        impact: true,\n        power: true,\n        'non-inferiority': true,\n      },\n    }\n\n    // mergeComponentData has no array support for now\n    return this.mergeComponentData(\n      data,\n      JSON.parse(JSON.stringify(importedData))\n    )\n  },\n  computed: {\n    // Constants\n    TEST_TYPE: () => TEST_TYPE,\n    TRAFFIC_MODE: () => TRAFFIC_MODE,\n    COMPARISON_MODE: () => COMPARISON_MODE,\n    FOCUS: () => FOCUS,\n\n    // in case parent component needs this information\n    metricData() {\n      let result = {\n        testType: this.testType,\n        calculateProp: this.calculateProp,\n        view: this.view,\n        lockedField: this.lockedField,\n        // nonInferiority: this.nonInferiority,\n        comparisonMode: this.comparisonMode,\n      }\n      return JSON.parse(JSON.stringify(result))\n    },\n    isNonInferiority() {\n      return this.$store.getters.isNonInferiority\n    },\n    falsePositiveRate: {\n      get() {\n        return this.$store.getters.falsePositiveRate\n      },\n      set(val) {\n        this.$store.commit('SET_FALSE_POSITIVE_RATE', val)\n      },\n    },\n    power: {\n      get() {\n        return this.$store.getters.targetPower\n      },\n      set(val) {\n        this.$store.commit('SET_TARGET_POWER', val)\n      },\n    },\n    variants: {\n      get() {\n        return this.$store.getters.variants\n      },\n      set(val) {\n        this.$store.commit('SET_VARIANTS', val)\n      },\n    },\n    testType: {\n      get() {\n        return this.$store.getters.testType\n      },\n      set(val) {\n        this.$store.commit('SET_TEST_TYPE', val)\n      },\n    },\n    comparisonMode: {\n      get() {\n        return this.$store.getters.comparisonMode\n      },\n      set(val) {\n        this.$store.commit('SET_COMPARISON_MODE', val)\n      },\n    },\n    trafficMode: {\n      get() {\n        return this.$store.getters.trafficMode\n      },\n      set(val) {\n        this.$store.commit('SET_TRAFFIC_MODE', val)\n      },\n    },\n  },\n  methods: {\n    updateFocus({ fieldProp, value }) {\n      if (this.focusedBlock == fieldProp && value === false) {\n        this.focusedBlock = ''\n      } else if (value === true) {\n        this.focusedBlock = fieldProp\n      }\n    },\n    mergeComponentData(base, toClone) {\n      // merges default data with imported one from parent component\n      let result = recursive(base, toClone)\n\n      // no array support for now\n      function recursive(baseRef, cloneRef) {\n        Object.keys(cloneRef).forEach((prop) => {\n          if (typeof cloneRef[prop] == 'object') {\n            baseRef[prop] = recursive(baseRef[prop], cloneRef[prop])\n          } else {\n            baseRef[prop] = cloneRef[prop]\n          }\n        })\n\n        return baseRef\n      }\n\n      return result\n    },\n  },\n  watch: {\n    // in case parent component needs this information\n    metricData() {\n      this.$emit('update:metricdata', this.metricData)\n    },\n  },\n  components: {\n    'svg-graph': svgGraph,\n    'pc-block-field': pcBlockField,\n    'pc-tooltip': pcTooltip,\n    'sample-comp': sampleComp,\n    'impact-comp': impactComp,\n    'base-comp': baseComp,\n    'non-inferiority': nonInferiority,\n    'non-inferiority-comp': nonInferiorityComp\n  },\n}\n</script>\n\n<style>\n/* application styles */\n\n/* colors */\n\n.power-calculator {\n  --white: #fff;\n  --black: #000;\n\n  --gray: #b5b5b5;\n  --light-gray: #f0f0f0;\n  --dark-gray: #525252;\n\n  --light-blue: #c1cfd8;\n  --pale-blue: #7898ae;\n  --blue: #155eab;\n  --dark-blue: #3d78df;\n\n  --light-yellow: #fef1cb;\n  --dark-yellow: #e2b634;\n  --fade-black: rgba(0, 0, 0, 0.3);\n\n  --red: #f00;\n}\n\n/* layout */\n\n.pc-main-header {\n  display: grid;\n  grid-template-columns: 33.33% 33.33% 33.33%;\n  grid-template-rows: auto;\n  grid-template-areas: 'controls-left title controls-right';\n  align-items: center;\n\n  margin: 25px 10px;\n}\n\n.pc-controls-left {\n  grid-area: controls-left;\n  display: grid;\n  grid-template-columns: min-content min-content min-content;\n  grid-template-rows: 2;\n  grid-template-areas:\n    'calc-options calc-options calc-options'\n    'test-type traffic comparison';\n  align-items: center;\n}\n\n.pc-controls-right {\n  grid-area: controls-right;\n  display: grid;\n  grid-template-columns: auto min-content min-content;\n  grid-template-rows: auto;\n  grid-template-areas: 'variants false-positive power';\n  align-items: center;\n  justify-items: end;\n}\n\n.pc-title {\n  grid-area: title;\n  font-size: 30px;\n  text-align: center;\n}\n\n.pc-traffic-mode {\n  grid-area: traffic;\n}\n\n.pc-non-inf-label,\n.pc-test-type,\n.pc-false-positive,\n.pc-power,\n.pc-traffic-mode,\n.pc-variants,\n.pc-comparison-mode {\n  font-size: 0.8em;\n}\n\n.pc-test-type {\n  grid-area: test-type;\n}\n\n.pc-non-inferiority {\n  grid-area: calc-options;\n  margin-bottom: 8px;\n}\n\n.pc-comparison-mode {\n  grid-area: comparison;\n}\n\n.pc-test-type-labels,\n.pc-traffic-mode-labels,\n.pc-non-inf-label,\n.pc-comparison-mode-label {\n  white-space: nowrap;\n}\n\n.pc-non-inferiority,\n.pc-test-type,\n.pc-traffic-mode,\n.pc-comparison-mode {\n  margin-left: 15px;\n}\n\n.pc-test-type-tooltip-wrapper {\n  display: inline-block;\n}\n\n.pc-variants {\n  grid-area: variants;\n  white-space: nowrap;\n  align-self: end;\n}\n\n.pc-false-positive {\n  grid-area: false-positive;\n  margin-left: 15px;\n  white-space: nowrap;\n  align-self: end;\n}\n\n.pc-power {\n  grid-area: power;\n  margin-left: 15px;\n  margin-right: 15px;\n  white-space: nowrap;\n  align-self: end;\n}\n\n.pc-blocks-wrapper {\n  grid-area: pc-blocks-wrapper;\n  display: grid;\n  grid-template-columns: 33% 33% 33%;\n  grid-template-rows: auto;\n  grid-template-areas:\n    'block-base block-sample block-impact'\n    'block-graph block-graph block-graph';\n  grid-template-rows: auto;\n  grid-column-gap: 8px;\n  grid-row-gap: 8px;\n}\n\n.pc-block--base {\n  grid-area: block-base;\n}\n\n.pc-block--sample {\n  grid-area: block-sample;\n}\n\n.pc-block--impact {\n  grid-area: block-impact;\n}\n\n.pc-block--graph {\n  grid-area: block-graph;\n}\n\n/* blocks */\n\n.pc-block {\n  background: var(--light-gray);\n}\n\n.pc-header {\n  color: var(--white);\n  text-align: center;\n  font-size: 28px;\n  line-height: 80px;\n  height: 80px;\n  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.29);\n  background: var(--pale-blue);\n  margin-bottom: 25px;\n}\n\n.pc-calculate {\n  display: inline-block;\n  margin-bottom: 25px;\n  font-weight: bold;\n  font-size: 0.8em;\n}\n\n.pc-value {\n  display: block;\n  margin-bottom: 25px;\n}\n\n/* block to calculate override rules*/\n\n.pc-block-to-calculate {\n  background: var(--light-yellow);\n}\n\n.pc-block-to-calculate .pc-header {\n  background: var(--dark-yellow);\n}\n\n.pc-hidden {\n  display: none !important;\n}\n</style>\n"]}, media: undefined });
+      inject("data-v-d7936b7e_0", { source: ".power-calculator{--white:#fff;--black:#000;--gray:#b5b5b5;--light-gray:#f0f0f0;--dark-gray:#525252;--light-blue:#c1cfd8;--pale-blue:#7898ae;--blue:#155eab;--dark-blue:#3d78df;--light-yellow:#fef1cb;--dark-yellow:#e2b634;--fade-black:rgba(0, 0, 0, 0.3);--red:#f00}.pc-main-header{display:grid;grid-template-columns:33.33% 33.33% 33.33%;grid-template-rows:auto;grid-template-areas:'controls-left title controls-right';align-items:center;margin:25px 10px}.pc-controls-left{grid-area:controls-left;display:grid;grid-template-columns:min-content min-content min-content;grid-template-rows:2;grid-template-areas:'calc-options calc-options calc-options' 'test-type traffic comparison';align-items:center}.pc-controls-right{grid-area:controls-right;display:grid;grid-template-columns:auto min-content min-content;grid-template-rows:auto;grid-template-areas:'variants false-positive power';align-items:center;justify-items:end}.pc-title{grid-area:title;font-size:30px;text-align:center}.pc-traffic-mode{grid-area:traffic}.pc-comparison-mode,.pc-false-positive,.pc-non-inf-label,.pc-power,.pc-test-type,.pc-traffic-mode,.pc-variants{font-size:.8em}.pc-test-type{grid-area:test-type}.pc-non-inferiority{grid-area:calc-options;margin-bottom:8px}.pc-comparison-mode{grid-area:comparison}.pc-comparison-mode-label,.pc-non-inf-label,.pc-test-type-labels,.pc-traffic-mode-labels{white-space:nowrap}.pc-comparison-mode,.pc-non-inferiority,.pc-test-type,.pc-traffic-mode{margin-left:15px}.pc-test-type-tooltip-wrapper{display:inline-block}.pc-non-inf-label{white-space:nowrap}.pc-non-inf-treshold{display:flex;align-items:center}.pc-non-inf-treshold-input{margin-left:5px}.pc-variants{grid-area:variants;white-space:nowrap;align-self:end}.pc-false-positive{grid-area:false-positive;margin-left:15px;white-space:nowrap;align-self:end}.pc-power{grid-area:power;margin-left:15px;margin-right:15px;white-space:nowrap;align-self:end}.pc-blocks-wrapper{grid-area:pc-blocks-wrapper;display:grid;grid-template-columns:33% 33% 33%;grid-template-rows:auto;grid-template-areas:'block-base block-sample block-impact' 'block-graph block-graph block-graph';grid-template-rows:auto;grid-column-gap:8px;grid-row-gap:8px}.pc-block--base{grid-area:block-base}.pc-block--sample{grid-area:block-sample}.pc-block--impact{grid-area:block-impact}.pc-block--graph{grid-area:block-graph}.pc-block{background:var(--light-gray)}.pc-header{color:var(--white);text-align:center;font-size:28px;line-height:80px;height:80px;text-shadow:0 1px 1px rgba(0,0,0,.29);background:var(--pale-blue);margin-bottom:25px}.pc-calculate{display:inline-block;margin-bottom:25px;font-weight:700;font-size:.8em}.pc-value{display:block;margin-bottom:25px}.pc-block-to-calculate{background:var(--light-yellow)}.pc-block-to-calculate .pc-header{background:var(--dark-yellow)}.pc-hidden{display:none!important}", map: undefined, media: undefined });
 
     };
     /* scoped */
-    const __vue_scope_id__$b = undefined;
+    const __vue_scope_id__ = undefined;
     /* module identifier */
-    const __vue_module_identifier__$b = undefined;
+    const __vue_module_identifier__ = undefined;
     /* functional template */
-    const __vue_is_functional_template__$b = false;
+    const __vue_is_functional_template__ = false;
     /* style inject SSR */
     
     /* style inject shadow dom */
     
 
     
-    const __vue_component__$b = /*#__PURE__*/normalizeComponent(
-      { render: __vue_render__$b, staticRenderFns: __vue_staticRenderFns__$b },
-      __vue_inject_styles__$b,
-      __vue_script__$b,
-      __vue_scope_id__$b,
-      __vue_is_functional_template__$b,
-      __vue_module_identifier__$b,
+    const __vue_component__ = /*#__PURE__*/normalizeComponent(
+      { render: __vue_render__, staticRenderFns: __vue_staticRenderFns__ },
+      __vue_inject_styles__,
+      __vue_script__,
+      __vue_scope_id__,
+      __vue_is_functional_template__,
+      __vue_module_identifier__,
       false,
       createInjector,
       undefined,
       undefined
     );
 
-  /*!
-   * vuex v3.6.2
-   * (c) 2021 Evan You
-   * @license MIT
-   */
-  function applyMixin (Vue) {
-    var version = Number(Vue.version.split('.')[0]);
-
-    if (version >= 2) {
-      Vue.mixin({ beforeCreate: vuexInit });
-    } else {
-      // override init and inject vuex init procedure
-      // for 1.x backwards compatibility.
-      var _init = Vue.prototype._init;
-      Vue.prototype._init = function (options) {
-        if ( options === void 0 ) options = {};
-
-        options.init = options.init
-          ? [vuexInit].concat(options.init)
-          : vuexInit;
-        _init.call(this, options);
-      };
-    }
-
-    /**
-     * Vuex init hook, injected into each instances init hooks list.
-     */
-
-    function vuexInit () {
-      var options = this.$options;
-      // store injection
-      if (options.store) {
-        this.$store = typeof options.store === 'function'
-          ? options.store()
-          : options.store;
-      } else if (options.parent && options.parent.$store) {
-        this.$store = options.parent.$store;
-      }
-    }
-  }
-
-  var target = typeof window !== 'undefined'
-    ? window
-    : typeof global !== 'undefined'
-      ? global
-      : {};
-  var devtoolHook = target.__VUE_DEVTOOLS_GLOBAL_HOOK__;
-
-  function devtoolPlugin (store) {
-    if (!devtoolHook) { return }
-
-    store._devtoolHook = devtoolHook;
-
-    devtoolHook.emit('vuex:init', store);
-
-    devtoolHook.on('vuex:travel-to-state', function (targetState) {
-      store.replaceState(targetState);
-    });
-
-    store.subscribe(function (mutation, state) {
-      devtoolHook.emit('vuex:mutation', mutation, state);
-    }, { prepend: true });
-
-    store.subscribeAction(function (action, state) {
-      devtoolHook.emit('vuex:action', action, state);
-    }, { prepend: true });
-  }
-
-  /**
-   * forEach for object
-   */
-  function forEachValue (obj, fn) {
-    Object.keys(obj).forEach(function (key) { return fn(obj[key], key); });
-  }
-
-  function isObject (obj) {
-    return obj !== null && typeof obj === 'object'
-  }
-
-  function isPromise (val) {
-    return val && typeof val.then === 'function'
-  }
-
-  function assert (condition, msg) {
-    if (!condition) { throw new Error(("[vuex] " + msg)) }
-  }
-
-  function partial (fn, arg) {
-    return function () {
-      return fn(arg)
-    }
-  }
-
-  // Base data struct for store's module, package with some attribute and method
-  var Module = function Module (rawModule, runtime) {
-    this.runtime = runtime;
-    // Store some children item
-    this._children = Object.create(null);
-    // Store the origin module object which passed by programmer
-    this._rawModule = rawModule;
-    var rawState = rawModule.state;
-
-    // Store the origin module's state
-    this.state = (typeof rawState === 'function' ? rawState() : rawState) || {};
+  const store = {
+    calculator,
   };
-
-  var prototypeAccessors = { namespaced: { configurable: true } };
-
-  prototypeAccessors.namespaced.get = function () {
-    return !!this._rawModule.namespaced
-  };
-
-  Module.prototype.addChild = function addChild (key, module) {
-    this._children[key] = module;
-  };
-
-  Module.prototype.removeChild = function removeChild (key) {
-    delete this._children[key];
-  };
-
-  Module.prototype.getChild = function getChild (key) {
-    return this._children[key]
-  };
-
-  Module.prototype.hasChild = function hasChild (key) {
-    return key in this._children
-  };
-
-  Module.prototype.update = function update (rawModule) {
-    this._rawModule.namespaced = rawModule.namespaced;
-    if (rawModule.actions) {
-      this._rawModule.actions = rawModule.actions;
-    }
-    if (rawModule.mutations) {
-      this._rawModule.mutations = rawModule.mutations;
-    }
-    if (rawModule.getters) {
-      this._rawModule.getters = rawModule.getters;
-    }
-  };
-
-  Module.prototype.forEachChild = function forEachChild (fn) {
-    forEachValue(this._children, fn);
-  };
-
-  Module.prototype.forEachGetter = function forEachGetter (fn) {
-    if (this._rawModule.getters) {
-      forEachValue(this._rawModule.getters, fn);
-    }
-  };
-
-  Module.prototype.forEachAction = function forEachAction (fn) {
-    if (this._rawModule.actions) {
-      forEachValue(this._rawModule.actions, fn);
-    }
-  };
-
-  Module.prototype.forEachMutation = function forEachMutation (fn) {
-    if (this._rawModule.mutations) {
-      forEachValue(this._rawModule.mutations, fn);
-    }
-  };
-
-  Object.defineProperties( Module.prototype, prototypeAccessors );
-
-  var ModuleCollection = function ModuleCollection (rawRootModule) {
-    // register root module (Vuex.Store options)
-    this.register([], rawRootModule, false);
-  };
-
-  ModuleCollection.prototype.get = function get (path) {
-    return path.reduce(function (module, key) {
-      return module.getChild(key)
-    }, this.root)
-  };
-
-  ModuleCollection.prototype.getNamespace = function getNamespace (path) {
-    var module = this.root;
-    return path.reduce(function (namespace, key) {
-      module = module.getChild(key);
-      return namespace + (module.namespaced ? key + '/' : '')
-    }, '')
-  };
-
-  ModuleCollection.prototype.update = function update$1 (rawRootModule) {
-    update([], this.root, rawRootModule);
-  };
-
-  ModuleCollection.prototype.register = function register (path, rawModule, runtime) {
-      var this$1 = this;
-      if ( runtime === void 0 ) runtime = true;
-
-    {
-      assertRawModule(path, rawModule);
-    }
-
-    var newModule = new Module(rawModule, runtime);
-    if (path.length === 0) {
-      this.root = newModule;
-    } else {
-      var parent = this.get(path.slice(0, -1));
-      parent.addChild(path[path.length - 1], newModule);
-    }
-
-    // register nested modules
-    if (rawModule.modules) {
-      forEachValue(rawModule.modules, function (rawChildModule, key) {
-        this$1.register(path.concat(key), rawChildModule, runtime);
-      });
-    }
-  };
-
-  ModuleCollection.prototype.unregister = function unregister (path) {
-    var parent = this.get(path.slice(0, -1));
-    var key = path[path.length - 1];
-    var child = parent.getChild(key);
-
-    if (!child) {
-      {
-        console.warn(
-          "[vuex] trying to unregister module '" + key + "', which is " +
-          "not registered"
-        );
-      }
-      return
-    }
-
-    if (!child.runtime) {
-      return
-    }
-
-    parent.removeChild(key);
-  };
-
-  ModuleCollection.prototype.isRegistered = function isRegistered (path) {
-    var parent = this.get(path.slice(0, -1));
-    var key = path[path.length - 1];
-
-    if (parent) {
-      return parent.hasChild(key)
-    }
-
-    return false
-  };
-
-  function update (path, targetModule, newModule) {
-    {
-      assertRawModule(path, newModule);
-    }
-
-    // update target module
-    targetModule.update(newModule);
-
-    // update nested modules
-    if (newModule.modules) {
-      for (var key in newModule.modules) {
-        if (!targetModule.getChild(key)) {
-          {
-            console.warn(
-              "[vuex] trying to add a new module '" + key + "' on hot reloading, " +
-              'manual reload is needed'
-            );
-          }
-          return
-        }
-        update(
-          path.concat(key),
-          targetModule.getChild(key),
-          newModule.modules[key]
-        );
-      }
-    }
-  }
-
-  var functionAssert = {
-    assert: function (value) { return typeof value === 'function'; },
-    expected: 'function'
-  };
-
-  var objectAssert = {
-    assert: function (value) { return typeof value === 'function' ||
-      (typeof value === 'object' && typeof value.handler === 'function'); },
-    expected: 'function or object with "handler" function'
-  };
-
-  var assertTypes = {
-    getters: functionAssert,
-    mutations: functionAssert,
-    actions: objectAssert
-  };
-
-  function assertRawModule (path, rawModule) {
-    Object.keys(assertTypes).forEach(function (key) {
-      if (!rawModule[key]) { return }
-
-      var assertOptions = assertTypes[key];
-
-      forEachValue(rawModule[key], function (value, type) {
-        assert(
-          assertOptions.assert(value),
-          makeAssertionMessage(path, key, type, value, assertOptions.expected)
-        );
-      });
-    });
-  }
-
-  function makeAssertionMessage (path, key, type, value, expected) {
-    var buf = key + " should be " + expected + " but \"" + key + "." + type + "\"";
-    if (path.length > 0) {
-      buf += " in module \"" + (path.join('.')) + "\"";
-    }
-    buf += " is " + (JSON.stringify(value)) + ".";
-    return buf
-  }
-
-  var Vue; // bind on install
-
-  var Store = function Store (options) {
-    var this$1 = this;
-    if ( options === void 0 ) options = {};
-
-    // Auto install if it is not done yet and `window` has `Vue`.
-    // To allow users to avoid auto-installation in some cases,
-    // this code should be placed here. See #731
-    if (!Vue && typeof window !== 'undefined' && window.Vue) {
-      install(window.Vue);
-    }
-
-    {
-      assert(Vue, "must call Vue.use(Vuex) before creating a store instance.");
-      assert(typeof Promise !== 'undefined', "vuex requires a Promise polyfill in this browser.");
-      assert(this instanceof Store, "store must be called with the new operator.");
-    }
-
-    var plugins = options.plugins; if ( plugins === void 0 ) plugins = [];
-    var strict = options.strict; if ( strict === void 0 ) strict = false;
-
-    // store internal state
-    this._committing = false;
-    this._actions = Object.create(null);
-    this._actionSubscribers = [];
-    this._mutations = Object.create(null);
-    this._wrappedGetters = Object.create(null);
-    this._modules = new ModuleCollection(options);
-    this._modulesNamespaceMap = Object.create(null);
-    this._subscribers = [];
-    this._watcherVM = new Vue();
-    this._makeLocalGettersCache = Object.create(null);
-
-    // bind commit and dispatch to self
-    var store = this;
-    var ref = this;
-    var dispatch = ref.dispatch;
-    var commit = ref.commit;
-    this.dispatch = function boundDispatch (type, payload) {
-      return dispatch.call(store, type, payload)
-    };
-    this.commit = function boundCommit (type, payload, options) {
-      return commit.call(store, type, payload, options)
-    };
-
-    // strict mode
-    this.strict = strict;
-
-    var state = this._modules.root.state;
-
-    // init root module.
-    // this also recursively registers all sub-modules
-    // and collects all module getters inside this._wrappedGetters
-    installModule(this, state, [], this._modules.root);
-
-    // initialize the store vm, which is responsible for the reactivity
-    // (also registers _wrappedGetters as computed properties)
-    resetStoreVM(this, state);
-
-    // apply plugins
-    plugins.forEach(function (plugin) { return plugin(this$1); });
-
-    var useDevtools = options.devtools !== undefined ? options.devtools : Vue.config.devtools;
-    if (useDevtools) {
-      devtoolPlugin(this);
-    }
-  };
-
-  var prototypeAccessors$1 = { state: { configurable: true } };
-
-  prototypeAccessors$1.state.get = function () {
-    return this._vm._data.$$state
-  };
-
-  prototypeAccessors$1.state.set = function (v) {
-    {
-      assert(false, "use store.replaceState() to explicit replace store state.");
-    }
-  };
-
-  Store.prototype.commit = function commit (_type, _payload, _options) {
-      var this$1 = this;
-
-    // check object-style commit
-    var ref = unifyObjectStyle(_type, _payload, _options);
-      var type = ref.type;
-      var payload = ref.payload;
-      var options = ref.options;
-
-    var mutation = { type: type, payload: payload };
-    var entry = this._mutations[type];
-    if (!entry) {
-      {
-        console.error(("[vuex] unknown mutation type: " + type));
-      }
-      return
-    }
-    this._withCommit(function () {
-      entry.forEach(function commitIterator (handler) {
-        handler(payload);
-      });
-    });
-
-    this._subscribers
-      .slice() // shallow copy to prevent iterator invalidation if subscriber synchronously calls unsubscribe
-      .forEach(function (sub) { return sub(mutation, this$1.state); });
-
-    if (
-      
-      options && options.silent
-    ) {
-      console.warn(
-        "[vuex] mutation type: " + type + ". Silent option has been removed. " +
-        'Use the filter functionality in the vue-devtools'
-      );
-    }
-  };
-
-  Store.prototype.dispatch = function dispatch (_type, _payload) {
-      var this$1 = this;
-
-    // check object-style dispatch
-    var ref = unifyObjectStyle(_type, _payload);
-      var type = ref.type;
-      var payload = ref.payload;
-
-    var action = { type: type, payload: payload };
-    var entry = this._actions[type];
-    if (!entry) {
-      {
-        console.error(("[vuex] unknown action type: " + type));
-      }
-      return
-    }
-
-    try {
-      this._actionSubscribers
-        .slice() // shallow copy to prevent iterator invalidation if subscriber synchronously calls unsubscribe
-        .filter(function (sub) { return sub.before; })
-        .forEach(function (sub) { return sub.before(action, this$1.state); });
-    } catch (e) {
-      {
-        console.warn("[vuex] error in before action subscribers: ");
-        console.error(e);
-      }
-    }
-
-    var result = entry.length > 1
-      ? Promise.all(entry.map(function (handler) { return handler(payload); }))
-      : entry[0](payload);
-
-    return new Promise(function (resolve, reject) {
-      result.then(function (res) {
-        try {
-          this$1._actionSubscribers
-            .filter(function (sub) { return sub.after; })
-            .forEach(function (sub) { return sub.after(action, this$1.state); });
-        } catch (e) {
-          {
-            console.warn("[vuex] error in after action subscribers: ");
-            console.error(e);
-          }
-        }
-        resolve(res);
-      }, function (error) {
-        try {
-          this$1._actionSubscribers
-            .filter(function (sub) { return sub.error; })
-            .forEach(function (sub) { return sub.error(action, this$1.state, error); });
-        } catch (e) {
-          {
-            console.warn("[vuex] error in error action subscribers: ");
-            console.error(e);
-          }
-        }
-        reject(error);
-      });
-    })
-  };
-
-  Store.prototype.subscribe = function subscribe (fn, options) {
-    return genericSubscribe(fn, this._subscribers, options)
-  };
-
-  Store.prototype.subscribeAction = function subscribeAction (fn, options) {
-    var subs = typeof fn === 'function' ? { before: fn } : fn;
-    return genericSubscribe(subs, this._actionSubscribers, options)
-  };
-
-  Store.prototype.watch = function watch (getter, cb, options) {
-      var this$1 = this;
-
-    {
-      assert(typeof getter === 'function', "store.watch only accepts a function.");
-    }
-    return this._watcherVM.$watch(function () { return getter(this$1.state, this$1.getters); }, cb, options)
-  };
-
-  Store.prototype.replaceState = function replaceState (state) {
-      var this$1 = this;
-
-    this._withCommit(function () {
-      this$1._vm._data.$$state = state;
-    });
-  };
-
-  Store.prototype.registerModule = function registerModule (path, rawModule, options) {
-      if ( options === void 0 ) options = {};
-
-    if (typeof path === 'string') { path = [path]; }
-
-    {
-      assert(Array.isArray(path), "module path must be a string or an Array.");
-      assert(path.length > 0, 'cannot register the root module by using registerModule.');
-    }
-
-    this._modules.register(path, rawModule);
-    installModule(this, this.state, path, this._modules.get(path), options.preserveState);
-    // reset store to update getters...
-    resetStoreVM(this, this.state);
-  };
-
-  Store.prototype.unregisterModule = function unregisterModule (path) {
-      var this$1 = this;
-
-    if (typeof path === 'string') { path = [path]; }
-
-    {
-      assert(Array.isArray(path), "module path must be a string or an Array.");
-    }
-
-    this._modules.unregister(path);
-    this._withCommit(function () {
-      var parentState = getNestedState(this$1.state, path.slice(0, -1));
-      Vue.delete(parentState, path[path.length - 1]);
-    });
-    resetStore(this);
-  };
-
-  Store.prototype.hasModule = function hasModule (path) {
-    if (typeof path === 'string') { path = [path]; }
-
-    {
-      assert(Array.isArray(path), "module path must be a string or an Array.");
-    }
-
-    return this._modules.isRegistered(path)
-  };
-
-  Store.prototype.hotUpdate = function hotUpdate (newOptions) {
-    this._modules.update(newOptions);
-    resetStore(this, true);
-  };
-
-  Store.prototype._withCommit = function _withCommit (fn) {
-    var committing = this._committing;
-    this._committing = true;
-    fn();
-    this._committing = committing;
-  };
-
-  Object.defineProperties( Store.prototype, prototypeAccessors$1 );
-
-  function genericSubscribe (fn, subs, options) {
-    if (subs.indexOf(fn) < 0) {
-      options && options.prepend
-        ? subs.unshift(fn)
-        : subs.push(fn);
-    }
-    return function () {
-      var i = subs.indexOf(fn);
-      if (i > -1) {
-        subs.splice(i, 1);
-      }
-    }
-  }
-
-  function resetStore (store, hot) {
-    store._actions = Object.create(null);
-    store._mutations = Object.create(null);
-    store._wrappedGetters = Object.create(null);
-    store._modulesNamespaceMap = Object.create(null);
-    var state = store.state;
-    // init all modules
-    installModule(store, state, [], store._modules.root, true);
-    // reset vm
-    resetStoreVM(store, state, hot);
-  }
-
-  function resetStoreVM (store, state, hot) {
-    var oldVm = store._vm;
-
-    // bind store public getters
-    store.getters = {};
-    // reset local getters cache
-    store._makeLocalGettersCache = Object.create(null);
-    var wrappedGetters = store._wrappedGetters;
-    var computed = {};
-    forEachValue(wrappedGetters, function (fn, key) {
-      // use computed to leverage its lazy-caching mechanism
-      // direct inline function use will lead to closure preserving oldVm.
-      // using partial to return function with only arguments preserved in closure environment.
-      computed[key] = partial(fn, store);
-      Object.defineProperty(store.getters, key, {
-        get: function () { return store._vm[key]; },
-        enumerable: true // for local getters
-      });
-    });
-
-    // use a Vue instance to store the state tree
-    // suppress warnings just in case the user has added
-    // some funky global mixins
-    var silent = Vue.config.silent;
-    Vue.config.silent = true;
-    store._vm = new Vue({
-      data: {
-        $$state: state
-      },
-      computed: computed
-    });
-    Vue.config.silent = silent;
-
-    // enable strict mode for new vm
-    if (store.strict) {
-      enableStrictMode(store);
-    }
-
-    if (oldVm) {
-      if (hot) {
-        // dispatch changes in all subscribed watchers
-        // to force getter re-evaluation for hot reloading.
-        store._withCommit(function () {
-          oldVm._data.$$state = null;
-        });
-      }
-      Vue.nextTick(function () { return oldVm.$destroy(); });
-    }
-  }
-
-  function installModule (store, rootState, path, module, hot) {
-    var isRoot = !path.length;
-    var namespace = store._modules.getNamespace(path);
-
-    // register in namespace map
-    if (module.namespaced) {
-      if (store._modulesNamespaceMap[namespace] && ("development" !== 'production')) {
-        console.error(("[vuex] duplicate namespace " + namespace + " for the namespaced module " + (path.join('/'))));
-      }
-      store._modulesNamespaceMap[namespace] = module;
-    }
-
-    // set state
-    if (!isRoot && !hot) {
-      var parentState = getNestedState(rootState, path.slice(0, -1));
-      var moduleName = path[path.length - 1];
-      store._withCommit(function () {
-        {
-          if (moduleName in parentState) {
-            console.warn(
-              ("[vuex] state field \"" + moduleName + "\" was overridden by a module with the same name at \"" + (path.join('.')) + "\"")
-            );
-          }
-        }
-        Vue.set(parentState, moduleName, module.state);
-      });
-    }
-
-    var local = module.context = makeLocalContext(store, namespace, path);
-
-    module.forEachMutation(function (mutation, key) {
-      var namespacedType = namespace + key;
-      registerMutation(store, namespacedType, mutation, local);
-    });
-
-    module.forEachAction(function (action, key) {
-      var type = action.root ? key : namespace + key;
-      var handler = action.handler || action;
-      registerAction(store, type, handler, local);
-    });
-
-    module.forEachGetter(function (getter, key) {
-      var namespacedType = namespace + key;
-      registerGetter(store, namespacedType, getter, local);
-    });
-
-    module.forEachChild(function (child, key) {
-      installModule(store, rootState, path.concat(key), child, hot);
-    });
-  }
-
-  /**
-   * make localized dispatch, commit, getters and state
-   * if there is no namespace, just use root ones
-   */
-  function makeLocalContext (store, namespace, path) {
-    var noNamespace = namespace === '';
-
-    var local = {
-      dispatch: noNamespace ? store.dispatch : function (_type, _payload, _options) {
-        var args = unifyObjectStyle(_type, _payload, _options);
-        var payload = args.payload;
-        var options = args.options;
-        var type = args.type;
-
-        if (!options || !options.root) {
-          type = namespace + type;
-          if ( !store._actions[type]) {
-            console.error(("[vuex] unknown local action type: " + (args.type) + ", global type: " + type));
-            return
-          }
-        }
-
-        return store.dispatch(type, payload)
-      },
-
-      commit: noNamespace ? store.commit : function (_type, _payload, _options) {
-        var args = unifyObjectStyle(_type, _payload, _options);
-        var payload = args.payload;
-        var options = args.options;
-        var type = args.type;
-
-        if (!options || !options.root) {
-          type = namespace + type;
-          if ( !store._mutations[type]) {
-            console.error(("[vuex] unknown local mutation type: " + (args.type) + ", global type: " + type));
-            return
-          }
-        }
-
-        store.commit(type, payload, options);
-      }
-    };
-
-    // getters and state object must be gotten lazily
-    // because they will be changed by vm update
-    Object.defineProperties(local, {
-      getters: {
-        get: noNamespace
-          ? function () { return store.getters; }
-          : function () { return makeLocalGetters(store, namespace); }
-      },
-      state: {
-        get: function () { return getNestedState(store.state, path); }
-      }
-    });
-
-    return local
-  }
-
-  function makeLocalGetters (store, namespace) {
-    if (!store._makeLocalGettersCache[namespace]) {
-      var gettersProxy = {};
-      var splitPos = namespace.length;
-      Object.keys(store.getters).forEach(function (type) {
-        // skip if the target getter is not match this namespace
-        if (type.slice(0, splitPos) !== namespace) { return }
-
-        // extract local getter type
-        var localType = type.slice(splitPos);
-
-        // Add a port to the getters proxy.
-        // Define as getter property because
-        // we do not want to evaluate the getters in this time.
-        Object.defineProperty(gettersProxy, localType, {
-          get: function () { return store.getters[type]; },
-          enumerable: true
-        });
-      });
-      store._makeLocalGettersCache[namespace] = gettersProxy;
-    }
-
-    return store._makeLocalGettersCache[namespace]
-  }
-
-  function registerMutation (store, type, handler, local) {
-    var entry = store._mutations[type] || (store._mutations[type] = []);
-    entry.push(function wrappedMutationHandler (payload) {
-      handler.call(store, local.state, payload);
-    });
-  }
-
-  function registerAction (store, type, handler, local) {
-    var entry = store._actions[type] || (store._actions[type] = []);
-    entry.push(function wrappedActionHandler (payload) {
-      var res = handler.call(store, {
-        dispatch: local.dispatch,
-        commit: local.commit,
-        getters: local.getters,
-        state: local.state,
-        rootGetters: store.getters,
-        rootState: store.state
-      }, payload);
-      if (!isPromise(res)) {
-        res = Promise.resolve(res);
-      }
-      if (store._devtoolHook) {
-        return res.catch(function (err) {
-          store._devtoolHook.emit('vuex:error', err);
-          throw err
-        })
-      } else {
-        return res
-      }
-    });
-  }
-
-  function registerGetter (store, type, rawGetter, local) {
-    if (store._wrappedGetters[type]) {
-      {
-        console.error(("[vuex] duplicate getter key: " + type));
-      }
-      return
-    }
-    store._wrappedGetters[type] = function wrappedGetter (store) {
-      return rawGetter(
-        local.state, // local state
-        local.getters, // local getters
-        store.state, // root state
-        store.getters // root getters
-      )
-    };
-  }
-
-  function enableStrictMode (store) {
-    store._vm.$watch(function () { return this._data.$$state }, function () {
-      {
-        assert(store._committing, "do not mutate vuex store state outside mutation handlers.");
-      }
-    }, { deep: true, sync: true });
-  }
-
-  function getNestedState (state, path) {
-    return path.reduce(function (state, key) { return state[key]; }, state)
-  }
-
-  function unifyObjectStyle (type, payload, options) {
-    if (isObject(type) && type.type) {
-      options = payload;
-      payload = type;
-      type = type.type;
-    }
-
-    {
-      assert(typeof type === 'string', ("expects string as the type, but found " + (typeof type) + "."));
-    }
-
-    return { type: type, payload: payload, options: options }
-  }
-
-  function install (_Vue) {
-    if (Vue && _Vue === Vue) {
-      {
-        console.error(
-          '[vuex] already installed. Vue.use(Vuex) should be called only once.'
-        );
-      }
-      return
-    }
-    Vue = _Vue;
-    applyMixin(Vue);
-  }
-
-  // export default {
-  //     modules: {
-  //         attributes,
-  //         nonInferiority,
-  //     },
-  //     actions,
-  //     mutations,
-  //     getters: Object.assign({}, dataFormat, math)
-  // }
-
-  const store = new Store({
-    modules: {
-      calculator
-    }
-  });
 
   var index = {
-      powerCalculator: __vue_component__$b,
-      store
+    powerCalculator: __vue_component__,
+    store,
   };
 
   return index;

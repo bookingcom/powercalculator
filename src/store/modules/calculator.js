@@ -828,7 +828,7 @@ export const calculator = {
         state.baseRate,
         state.testType === TEST_TYPE.BINOMIAL ? 'percentage' : 'float'
       ),
-    standardDeviation: (state) => displayValue(state.standardDeviation, 'int'),
+    standardDeviation: (state) => displayValue(state.standardDeviation, 'float'),
     metricTotal: (state) => (state.sample * state.baseRate).toFixed(0),
 
     // Sample
