@@ -71,6 +71,8 @@ export default {
       el.textContent = this.formattedVal
     }
 
+    // Once it updates, places the cursor back where it was. This is a visual
+    // glitch caused by the interaction between content editable and the prop drilling.
     const focus = document.activeElement
     if (el === focus) {
       const range = document.createRange()
@@ -79,7 +81,6 @@ export default {
       const sel = window.getSelection()
       sel.removeAllRanges()
       sel.addRange(range)
-      console.log('pls')
     }
   },
   computed: {

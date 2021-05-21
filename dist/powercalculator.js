@@ -80,6 +80,18 @@
       if (el && el.textContent != this.formattedVal) {
         el.textContent = this.formattedVal;
       }
+
+      // Once it updates, places the cursor back where it was. This is a visual
+      // glitch caused by the interaction between content editable and the prop drilling.
+      const focus = document.activeElement;
+      if (el === focus) {
+        const range = document.createRange();
+        range.selectNodeContents(focus);
+        range.collapse(false);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
     },
     computed: {
       isLocked() {
@@ -316,7 +328,7 @@
     /* style */
     const __vue_inject_styles__$8 = function (inject) {
       if (!inject) return
-      inject("data-v-f8c2be5a_0", { source: ".pc-value-field-wrapper{--base-padding:5px;display:block;position:relative;box-sizing:border-box;width:100%;filter:drop-shadow(0 4px 2px rgba(0, 0, 0, .1));border-radius:5px;background:var(--white);padding:var(--base-padding);overflow:hidden}.pc-field--focused{box-shadow:inset 0 0 0 1px var(--dark-blue)}.pc-value--formatted{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none;width:100%}.pc-value-display{box-sizing:border-box;font-size:1em;line-height:1.8em;align-self:center;min-height:1em;display:inline-block}.pc-value-display:focus{outline:0}.pc-false-positive-input,.pc-non-inf-treshold-input,.pc-power-input,.pc-variants-input{display:inline-block;vertical-align:middle;padding:4px 8px;text-align:center;width:4em;border:2px solid var(--gray);border-radius:8px;font-size:inherit}.pc-variants-input{width:6.5em}.pc-top-fields-error{color:var(--red)}.pc-value-formatting:before{color:var(--gray);content:attr(data-prefix)}.pc-value-formatting:after{color:var(--gray);content:attr(data-suffix)}.pc-block-to-calculate .pc-value-field-wrapper:not(.pc-value-display){background:var(--light-yellow);outline:2px solid var(--dark-yellow)}.pc-block-to-calculate .pc-value .pc-value-formatting:before{content:'=' attr(data-prefix);color:var(--black)}.pc-block-to-calculate .pc-value-formatting:after{color:var(--black)}", map: undefined, media: undefined });
+      inject("data-v-19d3c266_0", { source: ".pc-value-field-wrapper{--base-padding:5px;display:block;position:relative;box-sizing:border-box;width:100%;filter:drop-shadow(0 4px 2px rgba(0, 0, 0, .1));border-radius:5px;background:var(--white);padding:var(--base-padding);overflow:hidden}.pc-field--focused{box-shadow:inset 0 0 0 1px var(--dark-blue)}.pc-value--formatted{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none;width:100%}.pc-value-display{box-sizing:border-box;font-size:1em;line-height:1.8em;align-self:center;min-height:1em;display:inline-block}.pc-value-display:focus{outline:0}.pc-false-positive-input,.pc-non-inf-treshold-input,.pc-power-input,.pc-variants-input{display:inline-block;vertical-align:middle;padding:4px 8px;text-align:center;width:4em;border:2px solid var(--gray);border-radius:8px;font-size:inherit}.pc-variants-input{width:6.5em}.pc-top-fields-error{color:var(--red)}.pc-value-formatting:before{color:var(--gray);content:attr(data-prefix)}.pc-value-formatting:after{color:var(--gray);content:attr(data-suffix)}.pc-block-to-calculate .pc-value-field-wrapper:not(.pc-value-display){background:var(--light-yellow);outline:2px solid var(--dark-yellow)}.pc-block-to-calculate .pc-value .pc-value-formatting:before{content:'=' attr(data-prefix);color:var(--black)}.pc-block-to-calculate .pc-value-formatting:after{color:var(--black)}", map: undefined, media: undefined });
 
     };
     /* scoped */
@@ -6286,10 +6298,10 @@
         if (
           // Do not allow not numbers
           isNaN(baseRate) ||
-          // baseRate 0 or lower is always forbidden
-          baseRate <= 0 ||
-          // If it is binomial, do not allow 100% either.
-          (state.testType === TEST_TYPE.BINOMIAL && baseRate >= 100)
+          // gTest (percentage) -- 0 < base rate < 100
+          (state.testType === TEST_TYPE.BINOMIAL && (baseRate >= 100 || baseRate <= 0)) ||
+          // tTest (amount) -- 0 <= base rate
+          (state.testType === TEST_TYPE.CONTINUOUS && baseRate <= 0)
         ) {
           return
         }
@@ -6347,13 +6359,17 @@
           }
 
           if (state.isNonInferiority) {
-            state.absoluteThreshold = getAbsoluteThreshold(state);
+            state.absoluteThreshold = getAbsoluteThreshold({
+              ...state,
+              baseRate: newBaseRate,
+            });
           } else {
             state.absoluteImpact = getAbsoluteImpact(
               newBaseRate,
               state.relativeImpact
             );
           }
+
           state.sample = sample;
         } else {
           const effect = formula({
@@ -6372,6 +6388,7 @@
             state.relativeThreshold = effect;
             state.absoluteThreshold = getAbsoluteThreshold({
               ...state,
+              baseRate: newBaseRate,
               relativeThreshold: effect,
             });
           } else {

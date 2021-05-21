@@ -427,13 +427,17 @@ export const calculator = {
         }
 
         if (state.isNonInferiority) {
-          state.absoluteThreshold = getAbsoluteThreshold(state)
+          state.absoluteThreshold = getAbsoluteThreshold({
+            ...state,
+            baseRate: newBaseRate,
+          })
         } else {
           state.absoluteImpact = getAbsoluteImpact(
             newBaseRate,
             state.relativeImpact
           )
         }
+
         state.sample = sample
       } else {
         const effect = formula({
@@ -452,6 +456,7 @@ export const calculator = {
           state.relativeThreshold = effect
           state.absoluteThreshold = getAbsoluteThreshold({
             ...state,
+            baseRate: newBaseRate,
             relativeThreshold: effect,
           })
         } else {
