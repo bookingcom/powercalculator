@@ -366,10 +366,10 @@ export const calculator = {
       if (
         // Do not allow not numbers
         isNaN(baseRate) ||
-        // baseRate 0 or lower is always forbidden
-        baseRate <= 0 ||
-        // If it is binomial, do not allow 100% either.
-        (state.testType === TEST_TYPE.BINOMIAL && baseRate >= 100)
+        // gTest (percentage) -- 0 < base rate < 100
+        (state.testType === TEST_TYPE.BINOMIAL && (baseRate >= 100 || baseRate <= 0)) ||
+        // tTest (amount) -- 0 <= base rate
+        (state.testType === TEST_TYPE.CONTINUOUS && baseRate <= 0)
       ) {
         return
       }
