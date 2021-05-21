@@ -70,6 +70,17 @@ export default {
     if (el && el.textContent != this.formattedVal) {
       el.textContent = this.formattedVal
     }
+
+    const focus = document.activeElement
+    if (el === focus) {
+      const range = document.createRange()
+      range.selectNodeContents(focus)
+      range.collapse(false)
+      const sel = window.getSelection()
+      sel.removeAllRanges()
+      sel.addRange(range)
+      console.log('pls')
+    }
   },
   computed: {
     isLocked() {
