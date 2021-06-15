@@ -34,7 +34,7 @@ const executeTest = (idx, val, apr) => {
 }
 const skipTest = (idx) => `idx=${idx},out=skipped`
 
-describe('tTest', () => {
+describe('T-test dataset (two sided and non-inferiority, with and without standard deviation)', () => {
   const DATASET_SIZE = 9234
   const entries = []
   beforeAll(() => {
@@ -52,40 +52,40 @@ describe('tTest', () => {
     }
   })
 
-  describe('Verifying math library', () => {
-    test('Validate dataset', () => {
-      expect(entries.length).toBe(DATASET_SIZE)
-    })
-    describe('Comparative tests', () => {
-      const cases = []
-      beforeAll(() => {
-        for (const entry of entries) {
-          cases.push({
-            baseRate: +entry.point_estimate,
-            confidenceLevel: 0.9,
-            falsePositiveRate: 0.1,
-            sample: +entry.sample_size,
-            targetPower: +entry.power,
-            runtime: 10,
-            visitorsPerDay: +entry.sample_size / 10,
-            standardDeviation: +entry.stddev_base,
-            variants: entry.nr_variants - 1,
-            impact:
-              entry.mre_type === VALUE_TYPE.ABSOLUTE
-                ? getRelativeImpactFromAbsolute({
-                    base_rate: +entry.point_estimate,
-                    absolute_effect_size: +entry.effect_size,
-                  })
-                : +entry.effect_size,
+  test('Validate dataset', () => {
+    expect(entries.length).toBe(DATASET_SIZE)
+  })
+  describe('Two sided tests', () => {
+    const cases = []
+    beforeAll(() => {
+      for (const entry of entries) {
+        cases.push({
+          baseRate: +entry.point_estimate,
+          confidenceLevel: 0.9,
+          falsePositiveRate: 0.1,
+          sample: +entry.sample_size,
+          targetPower: +entry.power,
+          runtime: 10,
+          visitorsPerDay: +entry.sample_size / 10,
+          standardDeviation: +entry.stddev_base,
+          variants: entry.nr_variants - 1,
+          impact:
+            entry.mre_type === VALUE_TYPE.ABSOLUTE
+              ? getRelativeImpactFromAbsolute({
+                  base_rate: +entry.point_estimate,
+                  absolute_effect_size: +entry.effect_size,
+                })
+              : +entry.effect_size,
 
-            // Configuration
-            isNonInferiority: false,
-            comparisonMode: COMPARISON_MODE.ALL,
-            trafficMode: TRAFFIC_MODE.TOTAL,
-            testType: TEST_TYPE.CONTINUOUS,
-          })
-        }
-      })
+          // Configuration
+          isNonInferiority: false,
+          comparisonMode: COMPARISON_MODE.ALL,
+          trafficMode: TRAFFIC_MODE.TOTAL,
+          testType: TEST_TYPE.CONTINUOUS,
+        })
+      }
+    })
+    describe('T-test formulas (MUST pass)', () => {
       test('Calculating power', () => {
         const results = cases.map((entry, index) => {
           const {
@@ -177,42 +177,137 @@ describe('tTest', () => {
         expect(errors.length).toBe(0)
       })
     })
-    describe('Non-inferiority tests', () => {
-      const cases = []
-      beforeAll(() => {
-        for (const entry of entries) {
-          const opts = {
-            type: 'relative',
-            alternative: 'greater',
-            base_rate: +entry.point_estimate,
-            threshold: -entry.effect_size,
-          }
 
-          cases.push({
-            baseRate: +entry.point_estimate,
-            confidenceLevel: 0.9,
-            falsePositiveRate: 0.1,
-            sample: +entry.sample_size,
-            targetPower: +entry.power_ni,
-            runtime: 10,
-            visitorsPerDay: +entry.sample_size / 10,
-            standardDeviation: +entry.stddev_base,
-            variants: entry.nr_variants - 1,
-            impact: 0,
-            threshold: -entry.effect_size,
-
-            // Non-inferiority specials
-            mu: math.getMuFromRelativeDifference(opts),
-            opts,
-
-            // Configuration
-            isNonInferiority: true,
-            comparisonMode: COMPARISON_MODE.ALL,
-            trafficMode: TRAFFIC_MODE.TOTAL,
-            testType: TEST_TYPE.CONTINUOUS,
+    describe('G-test formulas (SHOULD pass)', () => {
+      test('Calculating power', () => {
+        const results = cases.map((entry, index) => {
+          const {
+            targetPower,
+            sample,
+            falsePositiveRate,
+            standardDeviation,
+            baseRate,
+            impact,
+            alpha,
+            variants,
+          } = entry
+          const approx = gTest.power({
+            total_sample_size: sample,
+            base_rate: baseRate,
+            effect_size: impact,
+            alpha: getCorrectedAlpha(falsePositiveRate, variants),
+            variants,
+            sd_rate: standardDeviation,
+            alternative: 'two-sided',
+            mu: 0,
           })
-        }
+          return executeTest(index, targetPower, approx)
+        })
+
+        const errors = results.filter((r) => /false/.test(r))
+
+        expect(errors.length).toBe(0)
       })
+
+      test('Calculating sample', () => {
+        const results = cases.map((entry, index) => {
+          const {
+            targetPower,
+            sample: targetSample,
+            falsePositiveRate,
+            standardDeviation,
+            baseRate,
+            impact,
+            alpha,
+            variants,
+          } = entry
+
+          if (targetPower < 0.7 || targetPower >= 0.999) return skipTest(index)
+          const approx = gTest.sample({
+            base_rate: baseRate,
+            effect_size: impact,
+            alpha: getCorrectedAlpha(falsePositiveRate, variants),
+            beta: 1 - targetPower,
+            variants,
+            sd_rate: standardDeviation,
+            alternative: 'two-sided',
+            mu: 0,
+          })
+          return executeTest(index, targetSample, approx)
+        })
+
+        const errors = results.filter((r) => /false/.test(r))
+        expect(errors.length).toBe(0)
+      })
+
+      test('Calculating effect size', () => {
+        const results = cases.map((entry, index) => {
+          const {
+            targetPower,
+            sample,
+            falsePositiveRate,
+            standardDeviation,
+            baseRate,
+            impact: targetImpact,
+            alpha,
+            variants,
+          } = entry
+          if (targetPower < 0.7 || targetPower >= 0.999) return skipTest(index)
+          const approx = gTest.impact({
+            total_sample_size: sample,
+            base_rate: baseRate,
+            alpha: getCorrectedAlpha(falsePositiveRate, variants),
+            beta: 1 - targetPower,
+            variants,
+            sd_rate: standardDeviation,
+            alternative: 'two-sided',
+            mu: 0,
+          })
+          return executeTest(index, targetImpact, approx)
+        })
+
+        const errors = results.filter((r) => /false/.test(r))
+        expect(errors.length).toBe(0)
+      })
+    })
+  })
+  describe('Non-inferiority tests with standard deviation', () => {
+    const cases = []
+    beforeAll(() => {
+      for (const entry of entries) {
+        const opts = {
+          type: 'relative',
+          alternative: 'greater',
+          base_rate: +entry.point_estimate,
+          threshold: -entry.effect_size,
+        }
+
+        cases.push({
+          baseRate: +entry.point_estimate,
+          confidenceLevel: 0.9,
+          falsePositiveRate: 0.1,
+          sample: +entry.sample_size,
+          targetPower: +entry.power_ni,
+          runtime: 10,
+          visitorsPerDay: +entry.sample_size / 10,
+          standardDeviation: +entry.stddev_base,
+          variants: entry.nr_variants - 1,
+          impact: 0,
+          threshold: -entry.effect_size,
+
+          // Non-inferiority specials
+          mu: math.getMuFromRelativeDifference(opts),
+          opts,
+
+          // Configuration
+          isNonInferiority: true,
+          comparisonMode: COMPARISON_MODE.ALL,
+          trafficMode: TRAFFIC_MODE.TOTAL,
+          testType: TEST_TYPE.CONTINUOUS,
+        })
+      }
+    })
+    describe('T-test formulas (MUST pass)', () => {
       test('Calculating power', () => {
         const results = cases.map((entry, index) => {
           const {
@@ -311,10 +406,345 @@ describe('tTest', () => {
         expect(errors.length).toBe(0)
       })
     })
+    describe('G-test formulas (SHOULD pass)', () => {
+      test('Calculating power', () => {
+        const results = cases.map((entry, index) => {
+          const {
+            targetPower,
+            sample,
+            falsePositiveRate,
+            standardDeviation,
+            baseRate,
+            impact,
+            alpha,
+            mu,
+            opts,
+            variants,
+          } = entry
+          const approx = gTest.power({
+            total_sample_size: sample,
+            base_rate: baseRate,
+            effect_size: 0,
+            alpha: getCorrectedAlpha(falsePositiveRate, variants),
+            variants,
+            sd_rate: standardDeviation,
+            alternative: 'greater',
+            mu,
+            opts,
+          })
+          return executeTest(index, targetPower, approx)
+        })
+
+        const errors = results.filter((r) => /false/.test(r))
+        expect(errors.length).toBe(0)
+      })
+
+      test('Calculating sample', () => {
+        const results = cases.map((entry, index) => {
+          const {
+            targetPower,
+            sample: targetSample,
+            falsePositiveRate,
+            standardDeviation,
+            baseRate,
+            impact,
+            alpha,
+            mu,
+            opts,
+            variants,
+          } = entry
+
+          if (targetPower < 0.7 || targetPower >= 0.999) return skipTest(index)
+          const approx = gTest.sample({
+            base_rate: baseRate,
+            effect_size: 0,
+            alpha: getCorrectedAlpha(falsePositiveRate, variants),
+            beta: 1 - targetPower,
+            variants,
+            sd_rate: standardDeviation,
+            alternative: 'greater',
+            mu,
+            opts,
+          })
+          return executeTest(index, targetSample, approx)
+        })
+
+        const errors = results.filter((r) => /false/.test(r))
+        expect(errors.length).toBe(0)
+      })
+      test('Calculating effect size', () => {
+        const results = cases.map((entry, index) => {
+          const {
+            targetPower,
+            sample,
+            falsePositiveRate,
+            standardDeviation,
+            baseRate,
+            threshold,
+            alpha,
+            mu,
+            opts,
+            variants,
+          } = entry
+          if (targetPower < 0.7 || targetPower >= 0.999) return skipTest(index)
+          const approx = gTest.impact({
+            total_sample_size: sample,
+            base_rate: baseRate,
+            alpha: getCorrectedAlpha(falsePositiveRate, variants),
+            beta: 1 - targetPower,
+            variants,
+            sd_rate: standardDeviation,
+            alternative: 'greater',
+            mu,
+            opts,
+          })
+          return executeTest(index, threshold, approx)
+        })
+
+        const errors = results.filter((r) => /false/.test(r))
+        expect(errors.length).toBe(0)
+      })
+    })
+  })
+  describe('Non-inferiority tests with calculated standard deviation', () => {
+    const cases = []
+    beforeAll(() => {
+      for (const entry of entries) {
+        const opts = {
+          type: 'relative',
+          alternative: 'greater',
+          base_rate: +entry.point_estimate,
+          threshold: -entry.effect_size,
+        }
+
+        cases.push({
+          baseRate: +entry.point_estimate,
+          confidenceLevel: 0.9,
+          falsePositiveRate: 0.1,
+          sample: +entry.sample_size,
+          targetPower: +entry.power_ni,
+          runtime: 10,
+          visitorsPerDay: +entry.sample_size / 10,
+          standardDeviation: Math.sqrt(
+            +entry.point_estimate * (1 - entry.point_estimate)
+          ),
+          variants: entry.nr_variants - 1,
+          impact: 0,
+          threshold: -entry.effect_size,
+
+          // Non-inferiority specials
+          mu: math.getMuFromRelativeDifference(opts),
+          opts,
+
+          // Configuration
+          isNonInferiority: true,
+          comparisonMode: COMPARISON_MODE.ALL,
+          trafficMode: TRAFFIC_MODE.TOTAL,
+          testType: TEST_TYPE.CONTINUOUS,
+        })
+      }
+    })
+    describe('T-test formulas (SHOULD pass)', () => {
+      test('Calculating power', () => {
+        const results = cases.map((entry, index) => {
+          const {
+            targetPower,
+            sample,
+            falsePositiveRate,
+            standardDeviation,
+            baseRate,
+            impact,
+            alpha,
+            mu,
+            opts,
+            variants,
+          } = entry
+          const approx = tTest.power({
+            total_sample_size: sample,
+            base_rate: baseRate,
+            effect_size: 0,
+            alpha: getCorrectedAlpha(falsePositiveRate, variants),
+            variants,
+            sd_rate: standardDeviation,
+            alternative: 'greater',
+            mu,
+            opts,
+          })
+          return executeTest(index, targetPower, approx)
+        })
+
+        const errors = results.filter((r) => /false/.test(r))
+        expect(errors.length).toBe(0)
+      })
+
+      test('Calculating sample', () => {
+        const results = cases.map((entry, index) => {
+          const {
+            targetPower,
+            sample: targetSample,
+            falsePositiveRate,
+            standardDeviation,
+            baseRate,
+            impact,
+            alpha,
+            mu,
+            opts,
+            variants,
+          } = entry
+
+          if (targetPower < 0.7 || targetPower >= 0.999) return skipTest(index)
+          const approx = tTest.sample({
+            base_rate: baseRate,
+            effect_size: 0,
+            alpha: getCorrectedAlpha(falsePositiveRate, variants),
+            beta: 1 - targetPower,
+            variants,
+            sd_rate: standardDeviation,
+            alternative: 'greater',
+            mu,
+            opts,
+          })
+          return executeTest(index, targetSample, approx)
+        })
+
+        const errors = results.filter((r) => /false/.test(r))
+        expect(errors.length).toBe(0)
+      })
+      test('Calculating effect size', () => {
+        const results = cases.map((entry, index) => {
+          const {
+            targetPower,
+            sample,
+            falsePositiveRate,
+            standardDeviation,
+            baseRate,
+            threshold,
+            alpha,
+            mu,
+            opts,
+            variants,
+          } = entry
+          if (targetPower < 0.7 || targetPower >= 0.999) return skipTest(index)
+          const approx = tTest.impact({
+            total_sample_size: sample,
+            base_rate: baseRate,
+            alpha: getCorrectedAlpha(falsePositiveRate, variants),
+            beta: 1 - targetPower,
+            variants,
+            sd_rate: standardDeviation,
+            alternative: 'greater',
+            mu,
+            opts,
+          })
+          return executeTest(index, threshold, approx)
+        })
+
+        const errors = results.filter((r) => /false/.test(r))
+        expect(errors.length).toBe(0)
+      })
+    })
+    describe('G-test formulas (SHOULD pass)', () => {
+      test('Calculating power', () => {
+        const results = cases.map((entry, index) => {
+          const {
+            targetPower,
+            sample,
+            falsePositiveRate,
+            standardDeviation,
+            baseRate,
+            impact,
+            alpha,
+            mu,
+            opts,
+            variants,
+          } = entry
+          const approx = gTest.power({
+            total_sample_size: sample,
+            base_rate: baseRate,
+            effect_size: 0,
+            alpha: getCorrectedAlpha(falsePositiveRate, variants),
+            variants,
+            sd_rate: standardDeviation,
+            alternative: 'greater',
+            mu,
+            opts,
+          })
+          return executeTest(index, targetPower, approx)
+        })
+
+        const errors = results.filter((r) => /false/.test(r))
+        expect(errors.length).toBe(0)
+      })
+
+      test('Calculating sample', () => {
+        const results = cases.map((entry, index) => {
+          const {
+            targetPower,
+            sample: targetSample,
+            falsePositiveRate,
+            standardDeviation,
+            baseRate,
+            impact,
+            alpha,
+            mu,
+            opts,
+            variants,
+          } = entry
+
+          if (targetPower < 0.7 || targetPower >= 0.999) return skipTest(index)
+          const approx = gTest.sample({
+            base_rate: baseRate,
+            effect_size: 0,
+            alpha: getCorrectedAlpha(falsePositiveRate, variants),
+            beta: 1 - targetPower,
+            variants,
+            sd_rate: standardDeviation,
+            alternative: 'greater',
+            mu,
+            opts,
+          })
+          return executeTest(index, targetSample, approx)
+        })
+
+        const errors = results.filter((r) => /false/.test(r))
+        expect(errors.length).toBe(0)
+      })
+      test('Calculating effect size', () => {
+        const results = cases.map((entry, index) => {
+          const {
+            targetPower,
+            sample,
+            falsePositiveRate,
+            standardDeviation,
+            baseRate,
+            threshold,
+            alpha,
+            mu,
+            opts,
+            variants,
+          } = entry
+          if (targetPower < 0.7 || targetPower >= 0.999) return skipTest(index)
+          const approx = gTest.impact({
+            total_sample_size: sample,
+            base_rate: baseRate,
+            alpha: getCorrectedAlpha(falsePositiveRate, variants),
+            beta: 1 - targetPower,
+            variants,
+            sd_rate: standardDeviation,
+            alternative: 'greater',
+            mu,
+            opts,
+          })
+          return executeTest(index, threshold, approx)
+        })
+
+        const errors = results.filter((r) => /false/.test(r))
+        expect(errors.length).toBe(0)
+      })
+    })
   })
 })
-
-describe('gTest', () => {
+describe('G-test dataset (only two-sided, no standard deviation)', () => {
   const DATASET_SIZE = 1539
   const entries = []
   beforeAll(() => {
@@ -332,59 +762,56 @@ describe('gTest', () => {
     }
   })
 
-  describe('Verifying math library', () => {
-    test('Validate dataset', () => {
-      expect(entries.length).toBe(DATASET_SIZE)
-    })
-    describe('Comparative tests', () => {
-      const cases = []
-      beforeAll(() => {
-        for (const entry of entries) {
-          cases.push({
-            baseRate: +entry.point_estimate,
-            confidenceLevel: 0.9,
-            falsePositiveRate: 0.1,
-            sample: +entry.sample_size,
-            targetPower: +entry.power,
-            runtime: 10,
-            visitorsPerDay: +entry.sample_size / 10,
-            // standardDeviation: +entry.stddev_base,
-            variants: entry.nr_variants - 1,
-            impact:
-              entry.mre_type === VALUE_TYPE.ABSOLUTE
-                ? getRelativeImpactFromAbsolute({
-                    base_rate: +entry.point_estimate,
-                    absolute_effect_size: +entry.effect_size,
-                  })
-                : +entry.effect_size,
+  test('Validate dataset', () => {
+    expect(entries.length).toBe(DATASET_SIZE)
+  })
+  describe('Two sided tests', () => {
+    const cases = []
+    beforeAll(() => {
+      for (const entry of entries) {
+        cases.push({
+          baseRate: +entry.point_estimate,
+          confidenceLevel: 0.9,
+          falsePositiveRate: 0.1,
+          sample: +entry.sample_size,
+          targetPower: +entry.power,
+          runtime: 10,
+          visitorsPerDay: +entry.sample_size / 10,
+          variants: entry.nr_variants - 1,
+          impact:
+            entry.mre_type === VALUE_TYPE.ABSOLUTE
+              ? getRelativeImpactFromAbsolute({
+                  base_rate: +entry.point_estimate,
+                  absolute_effect_size: +entry.effect_size,
+                })
+              : +entry.effect_size,
 
-            // Configuration
-            isNonInferiority: false,
-            comparisonMode: COMPARISON_MODE.ALL,
-            trafficMode: TRAFFIC_MODE.TOTAL,
-            testType: TEST_TYPE.BINOMIAL,
-          })
-        }
-      })
+          // Configuration
+          isNonInferiority: false,
+          comparisonMode: COMPARISON_MODE.ALL,
+          trafficMode: TRAFFIC_MODE.TOTAL,
+          testType: TEST_TYPE.BINOMIAL,
+        })
+      }
+    })
+    describe('T-Test formulas (MUST NOT pass)', () => {
       test('Calculating power', () => {
         const results = cases.map((entry, index) => {
           const {
             targetPower,
             sample,
             falsePositiveRate,
-            standardDeviation,
             baseRate,
             impact,
             alpha,
             variants,
           } = entry
-          const approx = gTest.power({
+          const approx = tTest.power({
             total_sample_size: sample,
             base_rate: baseRate,
             effect_size: impact,
             alpha: getCorrectedAlpha(falsePositiveRate, variants),
             variants,
-            sd_rate: standardDeviation,
             alternative: 'two-sided',
             mu: 0,
           })
@@ -402,7 +829,6 @@ describe('gTest', () => {
             targetPower,
             sample: targetSample,
             falsePositiveRate,
-            standardDeviation,
             baseRate,
             impact,
             alpha,
@@ -410,13 +836,12 @@ describe('gTest', () => {
           } = entry
 
           if (targetPower < 0.7 || targetPower >= 0.999) return skipTest(index)
-          const approx = gTest.sample({
+          const approx = tTest.sample({
             base_rate: baseRate,
             effect_size: impact,
             alpha: getCorrectedAlpha(falsePositiveRate, variants),
             beta: 1 - targetPower,
             variants,
-            sd_rate: standardDeviation,
             alternative: 'two-sided',
             mu: 0,
           })
@@ -433,7 +858,93 @@ describe('gTest', () => {
             targetPower,
             sample,
             falsePositiveRate,
-            standardDeviation,
+            baseRate,
+            impact: targetImpact,
+            alpha,
+            variants,
+          } = entry
+          if (targetPower < 0.7 || targetPower >= 0.999) return skipTest(index)
+          const approx = tTest.impact({
+            total_sample_size: sample,
+            base_rate: baseRate,
+            alpha: getCorrectedAlpha(falsePositiveRate, variants),
+            beta: 1 - targetPower,
+            variants,
+            alternative: 'two-sided',
+            mu: 0,
+          })
+          return executeTest(index, targetImpact, approx)
+        })
+
+        const errors = results.filter((r) => /false/.test(r))
+        expect(errors.length).toBe(0)
+      })
+    })
+
+    describe('G-Test formulas (MUST pass)', () => {
+      test('Calculating power', () => {
+        const results = cases.map((entry, index) => {
+          const {
+            targetPower,
+            sample,
+            falsePositiveRate,
+            baseRate,
+            impact,
+            alpha,
+            variants,
+          } = entry
+          const approx = gTest.power({
+            total_sample_size: sample,
+            base_rate: baseRate,
+            effect_size: impact,
+            alpha: getCorrectedAlpha(falsePositiveRate, variants),
+            variants,
+            alternative: 'two-sided',
+            mu: 0,
+          })
+          return executeTest(index, targetPower, approx)
+        })
+
+        const errors = results.filter((r) => /false/.test(r))
+
+        expect(errors.length).toBe(0)
+      })
+
+      test('Calculating sample', () => {
+        const results = cases.map((entry, index) => {
+          const {
+            targetPower,
+            sample: targetSample,
+            falsePositiveRate,
+            baseRate,
+            impact,
+            alpha,
+            variants,
+          } = entry
+
+          if (targetPower < 0.7 || targetPower >= 0.999) return skipTest(index)
+          const approx = gTest.sample({
+            base_rate: baseRate,
+            effect_size: impact,
+            alpha: getCorrectedAlpha(falsePositiveRate, variants),
+            beta: 1 - targetPower,
+            variants,
+            alternative: 'two-sided',
+            mu: 0,
+          })
+          return executeTest(index, targetSample, approx)
+        })
+
+        const errors = results.filter((r) => /false/.test(r))
+        expect(errors.length).toBe(0)
+      })
+
+      test('Calculating effect size', () => {
+        const results = cases.map((entry, index) => {
+          const {
+            targetPower,
+            sample,
+            falsePositiveRate,
             baseRate,
             impact: targetImpact,
             alpha,
@@ -446,7 +957,6 @@ describe('gTest', () => {
             alpha: getCorrectedAlpha(falsePositiveRate, variants),
             beta: 1 - targetPower,
             variants,
-            sd_rate: standardDeviation,
             alternative: 'two-sided',
             mu: 0,
           })
@@ -457,139 +967,5 @@ describe('gTest', () => {
         expect(errors.length).toBe(0)
       })
     })
-    // describe('Non-inferiority tests', () => {
-    //   const cases = []
-    //   beforeAll(() => {
-    //     for (const entry of entries) {
-    //       const opts = {
-    //         type: 'relative',
-    //         alternative: 'greater',
-    //         base_rate: +entry.point_estimate,
-    //         threshold: -entry.effect_size,
-    //       }
-
-    //       cases.push({
-    //         baseRate: +entry.point_estimate,
-    //         confidenceLevel: 0.9,
-    //         falsePositiveRate: 0.1,
-    //         sample: +entry.sample_size,
-    //         targetPower: +entry.power_ni,
-    //         runtime: 10,
-    //         visitorsPerDay: +entry.sample_size / 10,
-    //         standardDeviation: +entry.stddev_base,
-    //         variants: entry.nr_variants - 1,
-    //         impact: 0,
-    //         threshold: -entry.effect_size,
-
-    //         // Non-inferiority specials
-    //         mu: math.getMuFromRelativeDifference(opts),
-    //         opts,
-
-    //         // Configuration
-    //         isNonInferiority: true,
-    //         comparisonMode: COMPARISON_MODE.ALL,
-    //         trafficMode: TRAFFIC_MODE.TOTAL,
-    //         testType: TEST_TYPE.CONTINUOUS,
-    //       })
-    //     }
-    //   })
-    //   test('Calculating power', () => {
-    //     const results = cases.map((entry, index) => {
-    //       const {
-    //         targetPower,
-    //         sample,
-    //         falsePositiveRate,
-    //         standardDeviation,
-    //         baseRate,
-    //         impact,
-    //         alpha,
-    //         mu,
-    //         opts,
-    //         variants,
-    //       } = entry
-    //       const approx = tTest.power({
-    //         total_sample_size: sample,
-    //         base_rate: baseRate,
-    //         effect_size: 0,
-    //         alpha: getCorrectedAlpha(falsePositiveRate, variants),
-    //         variants,
-    //         sd_rate: standardDeviation,
-    //         alternative: 'greater',
-    //         mu,
-    //         opts,
-    //       })
-    //       return executeTest(index, targetPower, approx)
-    //     })
-
-    //     const errors = results.filter((r) => /false/.test(r))
-    //     expect(errors.length).toBe(0)
-    //   })
-
-    //   test('Calculating sample', () => {
-    //     const results = cases.map((entry, index) => {
-    //       const {
-    //         targetPower,
-    //         sample: targetSample,
-    //         falsePositiveRate,
-    //         standardDeviation,
-    //         baseRate,
-    //         impact,
-    //         alpha,
-    //         mu,
-    //         opts,
-    //         variants,
-    //       } = entry
-
-    //       if (targetPower < 0.7 || targetPower >= 0.999) return skipTest(index)
-    //       const approx = tTest.sample({
-    //         base_rate: baseRate,
-    //         effect_size: 0,
-    //         alpha: getCorrectedAlpha(falsePositiveRate, variants),
-    //         beta: 1 - targetPower,
-    //         variants,
-    //         sd_rate: standardDeviation,
-    //         alternative: 'greater',
-    //         mu,
-    //         opts,
-    //       })
-    //       return executeTest(index, targetSample, approx)
-    //     })
-
-    //     const errors = results.filter((r) => /false/.test(r))
-    //     expect(errors.length).toBe(0)
-    //   })
-    //   test('Calculating effect size', () => {
-    //     const results = cases.map((entry, index) => {
-    //       const {
-    //         targetPower,
-    //         sample,
-    //         falsePositiveRate,
-    //         standardDeviation,
-    //         baseRate,
-    //         threshold,
-    //         alpha,
-    //         mu,
-    //         opts,
-    //         variants,
-    //       } = entry
-    //       if (targetPower < 0.7 || targetPower >= 0.999) return skipTest(index)
-    //       const approx = tTest.impact({
-    //         total_sample_size: sample,
-    //         base_rate: baseRate,
-    //         alpha: getCorrectedAlpha(falsePositiveRate, variants),
-    //         beta: 1 - targetPower,
-    //         variants,
-    //         sd_rate: standardDeviation,
-    //         alternative: 'greater',
-    //         mu,
-    //         opts,
-    //       })
-    //       return executeTest(index, threshold, approx)
-    //     })
-
-    //     const errors = results.filter((r) => /false/.test(r))
-    //     expect(errors.length).toBe(0)
-    //   })
-    // })
   })
 })
