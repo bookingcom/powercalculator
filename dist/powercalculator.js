@@ -5969,8 +5969,15 @@
     ABSOLUTE: 'absolute',
   });
 
+  const CALCULATING = Object.freeze({
+    EFFECT_SIZE: 'impact',
+    POWER: 'power',
+    SAMPLE: 'sample',
+  });
+
   function displayValue(value, type = 'int') {
-    const alternativeToNaN = (val) => (!Number.isInteger(val) && !isFinite(val) ? '-' : val);
+    const alternativeToNaN = (val) =>
+      !Number.isInteger(val) && !isFinite(val) ? '-' : val;
 
     switch (type) {
       case 'float':
@@ -6030,6 +6037,35 @@
     }
 
     return isNaN(relativeThreshold) ? 0 : relativeThreshold
+  }
+
+  function getFormula(state, calculating) {
+    if (!Object.values(CALCULATING).includes(calculating)) {
+      throw new Error(
+        `${calculating} is not a valid value. Valid values: ${Object.values(
+        CALCULATING
+      ).join(',')}`
+      )
+    }
+
+    const { testType, isNonInferiority } = state;
+    // Special case. We want to use tTest for binomial non-inferiority.
+    if (isNonInferiority && testType === TEST_TYPE.BINOMIAL) {
+      return math.tTest[calculating]
+    }
+    return math[testType][calculating]
+  }
+
+  // Sometimes we need the standard deviation with binomial distributions. This
+  // means that we need to calculate it as the one we have stored is the one for
+  // continuous distributions, we need to calculate it. This calculation has been
+  // validated with real life distributions.
+  function getStandardDeviation(state) {
+    if (state.testType === TEST_TYPE.CONTINUOUS) {
+      return state.standardDeviation
+    } else {
+      return Math.sqrt(state.baseRate * (1 - state.baseRate))
+    }
   }
 
   const calculator = {
@@ -6210,7 +6246,7 @@
 
         // We need to recalculate based on the selected fields.
         // the result will be something like [tTest/gTest][impact/sample]
-        const formula = math[testType][focused];
+        const formula = getFormula(state, focused); 
         const alpha =
           state.comparisonMode === COMPARISON_MODE.ALL
             ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
@@ -6236,17 +6272,19 @@
           : 0;
 
         if (focused === FOCUS.SAMPLE) {
-          const sample = Math.ceil(formula({
+          const sample = Math.ceil(
+            formula({
               base_rate: newBaseRate,
               effect_size: impact,
-              sd_rate: state.standardDeviation,
+              sd_rate: getStandardDeviation(state),
               alpha,
               beta: 1 - state.targetPower,
               variants: state.variants,
               alternative: getAlternative(state.isNonInferiority),
               mu,
               opts,
-            }));
+            })
+          );
 
           if (lockedField === BLOCKED.DAYS) {
             state.runtime = Math.ceil(sample / state.visitorsPerDay);
@@ -6267,7 +6305,7 @@
           const effect = formula({
             total_sample_size: state.sample,
             base_rate: newBaseRate,
-            sd_rate: state.standardDeviation,
+            sd_rate: getStandardDeviation(state),
             alpha,
             beta: 1 - state.targetPower,
             variants: state.variants,
@@ -6299,7 +6337,8 @@
           // Do not allow not numbers
           isNaN(baseRate) ||
           // gTest (percentage) -- 0 < base rate < 100
-          (state.testType === TEST_TYPE.BINOMIAL && (baseRate >= 100 || baseRate <= 0)) ||
+          (state.testType === TEST_TYPE.BINOMIAL &&
+            (baseRate >= 100 || baseRate <= 0)) ||
           // tTest (amount) -- 0 <= base rate
           (state.testType === TEST_TYPE.CONTINUOUS && baseRate <= 0)
         ) {
@@ -6332,25 +6371,27 @@
           ? math.getMuFromRelativeDifference(opts)
           : 0;
 
-        const type = state.testType;
-        const formula = math[type][focusedBlock];
+        state.testType;
+        const formula = getFormula(state, focusedBlock); 
         const alpha =
           state.comparisonMode === COMPARISON_MODE.ALL
             ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
             : state.falsePositiveRate;
 
         if (focusedBlock === FOCUS.SAMPLE) {
-          const sample = Math.ceil(formula({
+          const sample = Math.ceil(
+            formula({
               base_rate: newBaseRate,
               effect_size: impact,
-              sd_rate: state.standardDeviation,
+              sd_rate: getStandardDeviation(state),
               alpha,
               beta: 1 - state.targetPower,
               variants: state.variants,
               alternative: getAlternative(state.isNonInferiority),
               mu,
               opts,
-            }));
+            })
+          );
 
           if (lockedField === BLOCKED.DAYS) {
             state.runtime = Math.ceil(sample / state.visitorsPerDay);
@@ -6375,7 +6416,7 @@
           const effect = formula({
             total_sample_size: state.sample,
             base_rate: newBaseRate, // It uses the displayed value
-            sd_rate: state.standardDeviation,
+            sd_rate: getStandardDeviation(state),
             alpha,
             beta: 1 - state.targetPower,
             variants: state.variants,
@@ -6436,8 +6477,8 @@
           ? math.getMuFromRelativeDifference(opts)
           : 0;
 
-        const type = state.testType;
-        const impactFormula = math[type].impact;
+        state.testType;
+        const impactFormula = getFormula(state, CALCULATING.EFFECT_SIZE); 
         const alpha =
           state.comparisonMode === COMPARISON_MODE.ALL
             ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
@@ -6448,7 +6489,7 @@
           // doesnt.
           total_sample_size: newSample,
           base_rate: state.baseRate,
-          sd_rate: state.standardDeviation,
+          sd_rate: getStandardDeviation(state),
           alpha,
           beta: 1 - state.targetPower,
           variants: state.variants,
@@ -6509,8 +6550,8 @@
             ? math.getMuFromRelativeDifference(opts)
             : 0;
 
-          const type = state.testType;
-          const impactFormula = math[type].impact;
+          state.testType;
+          const impactFormula = getFormula(state, CALCULATING.EFFECT_SIZE); 
           const alpha =
             state.comparisonMode === COMPARISON_MODE.ALL
               ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
@@ -6519,7 +6560,7 @@
           const newImpact = impactFormula({
             total_sample_size: newSample,
             base_rate: state.baseRate,
-            sd_rate: state.standardDeviation,
+            sd_rate: getStandardDeviation(state),
             alpha,
             beta: 1 - state.targetPower,
             variants: state.variants,
@@ -6577,8 +6618,8 @@
             ? math.getMuFromRelativeDifference(opts)
             : 0;
 
-          const type = state.testType;
-          const impactFormula = math[type].impact;
+          state.testType;
+          const impactFormula = getFormula(state, CALCULATING.EFFECT_SIZE); 
           const alpha =
             state.comparisonMode === COMPARISON_MODE.ALL
               ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
@@ -6589,7 +6630,7 @@
             // doesnt.
             total_sample_size: newSample,
             base_rate: state.baseRate,
-            sd_rate: state.standardDeviation,
+            sd_rate: getStandardDeviation(state),
             alpha,
             beta: 1 - state.targetPower,
             variants: state.variants,
@@ -6637,24 +6678,26 @@
               })
             : impact) / 100;
 
-        const type = state.testType;
-        const sampleFormula = math[type].sample;
+        state.testType;
+        const sampleFormula = getFormula(state, CALCULATING.SAMPLE); 
         const alpha =
           state.comparisonMode === COMPARISON_MODE.ALL
             ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
             : state.falsePositiveRate;
 
-        const sample = Math.ceil(sampleFormula({
+        const sample = Math.ceil(
+          sampleFormula({
             base_rate: state.baseRate,
             effect_size: newImpact,
-            sd_rate: state.standardDeviation,
+            sd_rate: getStandardDeviation(state),
             alpha,
             beta: 1 - state.targetPower,
             variants: state.variants,
             alternative: getAlternative(state.isNonInferiority),
             mu: 0, // if it isn't non-inferiority, it is always 0
             opts: {}, // emtpy if it isn't non-inferiority
-          }));
+          })
+        );
 
         if (lockedField === BLOCKED.DAYS) {
           state.runtime = Math.ceil(sample / state.visitorsPerDay);
@@ -6705,24 +6748,26 @@
           ? math.getMuFromAbsolutePerDay(opts)
           : math.getMuFromRelativeDifference(opts);
 
-        const type = state.testType;
-        const sampleFormula = math[type].sample;
+        state.testType;
+        const sampleFormula = getFormula(state, CALCULATING.SAMPLE); 
         const alpha =
           state.comparisonMode === COMPARISON_MODE.ALL
             ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
             : state.falsePositiveRate;
 
-        const sample = Math.ceil(sampleFormula({
+        const sample = Math.ceil(
+          sampleFormula({
             base_rate: baseRate,
             effect_size: impact,
-            sd_rate: state.standardDeviation,
+            sd_rate: getStandardDeviation(state),
             alpha,
             beta: 1 - state.targetPower,
             variants: state.variants,
             alternative: getAlternative(state.isNonInferiority),
             mu,
             opts,
-          }));
+          })
+        );
 
         if (lockedField === BLOCKED.DAYS) {
           state.runtime = Math.ceil(sample / visitorsPerDay);
@@ -6753,7 +6798,8 @@
       // UI getters
       // Configuration
       variants: (state) => state.variants,
-      falsePositiveRate: (state) => displayValue(state.falsePositiveRate, 'percentage'),
+      falsePositiveRate: (state) =>
+        displayValue(state.falsePositiveRate, 'percentage'),
       targetPower: (state) => displayValue(state.targetPower, 'percentage'),
       isNonInferiority: (state) => state.isNonInferiority,
       testType: (state) => state.testType,
@@ -6761,11 +6807,13 @@
       trafficMode: (state) => state.trafficMode,
 
       // Base rate
-      baseRate: (state) => displayValue(
+      baseRate: (state) =>
+        displayValue(
           state.baseRate,
           state.testType === TEST_TYPE.BINOMIAL ? 'percentage' : 'float'
         ),
-      standardDeviation: (state) => displayValue(state.standardDeviation, 'float'),
+      standardDeviation: (state) =>
+        displayValue(state.standardDeviation, 'float'),
       metricTotal: (state) => (state.sample * state.baseRate).toFixed(0),
 
       // Sample
@@ -6826,8 +6874,10 @@
       },
 
       // THRESHOLD
-      relativeThreshold: (state) => displayValue(state.relativeThreshold, 'percentage'),
-      absoluteThreshold: (state) => displayValue(state.absoluteThreshold, 'float'),
+      relativeThreshold: (state) =>
+        displayValue(state.relativeThreshold, 'percentage'),
+      absoluteThreshold: (state) =>
+        displayValue(state.absoluteThreshold, 'float'),
     },
   };
 
