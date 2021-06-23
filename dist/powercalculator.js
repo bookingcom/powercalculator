@@ -6244,6 +6244,9 @@
             ? state.baseRate / 100
             : state.baseRate * 100;
 
+        state.baseRate = newBaseRate;
+        state.testType = testType;
+
         // We need to recalculate based on the selected fields.
         // the result will be something like [tTest/gTest][impact/sample]
         const formula = getFormula(state, focused); 
@@ -6263,7 +6266,7 @@
               // different test. Also, it would turn the calculation stateful
               threshold: 0,
               visitors_per_day: state.visitorsPerDay,
-              base_rate: newBaseRate,
+              base_rate: state.baseRate,
             }
           : {};
 
@@ -6293,10 +6296,7 @@
           }
 
           if (state.isNonInferiority) {
-            state.absoluteThreshold = getAbsoluteThreshold({
-              ...state,
-              baseRate: newBaseRate,
-            });
+            state.absoluteThreshold = getAbsoluteThreshold(state);
           } else {
             state.absoluteImpact = getAbsoluteImpact(newBaseRate, impact);
           }
@@ -6318,7 +6318,6 @@
             state.relativeThreshold = effect;
             state.absoluteThreshold = getAbsoluteThreshold({
               ...state,
-              baseRate: newBaseRate,
               relativeThreshold: effect,
             });
           } else {
@@ -6326,9 +6325,6 @@
             state.absoluteImpact = getAbsoluteImpact(newBaseRate, effect);
           }
         }
-
-        state.baseRate = newBaseRate;
-        state.testType = testType;
       },
 
       // == BASE ==
