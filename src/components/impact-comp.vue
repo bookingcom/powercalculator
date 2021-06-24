@@ -32,7 +32,7 @@
             :fieldValue.sync="relativeImpact"
             :isReadOnly="isBlockFocused"
             :isBlockFocused="isBlockFocused"
-            enableEdit="true"
+            :enableEdit="true"
           ></pc-block-field>
         </label>
       </li>
@@ -43,11 +43,11 @@
           <pc-block-field
             class="pc-input-field"
             fieldProp="impactByMetricValue"
-            :suffix="testType == 'gTest' ? '%' : ''"
+            :suffix="isBinomial ? '%' : ''"
             :fieldValue.sync="absoluteImpact"
             :isReadOnly="isBlockFocused"
             :isBlockFocused="isBlockFocused"
-            enableEdit="true"
+            :enableEdit="true"
             aria-label="visitors with goals"
           ></pc-block-field>
           <span class="pc-input-details">
@@ -63,13 +63,13 @@
             class="pc-input-field"
             fieldProp="impactByVisitors"
             :fieldValue="absoluteImpactPerVisitor"
-            isReadOnly="true"
+            :isReadOnly="true"
             :isBlockFocused="isBlockFocused"
             :enableEdit="false"
           ></pc-block-field>
           <span class="pc-input-details">
             {{
-              testType == 'gTest'
+              isBinomial
                 ? ' Incremental units'
                 : ' Incremental change in the metric'
             }}
@@ -87,7 +87,7 @@
           ></pc-block-field>
           <span class="pc-input-details">
             {{
-              testType == 'gTest'
+              isBinomial
                 ? ' Incremental units per day'
                 : ' Incremental change in the metric per day'
             }}

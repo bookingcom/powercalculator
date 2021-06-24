@@ -8,7 +8,7 @@
     <span
       class="pc-value-formatting pc-value--formatted"
       aria-hidden="true"
-      :class="'pc-value-formatting-' + fieldProp"
+      :class="`pc-value-formatting-${fieldProp}`"
       :data-prefix="prefix"
       :data-suffix="suffix"
       :style="fieldFormattedStyle"
@@ -67,7 +67,7 @@ export default {
   updated() {
     // Resync the editable fields
     const el = this.$refs['pc-value']
-    if (el && el.textContent != this.formattedVal) {
+    if (el && el.textContent !== this.formattedVal) {
       el.textContent = this.formattedVal
     }
 
@@ -85,20 +85,20 @@ export default {
   },
   computed: {
     isLocked() {
-      return this.lockedField && this.lockedField == this.fieldProp
+      return this.lockedField && this.lockedField === this.fieldProp
     },
     formattedVal() {
       let result = this.fieldValue
       const sep = ','
 
       if (result / 1000 >= 1) {
-        const [integer, decimal] = (result + '').split('.')
+        const [integer, decimal] = String(result).split('.')
 
         result = integer.split('').reduceRight((prev, cur, i, arr) => {
           const iFromLeft = arr.length - i
           let resultStr = cur + prev
 
-          if (iFromLeft % 3 == 0 && iFromLeft != 0 && i != 0) {
+          if (iFromLeft % 3 === 0 && iFromLeft !== 0 && i !== 0) {
             resultStr = sep + resultStr
           }
 
@@ -152,7 +152,7 @@ export default {
       // People will use copy paste. We need some data sanitization
 
       // remove markup
-      const oldValue = this.$refs['pc-value'].textContent + ''
+      const oldValue = this.$refs['pc-value'].textContent || ''
 
       // remove commas
       // try to extract numbers from it

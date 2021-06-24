@@ -33,7 +33,7 @@
             :fieldValue.sync="thresholdRelative"
             :isBlockFocused="isBlockFocused"
             :isReadOnly="isBlockFocused"
-            enableEdit="true"
+            :enableEdit="true"
           ></pc-block-field>
         </label>
       </li>
@@ -54,7 +54,7 @@
             :fieldValue.sync="thresholdAbsolute"
             :isBlockFocused="isBlockFocused"
             :isReadOnly="isBlockFocused"
-            enableEdit="true"
+            :enableEdit="true"
           ></pc-block-field>
         </label>
       </li>

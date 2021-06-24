@@ -5,24 +5,24 @@
   >
     <pc-svg-chain :isBlockFocused="isBlockFocused"></pc-svg-chain>
 
-    <div class="pc-header" v-if="testType == 'gTest'">Base Rate</div>
+    <div class="pc-header" v-if="isBinomial">Base Rate</div>
     <div class="pc-header" v-else>Base Average</div>
 
     <ul class="pc-inputs">
       <li class="pc-input-item pc-input-left">
         <label>
           <span class="pc-input-title"
-            >{{ testType == 'gTest' ? 'Base Rate' : 'Base Average' }}
+            >{{ isBinomial ? 'Base Rate' : 'Base Average' }}
             <small class="pc-input-sub-title">conversion</small></span
           >
 
           <pc-block-field
             fieldProp="base"
-            :suffix="testType === TEST_TYPE.BINOMIAL ? '%' : ''"
+            :suffix="isBinomial ? '%' : ''"
             :fieldValue.sync="base"
             :isReadOnly="isReadOnly"
             :isBlockFocused="isBlockFocused"
-            enableEdit="true"
+            :enableEdit="true"
           ></pc-block-field>
         </label>
       </li>
@@ -45,7 +45,7 @@
         </label>
       </li>
 
-      <li class="pc-input-item pc-input-sd-rate" v-if="testType == 'tTest'">
+      <li class="pc-input-item pc-input-sd-rate" v-if="!isBinomial">
         <label>
           <pc-block-field
             prefix="±"
@@ -53,7 +53,7 @@
             :fieldValue.sync="sdRate"
             :isReadOnly="isReadOnly"
             :isBlockFocused="isBlockFocused"
-            enableEdit="true"
+            :enableEdit="true"
           ></pc-block-field>
           <span class="pc-input-details">Base Standard deviation</span>
         </label>

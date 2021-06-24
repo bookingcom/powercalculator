@@ -99,7 +99,7 @@
               fieldProp="variants"
               prefix="base + "
               :fieldValue.sync="variants"
-              enableEdit="true"
+              :enableEdit="true"
             ></pc-block-field>
             variant{{ variants > 1 ? 's' : '' }}
           </label>
@@ -111,7 +111,7 @@
               suffix="%"
               fieldProp="falsePositiveRate"
               :fieldValue.sync="falsePositiveRate"
-              enableEdit="true"
+              :enableEdit="true"
             ></pc-block-field>
             false positive rate
           </label>
@@ -123,7 +123,7 @@
               :class="{ 'pc-top-fields-error': power < 80 }"
               fieldProp="power"
               :fieldValue.sync="power"
-              enableEdit="true"
+              :enableEdit="true"
             ></pc-block-field>
             power
           </label>
@@ -132,7 +132,7 @@
 
       <div
         class="pc-blocks-wrapper"
-        :class="{ 'pc-blocks-wrapper-ttest': testType == 'tTest' }"
+        :class="{ 'pc-blocks-wrapper-ttest': testType === 'tTest' }"
       >
         <base-comp
           :blockName="FOCUS.BASE"
@@ -206,17 +206,23 @@ export default {
     if (
       importedData.lockedField &&
       Object.values(BLOCKED).includes(importedData.lockedField)
-    ) {this.lockedField = importedData.lockedField}
+    ) {
+      this.lockedField = importedData.lockedField
+    }
 
     if (
       importedData.focusedBlock &&
       Object.values(FOCUS).includes(importedData.focusedBlock)
-    ) {this.focusedBlock = importedData.focusedBlock}
+    ) {
+      this.focusedBlock = importedData.focusedBlock
+    }
 
     if (
       importedData.selected &&
       Object.values(SELECTED).includes(importedData.selected)
-    ) {this.selected = importedData.selected}
+    ) {
+      this.selected = importedData.selected
+    }
 
     // Import the metrics.
     this.$store.commit('SET_IMPORTED_METRICS', importedData)

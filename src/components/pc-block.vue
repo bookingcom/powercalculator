@@ -5,19 +5,22 @@
 <script>
 import pcBlockField from './pc-block-field.vue'
 import pcSvgChain from './pc-svg-chain.vue'
+import { TEST_TYPE } from '../store/modules/calculator'
 
 export default {
   props: ['blockName', 'lockedField', 'focusedBlock'],
-  data: () => ({}),
   computed: {
     testType() {
       return this.$store.getters.testType
+    },
+    isBinomial() {
+      return this.$store.testType === TEST_TYPE.BINOMIAL
     },
     isBlockFocused() {
       return this.focusedBlock === this.blockName
     },
     isReadOnly() {
-      return this.calculateProp == this.blockName
+      return this.calculateProp === this.blockName
     },
   },
   components: {

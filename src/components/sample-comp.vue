@@ -53,7 +53,7 @@
             :fieldValue.sync="visitorsPerDay"
             :isReadOnly="lockedField === BLOCKED.VISITORS_PER_DAY"
             :isBlockFocused="isBlockFocused"
-            enableEdit="true"
+            :enableEdit="true"
             :lockedField="lockedField"
           ></pc-block-field>
         </label>
@@ -178,7 +178,7 @@
             :fieldValue.sync="runtime"
             :isReadOnly="lockedField === BLOCKED.DAYS"
             :isBlockFocused="isBlockFocused"
-            enableEdit="true"
+            :enableEdit="true"
             :lockedField="lockedField"
             aria-label="Days"
           ></pc-block-field>
@@ -297,7 +297,7 @@ export default {
       }
     },
     getLockedStateClass(param) {
-      return this.lockedField == param
+      return this.lockedField === param
         ? 'pc-value-field--locked'
         : 'pc-value-field--unlocked'
     },
