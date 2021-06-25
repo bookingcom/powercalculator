@@ -13,7 +13,12 @@
       class="pc-calc-radio pc-calc-radio--impact"
       :class="{ 'pc-calc-radio--active': isBlockFocused }"
     >
-      <input type="radio" v-model="isFocused" :value="blockName" />
+      <input
+        type="radio"
+        v-model="isFocused"
+        :value="blockName"
+        :tabindex="isBlockFocused ? -1 : 4"
+      />
       {{ isBlockFocused ? 'Calculating' : 'Calculate' }}
     </label>
 
@@ -27,13 +32,14 @@
           >
 
           <pc-block-field
-            class="pc-input-field"
-            fieldProp="thresholdRelative"
-            suffix="%"
+            :enableEdit="true"
             :fieldValue.sync="thresholdRelative"
             :isBlockFocused="isBlockFocused"
             :isReadOnly="isBlockFocused"
-            :enableEdit="true"
+            :tabindex="isBlockFocused ? -1 : 12"
+            class="pc-input-field"
+            fieldProp="thresholdRelative"
+            suffix="%"
           ></pc-block-field>
         </label>
       </li>
@@ -48,13 +54,14 @@
           >
 
           <pc-block-field
-            class="pc-input-field"
-            fieldProp="thresholdAbsolute"
-            suffix=""
+            :enableEdit="true"
             :fieldValue.sync="thresholdAbsolute"
             :isBlockFocused="isBlockFocused"
             :isReadOnly="isBlockFocused"
-            :enableEdit="true"
+            :tabindex="isBlockFocused ? -1 : 13"
+            class="pc-input-field"
+            fieldProp="thresholdAbsolute"
+            suffix=""
           ></pc-block-field>
         </label>
       </li>

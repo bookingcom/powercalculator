@@ -13,7 +13,12 @@
       class="pc-calc-radio pc-calc-radio--impact"
       :class="{ 'pc-calc-radio--active': isBlockFocused }"
     >
-      <input type="radio" v-model="isFocused" :value="blockName" />
+      <input
+        type="radio"
+        v-model="isFocused"
+        :value="blockName"
+        :tabindex="isBlockFocused ? -1 : 3"
+      />
       {{ isBlockFocused ? 'Calculating' : 'Calculate' }}
     </label>
 
@@ -25,14 +30,15 @@
           <span class="pc-input-title">Relative</span>
 
           <pc-block-field
-            class="pc-input-field"
-            :prefix="isNonInferiority ? '' : '±'"
-            suffix="%"
-            fieldProp="impact"
-            :fieldValue.sync="relativeImpact"
-            :isReadOnly="isBlockFocused"
-            :isBlockFocused="isBlockFocused"
             :enableEdit="true"
+            :fieldValue.sync="relativeImpact"
+            :isBlockFocused="isBlockFocused"
+            :isReadOnly="isBlockFocused"
+            :prefix="isNonInferiority ? '' : '±'"
+            :tabindex="isBlockFocused ? -1 : 10"
+            class="pc-input-field"
+            fieldProp="impact"
+            suffix="%"
           ></pc-block-field>
         </label>
       </li>
@@ -41,14 +47,15 @@
           <span class="pc-input-title">Absolute</span>
 
           <pc-block-field
+            :enableEdit="true"
+            :fieldValue.sync="absoluteImpact"
+            :isBlockFocused="isBlockFocused"
+            :isReadOnly="isBlockFocused"
+            :suffix="isBinomial ? '%' : ''"
+            :tabindex="isBlockFocused ? -1 : 11"
+            aria-label="visitors with goals"
             class="pc-input-field"
             fieldProp="impactByMetricValue"
-            :suffix="isBinomial ? '%' : ''"
-            :fieldValue.sync="absoluteImpact"
-            :isReadOnly="isBlockFocused"
-            :isBlockFocused="isBlockFocused"
-            :enableEdit="true"
-            aria-label="visitors with goals"
           ></pc-block-field>
           <span class="pc-input-details">
             going from {{ addPercentToString(baseRate) }} to either

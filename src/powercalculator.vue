@@ -7,10 +7,11 @@
             <pc-tooltip class="pc-test-type-tooltip-wrapper">
               <label class="pc-test-type-labels" slot="text">
                 <input
-                  type="radio"
-                  name="test-mode"
-                  v-model="testType"
                   :value="TEST_TYPE.BINOMIAL"
+                  name="test-mode"
+                  tabindex="-1"
+                  type="radio"
+                  v-model="testType"
                 />
                 Binomial Metric
               </label>
@@ -23,10 +24,11 @@
             <pc-tooltip class="pc-test-type-tooltip-wrapper">
               <label class="pc-test-type-labels" slot="text">
                 <input
-                  type="radio"
-                  name="test-mode"
-                  v-model="testType"
                   :value="TEST_TYPE.CONTINUOUS"
+                  name="test-mode"
+                  tabindex="-1"
+                  type="radio"
+                  v-model="testType"
                 />
                 Continuous Metric
               </label>
@@ -40,20 +42,22 @@
           <div class="pc-traffic-mode">
             <label class="pc-traffic-mode-labels" slot="text">
               <input
-                type="radio"
-                name="traffic-mode"
-                v-model="trafficMode"
                 :value="TRAFFIC_MODE.DAILY"
                 checked
+                name="traffic-mode"
+                tabindex="-1"
+                type="radio"
+                v-model="trafficMode"
               />
               Daily traffic
             </label>
             <label class="pc-traffic-mode-labels" slot="text">
               <input
-                type="radio"
-                name="traffic-mode"
-                v-model="trafficMode"
                 :value="TRAFFIC_MODE.TOTAL"
+                name="traffic-mode"
+                tabindex="-1"
+                type="radio"
+                v-model="trafficMode"
               />
               Total traffic
             </label>
@@ -61,7 +65,7 @@
 
           <div class="pc-non-inferiority">
             <label class="pc-non-inf-label">
-              <input type="checkbox" v-model="isNonInferiority" />
+              <input type="checkbox" v-model="isNonInferiority" tabindex="-1" />
               Use non inferiority test
             </label>
           </div>
@@ -69,19 +73,21 @@
           <div class="pc-comparison-mode">
             <label class="pc-comparison-mode-labels" slot="text">
               <input
-                type="radio"
-                name="comparison-mode"
-                v-model="comparisonMode"
                 :value="COMPARISON_MODE.ALL"
+                name="comparison-mode"
+                tabindex="-1"
+                type="radio"
+                v-model="comparisonMode"
               />
               Base vs All variants
             </label>
             <label class="pc-traffic-mode-labels" slot="text">
               <input
-                type="radio"
-                name="comparison-mode"
-                v-model="comparisonMode"
                 :value="COMPARISON_MODE.ONE"
+                name="comparison-mode"
+                tabindex="-1"
+                type="radio"
+                v-model="comparisonMode"
               />
               Base vs One variant
             </label>
@@ -95,35 +101,38 @@
         <div class="pc-controls-right">
           <label class="pc-variants">
             <pc-block-field
+              :enableEdit="true"
+              :fieldValue.sync="variants"
               class="pc-variants-input"
               fieldProp="variants"
               prefix="base + "
-              :fieldValue.sync="variants"
-              :enableEdit="true"
+              tabindex="-1"
             ></pc-block-field>
             variant{{ variants > 1 ? 's' : '' }}
           </label>
 
           <label class="pc-false-positive">
             <pc-block-field
-              class="pc-false-positive-input"
               :class="{ 'pc-top-fields-error': falsePositiveRate > 10 }"
-              suffix="%"
-              fieldProp="falsePositiveRate"
-              :fieldValue.sync="falsePositiveRate"
               :enableEdit="true"
+              :fieldValue.sync="falsePositiveRate"
+              class="pc-false-positive-input"
+              fieldProp="falsePositiveRate"
+              suffix="%"
+              tabindex="-1"
             ></pc-block-field>
             false positive rate
           </label>
 
           <label class="pc-power">
             <pc-block-field
-              class="pc-power-input"
-              suffix="%"
               :class="{ 'pc-top-fields-error': power < 80 }"
-              fieldProp="power"
-              :fieldValue.sync="power"
               :enableEdit="true"
+              :fieldValue.sync="power"
+              class="pc-power-input"
+              fieldProp="power"
+              suffix="%"
+              tabindex="-1"
             ></pc-block-field>
             power
           </label>

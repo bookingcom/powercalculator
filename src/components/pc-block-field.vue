@@ -30,6 +30,7 @@
       <span
         class="pc-value-display"
         :contenteditable="!isReadOnly"
+        :tabindex="index"
         @focus="setFocusStyle(true)"
         @blur="setFocusStyle(false)"
         @input="updateVal"
@@ -57,6 +58,7 @@ export default {
     'fieldValue',
     'prefix',
     'suffix',
+    'tabindex',
   ],
   data() {
     return {
@@ -84,6 +86,12 @@ export default {
     }
   },
   computed: {
+    index() {
+      if (!this.tabindex) {
+        return 0
+      }
+      return this.tabindex
+    },
     isLocked() {
       return this.lockedField && this.lockedField === this.fieldProp
     },

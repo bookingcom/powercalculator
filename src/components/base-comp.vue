@@ -17,12 +17,13 @@
           >
 
           <pc-block-field
-            fieldProp="base"
-            :suffix="isBinomial ? '%' : ''"
-            :fieldValue.sync="base"
-            :isReadOnly="isReadOnly"
-            :isBlockFocused="isBlockFocused"
             :enableEdit="true"
+            :fieldValue.sync="base"
+            :isBlockFocused="isBlockFocused"
+            :isReadOnly="isReadOnly"
+            :suffix="isBinomial ? '%' : ''"
+            fieldProp="base"
+            tabindex="5"
           ></pc-block-field>
         </label>
       </li>
@@ -36,11 +37,11 @@
           >
 
           <pc-block-field
-            fieldProp="visitorsWithGoals"
+            :enableEdit="false"
             :fieldValue="visitorsWithGoals"
             :isBlockFocused="isBlockFocused"
             :isReadOnly="true"
-            :enableEdit="false"
+            fieldProp="visitorsWithGoals"
           ></pc-block-field>
         </label>
       </li>
@@ -48,12 +49,13 @@
       <li class="pc-input-item pc-input-sd-rate" v-if="!isBinomial">
         <label>
           <pc-block-field
-            prefix="±"
-            fieldProp="sdRate"
-            :fieldValue.sync="sdRate"
-            :isReadOnly="isReadOnly"
-            :isBlockFocused="isBlockFocused"
             :enableEdit="true"
+            :fieldValue.sync="sdRate"
+            :isBlockFocused="isBlockFocused"
+            :isReadOnly="isReadOnly"
+            fieldProp="sdRate"
+            prefix="±"
+            tabindex="6"
           ></pc-block-field>
           <span class="pc-input-details">Base Standard deviation</span>
         </label>

@@ -13,7 +13,12 @@
       class="pc-calc-radio pc-calc-radio--sample"
       :class="{ 'pc-calc-radio--active': isBlockFocused }"
     >
-      <input type="radio" :value="blockName" v-model="isSelected" />
+      <input
+        :tabindex="isBlockFocused ? -1 : 1"
+        :value="blockName"
+        type="radio"
+        v-model="isSelected"
+      />
       {{ isBlockFocused ? 'Calculating' : 'Calculate' }}
     </label>
 
@@ -28,10 +33,11 @@
           >
 
           <pc-block-field
-            fieldProp="sample"
+            :enableEdit="onlyTotalVisitors || isBlockFocused"
             :fieldValue.sync="sample"
             :isReadOnly="!(onlyTotalVisitors && !isBlockFocused)"
-            :enableEdit="onlyTotalVisitors || isBlockFocused"
+            :tabindex="onlyTotalVisitors && !isBlockFocused ? 7 : -1"
+            fieldProp="sample"
           ></pc-block-field>
         </label>
       </li>
@@ -49,18 +55,20 @@
           >
 
           <pc-block-field
-            fieldProp="visitorsPerDay"
-            :fieldValue.sync="visitorsPerDay"
-            :isReadOnly="lockedField === BLOCKED.VISITORS_PER_DAY"
-            :isBlockFocused="isBlockFocused"
             :enableEdit="true"
+            :fieldValue.sync="visitorsPerDay"
+            :isBlockFocused="isBlockFocused"
+            :isReadOnly="lockedField === BLOCKED.VISITORS_PER_DAY"
             :lockedField="lockedField"
+            :tabindex="lockedField === BLOCKED.DAYS ? 8 : -1"
+            fieldProp="visitorsPerDay"
           ></pc-block-field>
         </label>
 
         <button
-          type="button"
           class="pc-swap-button"
+          tabindex="-1"
+          type="button"
           v-on:click="switchLockedField"
         >
           <svg
@@ -172,15 +180,16 @@
       >
         <label>
           <pc-block-field
+            :enableEdit="true"
+            :fieldValue.sync="runtime"
+            :isBlockFocused="isBlockFocused"
+            :isReadOnly="lockedField === BLOCKED.DAYS"
+            :lockedField="lockedField"
+            :suffix="` day${runtime > 1 ? 's' : ''}`"
+            :tabindex="lockedField === BLOCKED.VISITORS_PER_DAY ? 9 : -1"
+            aria-label="Days"
             fieldProp="runtime"
             prefix=""
-            :suffix="` day${runtime > 1 ? 's': ''}`"
-            :fieldValue.sync="runtime"
-            :isReadOnly="lockedField === BLOCKED.DAYS"
-            :isBlockFocused="isBlockFocused"
-            :enableEdit="true"
-            :lockedField="lockedField"
-            aria-label="Days"
           ></pc-block-field>
         </label>
       </li>

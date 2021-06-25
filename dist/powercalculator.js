@@ -55,6 +55,7 @@
   //
   //
   //
+  //
 
   // Known bug: https://bugzilla.mozilla.org/show_bug.cgi?id=1248186
   var script$8 = {
@@ -67,6 +68,7 @@
       'fieldValue',
       'prefix',
       'suffix',
+      'tabindex',
     ],
     data() {
       return {
@@ -94,6 +96,12 @@
       }
     },
     computed: {
+      index() {
+        if (!this.tabindex) {
+          return 0
+        }
+        return this.tabindex
+      },
       isLocked() {
         return this.lockedField && this.lockedField === this.fieldProp
       },
@@ -322,13 +330,13 @@
   const __vue_script__$8 = script$8;
 
   /* template */
-  var __vue_render__$8 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return (_vm.enableEdit)?_c('span',{staticClass:"pc-value-field-wrapper",class:_vm.fieldWrapperClasses,on:{"click":function($event){return _vm.setFocus()}}},[_c('span',{staticClass:"pc-value-formatting pc-value--formatted",class:("pc-value-formatting-" + _vm.fieldProp),style:(_vm.fieldFormattedStyle),attrs:{"aria-hidden":"true","data-prefix":_vm.prefix,"data-suffix":_vm.suffix}},[_c('span',{ref:"pc-formatted-value",staticClass:"pc-value-display",domProps:{"textContent":_vm._s(_vm.formattedVal)}})]),_vm._v(" "),_c('span',{staticClass:"pc-value-formatting",class:_vm.fieldClass,style:(_vm.fieldEditableStyle),attrs:{"data-prefix":_vm.prefix,"data-suffix":_vm.suffix}},[_c('span',{ref:"pc-value",staticClass:"pc-value-display",attrs:{"contenteditable":!_vm.isReadOnly},domProps:{"textContent":_vm._s(_vm.formattedVal)},on:{"focus":function($event){return _vm.setFocusStyle(true)},"blur":function($event){return _vm.setFocusStyle(false)},"input":_vm.updateVal,"keydown":function($event){if(!$event.type.indexOf('key')&&_vm._k($event.keyCode,"enter",13,$event.key,"Enter")){ return null; }$event.preventDefault();}}})])]):_c('span',{staticClass:"pc-value-display pc-field-not-editable"},[_vm._v("\n  "+_vm._s(_vm.prefix)+" "),_c('strong',[_vm._v(_vm._s(_vm.formattedVal))]),_vm._v(" "+_vm._s(_vm.suffix)+"\n")])};
+  var __vue_render__$8 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return (_vm.enableEdit)?_c('span',{staticClass:"pc-value-field-wrapper",class:_vm.fieldWrapperClasses,on:{"click":function($event){return _vm.setFocus()}}},[_c('span',{staticClass:"pc-value-formatting pc-value--formatted",class:("pc-value-formatting-" + _vm.fieldProp),style:(_vm.fieldFormattedStyle),attrs:{"aria-hidden":"true","data-prefix":_vm.prefix,"data-suffix":_vm.suffix}},[_c('span',{ref:"pc-formatted-value",staticClass:"pc-value-display",domProps:{"textContent":_vm._s(_vm.formattedVal)}})]),_vm._v(" "),_c('span',{staticClass:"pc-value-formatting",class:_vm.fieldClass,style:(_vm.fieldEditableStyle),attrs:{"data-prefix":_vm.prefix,"data-suffix":_vm.suffix}},[_c('span',{ref:"pc-value",staticClass:"pc-value-display",attrs:{"contenteditable":!_vm.isReadOnly,"tabindex":_vm.index},domProps:{"textContent":_vm._s(_vm.formattedVal)},on:{"focus":function($event){return _vm.setFocusStyle(true)},"blur":function($event){return _vm.setFocusStyle(false)},"input":_vm.updateVal,"keydown":function($event){if(!$event.type.indexOf('key')&&_vm._k($event.keyCode,"enter",13,$event.key,"Enter")){ return null; }$event.preventDefault();}}})])]):_c('span',{staticClass:"pc-value-display pc-field-not-editable"},[_vm._v("\n  "+_vm._s(_vm.prefix)+" "),_c('strong',[_vm._v(_vm._s(_vm.formattedVal))]),_vm._v(" "+_vm._s(_vm.suffix)+"\n")])};
   var __vue_staticRenderFns__$8 = [];
 
     /* style */
     const __vue_inject_styles__$8 = function (inject) {
       if (!inject) return
-      inject("data-v-50a8ff79_0", { source: ".pc-value-field-wrapper{--base-padding:5px;display:block;position:relative;box-sizing:border-box;width:100%;filter:drop-shadow(0 4px 2px rgba(0, 0, 0, .1));border-radius:5px;background:var(--white);padding:var(--base-padding);overflow:hidden}.pc-field--focused{box-shadow:inset 0 0 0 1px var(--dark-blue)}.pc-value--formatted{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none;width:100%}.pc-value-display{box-sizing:border-box;font-size:1em;line-height:1.8em;align-self:center;min-height:1em;display:inline-block}.pc-value-display:focus{outline:0}.pc-false-positive-input,.pc-non-inf-treshold-input,.pc-power-input,.pc-variants-input{display:inline-block;vertical-align:middle;padding:4px 8px;text-align:center;width:4em;border:2px solid var(--gray);border-radius:8px;font-size:inherit}.pc-variants-input{width:6.5em}.pc-top-fields-error{color:var(--red)}.pc-value-formatting:before{color:var(--gray);content:attr(data-prefix)}.pc-value-formatting:after{color:var(--gray);content:attr(data-suffix)}.pc-block-to-calculate .pc-value-field-wrapper:not(.pc-value-display){background:var(--light-yellow);outline:2px solid var(--dark-yellow)}.pc-block-to-calculate .pc-value .pc-value-formatting:before{content:'=' attr(data-prefix);color:var(--black)}.pc-block-to-calculate .pc-value-formatting:after{color:var(--black)}", map: undefined, media: undefined });
+      inject("data-v-a22d39e8_0", { source: ".pc-value-field-wrapper{--base-padding:5px;display:block;position:relative;box-sizing:border-box;width:100%;filter:drop-shadow(0 4px 2px rgba(0, 0, 0, .1));border-radius:5px;background:var(--white);padding:var(--base-padding);overflow:hidden}.pc-field--focused{box-shadow:inset 0 0 0 1px var(--dark-blue)}.pc-value--formatted{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none;width:100%}.pc-value-display{box-sizing:border-box;font-size:1em;line-height:1.8em;align-self:center;min-height:1em;display:inline-block}.pc-value-display:focus{outline:0}.pc-false-positive-input,.pc-non-inf-treshold-input,.pc-power-input,.pc-variants-input{display:inline-block;vertical-align:middle;padding:4px 8px;text-align:center;width:4em;border:2px solid var(--gray);border-radius:8px;font-size:inherit}.pc-variants-input{width:6.5em}.pc-top-fields-error{color:var(--red)}.pc-value-formatting:before{color:var(--gray);content:attr(data-prefix)}.pc-value-formatting:after{color:var(--gray);content:attr(data-suffix)}.pc-block-to-calculate .pc-value-field-wrapper:not(.pc-value-display){background:var(--light-yellow);outline:2px solid var(--dark-yellow)}.pc-block-to-calculate .pc-value .pc-value-formatting:before{content:'=' attr(data-prefix);color:var(--black)}.pc-block-to-calculate .pc-value-formatting:after{color:var(--black)}", map: undefined, media: undefined });
 
     };
     /* scoped */
@@ -5914,8 +5922,7 @@
   });
 
   function displayValue(value, type = 'int') {
-    const alternativeToNaN = (val) =>
-      !Number.isInteger(val) && !isFinite(val) ? '-' : val;
+    const alternativeToNaN = (val) => (!Number.isInteger(val) && !isFinite(val) ? '-' : val);
 
     switch (type) {
       case 'float':
@@ -5979,11 +5986,7 @@
 
   function getFormula(state, calculating) {
     if (!Object.values(CALCULATING).includes(calculating)) {
-      throw new Error(
-        `${calculating} is not a valid value. Valid values: ${Object.values(
-        CALCULATING
-      ).join(',')}`
-      )
+      throw new Error(`${calculating} is not a valid value. Valid values: ${Object.values(CALCULATING).join(',')}`)
     }
 
     const { testType, isNonInferiority } = state;
@@ -6001,9 +6004,9 @@
   function getStandardDeviation(state) {
     if (state.testType === TEST_TYPE.CONTINUOUS) {
       return state.standardDeviation
-    } else {
-      return Math.sqrt(state.baseRate * (1 - state.baseRate))
     }
+      return Math.sqrt(state.baseRate * (1 - state.baseRate))
+
   }
 
   const calculator = {
@@ -6187,7 +6190,7 @@
 
         // We need to recalculate based on the selected fields.
         // the result will be something like [tTest/gTest][impact/sample]
-        const formula = getFormula(state, focused); 
+        const formula = getFormula(state, focused);
         const alpha =
           state.comparisonMode === COMPARISON_MODE.ALL
             ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
@@ -6213,8 +6216,7 @@
           : 0;
 
         if (focused === FOCUS.SAMPLE) {
-          const sample = Math.ceil(
-            formula({
+          const sample = Math.ceil(formula({
               base_rate: newBaseRate,
               effect_size: impact,
               sd_rate: getStandardDeviation(state),
@@ -6224,8 +6226,7 @@
               alternative: getAlternative(state.isNonInferiority),
               mu,
               opts,
-            })
-          );
+            }));
 
           if (lockedField === BLOCKED.DAYS) {
             state.runtime = Math.ceil(sample / state.visitorsPerDay);
@@ -6305,16 +6306,14 @@
           ? math.getMuFromRelativeDifference(opts)
           : 0;
 
-        state.testType;
-        const formula = getFormula(state, focusedBlock); 
+        const formula = getFormula(state, focusedBlock);
         const alpha =
           state.comparisonMode === COMPARISON_MODE.ALL
             ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
             : state.falsePositiveRate;
 
         if (focusedBlock === FOCUS.SAMPLE) {
-          const sample = Math.ceil(
-            formula({
+          const sample = Math.ceil(formula({
               base_rate: newBaseRate,
               effect_size: impact,
               sd_rate: getStandardDeviation(state),
@@ -6324,8 +6323,7 @@
               alternative: getAlternative(state.isNonInferiority),
               mu,
               opts,
-            })
-          );
+            }));
 
           if (lockedField === BLOCKED.DAYS) {
             state.runtime = Math.ceil(sample / state.visitorsPerDay);
@@ -6411,8 +6409,7 @@
           ? math.getMuFromRelativeDifference(opts)
           : 0;
 
-        state.testType;
-        const impactFormula = getFormula(state, CALCULATING.EFFECT_SIZE); 
+        const impactFormula = getFormula(state, CALCULATING.EFFECT_SIZE);
         const alpha =
           state.comparisonMode === COMPARISON_MODE.ALL
             ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
@@ -6484,8 +6481,7 @@
             ? math.getMuFromRelativeDifference(opts)
             : 0;
 
-          state.testType;
-          const impactFormula = getFormula(state, CALCULATING.EFFECT_SIZE); 
+          const impactFormula = getFormula(state, CALCULATING.EFFECT_SIZE);
           const alpha =
             state.comparisonMode === COMPARISON_MODE.ALL
               ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
@@ -6552,8 +6548,7 @@
             ? math.getMuFromRelativeDifference(opts)
             : 0;
 
-          state.testType;
-          const impactFormula = getFormula(state, CALCULATING.EFFECT_SIZE); 
+          const impactFormula = getFormula(state, CALCULATING.EFFECT_SIZE);
           const alpha =
             state.comparisonMode === COMPARISON_MODE.ALL
               ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
@@ -6612,15 +6607,13 @@
               })
             : impact) / 100;
 
-        state.testType;
-        const sampleFormula = getFormula(state, CALCULATING.SAMPLE); 
+        const sampleFormula = getFormula(state, CALCULATING.SAMPLE);
         const alpha =
           state.comparisonMode === COMPARISON_MODE.ALL
             ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
             : state.falsePositiveRate;
 
-        const sample = Math.ceil(
-          sampleFormula({
+        const sample = Math.ceil(sampleFormula({
             base_rate: state.baseRate,
             effect_size: newImpact,
             sd_rate: getStandardDeviation(state),
@@ -6630,8 +6623,7 @@
             alternative: getAlternative(state.isNonInferiority),
             mu: 0, // if it isn't non-inferiority, it is always 0
             opts: {}, // emtpy if it isn't non-inferiority
-          })
-        );
+          }));
 
         if (lockedField === BLOCKED.DAYS) {
           state.runtime = Math.ceil(sample / state.visitorsPerDay);
@@ -6682,15 +6674,13 @@
           ? math.getMuFromAbsolutePerDay(opts)
           : math.getMuFromRelativeDifference(opts);
 
-        state.testType;
-        const sampleFormula = getFormula(state, CALCULATING.SAMPLE); 
+        const sampleFormula = getFormula(state, CALCULATING.SAMPLE);
         const alpha =
           state.comparisonMode === COMPARISON_MODE.ALL
             ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
             : state.falsePositiveRate;
 
-        const sample = Math.ceil(
-          sampleFormula({
+        const sample = Math.ceil(sampleFormula({
             base_rate: baseRate,
             effect_size: impact,
             sd_rate: getStandardDeviation(state),
@@ -6700,8 +6690,7 @@
             alternative: getAlternative(state.isNonInferiority),
             mu,
             opts,
-          })
-        );
+          }));
 
         if (lockedField === BLOCKED.DAYS) {
           state.runtime = Math.ceil(sample / visitorsPerDay);
@@ -6732,8 +6721,7 @@
       // UI getters
       // Configuration
       variants: (state) => state.variants,
-      falsePositiveRate: (state) =>
-        displayValue(state.falsePositiveRate, 'percentage'),
+      falsePositiveRate: (state) => displayValue(state.falsePositiveRate, 'percentage'),
       targetPower: (state) => displayValue(state.targetPower, 'percentage'),
       isNonInferiority: (state) => state.isNonInferiority,
       testType: (state) => state.testType,
@@ -6741,13 +6729,11 @@
       trafficMode: (state) => state.trafficMode,
 
       // Base rate
-      baseRate: (state) =>
-        displayValue(
+      baseRate: (state) => displayValue(
           state.baseRate,
           state.testType === TEST_TYPE.BINOMIAL ? 'percentage' : 'float'
         ),
-      standardDeviation: (state) =>
-        displayValue(state.standardDeviation, 'float'),
+      standardDeviation: (state) => displayValue(state.standardDeviation, 'float'),
       metricTotal: (state) => (state.sample * state.baseRate).toFixed(0),
 
       // Sample
@@ -6808,10 +6794,8 @@
       },
 
       // THRESHOLD
-      relativeThreshold: (state) =>
-        displayValue(state.relativeThreshold, 'percentage'),
-      absoluteThreshold: (state) =>
-        displayValue(state.absoluteThreshold, 'float'),
+      relativeThreshold: (state) => displayValue(state.relativeThreshold, 'percentage'),
+      absoluteThreshold: (state) => displayValue(state.absoluteThreshold, 'float'),
     },
   };
 
@@ -6824,7 +6808,7 @@
         return this.$store.getters.testType
       },
       isBinomial() {
-        return this.$store.testType === TEST_TYPE.BINOMIAL
+        return this.$store.getters.testType === TEST_TYPE.BINOMIAL
       },
       isBlockFocused() {
         return this.focusedBlock === this.blockName
@@ -6851,7 +6835,7 @@
     /* style */
     const __vue_inject_styles__$6 = function (inject) {
       if (!inject) return
-      inject("data-v-468e1114_0", { source: ".pc-block{position:relative;padding-bottom:25px;border-bottom:3px solid var(--pale-blue)}.pc-block-to-calculate{border-bottom-color:var(--dark-yellow)}.pc-calc-radio{position:absolute;top:0;left:50%;transform:translate(-50%,-50%);background:var(--light-gray);border-radius:25%/100%;padding:7px 15px}.pc-calc-radio--active{background:var(--white)}.pc-inputs{display:block;list-style-type:none;margin:0;padding:0;--row-gap:10px;--padding:25px;--columns-gap:70px;--grid-column-width:calc(50% - (var(--columns-gap) / 2));display:grid;grid-template-columns:var(--grid-column-width) var(--grid-column-width);grid-template-rows:auto;grid-template-areas:'pc-input-left pc-input-right' 'pc-input-left-bottom pc-input-right-bottom';align-items:start;grid-gap:var(--row-gap) var(--columns-gap);padding:0 var(--padding)}.pc-input-item{text-align:center}.pc-input-title{position:relative;display:block;margin-bottom:25px}.pc-input-sub-title{position:absolute;top:100%;left:0;right:0;text-align:center;font-size:9px}.pc-input-left{grid-area:pc-input-left}.pc-input-right{grid-area:pc-input-right}.pc-input-left-bottom{grid-area:pc-input-left-bottom}.pc-input-right-bottom{grid-area:pc-input-right-bottom}.pc-input-details{font-size:10px;color:var(--dark-gray)}.pc-field-not-editable{position:relative;padding:5px;display:block}.pc-input-left .pc-field-not-editable,.pc-input-right .pc-field-not-editable{background:var(--light-gray);outline:2px solid var(--light-blue)}", map: undefined, media: undefined });
+      inject("data-v-0f993ed0_0", { source: ".pc-block{position:relative;padding-bottom:25px;border-bottom:3px solid var(--pale-blue)}.pc-block-to-calculate{border-bottom-color:var(--dark-yellow)}.pc-calc-radio{position:absolute;top:0;left:50%;transform:translate(-50%,-50%);background:var(--light-gray);border-radius:25%/100%;padding:7px 15px}.pc-calc-radio--active{background:var(--white)}.pc-inputs{display:block;list-style-type:none;margin:0;padding:0;--row-gap:10px;--padding:25px;--columns-gap:70px;--grid-column-width:calc(50% - (var(--columns-gap) / 2));display:grid;grid-template-columns:var(--grid-column-width) var(--grid-column-width);grid-template-rows:auto;grid-template-areas:'pc-input-left pc-input-right' 'pc-input-left-bottom pc-input-right-bottom';align-items:start;grid-gap:var(--row-gap) var(--columns-gap);padding:0 var(--padding)}.pc-input-item{text-align:center}.pc-input-title{position:relative;display:block;margin-bottom:25px}.pc-input-sub-title{position:absolute;top:100%;left:0;right:0;text-align:center;font-size:9px}.pc-input-left{grid-area:pc-input-left}.pc-input-right{grid-area:pc-input-right}.pc-input-left-bottom{grid-area:pc-input-left-bottom}.pc-input-right-bottom{grid-area:pc-input-right-bottom}.pc-input-details{font-size:10px;color:var(--dark-gray)}.pc-field-not-editable{position:relative;padding:5px;display:block}.pc-input-left .pc-field-not-editable,.pc-input-right .pc-field-not-editable{background:var(--light-gray);outline:2px solid var(--light-blue)}", map: undefined, media: undefined });
 
     };
     /* scoped */
@@ -6946,18 +6930,18 @@
   const __vue_script__$5 = script$5;
 
   /* template */
-  var __vue_render__$5 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-block pc-block--base",class:{ 'pc-block-focused': _vm.isBlockFocused }},[_c('pc-svg-chain',{attrs:{"isBlockFocused":_vm.isBlockFocused}}),_vm._v(" "),(_vm.isBinomial)?_c('div',{staticClass:"pc-header"},[_vm._v("Base Rate")]):_c('div',{staticClass:"pc-header"},[_vm._v("Base Average")]),_vm._v(" "),_c('ul',{staticClass:"pc-inputs"},[_c('li',{staticClass:"pc-input-item pc-input-left"},[_c('label',[_c('span',{staticClass:"pc-input-title"},[_vm._v(_vm._s(_vm.isBinomial ? 'Base Rate' : 'Base Average')+"\n          "),_c('small',{staticClass:"pc-input-sub-title"},[_vm._v("conversion")])]),_vm._v(" "),_c('pc-block-field',{attrs:{"fieldProp":"base","suffix":_vm.isBinomial ? '%' : '',"fieldValue":_vm.base,"isReadOnly":_vm.isReadOnly,"isBlockFocused":_vm.isBlockFocused,"enableEdit":true},on:{"update:fieldValue":function($event){_vm.base=$event;},"update:field-value":function($event){_vm.base=$event;}}})],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right"},[_c('label',[_vm._m(0),_vm._v(" "),_c('pc-block-field',{attrs:{"fieldProp":"visitorsWithGoals","fieldValue":_vm.visitorsWithGoals,"isBlockFocused":_vm.isBlockFocused,"isReadOnly":true,"enableEdit":false}})],1)]),_vm._v(" "),(!_vm.isBinomial)?_c('li',{staticClass:"pc-input-item pc-input-sd-rate"},[_c('label',[_c('pc-block-field',{attrs:{"prefix":"±","fieldProp":"sdRate","fieldValue":_vm.sdRate,"isReadOnly":_vm.isReadOnly,"isBlockFocused":_vm.isBlockFocused,"enableEdit":true},on:{"update:fieldValue":function($event){_vm.sdRate=$event;},"update:field-value":function($event){_vm.sdRate=$event;}}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v("Base Standard deviation")])],1)]):_vm._e()])],1)};
+  var __vue_render__$5 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-block pc-block--base",class:{ 'pc-block-focused': _vm.isBlockFocused }},[_c('pc-svg-chain',{attrs:{"isBlockFocused":_vm.isBlockFocused}}),_vm._v(" "),(_vm.isBinomial)?_c('div',{staticClass:"pc-header"},[_vm._v("Base Rate")]):_c('div',{staticClass:"pc-header"},[_vm._v("Base Average")]),_vm._v(" "),_c('ul',{staticClass:"pc-inputs"},[_c('li',{staticClass:"pc-input-item pc-input-left"},[_c('label',[_c('span',{staticClass:"pc-input-title"},[_vm._v(_vm._s(_vm.isBinomial ? 'Base Rate' : 'Base Average')+"\n          "),_c('small',{staticClass:"pc-input-sub-title"},[_vm._v("conversion")])]),_vm._v(" "),_c('pc-block-field',{attrs:{"enableEdit":true,"fieldValue":_vm.base,"isBlockFocused":_vm.isBlockFocused,"isReadOnly":_vm.isReadOnly,"suffix":_vm.isBinomial ? '%' : '',"fieldProp":"base","tabindex":"5"},on:{"update:fieldValue":function($event){_vm.base=$event;},"update:field-value":function($event){_vm.base=$event;}}})],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right"},[_c('label',[_vm._m(0),_vm._v(" "),_c('pc-block-field',{attrs:{"enableEdit":false,"fieldValue":_vm.visitorsWithGoals,"isBlockFocused":_vm.isBlockFocused,"isReadOnly":true,"fieldProp":"visitorsWithGoals"}})],1)]),_vm._v(" "),(!_vm.isBinomial)?_c('li',{staticClass:"pc-input-item pc-input-sd-rate"},[_c('label',[_c('pc-block-field',{attrs:{"enableEdit":true,"fieldValue":_vm.sdRate,"isBlockFocused":_vm.isBlockFocused,"isReadOnly":_vm.isReadOnly,"fieldProp":"sdRate","prefix":"±","tabindex":"6"},on:{"update:fieldValue":function($event){_vm.sdRate=$event;},"update:field-value":function($event){_vm.sdRate=$event;}}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v("Base Standard deviation")])],1)]):_vm._e()])],1)};
   var __vue_staticRenderFns__$5 = [function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('span',{staticClass:"pc-input-title"},[_vm._v("Metric Totals"),_c('small',{staticClass:"pc-input-sub-title"},[_vm._v("visitors reached goal")])])}];
 
     /* style */
     const __vue_inject_styles__$5 = function (inject) {
       if (!inject) return
-      inject("data-v-58870f2e_0", { source: ".pc-input-sd-rate{margin-top:-10px;z-index:1;position:relative;text-align:center}.pc-field-sdRate{width:90%;display:inline-block}", map: undefined, media: undefined })
-  ,inject("data-v-58870f2e_1", { source: ".pc-input-left[data-v-58870f2e]{position:relative;z-index:2}", map: undefined, media: undefined });
+      inject("data-v-8a96b108_0", { source: ".pc-input-sd-rate{margin-top:-10px;z-index:1;position:relative;text-align:center}.pc-field-sdRate{width:90%;display:inline-block}", map: undefined, media: undefined })
+  ,inject("data-v-8a96b108_1", { source: ".pc-input-left[data-v-8a96b108]{position:relative;z-index:2}", map: undefined, media: undefined });
 
     };
     /* scoped */
-    const __vue_scope_id__$5 = "data-v-58870f2e";
+    const __vue_scope_id__$5 = "data-v-8a96b108";
     /* module identifier */
     const __vue_module_identifier__$5 = undefined;
     /* functional template */
@@ -7086,7 +7070,7 @@
   var __vue_render__$4 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-block pc-block--impact",class:{
       'pc-block-focused': _vm.isBlockFocused,
       'pc-block-to-calculate': _vm.isBlockFocused,
-    }},[_c('pc-svg-chain',{attrs:{"isBlockFocused":_vm.isBlockFocused}}),_vm._v(" "),_c('label',{staticClass:"pc-calc-radio pc-calc-radio--impact",class:{ 'pc-calc-radio--active': _vm.isBlockFocused },attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.isFocused),expression:"isFocused"}],attrs:{"type":"radio"},domProps:{"value":_vm.blockName,"checked":_vm._q(_vm.isFocused,_vm.blockName)},on:{"change":function($event){_vm.isFocused=_vm.blockName;}}}),_vm._v("\n    "+_vm._s(_vm.isBlockFocused ? 'Calculating' : 'Calculate')+"\n  ")]),_vm._v(" "),_c('div',{staticClass:"pc-header"},[_vm._v("Impact")]),_vm._v(" "),_c('ul',{staticClass:"pc-inputs"},[_c('li',{staticClass:"pc-input-item pc-input-left"},[_c('label',[_c('span',{staticClass:"pc-input-title"},[_vm._v("Relative")]),_vm._v(" "),_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"prefix":_vm.isNonInferiority ? '' : '±',"suffix":"%","fieldProp":"impact","fieldValue":_vm.relativeImpact,"isReadOnly":_vm.isBlockFocused,"isBlockFocused":_vm.isBlockFocused,"enableEdit":true},on:{"update:fieldValue":function($event){_vm.relativeImpact=$event;},"update:field-value":function($event){_vm.relativeImpact=$event;}}})],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right"},[_c('label',[_c('span',{staticClass:"pc-input-title"},[_vm._v("Absolute")]),_vm._v(" "),_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"fieldProp":"impactByMetricValue","suffix":_vm.isBinomial ? '%' : '',"fieldValue":_vm.absoluteImpact,"isReadOnly":_vm.isBlockFocused,"isBlockFocused":_vm.isBlockFocused,"enableEdit":true,"aria-label":"visitors with goals"},on:{"update:fieldValue":function($event){_vm.absoluteImpact=$event;},"update:field-value":function($event){_vm.absoluteImpact=$event;}}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v("\n          going from "+_vm._s(_vm.addPercentToString(_vm.baseRate))+" to either\n          "+_vm._s(_vm.addPercentToString(_vm.minAbsoluteImpact))+" or\n          "+_vm._s(_vm.addPercentToString(_vm.maxAbsoluteImpact))+"\n        ")])],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-bottom-left"},[_c('label',[_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"fieldProp":"impactByVisitors","fieldValue":_vm.absoluteImpactPerVisitor,"isReadOnly":true,"isBlockFocused":_vm.isBlockFocused,"enableEdit":false}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v("\n          "+_vm._s(_vm.isBinomial
+    }},[_c('pc-svg-chain',{attrs:{"isBlockFocused":_vm.isBlockFocused}}),_vm._v(" "),_c('label',{staticClass:"pc-calc-radio pc-calc-radio--impact",class:{ 'pc-calc-radio--active': _vm.isBlockFocused },attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.isFocused),expression:"isFocused"}],attrs:{"type":"radio","tabindex":_vm.isBlockFocused ? -1 : 3},domProps:{"value":_vm.blockName,"checked":_vm._q(_vm.isFocused,_vm.blockName)},on:{"change":function($event){_vm.isFocused=_vm.blockName;}}}),_vm._v("\n    "+_vm._s(_vm.isBlockFocused ? 'Calculating' : 'Calculate')+"\n  ")]),_vm._v(" "),_c('div',{staticClass:"pc-header"},[_vm._v("Impact")]),_vm._v(" "),_c('ul',{staticClass:"pc-inputs"},[_c('li',{staticClass:"pc-input-item pc-input-left"},[_c('label',[_c('span',{staticClass:"pc-input-title"},[_vm._v("Relative")]),_vm._v(" "),_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"enableEdit":true,"fieldValue":_vm.relativeImpact,"isBlockFocused":_vm.isBlockFocused,"isReadOnly":_vm.isBlockFocused,"prefix":_vm.isNonInferiority ? '' : '±',"tabindex":_vm.isBlockFocused ? -1 : 10,"fieldProp":"impact","suffix":"%"},on:{"update:fieldValue":function($event){_vm.relativeImpact=$event;},"update:field-value":function($event){_vm.relativeImpact=$event;}}})],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right"},[_c('label',[_c('span',{staticClass:"pc-input-title"},[_vm._v("Absolute")]),_vm._v(" "),_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"enableEdit":true,"fieldValue":_vm.absoluteImpact,"isBlockFocused":_vm.isBlockFocused,"isReadOnly":_vm.isBlockFocused,"suffix":_vm.isBinomial ? '%' : '',"tabindex":_vm.isBlockFocused ? -1 : 11,"aria-label":"visitors with goals","fieldProp":"impactByMetricValue"},on:{"update:fieldValue":function($event){_vm.absoluteImpact=$event;},"update:field-value":function($event){_vm.absoluteImpact=$event;}}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v("\n          going from "+_vm._s(_vm.addPercentToString(_vm.baseRate))+" to either\n          "+_vm._s(_vm.addPercentToString(_vm.minAbsoluteImpact))+" or\n          "+_vm._s(_vm.addPercentToString(_vm.maxAbsoluteImpact))+"\n        ")])],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-bottom-left"},[_c('label',[_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"fieldProp":"impactByVisitors","fieldValue":_vm.absoluteImpactPerVisitor,"isReadOnly":true,"isBlockFocused":_vm.isBlockFocused,"enableEdit":false}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v("\n          "+_vm._s(_vm.isBinomial
                 ? ' Incremental units'
                 : ' Incremental change in the metric')+"\n        ")])],1)]),_vm._v(" "),(!_vm.onlyTotalVisitors)?_c('li',{staticClass:"pc-input-item pc-input-bottom-right"},[_c('label',[_c('pc-block-field',{attrs:{"fieldProp":"impactByVisitorsPerDay","fieldValue":_vm.absoluteImpactPerVisitorPerDay,"isReadOnly":"true","isBlockFocused":_vm.isBlockFocused,"enableEdit":false}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v("\n          "+_vm._s(_vm.isBinomial
                 ? ' Incremental units per day'
@@ -7204,13 +7188,13 @@
   var __vue_render__$3 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-block pc-block--noninferiority",class:{
       'pc-block-focused': _vm.isBlockFocused,
       'pc-block-to-calculate': _vm.isBlockFocused,
-    }},[_c('pc-svg-chain',{attrs:{"isBlockFocused":_vm.isBlockFocused}}),_vm._v(" "),_c('label',{staticClass:"pc-calc-radio pc-calc-radio--impact",class:{ 'pc-calc-radio--active': _vm.isBlockFocused },attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.isFocused),expression:"isFocused"}],attrs:{"type":"radio"},domProps:{"value":_vm.blockName,"checked":_vm._q(_vm.isFocused,_vm.blockName)},on:{"change":function($event){_vm.isFocused=_vm.blockName;}}}),_vm._v("\n    "+_vm._s(_vm.isBlockFocused ? 'Calculating' : 'Calculate')+"\n  ")]),_vm._v(" "),_c('div',{staticClass:"pc-header"},[_vm._v("Acceptable Cost")]),_vm._v(" "),_c('ul',{staticClass:"pc-inputs"},[_c('li',{staticClass:"pc-input-item pc-input-left"},[_c('label',[_vm._m(0),_vm._v(" "),_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"fieldProp":"thresholdRelative","suffix":"%","fieldValue":_vm.thresholdRelative,"isBlockFocused":_vm.isBlockFocused,"isReadOnly":_vm.isBlockFocused,"enableEdit":true},on:{"update:fieldValue":function($event){_vm.thresholdRelative=$event;},"update:field-value":function($event){_vm.thresholdRelative=$event;}}})],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right"},[_c('label',[_c('span',{staticClass:"pc-input-title"},[_vm._v("Absolute\n          "),(!_vm.onlyTotalVisitors)?_c('small',{staticClass:"pc-input-sub-title"},[_vm._v("impact per day")]):_vm._e()]),_vm._v(" "),_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"fieldProp":"thresholdAbsolute","suffix":"","fieldValue":_vm.thresholdAbsolute,"isBlockFocused":_vm.isBlockFocused,"isReadOnly":_vm.isBlockFocused,"enableEdit":true},on:{"update:fieldValue":function($event){_vm.thresholdAbsolute=$event;},"update:field-value":function($event){_vm.thresholdAbsolute=$event;}}})],1)])])],1)};
+    }},[_c('pc-svg-chain',{attrs:{"isBlockFocused":_vm.isBlockFocused}}),_vm._v(" "),_c('label',{staticClass:"pc-calc-radio pc-calc-radio--impact",class:{ 'pc-calc-radio--active': _vm.isBlockFocused },attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.isFocused),expression:"isFocused"}],attrs:{"type":"radio","tabindex":_vm.isBlockFocused ? -1 : 4},domProps:{"value":_vm.blockName,"checked":_vm._q(_vm.isFocused,_vm.blockName)},on:{"change":function($event){_vm.isFocused=_vm.blockName;}}}),_vm._v("\n    "+_vm._s(_vm.isBlockFocused ? 'Calculating' : 'Calculate')+"\n  ")]),_vm._v(" "),_c('div',{staticClass:"pc-header"},[_vm._v("Acceptable Cost")]),_vm._v(" "),_c('ul',{staticClass:"pc-inputs"},[_c('li',{staticClass:"pc-input-item pc-input-left"},[_c('label',[_vm._m(0),_vm._v(" "),_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"enableEdit":true,"fieldValue":_vm.thresholdRelative,"isBlockFocused":_vm.isBlockFocused,"isReadOnly":_vm.isBlockFocused,"tabindex":_vm.isBlockFocused ? -1 : 12,"fieldProp":"thresholdRelative","suffix":"%"},on:{"update:fieldValue":function($event){_vm.thresholdRelative=$event;},"update:field-value":function($event){_vm.thresholdRelative=$event;}}})],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right"},[_c('label',[_c('span',{staticClass:"pc-input-title"},[_vm._v("Absolute\n          "),(!_vm.onlyTotalVisitors)?_c('small',{staticClass:"pc-input-sub-title"},[_vm._v("impact per day")]):_vm._e()]),_vm._v(" "),_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"enableEdit":true,"fieldValue":_vm.thresholdAbsolute,"isBlockFocused":_vm.isBlockFocused,"isReadOnly":_vm.isBlockFocused,"tabindex":_vm.isBlockFocused ? -1 : 13,"fieldProp":"thresholdAbsolute","suffix":""},on:{"update:fieldValue":function($event){_vm.thresholdAbsolute=$event;},"update:field-value":function($event){_vm.thresholdAbsolute=$event;}}})],1)])])],1)};
   var __vue_staticRenderFns__$3 = [function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('span',{staticClass:"pc-input-title"},[_vm._v("Relative "),_c('small',{staticClass:"pc-input-sub-title"},[_vm._v("change")])])}];
 
     /* style */
     const __vue_inject_styles__$3 = function (inject) {
       if (!inject) return
-      inject("data-v-457afd56_0", { source: ".pc-non-inf-select{--base-padding:5px;font-size:inherit;line-height:28px;border:none;display:block;position:relative;box-sizing:border-box;width:100%;filter:drop-shadow(0 4px 2px rgba(0, 0, 0, .1));border-radius:5px;background:var(--white);padding:var(--base-padding);overflow:hidden;-webkit-appearance:none;-moz-appearance:none;appearance:none}.pc-non-inf-select:focus{outline:0;box-shadow:inset 0 0 0 1px var(--dark-blue)}.pc-non-inf-select-wrapper{position:relative}.pc-non-inf-select-wrapper:after{--border-size:7px;content:'';position:absolute;right:5px;bottom:0;pointer-events:none;border:var(--border-size) solid transparent;border-top:var(--border-size) solid var(--gray);transform:translateY(calc(-50% - var(--border-size)/ 2))}.no-sub-title{margin:15px 0 10px 0}", map: undefined, media: undefined });
+      inject("data-v-63b6624f_0", { source: ".pc-non-inf-select{--base-padding:5px;font-size:inherit;line-height:28px;border:none;display:block;position:relative;box-sizing:border-box;width:100%;filter:drop-shadow(0 4px 2px rgba(0, 0, 0, .1));border-radius:5px;background:var(--white);padding:var(--base-padding);overflow:hidden;-webkit-appearance:none;-moz-appearance:none;appearance:none}.pc-non-inf-select:focus{outline:0;box-shadow:inset 0 0 0 1px var(--dark-blue)}.pc-non-inf-select-wrapper{position:relative}.pc-non-inf-select-wrapper:after{--border-size:7px;content:'';position:absolute;right:5px;bottom:0;pointer-events:none;border:var(--border-size) solid transparent;border-top:var(--border-size) solid var(--gray);transform:translateY(calc(-50% - var(--border-size)/ 2))}.no-sub-title{margin:15px 0 10px 0}", map: undefined, media: undefined });
 
     };
     /* scoped */
@@ -7424,24 +7408,24 @@
   var __vue_render__$1 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-block pc-block--sample",class:{
       'pc-block-focused': _vm.isBlockFocused,
       'pc-block-to-calculate': _vm.isBlockFocused,
-    }},[_c('pc-svg-chain',{attrs:{"isBlockFocused":_vm.isBlockFocused}}),_vm._v(" "),_c('label',{staticClass:"pc-calc-radio pc-calc-radio--sample",class:{ 'pc-calc-radio--active': _vm.isBlockFocused },attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.isSelected),expression:"isSelected"}],attrs:{"type":"radio"},domProps:{"value":_vm.blockName,"checked":_vm._q(_vm.isSelected,_vm.blockName)},on:{"change":function($event){_vm.isSelected=_vm.blockName;}}}),_vm._v("\n    "+_vm._s(_vm.isBlockFocused ? 'Calculating' : 'Calculate')+"\n  ")]),_vm._v(" "),_c('div',{staticClass:"pc-header"},[_vm._v("Sample Size")]),_vm._v(" "),_c('ul',{staticClass:"pc-inputs",class:{ 'pc-inputs-no-grid': _vm.onlyTotalVisitors }},[_c('li',{staticClass:"pc-input-item pc-input-left"},[_c('label',[_vm._m(0),_vm._v(" "),_c('pc-block-field',{attrs:{"fieldProp":"sample","fieldValue":_vm.sample,"isReadOnly":!(_vm.onlyTotalVisitors && !_vm.isBlockFocused),"enableEdit":_vm.onlyTotalVisitors || _vm.isBlockFocused},on:{"update:fieldValue":function($event){_vm.sample=$event;},"update:field-value":function($event){_vm.sample=$event;}}})],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right pc-value-field--lockable",class:[
+    }},[_c('pc-svg-chain',{attrs:{"isBlockFocused":_vm.isBlockFocused}}),_vm._v(" "),_c('label',{staticClass:"pc-calc-radio pc-calc-radio--sample",class:{ 'pc-calc-radio--active': _vm.isBlockFocused },attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.isSelected),expression:"isSelected"}],attrs:{"tabindex":_vm.isBlockFocused ? -1 : 1,"type":"radio"},domProps:{"value":_vm.blockName,"checked":_vm._q(_vm.isSelected,_vm.blockName)},on:{"change":function($event){_vm.isSelected=_vm.blockName;}}}),_vm._v("\n    "+_vm._s(_vm.isBlockFocused ? 'Calculating' : 'Calculate')+"\n  ")]),_vm._v(" "),_c('div',{staticClass:"pc-header"},[_vm._v("Sample Size")]),_vm._v(" "),_c('ul',{staticClass:"pc-inputs",class:{ 'pc-inputs-no-grid': _vm.onlyTotalVisitors }},[_c('li',{staticClass:"pc-input-item pc-input-left"},[_c('label',[_vm._m(0),_vm._v(" "),_c('pc-block-field',{attrs:{"enableEdit":_vm.onlyTotalVisitors || _vm.isBlockFocused,"fieldValue":_vm.sample,"isReadOnly":!(_vm.onlyTotalVisitors && !_vm.isBlockFocused),"tabindex":_vm.onlyTotalVisitors && !_vm.isBlockFocused ? 7 : -1,"fieldProp":"sample"},on:{"update:fieldValue":function($event){_vm.sample=$event;},"update:field-value":function($event){_vm.sample=$event;}}})],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right pc-value-field--lockable",class:[
           _vm.getLockedStateClass(_vm.BLOCKED.VISITORS_PER_DAY),
-          { 'pc-hidden': _vm.onlyTotalVisitors } ]},[_c('label',[_vm._m(1),_vm._v(" "),_c('pc-block-field',{attrs:{"fieldProp":"visitorsPerDay","fieldValue":_vm.visitorsPerDay,"isReadOnly":_vm.lockedField === _vm.BLOCKED.VISITORS_PER_DAY,"isBlockFocused":_vm.isBlockFocused,"enableEdit":true,"lockedField":_vm.lockedField},on:{"update:fieldValue":function($event){_vm.visitorsPerDay=$event;},"update:field-value":function($event){_vm.visitorsPerDay=$event;}}})],1),_vm._v(" "),_c('button',{staticClass:"pc-swap-button",attrs:{"type":"button"},on:{"click":_vm.switchLockedField}},[_c('svg',{attrs:{"width":"20px","height":"20px","viewBox":"0 0 20 20","version":"1.1","xmlns":"http://www.w3.org/2000/svg","xmlns:xlink":"http://www.w3.org/1999/xlink"}},[_c('desc',[_vm._v("\n            Lock\n            "+_vm._s(_vm.lockedField === _vm.BLOCKED.DAYS
+          { 'pc-hidden': _vm.onlyTotalVisitors } ]},[_c('label',[_vm._m(1),_vm._v(" "),_c('pc-block-field',{attrs:{"enableEdit":true,"fieldValue":_vm.visitorsPerDay,"isBlockFocused":_vm.isBlockFocused,"isReadOnly":_vm.lockedField === _vm.BLOCKED.VISITORS_PER_DAY,"lockedField":_vm.lockedField,"tabindex":_vm.lockedField === _vm.BLOCKED.DAYS ? 8 : -1,"fieldProp":"visitorsPerDay"},on:{"update:fieldValue":function($event){_vm.visitorsPerDay=$event;},"update:field-value":function($event){_vm.visitorsPerDay=$event;}}})],1),_vm._v(" "),_c('button',{staticClass:"pc-swap-button",attrs:{"tabindex":"-1","type":"button"},on:{"click":_vm.switchLockedField}},[_c('svg',{attrs:{"width":"20px","height":"20px","viewBox":"0 0 20 20","version":"1.1","xmlns":"http://www.w3.org/2000/svg","xmlns:xlink":"http://www.w3.org/1999/xlink"}},[_c('desc',[_vm._v("\n            Lock\n            "+_vm._s(_vm.lockedField === _vm.BLOCKED.DAYS
                   ? 'number of days'
                   : 'visitors per day')+"\n          ")]),_vm._v(" "),_c('defs',[_c('circle',{attrs:{"id":"path-1","cx":"13","cy":"13","r":"10"}}),_vm._v(" "),_c('filter',{attrs:{"x":"-5.0%","y":"-5.0%","width":"110.0%","height":"110.0%","filterUnits":"objectBoundingBox","id":"filter-2"}},[_c('feGaussianBlur',{attrs:{"stdDeviation":"0.5","in":"SourceAlpha","result":"shadowBlurInner1"}}),_vm._v(" "),_c('feOffset',{attrs:{"dx":"0","dy":"1","in":"shadowBlurInner1","result":"shadowOffsetInner1"}}),_vm._v(" "),_c('feComposite',{attrs:{"in":"shadowOffsetInner1","in2":"SourceAlpha","operator":"arithmetic","k2":"-1","k3":"1","result":"shadowInnerInner1"}}),_vm._v(" "),_c('feColorMatrix',{attrs:{"values":"0 0 0 0 0.489716199   0 0 0 0 0.489716199   0 0 0 0 0.489716199  0 0 0 0.5 0","type":"matrix","in":"shadowInnerInner1"}})],1)]),_vm._v(" "),_c('g',{attrs:{"id":"Page-1","stroke":"none","stroke-width":"1","fill":"none","fill-rule":"evenodd"}},[_c('g',{attrs:{"id":"Power-Calculator","transform":"translate(-550.000000, -522.000000)"}},[_c('g',{attrs:{"id":"Switcher","transform":"translate(547.000000, 519.000000)"}},[_c('g',{attrs:{"id":"Oval-3"}},[_c('use',{attrs:{"fill":"#EFEFEF","fill-rule":"evenodd","xlink:href":"#path-1"}}),_vm._v(" "),_c('use',{attrs:{"fill":"black","fill-opacity":"1","filter":"url(#filter-2)","xlink:href":"#path-1"}})]),_vm._v(" "),_c('g',{attrs:{"id":"Group","stroke-width":"1","fill-rule":"evenodd","transform":"translate(7.000000, 7.000000)","fill":"#155EAB"}},[_c('path',{attrs:{"d":"M4.5,4.20404051 L4.5,9.9127641 L2.5,9.9127641 L2.5,4.20404051 L0.5,4.20404051 L3.5,0.70872359 L6.5,4.20404051 L4.5,4.20404051 Z","id":"Combined-Shape"}}),_vm._v(" "),_c('path',{attrs:{"d":"M9.5,5.49531692 L9.5,11.2040405 L7.5,11.2040405 L7.5,5.49531692 L5.5,5.49531692 L8.5,2 L11.5,5.49531692 L9.5,5.49531692 Z","id":"Combined-Shape","transform":"translate(8.500000, 6.602020) scale(1, -1) translate(-8.500000, -6.602020) "}})])])])])])])]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right-swap pc-value-field--lockable",class:[
           _vm.getLockedStateClass(_vm.BLOCKED.DAYS),
-          { 'pc-hidden': _vm.onlyTotalVisitors } ]},[_c('label',[_c('pc-block-field',{attrs:{"fieldProp":"runtime","prefix":"","suffix":" days","fieldValue":_vm.runtime,"isReadOnly":_vm.lockedField === _vm.BLOCKED.DAYS,"isBlockFocused":_vm.isBlockFocused,"enableEdit":true,"lockedField":_vm.lockedField,"aria-label":"Days"},on:{"update:fieldValue":function($event){_vm.runtime=$event;},"update:field-value":function($event){_vm.runtime=$event;}}})],1)])])],1)};
+          { 'pc-hidden': _vm.onlyTotalVisitors } ]},[_c('label',[_c('pc-block-field',{attrs:{"enableEdit":true,"fieldValue":_vm.runtime,"isBlockFocused":_vm.isBlockFocused,"isReadOnly":_vm.lockedField === _vm.BLOCKED.DAYS,"lockedField":_vm.lockedField,"suffix":(" day" + (_vm.runtime > 1 ? 's' : '')),"tabindex":_vm.lockedField === _vm.BLOCKED.VISITORS_PER_DAY ? 9 : -1,"aria-label":"Days","fieldProp":"runtime","prefix":""},on:{"update:fieldValue":function($event){_vm.runtime=$event;},"update:field-value":function($event){_vm.runtime=$event;}}})],1)])])],1)};
   var __vue_staticRenderFns__$1 = [function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('span',{staticClass:"pc-input-title"},[_vm._v("Total #\n          "),_c('small',{staticClass:"pc-input-sub-title"},[_vm._v("of new visitors")])])},function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('span',{staticClass:"pc-input-title"},[_vm._v("Daily #\n          "),_c('small',{staticClass:"pc-input-sub-title"},[_vm._v("of new visitors")])])}];
 
     /* style */
     const __vue_inject_styles__$1 = function (inject) {
       if (!inject) return
-      inject("data-v-78730005_0", { source: ".pc-swap-button{-webkit-appearance:none;background:0 0;border:0;margin:0;padding:0;position:absolute;top:calc(100% - 10px);left:5px;z-index:5}.pc-value-field--unlocked .pc-value-field-wrapper{z-index:1}.pc-block-to-calculate .pc-value-field--locked .pc-value-formatting:after,.pc-block-to-calculate .pc-value-field--locked .pc-value-formatting:before,.pc-value-field--locked .pc-value-field-wrapper,.pc-value-field--locked .pc-value-formatting:after,.pc-value-field--locked .pc-value-formatting:before{color:var(--dark-gray)}", map: undefined, media: undefined })
-  ,inject("data-v-78730005_1", { source: ".pc-inputs[data-v-78730005]{grid-template-areas:'pc-input-left pc-input-right' 'pc-input-left-swap pc-input-right-swap'}.pc-input-right[data-v-78730005],.pc-input-right-swap[data-v-78730005]{position:relative}.pc-input-right-swap[data-v-78730005]{grid-area:pc-input-right-swap;margin-top:-10px;filter:drop-shadow(0 4px 2px rgba(0, 0, 0, .1)) drop-shadow(0 -4px 2px rgba(0, 0, 0, .1))}.pc-input-right-swap .pc-value-field-wrapper[data-v-78730005]{filter:none}.pc-value-formatting[data-v-78730005]:after{font-size:14px}.pc-block-to-calculate .pc-field-runtime[data-v-78730005],.pc-block-to-calculate .pc-field-visitorsPerDay[data-v-78730005]{background:var(--white)}.pc-value-field--lockable.pc-value-field--locked .pc-value-field-wrapper[data-v-78730005]{background:linear-gradient(0deg,var(--light-gray) 0,var(--white) 100%)}.pc-inputs-no-grid[data-v-78730005]{display:block}", map: undefined, media: undefined });
+      inject("data-v-b7c6e87a_0", { source: ".pc-swap-button{-webkit-appearance:none;background:0 0;border:0;margin:0;padding:0;position:absolute;top:calc(100% - 10px);left:5px;z-index:5}.pc-value-field--unlocked .pc-value-field-wrapper{z-index:1}.pc-block-to-calculate .pc-value-field--locked .pc-value-formatting:after,.pc-block-to-calculate .pc-value-field--locked .pc-value-formatting:before,.pc-value-field--locked .pc-value-field-wrapper,.pc-value-field--locked .pc-value-formatting:after,.pc-value-field--locked .pc-value-formatting:before{color:var(--dark-gray)}", map: undefined, media: undefined })
+  ,inject("data-v-b7c6e87a_1", { source: ".pc-inputs[data-v-b7c6e87a]{grid-template-areas:'pc-input-left pc-input-right' 'pc-input-left-swap pc-input-right-swap'}.pc-input-right[data-v-b7c6e87a],.pc-input-right-swap[data-v-b7c6e87a]{position:relative}.pc-input-right-swap[data-v-b7c6e87a]{grid-area:pc-input-right-swap;margin-top:-10px;filter:drop-shadow(0 4px 2px rgba(0, 0, 0, .1)) drop-shadow(0 -4px 2px rgba(0, 0, 0, .1))}.pc-input-right-swap .pc-value-field-wrapper[data-v-b7c6e87a]{filter:none}.pc-value-formatting[data-v-b7c6e87a]:after{font-size:14px}.pc-block-to-calculate .pc-field-runtime[data-v-b7c6e87a],.pc-block-to-calculate .pc-field-visitorsPerDay[data-v-b7c6e87a]{background:var(--white)}.pc-value-field--lockable.pc-value-field--locked .pc-value-field-wrapper[data-v-b7c6e87a]{background:linear-gradient(0deg,var(--light-gray) 0,var(--white) 100%)}.pc-inputs-no-grid[data-v-b7c6e87a]{display:block}", map: undefined, media: undefined });
 
     };
     /* scoped */
-    const __vue_scope_id__$1 = "data-v-78730005";
+    const __vue_scope_id__$1 = "data-v-b7c6e87a";
     /* module identifier */
     const __vue_module_identifier__$1 = undefined;
     /* functional template */
@@ -7646,13 +7630,13 @@
   const __vue_script__ = script;
 
   /* template */
-  var __vue_render__ = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"power-calculator"},[_c('form',{staticClass:"pc-form",attrs:{"action":"."}},[_c('div',{staticClass:"pc-main-header"},[_c('div',{staticClass:"pc-controls-left"},[_c('div',{staticClass:"pc-test-type"},[_c('pc-tooltip',{staticClass:"pc-test-type-tooltip-wrapper"},[_c('label',{staticClass:"pc-test-type-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.testType),expression:"testType"}],attrs:{"type":"radio","name":"test-mode"},domProps:{"value":_vm.TEST_TYPE.BINOMIAL,"checked":_vm._q(_vm.testType,_vm.TEST_TYPE.BINOMIAL)},on:{"change":function($event){_vm.testType=_vm.TEST_TYPE.BINOMIAL;}}}),_vm._v("\n              Binomial Metric\n            ")]),_vm._v(" "),_c('span',{attrs:{"slot":"tooltip"},slot:"tooltip"},[_vm._v("\n              A binomial metric is one that can be only two values like 0 or\n              1, yes or no, converted or not converted\n            ")])]),_vm._v(" "),_c('pc-tooltip',{staticClass:"pc-test-type-tooltip-wrapper"},[_c('label',{staticClass:"pc-test-type-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.testType),expression:"testType"}],attrs:{"type":"radio","name":"test-mode"},domProps:{"value":_vm.TEST_TYPE.CONTINUOUS,"checked":_vm._q(_vm.testType,_vm.TEST_TYPE.CONTINUOUS)},on:{"change":function($event){_vm.testType=_vm.TEST_TYPE.CONTINUOUS;}}}),_vm._v("\n              Continuous Metric\n            ")]),_vm._v(" "),_c('span',{attrs:{"slot":"tooltip"},slot:"tooltip"},[_vm._v("\n              A continuous metric is one that can be any number like time on\n              site or the number of rooms sold\n            ")])])],1),_vm._v(" "),_c('div',{staticClass:"pc-traffic-mode"},[_c('label',{staticClass:"pc-traffic-mode-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.trafficMode),expression:"trafficMode"}],attrs:{"type":"radio","name":"traffic-mode","checked":""},domProps:{"value":_vm.TRAFFIC_MODE.DAILY,"checked":_vm._q(_vm.trafficMode,_vm.TRAFFIC_MODE.DAILY)},on:{"change":function($event){_vm.trafficMode=_vm.TRAFFIC_MODE.DAILY;}}}),_vm._v("\n            Daily traffic\n          ")]),_vm._v(" "),_c('label',{staticClass:"pc-traffic-mode-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.trafficMode),expression:"trafficMode"}],attrs:{"type":"radio","name":"traffic-mode"},domProps:{"value":_vm.TRAFFIC_MODE.TOTAL,"checked":_vm._q(_vm.trafficMode,_vm.TRAFFIC_MODE.TOTAL)},on:{"change":function($event){_vm.trafficMode=_vm.TRAFFIC_MODE.TOTAL;}}}),_vm._v("\n            Total traffic\n          ")])]),_vm._v(" "),_c('div',{staticClass:"pc-non-inferiority"},[_c('label',{staticClass:"pc-non-inf-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.isNonInferiority),expression:"isNonInferiority"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.isNonInferiority)?_vm._i(_vm.isNonInferiority,null)>-1:(_vm.isNonInferiority)},on:{"change":function($event){var $$a=_vm.isNonInferiority,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.isNonInferiority=$$a.concat([$$v]));}else {$$i>-1&&(_vm.isNonInferiority=$$a.slice(0,$$i).concat($$a.slice($$i+1)));}}else {_vm.isNonInferiority=$$c;}}}}),_vm._v("\n            Use non inferiority test\n          ")])]),_vm._v(" "),_c('div',{staticClass:"pc-comparison-mode"},[_c('label',{staticClass:"pc-comparison-mode-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.comparisonMode),expression:"comparisonMode"}],attrs:{"type":"radio","name":"comparison-mode"},domProps:{"value":_vm.COMPARISON_MODE.ALL,"checked":_vm._q(_vm.comparisonMode,_vm.COMPARISON_MODE.ALL)},on:{"change":function($event){_vm.comparisonMode=_vm.COMPARISON_MODE.ALL;}}}),_vm._v("\n            Base vs All variants\n          ")]),_vm._v(" "),_c('label',{staticClass:"pc-traffic-mode-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.comparisonMode),expression:"comparisonMode"}],attrs:{"type":"radio","name":"comparison-mode"},domProps:{"value":_vm.COMPARISON_MODE.ONE,"checked":_vm._q(_vm.comparisonMode,_vm.COMPARISON_MODE.ONE)},on:{"change":function($event){_vm.comparisonMode=_vm.COMPARISON_MODE.ONE;}}}),_vm._v("\n            Base vs One variant\n          ")])])]),_vm._v(" "),_vm._m(0),_vm._v(" "),_c('div',{staticClass:"pc-controls-right"},[_c('label',{staticClass:"pc-variants"},[_c('pc-block-field',{staticClass:"pc-variants-input",attrs:{"fieldProp":"variants","prefix":"base + ","fieldValue":_vm.variants,"enableEdit":true},on:{"update:fieldValue":function($event){_vm.variants=$event;},"update:field-value":function($event){_vm.variants=$event;}}}),_vm._v("\n          variant"+_vm._s(_vm.variants > 1 ? 's' : '')+"\n        ")],1),_vm._v(" "),_c('label',{staticClass:"pc-false-positive"},[_c('pc-block-field',{staticClass:"pc-false-positive-input",class:{ 'pc-top-fields-error': _vm.falsePositiveRate > 10 },attrs:{"suffix":"%","fieldProp":"falsePositiveRate","fieldValue":_vm.falsePositiveRate,"enableEdit":true},on:{"update:fieldValue":function($event){_vm.falsePositiveRate=$event;},"update:field-value":function($event){_vm.falsePositiveRate=$event;}}}),_vm._v("\n          false positive rate\n        ")],1),_vm._v(" "),_c('label',{staticClass:"pc-power"},[_c('pc-block-field',{staticClass:"pc-power-input",class:{ 'pc-top-fields-error': _vm.power < 80 },attrs:{"suffix":"%","fieldProp":"power","fieldValue":_vm.power,"enableEdit":true},on:{"update:fieldValue":function($event){_vm.power=$event;},"update:field-value":function($event){_vm.power=$event;}}}),_vm._v("\n          power\n        ")],1)])]),_vm._v(" "),_c('div',{staticClass:"pc-blocks-wrapper",class:{ 'pc-blocks-wrapper-ttest': _vm.testType === 'tTest' }},[_c('base-comp',{attrs:{"blockName":_vm.FOCUS.BASE,"focusedBlock":_vm.focusedBlock,"lockedField":_vm.lockedField}}),_vm._v(" "),_c('sample-comp',{attrs:{"blockName":_vm.FOCUS.SAMPLE,"focusedBlock":_vm.focusedBlock,"lockedField":_vm.lockedField},on:{"update:focusedBlock":function($event){_vm.focusedBlock=$event;},"update:focused-block":function($event){_vm.focusedBlock=$event;},"update:lockedField":function($event){_vm.lockedField=$event;},"update:locked-field":function($event){_vm.lockedField=$event;}}}),_vm._v(" "),(!_vm.isNonInferiority)?_c('impact-comp',{attrs:{"blockName":_vm.FOCUS.IMPACT,"focusedBlock":_vm.focusedBlock,"lockedField":_vm.lockedField},on:{"update:focusedBlock":function($event){_vm.focusedBlock=$event;},"update:focused-block":function($event){_vm.focusedBlock=$event;},"update:selected":function($event){_vm.selected = $event;}}}):_vm._e(),_vm._v(" "),(_vm.isNonInferiority)?_c('non-inferiority-comp',{attrs:{"blockName":_vm.FOCUS.IMPACT,"focusedBlock":_vm.focusedBlock,"lockedField":_vm.lockedField},on:{"update:focusedBlock":function($event){_vm.focusedBlock=$event;},"update:focused-block":function($event){_vm.focusedBlock=$event;},"update:selected":function($event){_vm.selected = $event;}}}):_vm._e()],1)])])};
+  var __vue_render__ = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"power-calculator"},[_c('form',{staticClass:"pc-form",attrs:{"action":"."}},[_c('div',{staticClass:"pc-main-header"},[_c('div',{staticClass:"pc-controls-left"},[_c('div',{staticClass:"pc-test-type"},[_c('pc-tooltip',{staticClass:"pc-test-type-tooltip-wrapper"},[_c('label',{staticClass:"pc-test-type-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.testType),expression:"testType"}],attrs:{"name":"test-mode","tabindex":"-1","type":"radio"},domProps:{"value":_vm.TEST_TYPE.BINOMIAL,"checked":_vm._q(_vm.testType,_vm.TEST_TYPE.BINOMIAL)},on:{"change":function($event){_vm.testType=_vm.TEST_TYPE.BINOMIAL;}}}),_vm._v("\n              Binomial Metric\n            ")]),_vm._v(" "),_c('span',{attrs:{"slot":"tooltip"},slot:"tooltip"},[_vm._v("\n              A binomial metric is one that can be only two values like 0 or\n              1, yes or no, converted or not converted\n            ")])]),_vm._v(" "),_c('pc-tooltip',{staticClass:"pc-test-type-tooltip-wrapper"},[_c('label',{staticClass:"pc-test-type-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.testType),expression:"testType"}],attrs:{"name":"test-mode","tabindex":"-1","type":"radio"},domProps:{"value":_vm.TEST_TYPE.CONTINUOUS,"checked":_vm._q(_vm.testType,_vm.TEST_TYPE.CONTINUOUS)},on:{"change":function($event){_vm.testType=_vm.TEST_TYPE.CONTINUOUS;}}}),_vm._v("\n              Continuous Metric\n            ")]),_vm._v(" "),_c('span',{attrs:{"slot":"tooltip"},slot:"tooltip"},[_vm._v("\n              A continuous metric is one that can be any number like time on\n              site or the number of rooms sold\n            ")])])],1),_vm._v(" "),_c('div',{staticClass:"pc-traffic-mode"},[_c('label',{staticClass:"pc-traffic-mode-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.trafficMode),expression:"trafficMode"}],attrs:{"checked":"","name":"traffic-mode","tabindex":"-1","type":"radio"},domProps:{"value":_vm.TRAFFIC_MODE.DAILY,"checked":_vm._q(_vm.trafficMode,_vm.TRAFFIC_MODE.DAILY)},on:{"change":function($event){_vm.trafficMode=_vm.TRAFFIC_MODE.DAILY;}}}),_vm._v("\n            Daily traffic\n          ")]),_vm._v(" "),_c('label',{staticClass:"pc-traffic-mode-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.trafficMode),expression:"trafficMode"}],attrs:{"name":"traffic-mode","tabindex":"-1","type":"radio"},domProps:{"value":_vm.TRAFFIC_MODE.TOTAL,"checked":_vm._q(_vm.trafficMode,_vm.TRAFFIC_MODE.TOTAL)},on:{"change":function($event){_vm.trafficMode=_vm.TRAFFIC_MODE.TOTAL;}}}),_vm._v("\n            Total traffic\n          ")])]),_vm._v(" "),_c('div',{staticClass:"pc-non-inferiority"},[_c('label',{staticClass:"pc-non-inf-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.isNonInferiority),expression:"isNonInferiority"}],attrs:{"type":"checkbox","tabindex":"-1"},domProps:{"checked":Array.isArray(_vm.isNonInferiority)?_vm._i(_vm.isNonInferiority,null)>-1:(_vm.isNonInferiority)},on:{"change":function($event){var $$a=_vm.isNonInferiority,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.isNonInferiority=$$a.concat([$$v]));}else {$$i>-1&&(_vm.isNonInferiority=$$a.slice(0,$$i).concat($$a.slice($$i+1)));}}else {_vm.isNonInferiority=$$c;}}}}),_vm._v("\n            Use non inferiority test\n          ")])]),_vm._v(" "),_c('div',{staticClass:"pc-comparison-mode"},[_c('label',{staticClass:"pc-comparison-mode-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.comparisonMode),expression:"comparisonMode"}],attrs:{"name":"comparison-mode","tabindex":"-1","type":"radio"},domProps:{"value":_vm.COMPARISON_MODE.ALL,"checked":_vm._q(_vm.comparisonMode,_vm.COMPARISON_MODE.ALL)},on:{"change":function($event){_vm.comparisonMode=_vm.COMPARISON_MODE.ALL;}}}),_vm._v("\n            Base vs All variants\n          ")]),_vm._v(" "),_c('label',{staticClass:"pc-traffic-mode-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.comparisonMode),expression:"comparisonMode"}],attrs:{"name":"comparison-mode","tabindex":"-1","type":"radio"},domProps:{"value":_vm.COMPARISON_MODE.ONE,"checked":_vm._q(_vm.comparisonMode,_vm.COMPARISON_MODE.ONE)},on:{"change":function($event){_vm.comparisonMode=_vm.COMPARISON_MODE.ONE;}}}),_vm._v("\n            Base vs One variant\n          ")])])]),_vm._v(" "),_vm._m(0),_vm._v(" "),_c('div',{staticClass:"pc-controls-right"},[_c('label',{staticClass:"pc-variants"},[_c('pc-block-field',{staticClass:"pc-variants-input",attrs:{"enableEdit":true,"fieldValue":_vm.variants,"fieldProp":"variants","prefix":"base + ","tabindex":"-1"},on:{"update:fieldValue":function($event){_vm.variants=$event;},"update:field-value":function($event){_vm.variants=$event;}}}),_vm._v("\n          variant"+_vm._s(_vm.variants > 1 ? 's' : '')+"\n        ")],1),_vm._v(" "),_c('label',{staticClass:"pc-false-positive"},[_c('pc-block-field',{staticClass:"pc-false-positive-input",class:{ 'pc-top-fields-error': _vm.falsePositiveRate > 10 },attrs:{"enableEdit":true,"fieldValue":_vm.falsePositiveRate,"fieldProp":"falsePositiveRate","suffix":"%","tabindex":"-1"},on:{"update:fieldValue":function($event){_vm.falsePositiveRate=$event;},"update:field-value":function($event){_vm.falsePositiveRate=$event;}}}),_vm._v("\n          false positive rate\n        ")],1),_vm._v(" "),_c('label',{staticClass:"pc-power"},[_c('pc-block-field',{staticClass:"pc-power-input",class:{ 'pc-top-fields-error': _vm.power < 80 },attrs:{"enableEdit":true,"fieldValue":_vm.power,"fieldProp":"power","suffix":"%","tabindex":"-1"},on:{"update:fieldValue":function($event){_vm.power=$event;},"update:field-value":function($event){_vm.power=$event;}}}),_vm._v("\n          power\n        ")],1)])]),_vm._v(" "),_c('div',{staticClass:"pc-blocks-wrapper",class:{ 'pc-blocks-wrapper-ttest': _vm.testType === 'tTest' }},[_c('base-comp',{attrs:{"blockName":_vm.FOCUS.BASE,"focusedBlock":_vm.focusedBlock,"lockedField":_vm.lockedField}}),_vm._v(" "),_c('sample-comp',{attrs:{"blockName":_vm.FOCUS.SAMPLE,"focusedBlock":_vm.focusedBlock,"lockedField":_vm.lockedField},on:{"update:focusedBlock":function($event){_vm.focusedBlock=$event;},"update:focused-block":function($event){_vm.focusedBlock=$event;},"update:lockedField":function($event){_vm.lockedField=$event;},"update:locked-field":function($event){_vm.lockedField=$event;}}}),_vm._v(" "),(!_vm.isNonInferiority)?_c('impact-comp',{attrs:{"blockName":_vm.FOCUS.IMPACT,"focusedBlock":_vm.focusedBlock,"lockedField":_vm.lockedField},on:{"update:focusedBlock":function($event){_vm.focusedBlock=$event;},"update:focused-block":function($event){_vm.focusedBlock=$event;},"update:selected":function($event){_vm.selected = $event;}}}):_vm._e(),_vm._v(" "),(_vm.isNonInferiority)?_c('non-inferiority-comp',{attrs:{"blockName":_vm.FOCUS.IMPACT,"focusedBlock":_vm.focusedBlock,"lockedField":_vm.lockedField},on:{"update:focusedBlock":function($event){_vm.focusedBlock=$event;},"update:focused-block":function($event){_vm.focusedBlock=$event;},"update:selected":function($event){_vm.selected = $event;}}}):_vm._e()],1)])])};
   var __vue_staticRenderFns__ = [function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-title"},[_vm._v("\n        Power Calculator "),_c('sup',{staticStyle:{"color":"#f00","font-size":"11px"}},[_vm._v("β")])])}];
 
     /* style */
     const __vue_inject_styles__ = function (inject) {
       if (!inject) return
-      inject("data-v-7b1b0268_0", { source: ".power-calculator{--white:#fff;--black:#000;--gray:#b5b5b5;--light-gray:#f0f0f0;--dark-gray:#525252;--light-blue:#c1cfd8;--pale-blue:#7898ae;--blue:#155eab;--dark-blue:#3d78df;--light-yellow:#fef1cb;--dark-yellow:#e2b634;--fade-black:rgba(0, 0, 0, 0.3);--red:#f00}.pc-main-header{display:grid;grid-template-columns:33.33% 33.33% 33.33%;grid-template-rows:auto;grid-template-areas:'controls-left title controls-right';align-items:center;margin:25px 10px}.pc-controls-left{grid-area:controls-left;display:grid;grid-template-columns:min-content min-content min-content;grid-template-rows:2;grid-template-areas:'calc-options calc-options calc-options' 'test-type traffic comparison';align-items:center}.pc-controls-right{grid-area:controls-right;display:grid;grid-template-columns:auto min-content min-content;grid-template-rows:auto;grid-template-areas:'variants false-positive power';align-items:center;justify-items:end}.pc-title{grid-area:title;font-size:30px;text-align:center}.pc-traffic-mode{grid-area:traffic}.pc-comparison-mode,.pc-false-positive,.pc-non-inf-label,.pc-power,.pc-test-type,.pc-traffic-mode,.pc-variants{font-size:.8em}.pc-test-type{grid-area:test-type}.pc-non-inferiority{grid-area:calc-options;margin-bottom:8px}.pc-comparison-mode{grid-area:comparison}.pc-comparison-mode-label,.pc-non-inf-label,.pc-test-type-labels,.pc-traffic-mode-labels{white-space:nowrap}.pc-comparison-mode,.pc-non-inferiority,.pc-test-type,.pc-traffic-mode{margin-left:15px}.pc-test-type-tooltip-wrapper{display:inline-block}.pc-non-inf-label{white-space:nowrap}.pc-non-inf-treshold{display:flex;align-items:center}.pc-non-inf-treshold-input{margin-left:5px}.pc-variants{grid-area:variants;white-space:nowrap;align-self:end}.pc-false-positive{grid-area:false-positive;margin-left:15px;white-space:nowrap;align-self:end}.pc-power{grid-area:power;margin-left:15px;margin-right:15px;white-space:nowrap;align-self:end}.pc-blocks-wrapper{grid-area:pc-blocks-wrapper;display:grid;grid-template-columns:33% 33% 33%;grid-template-rows:auto;grid-template-areas:'block-base block-sample block-impact' 'block-graph block-graph block-graph';grid-template-rows:auto;grid-column-gap:8px;grid-row-gap:8px}.pc-block--base{grid-area:block-base}.pc-block--sample{grid-area:block-sample}.pc-block--impact{grid-area:block-impact}.pc-block--graph{grid-area:block-graph}.pc-block{background:var(--light-gray)}.pc-header{color:var(--white);text-align:center;font-size:28px;line-height:80px;height:80px;text-shadow:0 1px 1px rgba(0,0,0,.29);background:var(--pale-blue);margin-bottom:25px}.pc-calculate{display:inline-block;margin-bottom:25px;font-weight:700;font-size:.8em}.pc-value{display:block;margin-bottom:25px}.pc-block-to-calculate{background:var(--light-yellow)}.pc-block-to-calculate .pc-header{background:var(--dark-yellow)}.pc-hidden{display:none!important}", map: undefined, media: undefined });
+      inject("data-v-2124889c_0", { source: ".power-calculator{--white:#fff;--black:#000;--gray:#b5b5b5;--light-gray:#f0f0f0;--dark-gray:#525252;--light-blue:#c1cfd8;--pale-blue:#7898ae;--blue:#155eab;--dark-blue:#3d78df;--light-yellow:#fef1cb;--dark-yellow:#e2b634;--fade-black:rgba(0, 0, 0, 0.3);--red:#f00}.pc-main-header{display:grid;grid-template-columns:33.33% 33.33% 33.33%;grid-template-rows:auto;grid-template-areas:'controls-left title controls-right';align-items:center;margin:25px 10px}.pc-controls-left{grid-area:controls-left;display:grid;grid-template-columns:min-content min-content min-content;grid-template-rows:2;grid-template-areas:'calc-options calc-options calc-options' 'test-type traffic comparison';align-items:center}.pc-controls-right{grid-area:controls-right;display:grid;grid-template-columns:auto min-content min-content;grid-template-rows:auto;grid-template-areas:'variants false-positive power';align-items:center;justify-items:end}.pc-title{grid-area:title;font-size:30px;text-align:center}.pc-traffic-mode{grid-area:traffic}.pc-comparison-mode,.pc-false-positive,.pc-non-inf-label,.pc-power,.pc-test-type,.pc-traffic-mode,.pc-variants{font-size:.8em}.pc-test-type{grid-area:test-type}.pc-non-inferiority{grid-area:calc-options;margin-bottom:8px}.pc-comparison-mode{grid-area:comparison}.pc-comparison-mode-label,.pc-non-inf-label,.pc-test-type-labels,.pc-traffic-mode-labels{white-space:nowrap}.pc-comparison-mode,.pc-non-inferiority,.pc-test-type,.pc-traffic-mode{margin-left:15px}.pc-test-type-tooltip-wrapper{display:inline-block}.pc-non-inf-label{white-space:nowrap}.pc-non-inf-treshold{display:flex;align-items:center}.pc-non-inf-treshold-input{margin-left:5px}.pc-variants{grid-area:variants;white-space:nowrap;align-self:end}.pc-false-positive{grid-area:false-positive;margin-left:15px;white-space:nowrap;align-self:end}.pc-power{grid-area:power;margin-left:15px;margin-right:15px;white-space:nowrap;align-self:end}.pc-blocks-wrapper{grid-area:pc-blocks-wrapper;display:grid;grid-template-columns:33% 33% 33%;grid-template-rows:auto;grid-template-areas:'block-base block-sample block-impact' 'block-graph block-graph block-graph';grid-template-rows:auto;grid-column-gap:8px;grid-row-gap:8px}.pc-block--base{grid-area:block-base}.pc-block--sample{grid-area:block-sample}.pc-block--impact{grid-area:block-impact}.pc-block--graph{grid-area:block-graph}.pc-block{background:var(--light-gray)}.pc-header{color:var(--white);text-align:center;font-size:28px;line-height:80px;height:80px;text-shadow:0 1px 1px rgba(0,0,0,.29);background:var(--pale-blue);margin-bottom:25px}.pc-calculate{display:inline-block;margin-bottom:25px;font-weight:700;font-size:.8em}.pc-value{display:block;margin-bottom:25px}.pc-block-to-calculate{background:var(--light-yellow)}.pc-block-to-calculate .pc-header{background:var(--dark-yellow)}.pc-hidden{display:none!important}", map: undefined, media: undefined });
 
     };
     /* scoped */

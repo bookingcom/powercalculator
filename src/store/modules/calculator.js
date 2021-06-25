@@ -44,8 +44,7 @@ const CALCULATING = Object.freeze({
 })
 
 function displayValue(value, type = 'int') {
-  const alternativeToNaN = (val) =>
-    !Number.isInteger(val) && !isFinite(val) ? '-' : val
+  const alternativeToNaN = (val) => (!Number.isInteger(val) && !isFinite(val) ? '-' : val)
 
   switch (type) {
     case 'float':
@@ -109,11 +108,7 @@ function getRelativeThreshold(state) {
 
 function getFormula(state, calculating) {
   if (!Object.values(CALCULATING).includes(calculating)) {
-    throw new Error(
-      `${calculating} is not a valid value. Valid values: ${Object.values(
-        CALCULATING
-      ).join(',')}`
-    )
+    throw new Error(`${calculating} is not a valid value. Valid values: ${Object.values(CALCULATING).join(',')}`)
   }
 
   const { testType, isNonInferiority } = state
@@ -131,9 +126,9 @@ function getFormula(state, calculating) {
 function getStandardDeviation(state) {
   if (state.testType === TEST_TYPE.CONTINUOUS) {
     return state.standardDeviation
-  } else {
-    return Math.sqrt(state.baseRate * (1 - state.baseRate))
   }
+    return Math.sqrt(state.baseRate * (1 - state.baseRate))
+
 }
 
 export const calculator = {
@@ -317,7 +312,7 @@ export const calculator = {
 
       // We need to recalculate based on the selected fields.
       // the result will be something like [tTest/gTest][impact/sample]
-      const formula = getFormula(state, focused) 
+      const formula = getFormula(state, focused)
       const alpha =
         state.comparisonMode === COMPARISON_MODE.ALL
           ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
@@ -343,8 +338,7 @@ export const calculator = {
         : 0
 
       if (focused === FOCUS.SAMPLE) {
-        const sample = Math.ceil(
-          formula({
+        const sample = Math.ceil(formula({
             base_rate: newBaseRate,
             effect_size: impact,
             sd_rate: getStandardDeviation(state),
@@ -354,8 +348,7 @@ export const calculator = {
             alternative: getAlternative(state.isNonInferiority),
             mu,
             opts,
-          })
-        )
+          }))
 
         if (lockedField === BLOCKED.DAYS) {
           state.runtime = Math.ceil(sample / state.visitorsPerDay)
@@ -435,16 +428,14 @@ export const calculator = {
         ? math.getMuFromRelativeDifference(opts)
         : 0
 
-      const type = state.testType
-      const formula = getFormula(state, focusedBlock) 
+      const formula = getFormula(state, focusedBlock)
       const alpha =
         state.comparisonMode === COMPARISON_MODE.ALL
           ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
           : state.falsePositiveRate
 
       if (focusedBlock === FOCUS.SAMPLE) {
-        const sample = Math.ceil(
-          formula({
+        const sample = Math.ceil(formula({
             base_rate: newBaseRate,
             effect_size: impact,
             sd_rate: getStandardDeviation(state),
@@ -454,8 +445,7 @@ export const calculator = {
             alternative: getAlternative(state.isNonInferiority),
             mu,
             opts,
-          })
-        )
+          }))
 
         if (lockedField === BLOCKED.DAYS) {
           state.runtime = Math.ceil(sample / state.visitorsPerDay)
@@ -541,8 +531,7 @@ export const calculator = {
         ? math.getMuFromRelativeDifference(opts)
         : 0
 
-      const type = state.testType
-      const impactFormula = getFormula(state, CALCULATING.EFFECT_SIZE) 
+      const impactFormula = getFormula(state, CALCULATING.EFFECT_SIZE)
       const alpha =
         state.comparisonMode === COMPARISON_MODE.ALL
           ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
@@ -614,8 +603,7 @@ export const calculator = {
           ? math.getMuFromRelativeDifference(opts)
           : 0
 
-        const type = state.testType
-        const impactFormula = getFormula(state, CALCULATING.EFFECT_SIZE) 
+        const impactFormula = getFormula(state, CALCULATING.EFFECT_SIZE)
         const alpha =
           state.comparisonMode === COMPARISON_MODE.ALL
             ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
@@ -682,8 +670,7 @@ export const calculator = {
           ? math.getMuFromRelativeDifference(opts)
           : 0
 
-        const type = state.testType
-        const impactFormula = getFormula(state, CALCULATING.EFFECT_SIZE) 
+        const impactFormula = getFormula(state, CALCULATING.EFFECT_SIZE)
         const alpha =
           state.comparisonMode === COMPARISON_MODE.ALL
             ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
@@ -742,15 +729,13 @@ export const calculator = {
             })
           : impact) / 100
 
-      const type = state.testType
-      const sampleFormula = getFormula(state, CALCULATING.SAMPLE) 
+      const sampleFormula = getFormula(state, CALCULATING.SAMPLE)
       const alpha =
         state.comparisonMode === COMPARISON_MODE.ALL
           ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
           : state.falsePositiveRate
 
-      const sample = Math.ceil(
-        sampleFormula({
+      const sample = Math.ceil(sampleFormula({
           base_rate: state.baseRate,
           effect_size: newImpact,
           sd_rate: getStandardDeviation(state),
@@ -760,8 +745,7 @@ export const calculator = {
           alternative: getAlternative(state.isNonInferiority),
           mu: 0, // if it isn't non-inferiority, it is always 0
           opts: {}, // emtpy if it isn't non-inferiority
-        })
-      )
+        }))
 
       if (lockedField === BLOCKED.DAYS) {
         state.runtime = Math.ceil(sample / state.visitorsPerDay)
@@ -812,15 +796,13 @@ export const calculator = {
         ? math.getMuFromAbsolutePerDay(opts)
         : math.getMuFromRelativeDifference(opts)
 
-      const type = state.testType
-      const sampleFormula = getFormula(state, CALCULATING.SAMPLE) 
+      const sampleFormula = getFormula(state, CALCULATING.SAMPLE)
       const alpha =
         state.comparisonMode === COMPARISON_MODE.ALL
           ? math.getCorrectedAlpha(state.falsePositiveRate, state.variants)
           : state.falsePositiveRate
 
-      const sample = Math.ceil(
-        sampleFormula({
+      const sample = Math.ceil(sampleFormula({
           base_rate: baseRate,
           effect_size: impact,
           sd_rate: getStandardDeviation(state),
@@ -830,8 +812,7 @@ export const calculator = {
           alternative: getAlternative(state.isNonInferiority),
           mu,
           opts,
-        })
-      )
+        }))
 
       if (lockedField === BLOCKED.DAYS) {
         state.runtime = Math.ceil(sample / visitorsPerDay)
@@ -862,8 +843,7 @@ export const calculator = {
     // UI getters
     // Configuration
     variants: (state) => state.variants,
-    falsePositiveRate: (state) =>
-      displayValue(state.falsePositiveRate, 'percentage'),
+    falsePositiveRate: (state) => displayValue(state.falsePositiveRate, 'percentage'),
     targetPower: (state) => displayValue(state.targetPower, 'percentage'),
     isNonInferiority: (state) => state.isNonInferiority,
     testType: (state) => state.testType,
@@ -871,13 +851,11 @@ export const calculator = {
     trafficMode: (state) => state.trafficMode,
 
     // Base rate
-    baseRate: (state) =>
-      displayValue(
+    baseRate: (state) => displayValue(
         state.baseRate,
         state.testType === TEST_TYPE.BINOMIAL ? 'percentage' : 'float'
       ),
-    standardDeviation: (state) =>
-      displayValue(state.standardDeviation, 'float'),
+    standardDeviation: (state) => displayValue(state.standardDeviation, 'float'),
     metricTotal: (state) => (state.sample * state.baseRate).toFixed(0),
 
     // Sample
@@ -938,10 +916,8 @@ export const calculator = {
     },
 
     // THRESHOLD
-    relativeThreshold: (state) =>
-      displayValue(state.relativeThreshold, 'percentage'),
-    absoluteThreshold: (state) =>
-      displayValue(state.absoluteThreshold, 'float'),
+    relativeThreshold: (state) => displayValue(state.relativeThreshold, 'percentage'),
+    absoluteThreshold: (state) => displayValue(state.absoluteThreshold, 'float'),
   },
 }
 
