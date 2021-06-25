@@ -14,7 +14,7 @@ export default {
       return this.$store.getters.testType
     },
     isBinomial() {
-      return this.$store.testType === TEST_TYPE.BINOMIAL
+      return this.$store.getters.testType === TEST_TYPE.BINOMIAL
     },
     isBlockFocused() {
       return this.focusedBlock === this.blockName
