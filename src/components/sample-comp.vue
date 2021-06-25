@@ -174,7 +174,7 @@
           <pc-block-field
             fieldProp="runtime"
             prefix=""
-            suffix=" days"
+            :suffix="` day${runtime > 1 ? 's': ''}`"
             :fieldValue.sync="runtime"
             :isReadOnly="lockedField === BLOCKED.DAYS"
             :isBlockFocused="isBlockFocused"
