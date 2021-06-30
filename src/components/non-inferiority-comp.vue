@@ -99,7 +99,7 @@ export default {
     },
     thresholdRelative: {
       get() {
-        return this.$store.getters.relativeThreshold
+        return this.$store.getters.relativeThreshold(!this.isBlockFocused)
       },
       set(threshold) {
         if (this.focusedBlock === FOCUS.SAMPLE) {
@@ -119,7 +119,7 @@ export default {
     },
     thresholdAbsolute: {
       get() {
-        return this.$store.getters.absoluteThreshold
+        return this.$store.getters.absoluteThreshold(!this.isBlockFocused)
       },
       set(threshold) {
         if (this.focusedBlock === FOCUS.SAMPLE) {

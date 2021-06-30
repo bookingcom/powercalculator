@@ -43,14 +43,25 @@ const CALCULATING = Object.freeze({
   SAMPLE: 'sample',
 })
 
-function displayValue(value, type = 'int') {
+function displayValue(value, { type = 'int', userInput = false }) {
   const alternativeToNaN = (val) => (!Number.isInteger(val) && !isFinite(val) ? '-' : val)
 
+  let num = parseFloat(value)
   switch (type) {
     case 'float':
-      return alternativeToNaN(+parseFloat(value).toFixed(2))
+      if (!userInput) {
+        num = num.toFixed(2)
+      }
+      return alternativeToNaN(num)
     case 'percentage':
-      return alternativeToNaN(+(parseFloat(value) * 100).toFixed(2))
+      num *= 100
+      if (!userInput) {
+        num = num.toFixed(2)
+        if (num.endsWith('.00')) {
+          num = num.slice(0, -3)
+        }
+      }
+      return alternativeToNaN(num)
     case 'int':
     default:
       return alternativeToNaN(parseInt(value, 10))
@@ -88,7 +99,9 @@ function getAbsoluteThreshold(state) {
     absoluteThreshold = absoluteThreshold * runtime
   }
 
-  return isNaN(absoluteThreshold) ? 0 : displayValue(absoluteThreshold, 'float')
+  return isNaN(absoluteThreshold)
+    ? 0
+    : displayValue(absoluteThreshold, { type: 'float' })
 }
 
 function getRelativeThreshold(state) {
@@ -127,8 +140,7 @@ function getStandardDeviation(state) {
   if (state.testType === TEST_TYPE.CONTINUOUS) {
     return state.standardDeviation
   }
-    return Math.sqrt(state.baseRate * (1 - state.baseRate))
-
+  return Math.sqrt(state.baseRate * (1 - state.baseRate))
 }
 
 export const calculator = {
@@ -843,23 +855,23 @@ export const calculator = {
     // UI getters
     // Configuration
     variants: (state) => state.variants,
-    falsePositiveRate: (state) => displayValue(state.falsePositiveRate, 'percentage'),
-    targetPower: (state) => displayValue(state.targetPower, 'percentage'),
+    falsePositiveRate: (state) => displayValue(state.falsePositiveRate, { type: 'percentage' }),
+    targetPower: (state) => displayValue(state.targetPower, { type: 'percentage' }),
     isNonInferiority: (state) => state.isNonInferiority,
     testType: (state) => state.testType,
     comparisonMode: (state) => state.comparisonMode,
     trafficMode: (state) => state.trafficMode,
 
     // Base rate
-    baseRate: (state) => displayValue(
-        state.baseRate,
-        state.testType === TEST_TYPE.BINOMIAL ? 'percentage' : 'float'
-      ),
-    standardDeviation: (state) => displayValue(state.standardDeviation, 'float'),
+    baseRate: (state) => displayValue(state.baseRate, {
+        type: state.testType === TEST_TYPE.BINOMIAL ? 'percentage' : 'float',
+        userInput: true,
+      }),
+    standardDeviation: (state) => displayValue(state.standardDeviation, { type: 'float', userInput: true }),
     metricTotal: (state) => (state.sample * state.baseRate).toFixed(0),
 
     // Sample
-    visitorsPerDay: (state) => displayValue(state.visitorsPerDay, 'int'),
+    visitorsPerDay: (state) => displayValue(state.visitorsPerDay, { type: 'int' }),
     sample: (state) => {
       if (
         (state.isNonInferiority && state.relativeThreshold === 0) ||
@@ -867,7 +879,9 @@ export const calculator = {
       ) {
         return '-'
       }
-      return displayValue(Math.ceil(state.sample), 'int')
+      return displayValue(Math.ceil(state.sample), {
+        type: 'int',
+      })
     },
     runtime: (state) => {
       if (
@@ -876,25 +890,26 @@ export const calculator = {
       ) {
         return '-'
       }
-      return displayValue(Math.ceil(state.runtime), 'int')
+      return displayValue(Math.ceil(state.runtime), { type: 'int' })
     },
 
     // Impact
-    relativeImpact: (state) => displayValue(state.relativeImpact, 'percentage'),
-    absoluteImpact: (state) => displayValue(state.absoluteImpact, 'percentage'),
+    relativeImpact: (state) => (userInput = false) => displayValue(state.relativeImpact, { type: 'percentage', userInput }),
+    absoluteImpact: (state) => (userInput = false) => displayValue(state.absoluteImpact, { type: 'percentage', userInput }),
+
     minAbsoluteImpact: (state) => {
       const { min } = math.getAbsoluteImpactInMetricHash({
         base_rate: state.baseRate,
         effect_size: state.relativeImpact,
       })
-      return displayValue(min, 'percentage')
+      return displayValue(min, { type: 'percentage' })
     },
     maxAbsoluteImpact: (state) => {
       const { max } = math.getAbsoluteImpactInMetricHash({
         base_rate: state.baseRate,
         effect_size: state.relativeImpact,
       })
-      return displayValue(max, 'percentage')
+      return displayValue(max, { type: 'percentage' })
     },
     absoluteImpactPerVisitor: (state) => {
       const impactPerVisitor = math.getAbsoluteImpactInVisitors({
@@ -903,7 +918,7 @@ export const calculator = {
         total_sample_size: state.sample,
       })
 
-      return displayValue(impactPerVisitor, 'int')
+      return displayValue(impactPerVisitor, { type: 'int' })
     },
     absoluteImpactPerVisitorPerDay: (state) => {
       const impactPerVisitor = math.getAbsoluteImpactInVisitors({
@@ -912,12 +927,14 @@ export const calculator = {
         total_sample_size: state.sample,
       })
       // We need to use the parsed display value for consistency
-      return displayValue(Math.floor(impactPerVisitor / state.runtime), 'int')
+      return displayValue(Math.floor(impactPerVisitor / state.runtime), {
+        type: 'int',
+      })
     },
 
     // THRESHOLD
-    relativeThreshold: (state) => displayValue(state.relativeThreshold, 'percentage'),
-    absoluteThreshold: (state) => displayValue(state.absoluteThreshold, 'float'),
+    relativeThreshold: (state) => (userInput) => displayValue(state.relativeThreshold, { type: 'percentage', userInput }),
+    absoluteThreshold: (state) => (userInput) => displayValue(state.absoluteThreshold, { type: 'float', userInput }),
   },
 }
 

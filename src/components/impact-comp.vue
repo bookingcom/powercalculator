@@ -139,7 +139,7 @@ export default {
     },
     relativeImpact: {
       get() {
-        return this.$store.getters.relativeImpact
+        return this.$store.getters.relativeImpact(!this.isBlockFocused)
       },
       set(val) {
         if (this.focusedBlock === FOCUS.SAMPLE) {
@@ -162,7 +162,7 @@ export default {
     },
     absoluteImpact: {
       get() {
-        return this.$store.getters.absoluteImpact
+        return this.$store.getters.absoluteImpact(!this.isBlockFocused)
       },
       set(val) {
         if (this.focusedBlock === FOCUS.SAMPLE) {

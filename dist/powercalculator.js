@@ -5921,14 +5921,25 @@
     SAMPLE: 'sample',
   });
 
-  function displayValue(value, type = 'int') {
+  function displayValue(value, { type = 'int', userInput = false }) {
     const alternativeToNaN = (val) => (!Number.isInteger(val) && !isFinite(val) ? '-' : val);
 
+    let num = parseFloat(value);
     switch (type) {
       case 'float':
-        return alternativeToNaN(+parseFloat(value).toFixed(2))
+        if (!userInput) {
+          num = num.toFixed(2);
+        }
+        return alternativeToNaN(num)
       case 'percentage':
-        return alternativeToNaN(+(parseFloat(value) * 100).toFixed(2))
+        num *= 100;
+        if (!userInput) {
+          num = num.toFixed(2);
+          if (num.endsWith('.00')) {
+            num = num.slice(0, -3);
+          }
+        }
+        return alternativeToNaN(num)
       case 'int':
       default:
         return alternativeToNaN(parseInt(value, 10))
@@ -5966,7 +5977,9 @@
       absoluteThreshold = absoluteThreshold * runtime;
     }
 
-    return isNaN(absoluteThreshold) ? 0 : displayValue(absoluteThreshold, 'float')
+    return isNaN(absoluteThreshold)
+      ? 0
+      : displayValue(absoluteThreshold, { type: 'float' })
   }
 
   function getRelativeThreshold(state) {
@@ -6005,8 +6018,7 @@
     if (state.testType === TEST_TYPE.CONTINUOUS) {
       return state.standardDeviation
     }
-      return Math.sqrt(state.baseRate * (1 - state.baseRate))
-
+    return Math.sqrt(state.baseRate * (1 - state.baseRate))
   }
 
   const calculator = {
@@ -6721,23 +6733,23 @@
       // UI getters
       // Configuration
       variants: (state) => state.variants,
-      falsePositiveRate: (state) => displayValue(state.falsePositiveRate, 'percentage'),
-      targetPower: (state) => displayValue(state.targetPower, 'percentage'),
+      falsePositiveRate: (state) => displayValue(state.falsePositiveRate, { type: 'percentage' }),
+      targetPower: (state) => displayValue(state.targetPower, { type: 'percentage' }),
       isNonInferiority: (state) => state.isNonInferiority,
       testType: (state) => state.testType,
       comparisonMode: (state) => state.comparisonMode,
       trafficMode: (state) => state.trafficMode,
 
       // Base rate
-      baseRate: (state) => displayValue(
-          state.baseRate,
-          state.testType === TEST_TYPE.BINOMIAL ? 'percentage' : 'float'
-        ),
-      standardDeviation: (state) => displayValue(state.standardDeviation, 'float'),
+      baseRate: (state) => displayValue(state.baseRate, {
+          type: state.testType === TEST_TYPE.BINOMIAL ? 'percentage' : 'float',
+          userInput: true,
+        }),
+      standardDeviation: (state) => displayValue(state.standardDeviation, { type: 'float', userInput: true }),
       metricTotal: (state) => (state.sample * state.baseRate).toFixed(0),
 
       // Sample
-      visitorsPerDay: (state) => displayValue(state.visitorsPerDay, 'int'),
+      visitorsPerDay: (state) => displayValue(state.visitorsPerDay, { type: 'int' }),
       sample: (state) => {
         if (
           (state.isNonInferiority && state.relativeThreshold === 0) ||
@@ -6745,7 +6757,9 @@
         ) {
           return '-'
         }
-        return displayValue(Math.ceil(state.sample), 'int')
+        return displayValue(Math.ceil(state.sample), {
+          type: 'int',
+        })
       },
       runtime: (state) => {
         if (
@@ -6754,25 +6768,26 @@
         ) {
           return '-'
         }
-        return displayValue(Math.ceil(state.runtime), 'int')
+        return displayValue(Math.ceil(state.runtime), { type: 'int' })
       },
 
       // Impact
-      relativeImpact: (state) => displayValue(state.relativeImpact, 'percentage'),
-      absoluteImpact: (state) => displayValue(state.absoluteImpact, 'percentage'),
+      relativeImpact: (state) => (userInput = false) => displayValue(state.relativeImpact, { type: 'percentage', userInput }),
+      absoluteImpact: (state) => (userInput = false) => displayValue(state.absoluteImpact, { type: 'percentage', userInput }),
+
       minAbsoluteImpact: (state) => {
         const { min } = math.getAbsoluteImpactInMetricHash({
           base_rate: state.baseRate,
           effect_size: state.relativeImpact,
         });
-        return displayValue(min, 'percentage')
+        return displayValue(min, { type: 'percentage' })
       },
       maxAbsoluteImpact: (state) => {
         const { max } = math.getAbsoluteImpactInMetricHash({
           base_rate: state.baseRate,
           effect_size: state.relativeImpact,
         });
-        return displayValue(max, 'percentage')
+        return displayValue(max, { type: 'percentage' })
       },
       absoluteImpactPerVisitor: (state) => {
         const impactPerVisitor = math.getAbsoluteImpactInVisitors({
@@ -6781,7 +6796,7 @@
           total_sample_size: state.sample,
         });
 
-        return displayValue(impactPerVisitor, 'int')
+        return displayValue(impactPerVisitor, { type: 'int' })
       },
       absoluteImpactPerVisitorPerDay: (state) => {
         const impactPerVisitor = math.getAbsoluteImpactInVisitors({
@@ -6790,12 +6805,14 @@
           total_sample_size: state.sample,
         });
         // We need to use the parsed display value for consistency
-        return displayValue(Math.floor(impactPerVisitor / state.runtime), 'int')
+        return displayValue(Math.floor(impactPerVisitor / state.runtime), {
+          type: 'int',
+        })
       },
 
       // THRESHOLD
-      relativeThreshold: (state) => displayValue(state.relativeThreshold, 'percentage'),
-      absoluteThreshold: (state) => displayValue(state.absoluteThreshold, 'float'),
+      relativeThreshold: (state) => (userInput) => displayValue(state.relativeThreshold, { type: 'percentage', userInput }),
+      absoluteThreshold: (state) => (userInput) => displayValue(state.absoluteThreshold, { type: 'float', userInput }),
     },
   };
 
@@ -6992,7 +7009,7 @@
       },
       relativeImpact: {
         get() {
-          return this.$store.getters.relativeImpact
+          return this.$store.getters.relativeImpact(!this.isBlockFocused)
         },
         set(val) {
           if (this.focusedBlock === FOCUS.SAMPLE) {
@@ -7015,7 +7032,7 @@
       },
       absoluteImpact: {
         get() {
-          return this.$store.getters.absoluteImpact
+          return this.$store.getters.absoluteImpact(!this.isBlockFocused)
         },
         set(val) {
           if (this.focusedBlock === FOCUS.SAMPLE) {
@@ -7134,7 +7151,7 @@
       },
       thresholdRelative: {
         get() {
-          return this.$store.getters.relativeThreshold
+          return this.$store.getters.relativeThreshold(!this.isBlockFocused)
         },
         set(threshold) {
           if (this.focusedBlock === FOCUS.SAMPLE) {
@@ -7154,7 +7171,7 @@
       },
       thresholdAbsolute: {
         get() {
-          return this.$store.getters.absoluteThreshold
+          return this.$store.getters.absoluteThreshold(!this.isBlockFocused)
         },
         set(threshold) {
           if (this.focusedBlock === FOCUS.SAMPLE) {
@@ -7194,7 +7211,7 @@
     /* style */
     const __vue_inject_styles__$3 = function (inject) {
       if (!inject) return
-      inject("data-v-63b6624f_0", { source: ".pc-non-inf-select{--base-padding:5px;font-size:inherit;line-height:28px;border:none;display:block;position:relative;box-sizing:border-box;width:100%;filter:drop-shadow(0 4px 2px rgba(0, 0, 0, .1));border-radius:5px;background:var(--white);padding:var(--base-padding);overflow:hidden;-webkit-appearance:none;-moz-appearance:none;appearance:none}.pc-non-inf-select:focus{outline:0;box-shadow:inset 0 0 0 1px var(--dark-blue)}.pc-non-inf-select-wrapper{position:relative}.pc-non-inf-select-wrapper:after{--border-size:7px;content:'';position:absolute;right:5px;bottom:0;pointer-events:none;border:var(--border-size) solid transparent;border-top:var(--border-size) solid var(--gray);transform:translateY(calc(-50% - var(--border-size)/ 2))}.no-sub-title{margin:15px 0 10px 0}", map: undefined, media: undefined });
+      inject("data-v-89abe762_0", { source: ".pc-non-inf-select{--base-padding:5px;font-size:inherit;line-height:28px;border:none;display:block;position:relative;box-sizing:border-box;width:100%;filter:drop-shadow(0 4px 2px rgba(0, 0, 0, .1));border-radius:5px;background:var(--white);padding:var(--base-padding);overflow:hidden;-webkit-appearance:none;-moz-appearance:none;appearance:none}.pc-non-inf-select:focus{outline:0;box-shadow:inset 0 0 0 1px var(--dark-blue)}.pc-non-inf-select-wrapper{position:relative}.pc-non-inf-select-wrapper:after{--border-size:7px;content:'';position:absolute;right:5px;bottom:0;pointer-events:none;border:var(--border-size) solid transparent;border-top:var(--border-size) solid var(--gray);transform:translateY(calc(-50% - var(--border-size)/ 2))}.no-sub-title{margin:15px 0 10px 0}", map: undefined, media: undefined });
 
     };
     /* scoped */
@@ -7595,16 +7612,23 @@
           focusedBlock: this.focusedBlock,
           sample: this.$store.getters.sample,
           baseRate: this.$store.getters.baseRate,
-          impact: this.$store.getters.relativeImpact,
-          absoluteImpact: this.$store.getters.absoluteImpact,
+          impact: this.$store.getters.relativeImpact(!this.$store.getters.isNonInferiority &&
+              this.focusedBlock !== FOCUS.IMPACT),
+          relativeImpact: this.$store.getters.relativeImpact(!this.$store.getters.isNonInferiority &&
+              this.focusedBlock !== FOCUS.IMPACT),
+          absoluteImpact: this.$store.getters.absoluteImpact(!this.$store.getters.isNonInferiority &&
+              this.focusedBlock !== FOCUS.IMPACT),
           targetPower: this.$store.getters.targetPower,
           falsePositiveRate: this.$store.getters.falsePositiveRate,
           standardDeviation: this.$store.getters.standardDeviation,
           runtime: this.$store.getters.runtime,
           visitorsPerDay: this.$store.getters.visitorsPerDay,
-          threshold: this.$store.getters.thresholdRelative,
-          absoluteThreshold: this.$store.getters.absoluteThreshold,
-          relativeThreshold: this.$store.getters.relativeThreshold,
+          threshold: this.$store.getters.relativeThreshold(this.$store.getters.isNonInferiority &&
+              this.focusedBlock !== FOCUS.IMPACT),
+          absoluteThreshold: this.$store.getters.absoluteThreshold(this.$store.getters.isNonInferiority &&
+              this.focusedBlock !== FOCUS.IMPACT),
+          relativeThreshold: this.$store.getters.relativeThreshold(this.$store.getters.isNonInferiority &&
+              this.focusedBlock !== FOCUS.IMPACT),
           variants: this.$store.getters.variants,
           comparisonMode: this.$store.getters.comparisonMode,
           trafficMode: this.$store.getters.trafficMode,
@@ -7636,7 +7660,7 @@
     /* style */
     const __vue_inject_styles__ = function (inject) {
       if (!inject) return
-      inject("data-v-2124889c_0", { source: ".power-calculator{--white:#fff;--black:#000;--gray:#b5b5b5;--light-gray:#f0f0f0;--dark-gray:#525252;--light-blue:#c1cfd8;--pale-blue:#7898ae;--blue:#155eab;--dark-blue:#3d78df;--light-yellow:#fef1cb;--dark-yellow:#e2b634;--fade-black:rgba(0, 0, 0, 0.3);--red:#f00}.pc-main-header{display:grid;grid-template-columns:33.33% 33.33% 33.33%;grid-template-rows:auto;grid-template-areas:'controls-left title controls-right';align-items:center;margin:25px 10px}.pc-controls-left{grid-area:controls-left;display:grid;grid-template-columns:min-content min-content min-content;grid-template-rows:2;grid-template-areas:'calc-options calc-options calc-options' 'test-type traffic comparison';align-items:center}.pc-controls-right{grid-area:controls-right;display:grid;grid-template-columns:auto min-content min-content;grid-template-rows:auto;grid-template-areas:'variants false-positive power';align-items:center;justify-items:end}.pc-title{grid-area:title;font-size:30px;text-align:center}.pc-traffic-mode{grid-area:traffic}.pc-comparison-mode,.pc-false-positive,.pc-non-inf-label,.pc-power,.pc-test-type,.pc-traffic-mode,.pc-variants{font-size:.8em}.pc-test-type{grid-area:test-type}.pc-non-inferiority{grid-area:calc-options;margin-bottom:8px}.pc-comparison-mode{grid-area:comparison}.pc-comparison-mode-label,.pc-non-inf-label,.pc-test-type-labels,.pc-traffic-mode-labels{white-space:nowrap}.pc-comparison-mode,.pc-non-inferiority,.pc-test-type,.pc-traffic-mode{margin-left:15px}.pc-test-type-tooltip-wrapper{display:inline-block}.pc-non-inf-label{white-space:nowrap}.pc-non-inf-treshold{display:flex;align-items:center}.pc-non-inf-treshold-input{margin-left:5px}.pc-variants{grid-area:variants;white-space:nowrap;align-self:end}.pc-false-positive{grid-area:false-positive;margin-left:15px;white-space:nowrap;align-self:end}.pc-power{grid-area:power;margin-left:15px;margin-right:15px;white-space:nowrap;align-self:end}.pc-blocks-wrapper{grid-area:pc-blocks-wrapper;display:grid;grid-template-columns:33% 33% 33%;grid-template-rows:auto;grid-template-areas:'block-base block-sample block-impact' 'block-graph block-graph block-graph';grid-template-rows:auto;grid-column-gap:8px;grid-row-gap:8px}.pc-block--base{grid-area:block-base}.pc-block--sample{grid-area:block-sample}.pc-block--impact{grid-area:block-impact}.pc-block--graph{grid-area:block-graph}.pc-block{background:var(--light-gray)}.pc-header{color:var(--white);text-align:center;font-size:28px;line-height:80px;height:80px;text-shadow:0 1px 1px rgba(0,0,0,.29);background:var(--pale-blue);margin-bottom:25px}.pc-calculate{display:inline-block;margin-bottom:25px;font-weight:700;font-size:.8em}.pc-value{display:block;margin-bottom:25px}.pc-block-to-calculate{background:var(--light-yellow)}.pc-block-to-calculate .pc-header{background:var(--dark-yellow)}.pc-hidden{display:none!important}", map: undefined, media: undefined });
+      inject("data-v-6ae05cb6_0", { source: ".power-calculator{--white:#fff;--black:#000;--gray:#b5b5b5;--light-gray:#f0f0f0;--dark-gray:#525252;--light-blue:#c1cfd8;--pale-blue:#7898ae;--blue:#155eab;--dark-blue:#3d78df;--light-yellow:#fef1cb;--dark-yellow:#e2b634;--fade-black:rgba(0, 0, 0, 0.3);--red:#f00}.pc-main-header{display:grid;grid-template-columns:33.33% 33.33% 33.33%;grid-template-rows:auto;grid-template-areas:'controls-left title controls-right';align-items:center;margin:25px 10px}.pc-controls-left{grid-area:controls-left;display:grid;grid-template-columns:min-content min-content min-content;grid-template-rows:2;grid-template-areas:'calc-options calc-options calc-options' 'test-type traffic comparison';align-items:center}.pc-controls-right{grid-area:controls-right;display:grid;grid-template-columns:auto min-content min-content;grid-template-rows:auto;grid-template-areas:'variants false-positive power';align-items:center;justify-items:end}.pc-title{grid-area:title;font-size:30px;text-align:center}.pc-traffic-mode{grid-area:traffic}.pc-comparison-mode,.pc-false-positive,.pc-non-inf-label,.pc-power,.pc-test-type,.pc-traffic-mode,.pc-variants{font-size:.8em}.pc-test-type{grid-area:test-type}.pc-non-inferiority{grid-area:calc-options;margin-bottom:8px}.pc-comparison-mode{grid-area:comparison}.pc-comparison-mode-label,.pc-non-inf-label,.pc-test-type-labels,.pc-traffic-mode-labels{white-space:nowrap}.pc-comparison-mode,.pc-non-inferiority,.pc-test-type,.pc-traffic-mode{margin-left:15px}.pc-test-type-tooltip-wrapper{display:inline-block}.pc-non-inf-label{white-space:nowrap}.pc-non-inf-treshold{display:flex;align-items:center}.pc-non-inf-treshold-input{margin-left:5px}.pc-variants{grid-area:variants;white-space:nowrap;align-self:end}.pc-false-positive{grid-area:false-positive;margin-left:15px;white-space:nowrap;align-self:end}.pc-power{grid-area:power;margin-left:15px;margin-right:15px;white-space:nowrap;align-self:end}.pc-blocks-wrapper{grid-area:pc-blocks-wrapper;display:grid;grid-template-columns:33% 33% 33%;grid-template-rows:auto;grid-template-areas:'block-base block-sample block-impact' 'block-graph block-graph block-graph';grid-template-rows:auto;grid-column-gap:8px;grid-row-gap:8px}.pc-block--base{grid-area:block-base}.pc-block--sample{grid-area:block-sample}.pc-block--impact{grid-area:block-impact}.pc-block--graph{grid-area:block-graph}.pc-block{background:var(--light-gray)}.pc-header{color:var(--white);text-align:center;font-size:28px;line-height:80px;height:80px;text-shadow:0 1px 1px rgba(0,0,0,.29);background:var(--pale-blue);margin-bottom:25px}.pc-calculate{display:inline-block;margin-bottom:25px;font-weight:700;font-size:.8em}.pc-value{display:block;margin-bottom:25px}.pc-block-to-calculate{background:var(--light-yellow)}.pc-block-to-calculate .pc-header{background:var(--dark-yellow)}.pc-hidden{display:none!important}", map: undefined, media: undefined });
 
     };
     /* scoped */

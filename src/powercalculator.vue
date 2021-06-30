@@ -340,16 +340,23 @@ export default {
         focusedBlock: this.focusedBlock,
         sample: this.$store.getters.sample,
         baseRate: this.$store.getters.baseRate,
-        impact: this.$store.getters.relativeImpact,
-        absoluteImpact: this.$store.getters.absoluteImpact,
+        impact: this.$store.getters.relativeImpact(!this.$store.getters.isNonInferiority &&
+            this.focusedBlock !== FOCUS.IMPACT),
+        relativeImpact: this.$store.getters.relativeImpact(!this.$store.getters.isNonInferiority &&
+            this.focusedBlock !== FOCUS.IMPACT),
+        absoluteImpact: this.$store.getters.absoluteImpact(!this.$store.getters.isNonInferiority &&
+            this.focusedBlock !== FOCUS.IMPACT),
         targetPower: this.$store.getters.targetPower,
         falsePositiveRate: this.$store.getters.falsePositiveRate,
         standardDeviation: this.$store.getters.standardDeviation,
         runtime: this.$store.getters.runtime,
         visitorsPerDay: this.$store.getters.visitorsPerDay,
-        threshold: this.$store.getters.thresholdRelative,
-        absoluteThreshold: this.$store.getters.absoluteThreshold,
-        relativeThreshold: this.$store.getters.relativeThreshold,
+        threshold: this.$store.getters.relativeThreshold(this.$store.getters.isNonInferiority &&
+            this.focusedBlock !== FOCUS.IMPACT),
+        absoluteThreshold: this.$store.getters.absoluteThreshold(this.$store.getters.isNonInferiority &&
+            this.focusedBlock !== FOCUS.IMPACT),
+        relativeThreshold: this.$store.getters.relativeThreshold(this.$store.getters.isNonInferiority &&
+            this.focusedBlock !== FOCUS.IMPACT),
         variants: this.$store.getters.variants,
         comparisonMode: this.$store.getters.comparisonMode,
         trafficMode: this.$store.getters.trafficMode,
