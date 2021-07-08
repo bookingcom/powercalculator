@@ -7536,79 +7536,74 @@
     //
 
     var script$6 = {
-        extends: __vue_component__$4,
-        template: '#impact-comp',
-        props: ['enableEdit', 'fieldFromBlock', 'isBlockFocused', 'isnoninferiority'],
-        data () {
-            return {
-                focusedBlock: ''
-            }
-        },
-        computed: {
-            days () {
-                return this.$store.state.attributes.runtime
-            },
-            base () {
-                return this.$store.state.attributes.base
-            },
-            sample () {
-                return this.$store.state.attributes.sample
-            },
-            impact () {
-                return this.$store.state.attributes.impact
-            },
-            testType () {
-                return this.$store.state.attributes.testType
-            },
-            isReadOnly () {
-                return this.calculateProp == 'impact'
-            },
-            impactByMetricDisplay () {
-                return this.$store.getters.impactByMetricDisplay
-            },
-            impactByMetricMinDisplay () {
-                return this.$store.getters.impactByMetricMinDisplay
-            },
-            impactByMetricMaxDisplay () {
-                return this.$store.getters.impactByMetricMaxDisplay
-            },
-            impactByVisitorsDisplay () {
-                return this.$store.getters.impactByVisitorsDisplay
-            },
-            impactByVisitorsPerDayDisplay () {
-                return this.$store.getters.impactByVisitorsPerDayDisplay
-            },
-            onlyTotalVisitors () {
-                return this.$store.state.attributes.onlyTotalVisitors
-            },
-        },
-        watch: {
-            isReadOnly () {
-                return this.calculateProp == 'impact'
-            }
-        },
-        methods: {
-            updateFocus ({fieldProp, value}) {
-                if (this.focusedBlock == fieldProp && value === false) {
-                    this.focusedBlock = '';
-                } else if (value === true) {
-                    this.focusedBlock = fieldProp;
-                }
-
-                this.$emit('update:focus', {
-                    fieldProp: this.fieldFromBlock,
-                    value: value
-                });
-            },
-            addPercentToString (str) {
-                let result = str;
-                if (this.testType == 'gTest') {
-                    result += '%';
-                }
-
-                return result
-            }
+      extends: __vue_component__$4,
+      template: '#impact-comp',
+      props: ['enableEdit', 'fieldFromBlock', 'isBlockFocused', 'isnoninferiority'],
+      data() {
+        return {
+          focusedBlock: ''
         }
+      },
+      computed: {
+        days() {
+          return this.$store.state.attributes.runtime
+        },
+        base() {
+          return this.$store.state.attributes.base
+        },
+        sample() {
+          return this.$store.state.attributes.sample
+        },
+        impact() {
+          return this.$store.state.attributes.impact
+        },
+        testType() {
+          return this.$store.state.attributes.testType
+        },
+        isReadOnly() {
+          return this.calculateProp == 'impact'
+        },
+        impactByMetricDisplay() {
+          return this.$store.getters.impactByMetricDisplay
+        },
+        impactByMetricMinDisplay() {
+          return this.$store.getters.impactByMetricMinDisplay
+        },
+        impactByMetricMaxDisplay() {
+          return this.$store.getters.impactByMetricMaxDisplay
+        },
+        impactByVisitorsDisplay() {
+          return this.$store.getters.impactByVisitorsDisplay
+        },
+        impactByVisitorsPerDayDisplay() {
+          return this.$store.getters.impactByVisitorsPerDayDisplay
+        },
+        onlyTotalVisitors() {
+          return this.$store.state.attributes.onlyTotalVisitors
+        }
+      },
+      methods: {
+        updateFocus({ fieldProp, value }) {
+          if (this.focusedBlock == fieldProp && value === false) {
+            this.focusedBlock = '';
+          } else if (value === true) {
+            this.focusedBlock = fieldProp;
+          }
+
+          this.$emit('update:focus', {
+            fieldProp: this.fieldFromBlock,
+            value: value
+          });
+        },
+        addPercentToString(str) {
+          let result = str;
+          if (this.testType == 'gTest') {
+            result += '%';
+          }
+
+          return result
+        }
+      }
     };
 
     /* script */
@@ -7663,16 +7658,14 @@
                 }
               }),
               _vm._v(
-                "\n            " +
+                "\n    " +
                   _vm._s(_vm.isCalculated ? "Calculating" : "Calculate") +
-                  "\n    "
+                  "\n  "
               )
             ]
           ),
           _vm._v(" "),
-          _c("div", { staticClass: "pc-header" }, [
-            _vm._v("\n        Impact\n    ")
-          ]),
+          _c("div", { staticClass: "pc-header" }, [_vm._v("\n    Impact\n  ")]),
           _vm._v(" "),
           _c("ul", { staticClass: "pc-inputs" }, [
             _c("li", { staticClass: "pc-input-item pc-input-left" }, [
@@ -7727,17 +7720,17 @@
                   _vm._v(" "),
                   _c("span", { staticClass: "pc-input-details" }, [
                     _vm._v(
-                      "\n                        going from " +
+                      "\n          going from " +
                         _vm._s(_vm.addPercentToString(_vm.base)) +
-                        " to\n                        either " +
+                        " to either\n          " +
                         _vm._s(
                           _vm.addPercentToString(_vm.impactByMetricMinDisplay)
                         ) +
-                        " or\n                        " +
+                        " or\n          " +
                         _vm._s(
                           _vm.addPercentToString(_vm.impactByMetricMaxDisplay)
                         ) +
-                        "\n                    "
+                        "\n        "
                     )
                   ])
                 ],
@@ -7764,13 +7757,13 @@
                   _vm._v(" "),
                   _c("span", { staticClass: "pc-input-details" }, [
                     _vm._v(
-                      "\n                    " +
+                      "\n          " +
                         _vm._s(
                           _vm.testType == "gTest"
                             ? " Incremental units"
                             : " Incremental change in the metric"
                         ) +
-                        "\n                "
+                        "\n        "
                     )
                   ])
                 ],
@@ -7798,13 +7791,13 @@
                       _vm._v(" "),
                       _c("span", { staticClass: "pc-input-details" }, [
                         _vm._v(
-                          "\n                    " +
+                          "\n          " +
                             _vm._s(
                               _vm.testType == "gTest"
                                 ? " Incremental units per day"
                                 : " Incremental change in the metric per day"
                             ) +
-                            "\n                "
+                            "\n        "
                         )
                       ])
                     ],
@@ -7823,7 +7816,7 @@
       /* style */
       const __vue_inject_styles__$6 = function (inject) {
         if (!inject) return
-        inject("data-v-ed365eb8_0", { source: "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", map: {"version":3,"sources":[],"names":[],"mappings":"","file":"impact-comp.vue"}, media: undefined });
+        inject("data-v-9d953136_0", { source: "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", map: {"version":3,"sources":[],"names":[],"mappings":"","file":"impact-comp.vue"}, media: undefined });
 
       };
       /* scoped */
@@ -8284,92 +8277,94 @@
     //
 
     var script$a = {
-        props: ['enableEdit', 'fieldFromBlock', 'isBlockFocused'],
-        extends: __vue_component__$4,
-        template: '#base-comp',
-        data () {
-            return {
-                focusedBlock: '',
-                options: [
-                    {
-                        text: 'relative',
-                        value: 'relative'
-                    },
-                    {
-                        text: 'absolute',
-                        value: 'absolutePerDay'
-                    }
-                ]
+      props: ['enableEdit', 'fieldFromBlock', 'isBlockFocused'],
+      extends: __vue_component__$4,
+      template: '#base-comp',
+      data() {
+        return {
+          focusedBlock: '',
+          options: [
+            {
+              text: 'relative',
+              value: 'relative'
+            },
+            {
+              text: 'absolute',
+              value: 'absolutePerDay'
             }
-        },
-        computed: {
-            isReadOnly () {
-                return this.calculateProp == 'base'
-            },
-            enabled () {
-                return this.$store.state.nonInferiority.enabled
-            },
-            threshold () {
-                return this.$store.state.nonInferiority.threshold
-            },
-            thresholdRelative () {
-                return this.$store.state.nonInferiority.thresholdRelative
-            },
-            thresholdAbsolute () {
-                const thresholdPerDay =  this.$store.state.nonInferiority.thresholdAbsolute;
-                if (this.$store.state.attributes.onlyTotalVisitors) {
-                    const runtime = this.$store.getters.runtime;
-                    return thresholdPerDay * runtime
-                }
-                return thresholdPerDay
-            },
-            isRelative () {
-                return this.$store.state.nonInferiority.selected == 'relative'
-            },
-            onlyTotalVisitors () {
-                return this.$store.state.attributes.onlyTotalVisitors
-            },
-            selected: {
-                get () {
-                    return this.$store.state.nonInferiority.selected
-                },
-                set (newValue) {
-                    this.$store.dispatch('change:noninferiority', {
-                        prop: 'selected',
-                        value: newValue
-                    });
-                }
-            },
-            expectedChange: {
-                get () {
-                    return this.$store.state.nonInferiority.expectedChange
-                },
-                set (newValue) {
-                    this.$store.dispatch('field:change', {
-                        prop: 'expectedChange',
-                        value: newValue
-                    });
-                }
-            },
-        },
-        methods: {
-            enableInput () {
-                this.$emit('edit:update', {prop: 'base'});
-            },
-            updateFocus ({fieldProp, value}) {
-                if (this.focusedBlock == fieldProp && value === false) {
-                    this.focusedBlock = '';
-                } else if (value === true) {
-                    this.focusedBlock = fieldProp;
-                }
-
-                this.$emit('update:focus', {
-                    fieldProp: this.fieldFromBlock,
-                    value: value
-                });
-            }
-
+          ]
         }
+      },
+      computed: {
+        enabled() {
+          return this.$store.state.nonInferiority.enabled
+        },
+        threshold() {
+          return this.$store.state.nonInferiority.threshold
+        },
+        thresholdRelative() {
+          return this.$store.state.nonInferiority.thresholdRelative
+        },
+        thresholdAbsolute() {
+          const thresholdPerDay = this.$store.state.nonInferiority.thresholdAbsolute;
+          if (this.$store.state.attributes.onlyTotalVisitors) {
+            const runtime = this.$store.getters.runtime;
+            return thresholdPerDay * runtime
+          }
+          return thresholdPerDay
+        },
+        isRelative() {
+          return this.$store.state.nonInferiority.selected == 'relative'
+        },
+        onlyTotalVisitors() {
+          return this.$store.state.attributes.onlyTotalVisitors
+        },
+        testType() {
+          return this.$store.state.attributes.testType
+        },
+        isReadOnly() {
+          return this.calculateProp == 'non-inferiority'
+        },
+        selected: {
+          get() {
+            return this.$store.state.nonInferiority.selected
+          },
+          set(newValue) {
+            this.$store.dispatch('change:noninferiority', {
+              prop: 'selected',
+              value: newValue
+            });
+          }
+        },
+        expectedChange: {
+          get() {
+            return this.$store.state.nonInferiority.expectedChange
+          },
+          set(newValue) {
+            this.$store.dispatch('field:change', {
+              prop: 'expectedChange',
+              value: newValue
+            });
+          }
+        }
+      },
+      methods: {
+        enableInput() {
+          this.$emit('edit:update', { prop: 'base' });
+        },
+        updateFocus({ fieldProp, value }) {
+          if (this.focusedBlock == fieldProp && value === false) {
+            this.focusedBlock = '';
+          } else if (value === true) {
+            this.focusedBlock = fieldProp;
+          }
+
+          this.$emit('update:focus', {
+            fieldProp: this.fieldFromBlock,
+            value: value
+          });
+        }
+      }
     };
 
     /* script */
@@ -8384,13 +8379,55 @@
         "div",
         {
           staticClass: "pc-block pc-block--noninferiority",
-          class: { "pc-block-focused": _vm.focusedBlock == "noninferiority" }
+          class: {
+            "pc-block-focused": _vm.isBlockFocused,
+            "pc-block-to-calculate": _vm.calculateProp == "non-inferiority"
+          }
         },
         [
-          _c("pc-svg-chain", { attrs: { fieldFromBlock: _vm.fieldFromBlock } }),
+          _c("pc-svg-chain", {
+            attrs: {
+              calculateProp: _vm.calculateProp,
+              fieldFromBlock: _vm.fieldFromBlock
+            }
+          }),
+          _vm._v(" "),
+          _c(
+            "label",
+            {
+              staticClass: "pc-calc-radio pc-calc-radio--impact",
+              class: { "pc-calc-radio--active": _vm.isCalculated },
+              attrs: { slot: "text" },
+              slot: "text"
+            },
+            [
+              _c("input", {
+                directives: [
+                  {
+                    name: "model",
+                    rawName: "v-model",
+                    value: _vm.isCalculated,
+                    expression: "isCalculated"
+                  }
+                ],
+                attrs: { type: "radio" },
+                domProps: { value: true, checked: _vm._q(_vm.isCalculated, true) },
+                on: {
+                  change: function($event) {
+                    _vm.isCalculated = true;
+                  }
+                }
+              }),
+              _vm._v(
+                "\n    " +
+                  _vm._s(_vm.isCalculated ? "Calculating" : "Calculate") +
+                  "\n  "
+              )
+            ]
+          ),
           _vm._v(" "),
           _c("div", { staticClass: "pc-header" }, [
-            _vm._v("\n        Non Inferiority\n    ")
+            _vm._v("\n    Non Inferiority\n  ")
           ]),
           _vm._v(" "),
           _c("ul", { staticClass: "pc-inputs" }, [
@@ -8401,6 +8438,7 @@
                   _vm._m(0),
                   _vm._v(" "),
                   _c("pc-block-field", {
+                    staticClass: "pc-input-field",
                     attrs: {
                       fieldProp: "thresholdRelative",
                       suffix: "%",
@@ -8408,7 +8446,7 @@
                       fieldFromBlock: _vm.fieldFromBlock,
                       isBlockFocused: _vm.isBlockFocused,
                       isReadOnly: _vm.isReadOnly,
-                      enableEdit: true
+                      enableEdit: _vm.enableEdit
                     },
                     on: { "update:focus": _vm.updateFocus }
                   })
@@ -8422,7 +8460,7 @@
                 "label",
                 [
                   _c("span", { staticClass: "pc-input-title" }, [
-                    _vm._v("Absolute "),
+                    _vm._v("Absolute\n          "),
                     !_vm.onlyTotalVisitors
                       ? _c("small", { staticClass: "pc-input-sub-title" }, [
                           _vm._v("impact per day")
@@ -8431,6 +8469,7 @@
                   ]),
                   _vm._v(" "),
                   _c("pc-block-field", {
+                    staticClass: "pc-input-field",
                     attrs: {
                       fieldProp: "thresholdAbsolute",
                       suffix: "",
@@ -8438,7 +8477,7 @@
                       fieldFromBlock: _vm.fieldFromBlock,
                       isBlockFocused: _vm.isBlockFocused,
                       isReadOnly: _vm.isReadOnly,
-                      enableEdit: true
+                      enableEdit: _vm.enableEdit
                     },
                     on: { "update:focus": _vm.updateFocus }
                   })
@@ -8464,6 +8503,7 @@
                         }
                       ],
                       staticClass: "pc-non-inf-select",
+                      attrs: { disabled: _vm.isReadOnly },
                       on: {
                         change: function($event) {
                           var $$selectedVal = Array.prototype.filter
@@ -8482,21 +8522,15 @@
                     },
                     [
                       _c("option", { attrs: { value: "nochange" } }, [
-                        _vm._v(
-                          "\n                            No Change\n                        "
-                        )
+                        _vm._v("\n              No Change\n            ")
                       ]),
                       _vm._v(" "),
                       _c("option", { attrs: { value: "degradation" } }, [
-                        _vm._v(
-                          "\n                            Degradation\n                        "
-                        )
+                        _vm._v("\n              Degradation\n            ")
                       ]),
                       _vm._v(" "),
                       _c("option", { attrs: { value: "improvement" } }, [
-                        _vm._v(
-                          "\n                            Improvement\n                        "
-                        )
+                        _vm._v("\n              Improvement\n            ")
                       ])
                     ]
                   )
@@ -8523,7 +8557,7 @@
         var _h = _vm.$createElement;
         var _c = _vm._self._c || _h;
         return _c("span", { staticClass: "pc-input-title no-sub-title" }, [
-          _vm._v("\n                        Expected Change\n                    "),
+          _vm._v("\n          Expected Change\n          "),
           _c("small", { staticClass: "pc-input-sub-title" })
         ])
       }
@@ -8533,7 +8567,7 @@
       /* style */
       const __vue_inject_styles__$a = function (inject) {
         if (!inject) return
-        inject("data-v-c06bdb14_0", { source: "\n.pc-non-inf-select {\n    --base-padding: 5px;\n    font-size: inherit;\n    line-height: 28px;\n    border: none;\n    display: block;\n    position: relative;\n    box-sizing: border-box;\n    width: 100%;\n    filter: drop-shadow(0 4px 2px rgba(0,0,0,0.1));\n    border-radius: 5px;\n    background: var(--white);\n    padding: var(--base-padding);\n\n    overflow: hidden;\n    -webkit-appearance: none;\n    -moz-appearance: none;\n    appearance: none;\n}\n.pc-non-inf-select:focus {\n    outline: 0;\n    box-shadow: inset 0 0 0 1px var(--dark-blue);\n}\n.pc-non-inf-select-wrapper {\n    position: relative;\n}\n.pc-non-inf-select-wrapper:after {\n    --border-size: 7px;\n    content: '';\n    position: absolute;\n    right: 5px;\n    bottom: 0;\n    pointer-events: none;\n    border: var(--border-size) solid transparent;\n    border-top: var(--border-size) solid var(--gray);\n    transform: translateY(calc(-50% - var(--border-size)/2));\n}\n.no-sub-title {\n    margin: 15px 0 10px 0;\n}\n", map: {"version":3,"sources":["/Users/amartinezdem/git_tree/github/bookingcom/powercalculator/src/components/non-inferiority-comp.vue"],"names":[],"mappings":";AAwKA;IACA,mBAAA;IACA,kBAAA;IACA,iBAAA;IACA,YAAA;IACA,cAAA;IACA,kBAAA;IACA,sBAAA;IACA,WAAA;IACA,8CAAA;IACA,kBAAA;IACA,wBAAA;IACA,4BAAA;;IAEA,gBAAA;IACA,wBAAA;IACA,qBAAA;IACA,gBAAA;AACA;AAEA;IACA,UAAA;IACA,4CAAA;AACA;AAEA;IACA,kBAAA;AACA;AAEA;IACA,kBAAA;IACA,WAAA;IACA,kBAAA;IACA,UAAA;IACA,SAAA;IACA,oBAAA;IACA,4CAAA;IACA,gDAAA;IACA,wDAAA;AACA;AAEA;IACA,qBAAA;AACA","file":"non-inferiority-comp.vue","sourcesContent":["<template id=\"noninferiority-comp\">\n    <div class=\"pc-block pc-block--noninferiority\" :class=\"{'pc-block-focused': focusedBlock == 'noninferiority'}\">\n\n        <pc-svg-chain v-bind:fieldFromBlock=\"fieldFromBlock\"></pc-svg-chain>\n\n        <div class=\"pc-header\">\n            Non Inferiority\n        </div>\n\n        <ul class=\"pc-inputs\">\n            <li class=\"pc-input-item pc-input-left\">\n                <label>\n                    <span class=\"pc-input-title\">Relative <small class=\"pc-input-sub-title\">change</small></span>\n\n                    <pc-block-field\n                        fieldProp=\"thresholdRelative\"\n                        suffix=\"%\"\n\n                        v-bind:fieldValue=\"thresholdRelative\"\n                        v-bind:fieldFromBlock=\"fieldFromBlock\"\n                        v-bind:isBlockFocused=\"isBlockFocused\"\n                        v-bind:isReadOnly=\"isReadOnly\"\n                        v-bind:enableEdit=\"true\"\n\n                        v-on:update:focus=\"updateFocus\"></pc-block-field>\n                </label>\n            </li>\n\n            <li class=\"pc-input-item pc-input-right\">\n                <label>\n                    <span class=\"pc-input-title\">Absolute <small\n                        v-if=\"!onlyTotalVisitors\" class=\"pc-input-sub-title\">impact per day</small></span>\n\n                    <pc-block-field\n                        fieldProp=\"thresholdAbsolute\"\n                        suffix=\"\"\n                        v-bind:fieldValue=\"thresholdAbsolute\"\n                        v-bind:fieldFromBlock=\"fieldFromBlock\"\n                        v-bind:isBlockFocused=\"isBlockFocused\"\n                        v-bind:isReadOnly=\"isReadOnly\"\n                        v-bind:enableEdit=\"true\"\n\n                        v-on:update:focus=\"updateFocus\"></pc-block-field>\n                </label>\n            </li>\n\n            <li class=\"pc-input-item pc-input-left-bottom\">\n                <label>\n                    <span class=\"pc-input-title no-sub-title\">\n                            Expected Change\n                        <small class=\"pc-input-sub-title\">\n\n                        </small>\n                    </span>\n\n                    <div class=\"pc-non-inf-select-wrapper\">\n                        <select v-model=\"expectedChange\" class=\"pc-non-inf-select\">\n                            <option value=\"nochange\">\n                                No Change\n                            </option>\n                            <option value=\"degradation\">\n                                Degradation\n                            </option>\n                            <option value=\"improvement\">\n                                Improvement\n                            </option>\n                        </select>\n                    </div>\n                </label>\n            </li>\n        </ul>\n    </div>\n</template>\n\n<script>\nimport pcBlock from './pc-block.vue'\n\nexport default {\n    props: ['enableEdit', 'fieldFromBlock', 'isBlockFocused'],\n    extends: pcBlock,\n    template: '#base-comp',\n    data () {\n        return {\n            focusedBlock: '',\n            options: [\n                {\n                    text: 'relative',\n                    value: 'relative'\n                },\n                {\n                    text: 'absolute',\n                    value: 'absolutePerDay'\n                }\n            ]\n        }\n    },\n    computed: {\n        isReadOnly () {\n            return this.calculateProp == 'base'\n        },\n        enabled () {\n            return this.$store.state.nonInferiority.enabled\n        },\n        threshold () {\n            return this.$store.state.nonInferiority.threshold\n        },\n        thresholdRelative () {\n            return this.$store.state.nonInferiority.thresholdRelative\n        },\n        thresholdAbsolute () {\n            const thresholdPerDay =  this.$store.state.nonInferiority.thresholdAbsolute\n            if (this.$store.state.attributes.onlyTotalVisitors) {\n                const runtime = this.$store.getters.runtime;\n                return thresholdPerDay * runtime\n            }\n            return thresholdPerDay\n        },\n        isRelative () {\n            return this.$store.state.nonInferiority.selected == 'relative'\n        },\n        onlyTotalVisitors () {\n            return this.$store.state.attributes.onlyTotalVisitors\n        },\n        selected: {\n            get () {\n                return this.$store.state.nonInferiority.selected\n            },\n            set (newValue) {\n                this.$store.dispatch('change:noninferiority', {\n                    prop: 'selected',\n                    value: newValue\n                })\n            }\n        },\n        expectedChange: {\n            get () {\n                return this.$store.state.nonInferiority.expectedChange\n            },\n            set (newValue) {\n                this.$store.dispatch('field:change', {\n                    prop: 'expectedChange',\n                    value: newValue\n                })\n            }\n        },\n    },\n    methods: {\n        enableInput () {\n            this.$emit('edit:update', {prop: 'base'})\n        },\n        updateFocus ({fieldProp, value}) {\n            if (this.focusedBlock == fieldProp && value === false) {\n                this.focusedBlock = ''\n            } else if (value === true) {\n                this.focusedBlock = fieldProp\n            }\n\n            this.$emit('update:focus', {\n                fieldProp: this.fieldFromBlock,\n                value: value\n            })\n        }\n\n    }\n}\n</script>\n\n<style>\n.pc-non-inf-select {\n    --base-padding: 5px;\n    font-size: inherit;\n    line-height: 28px;\n    border: none;\n    display: block;\n    position: relative;\n    box-sizing: border-box;\n    width: 100%;\n    filter: drop-shadow(0 4px 2px rgba(0,0,0,0.1));\n    border-radius: 5px;\n    background: var(--white);\n    padding: var(--base-padding);\n\n    overflow: hidden;\n    -webkit-appearance: none;\n    -moz-appearance: none;\n    appearance: none;\n}\n\n.pc-non-inf-select:focus {\n    outline: 0;\n    box-shadow: inset 0 0 0 1px var(--dark-blue);\n}\n\n.pc-non-inf-select-wrapper {\n    position: relative;\n}\n\n.pc-non-inf-select-wrapper:after {\n    --border-size: 7px;\n    content: '';\n    position: absolute;\n    right: 5px;\n    bottom: 0;\n    pointer-events: none;\n    border: var(--border-size) solid transparent;\n    border-top: var(--border-size) solid var(--gray);\n    transform: translateY(calc(-50% - var(--border-size)/2));\n}\n\n.no-sub-title {\n    margin: 15px 0 10px 0;\n}\n</style>\n"]}, media: undefined });
+        inject("data-v-287b0914_0", { source: "\n.pc-non-inf-select {\n  --base-padding: 5px;\n  font-size: inherit;\n  line-height: 28px;\n  border: none;\n  display: block;\n  position: relative;\n  box-sizing: border-box;\n  width: 100%;\n  filter: drop-shadow(0 4px 2px rgba(0, 0, 0, 0.1));\n  border-radius: 5px;\n  background: var(--white);\n  padding: var(--base-padding);\n\n  overflow: hidden;\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  appearance: none;\n}\n.pc-non-inf-select:focus {\n  outline: 0;\n  box-shadow: inset 0 0 0 1px var(--dark-blue);\n}\n.pc-non-inf-select-wrapper {\n  position: relative;\n}\n.pc-non-inf-select-wrapper:after {\n  --border-size: 7px;\n  content: '';\n  position: absolute;\n  right: 5px;\n  bottom: 0;\n  pointer-events: none;\n  border: var(--border-size) solid transparent;\n  border-top: var(--border-size) solid var(--gray);\n  transform: translateY(calc(-50% - var(--border-size) / 2));\n}\n.no-sub-title {\n  margin: 15px 0 10px 0;\n}\n", map: {"version":3,"sources":["/Users/amartinezdem/git_tree/github/bookingcom/powercalculator/src/components/non-inferiority-comp.vue"],"names":[],"mappings":";AAiMA;EACA,mBAAA;EACA,kBAAA;EACA,iBAAA;EACA,YAAA;EACA,cAAA;EACA,kBAAA;EACA,sBAAA;EACA,WAAA;EACA,iDAAA;EACA,kBAAA;EACA,wBAAA;EACA,4BAAA;;EAEA,gBAAA;EACA,wBAAA;EACA,qBAAA;EACA,gBAAA;AACA;AAEA;EACA,UAAA;EACA,4CAAA;AACA;AAEA;EACA,kBAAA;AACA;AAEA;EACA,kBAAA;EACA,WAAA;EACA,kBAAA;EACA,UAAA;EACA,SAAA;EACA,oBAAA;EACA,4CAAA;EACA,gDAAA;EACA,0DAAA;AACA;AAEA;EACA,qBAAA;AACA","file":"non-inferiority-comp.vue","sourcesContent":["<template id=\"noninferiority-comp\">\n  <div\n    class=\"pc-block pc-block--noninferiority\"\n    :class=\"{\n      'pc-block-focused': isBlockFocused,\n      'pc-block-to-calculate': calculateProp == 'non-inferiority'\n    }\"\n  >\n    <pc-svg-chain\n      v-bind:calculateProp=\"calculateProp\"\n      v-bind:fieldFromBlock=\"fieldFromBlock\"\n    ></pc-svg-chain>\n\n    <label\n      slot=\"text\"\n      class=\"pc-calc-radio pc-calc-radio--impact\"\n      :class=\"{ 'pc-calc-radio--active': isCalculated }\"\n    >\n      <input type=\"radio\" v-model=\"isCalculated\" :value=\"true\" />\n      {{ isCalculated ? 'Calculating' : 'Calculate' }}\n    </label>\n\n    <div class=\"pc-header\">\n      Non Inferiority\n    </div>\n\n    <ul class=\"pc-inputs\">\n      <li class=\"pc-input-item pc-input-left\">\n        <label>\n          <span class=\"pc-input-title\"\n            >Relative <small class=\"pc-input-sub-title\">change</small></span\n          >\n\n          <pc-block-field\n            class=\"pc-input-field\"\n            fieldProp=\"thresholdRelative\"\n            suffix=\"%\"\n            v-bind:fieldValue=\"thresholdRelative\"\n            v-bind:fieldFromBlock=\"fieldFromBlock\"\n            v-bind:isBlockFocused=\"isBlockFocused\"\n            v-bind:isReadOnly=\"isReadOnly\"\n            v-bind:enableEdit=\"enableEdit\"\n            v-on:update:focus=\"updateFocus\"\n          ></pc-block-field>\n        </label>\n      </li>\n\n      <li class=\"pc-input-item pc-input-right\">\n        <label>\n          <span class=\"pc-input-title\"\n            >Absolute\n            <small v-if=\"!onlyTotalVisitors\" class=\"pc-input-sub-title\"\n              >impact per day</small\n            ></span\n          >\n\n          <pc-block-field\n            class=\"pc-input-field\"\n            fieldProp=\"thresholdAbsolute\"\n            suffix=\"\"\n            v-bind:fieldValue=\"thresholdAbsolute\"\n            v-bind:fieldFromBlock=\"fieldFromBlock\"\n            v-bind:isBlockFocused=\"isBlockFocused\"\n            v-bind:isReadOnly=\"isReadOnly\"\n            v-bind:enableEdit=\"enableEdit\"\n            v-on:update:focus=\"updateFocus\"\n          ></pc-block-field>\n        </label>\n      </li>\n\n      <li class=\"pc-input-item pc-input-left-bottom\">\n        <label>\n          <span class=\"pc-input-title no-sub-title\">\n            Expected Change\n            <small class=\"pc-input-sub-title\"> </small>\n          </span>\n\n          <div class=\"pc-non-inf-select-wrapper\">\n            <select v-model=\"expectedChange\" class=\"pc-non-inf-select\"\n              :disabled=\"isReadOnly\">\n              <option value=\"nochange\">\n                No Change\n              </option>\n              <option value=\"degradation\">\n                Degradation\n              </option>\n              <option value=\"improvement\">\n                Improvement\n              </option>\n            </select>\n          </div>\n        </label>\n      </li>\n    </ul>\n  </div>\n</template>\n\n<script>\nimport pcBlock from './pc-block.vue'\n\nexport default {\n  props: ['enableEdit', 'fieldFromBlock', 'isBlockFocused'],\n  extends: pcBlock,\n  template: '#base-comp',\n  data() {\n    return {\n      focusedBlock: '',\n      options: [\n        {\n          text: 'relative',\n          value: 'relative'\n        },\n        {\n          text: 'absolute',\n          value: 'absolutePerDay'\n        }\n      ]\n    }\n  },\n  computed: {\n    enabled() {\n      return this.$store.state.nonInferiority.enabled\n    },\n    threshold() {\n      return this.$store.state.nonInferiority.threshold\n    },\n    thresholdRelative() {\n      return this.$store.state.nonInferiority.thresholdRelative\n    },\n    thresholdAbsolute() {\n      const thresholdPerDay = this.$store.state.nonInferiority.thresholdAbsolute\n      if (this.$store.state.attributes.onlyTotalVisitors) {\n        const runtime = this.$store.getters.runtime\n        return thresholdPerDay * runtime\n      }\n      return thresholdPerDay\n    },\n    isRelative() {\n      return this.$store.state.nonInferiority.selected == 'relative'\n    },\n    onlyTotalVisitors() {\n      return this.$store.state.attributes.onlyTotalVisitors\n    },\n    testType() {\n      return this.$store.state.attributes.testType\n    },\n    isReadOnly() {\n      return this.calculateProp == 'non-inferiority'\n    },\n    selected: {\n      get() {\n        return this.$store.state.nonInferiority.selected\n      },\n      set(newValue) {\n        this.$store.dispatch('change:noninferiority', {\n          prop: 'selected',\n          value: newValue\n        })\n      }\n    },\n    expectedChange: {\n      get() {\n        return this.$store.state.nonInferiority.expectedChange\n      },\n      set(newValue) {\n        this.$store.dispatch('field:change', {\n          prop: 'expectedChange',\n          value: newValue\n        })\n      }\n    }\n  },\n  methods: {\n    enableInput() {\n      this.$emit('edit:update', { prop: 'base' })\n    },\n    updateFocus({ fieldProp, value }) {\n      if (this.focusedBlock == fieldProp && value === false) {\n        this.focusedBlock = ''\n      } else if (value === true) {\n        this.focusedBlock = fieldProp\n      }\n\n      this.$emit('update:focus', {\n        fieldProp: this.fieldFromBlock,\n        value: value\n      })\n    }\n  }\n}\n</script>\n\n<style>\n.pc-non-inf-select {\n  --base-padding: 5px;\n  font-size: inherit;\n  line-height: 28px;\n  border: none;\n  display: block;\n  position: relative;\n  box-sizing: border-box;\n  width: 100%;\n  filter: drop-shadow(0 4px 2px rgba(0, 0, 0, 0.1));\n  border-radius: 5px;\n  background: var(--white);\n  padding: var(--base-padding);\n\n  overflow: hidden;\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  appearance: none;\n}\n\n.pc-non-inf-select:focus {\n  outline: 0;\n  box-shadow: inset 0 0 0 1px var(--dark-blue);\n}\n\n.pc-non-inf-select-wrapper {\n  position: relative;\n}\n\n.pc-non-inf-select-wrapper:after {\n  --border-size: 7px;\n  content: '';\n  position: absolute;\n  right: 5px;\n  bottom: 0;\n  pointer-events: none;\n  border: var(--border-size) solid transparent;\n  border-top: var(--border-size) solid var(--gray);\n  transform: translateY(calc(-50% - var(--border-size) / 2));\n}\n\n.no-sub-title {\n  margin: 15px 0 10px 0;\n}\n</style>\n"]}, media: undefined });
 
       };
       /* scoped */
@@ -9155,277 +9189,313 @@
       );
 
     var actions = {
-        'field:change' (context, { prop, value }) {
-            // add validations necessary here
+      'field:change'(context, { prop, value }) {
+        // add validations necessary here
 
-            switch (prop) {
-
-                // these 3 cases will call the same extra action
-                case 'base':
-                    context.commit('field:change', { prop, value });
-                    if (context.state.nonInferiority.enabled === true) {
-                        if (context.state.nonInferiority.selected == 'absolutePerDay') {
-                            context.dispatch('change:noninferiorityimpact');
-                        }
-                        context.dispatch('convert:noninferioritythreshold', { prop, value });
-                    }
-
-                    context.dispatch('update:proptocalculate', context.getters.calculatedValues);
-                break;
-
-                case 'sample':
-                case 'runtime':
-                case 'visitorsPerDay':
-                    context.dispatch('sample:sideeffect', {prop, value});
-                    context.dispatch('update:proptocalculate', context.getters.calculatedValues);
-
-                    if (context.state.nonInferiority.enabled === true && prop == 'visitorsPerDay') {
-                        context.dispatch('convert:noninferioritythreshold', { prop, value });
-                    }
-                break;
-
-                case 'thresholdRelative':
-                case 'thresholdAbsolute':
-                    context.dispatch('threshold:sideeffect', {prop, value});
-                    context.dispatch('change:noninferiorityimpact');
-                    context.dispatch('convert:noninferioritythreshold', { prop, value });
-                break;
-
-                case 'impactByMetricValue':
-                    context.dispatch('convert:absoluteimpact', {prop, value});
-                break;
-
-                case 'expectedChange':
-                    context.commit('field:change', { prop, value });
-                    context.dispatch('change:noninferiorityimpact');
-                break;
-
-                case 'visitorsWithGoals':
-                    context.dispatch('convert:visitorswithgoals', {prop, value});
-                break;
-
-                default:
-                    context.commit('field:change', { prop, value });
-
-                    if (context.state.nonInferiority.enabled === true) {
-                        context.dispatch('convert:noninferioritythreshold', { prop, value });
-                    }
-
-                    // calculate new value for calculated prop
-                    context.dispatch('update:proptocalculate', context.getters.calculatedValues);
-                break;
-            }
-        },
-        'change:noninferiority' (context, { prop, value }) {
-            // add validations necessary here
-            context.commit('change:noninferiority', { prop, value });
-            context.dispatch('change:noninferiorityimpact');
-
-            if (prop == 'enabled') {
-
-                if (value === true) {
-                    context.dispatch('field:change', {
-                        prop: 'lockedField',
-                        value: 'days'
-                    });
-                    context.dispatch('field:change', {
-                        prop: 'onlyTotalVisitors',
-                        value: false
-                    });
-                    context.dispatch('update:calculateprop', {value: 'sample'});
-                }
-            } else {
-                // update values based on nonInferiority.selected
-                context.dispatch('update:proptocalculate', context.getters.calculatedValues);
-            }
-        },
-        'change:noninferiorityimpact' (context) {
-            let impactValue = context.getters.nonInferiorityImpact;
-
-            if (context.state.nonInferiority.enabled === true) {
-                this.__impactBackup = context.state.attributes.impact;
-                context.dispatch('convert:noninferioritythreshold', {
-                    prop: 'impact',
-                    value: impactValue
-                });
-            } else {
-                impactValue = this.__impactBackup || 0;
-            }
-
-            context.dispatch('field:change', {
-                prop: 'impact',
-                value: impactValue
-            });
-        },
-        'switch:lockedfield' (context) {
-            let newLockedField = context.state.attributes.lockedField == 'days' ? 'visitorsPerDay' : 'days';
-
-            if (context.state.nonInferiority.enabled === true) {
-                newLockedField = 'days';
-            }
-
-            context.commit('switch:lockedfield', {
-                value: newLockedField
-            });
-        },
-        'sample:sideeffect' (context, { prop, value }) {
-            const isSampleCalculated = context.state.attributes.calculateProp == 'sample';
-            let lockedField = context.state.attributes.lockedField;
-
-            let stateMachine = {
-                calculated: {
-                    sample: false,
-                    runtime: lockedField == 'days',
-                    visitorsPerDay: lockedField != 'days',
-                },
-                notCalculated: {
-                    sample: true,
-                    runtime: lockedField == 'days' && prop == 'sample',
-                    visitorsPerDay: lockedField != 'days' && prop == 'sample',
-                }
-            };
-
-            let input = stateMachine[isSampleCalculated ? 'calculated' : 'notCalculated'];
-
-            let data = {
-                sample: context.state.attributes.sample,
-                visitorsPerDay: context.state.attributes.visitorsPerDay,
-                runtime: context.state.attributes.runtime
-            };
-
-            // override of the prop changed by the action change:fields with the new value
-            data[prop] = value;
-
-            context.commit('sample:sideeffect', {
-                prop: prop,
-                value: data[prop]
-            });
-
-            // looks throught the stat machine list and updates all values based on data
-            Object.keys(input).forEach((key) => {
-                if (input[key] == true) {
-                    if (key != prop) {
-                        let result = 0;
-                        if (key == 'runtime') {
-                            result = Math.ceil(window.parseInt(data.sample) / data.visitorsPerDay);
-                            result = isNaN(result) ? '-' : result;
-
-                        } else if (key == 'visitorsPerDay') {
-                            let isInvalid = false;
-                            result = Math.floor(window.parseInt(data.sample) / data.runtime);
-                            isInvalid = isNaN(result);
-
-                            result = isNaN(result) || isInvalid ? '-' : result;
-
-                        } else if (key == 'sample') {
-                            let isInvalid = false;
-                            result = Math.ceil(data.runtime * data.visitorsPerDay);
-                            isInvalid = isNaN(result);
-
-                            result = isInvalid ? '-' : result;
-                        }
-
-                        context.commit('sample:sideeffect', {
-                            prop: key,
-                            value: result
-                        });
-                    }
-                }
-            });
-        },
-        'threshold:sideeffect' (context, { prop, value }) {
+        switch (prop) {
+          // these 3 cases will call the same extra action
+          case 'base':
             context.commit('field:change', { prop, value });
-            if (context.state.attributes.calculateProp == 'sample') {
-                context.dispatch('sample:sideeffect', context.getters.calculatedValues);
-            }
-            context.dispatch('update:proptocalculate', context.getters.calculatedValues);
-        },
-        'update:calculateprop' (context, { value }) {
-            context.commit('update:calculateprop', { value });
-        },
-        'convert:absoluteimpact' (context, { prop, value }) {
-            let impactObj = {
-                    prop: 'impact',
-                    value: context.getters.displayValue('impact', context.getters.calculateImpactFromAbsoluteImpact(value))
-                };
-
-            context.dispatch('field:change', impactObj);
-        },
-        'convert:visitorswithgoals' (context, { prop, value }) {
-            let newValue = context.getters.baseFromVisitorsWithGoals(value);
-
-            context.dispatch('field:change', {
-                prop: 'base',
-                value: newValue
-            });
-        },
-        'convert:noninferioritythreshold' (context, { prop, value }) {
-            let valueToCalculate,
-                currentValue,
-                propToUpdate,
-                calculatedValue = 0;
-
-            switch (prop) {
-                case 'thresholdRelative':
-                    valueToCalculate = 'absolute';
-                    currentValue = value;
-                break;
-
-                case 'thresholdAbsolute':
-                    valueToCalculate = 'relative';
-                    currentValue = value;
-                break;
-                default:
-                    if (context.state.nonInferiority.selected == 'absolutePerDay') {
-                        valueToCalculate = 'relative';
-                    } else {
-                        valueToCalculate = 'absolute';
-                    }
-                    currentValue = context.state.nonInferiority.threshold;
-                break;
-            }
-
-            if (valueToCalculate == 'absolute') {
-                calculatedValue = context.getters.displayValue('nonInfThresholdAbsolute', context.getters.calculateAbsoluteFromRelative(currentValue));
-                calculatedValue = Math.round(calculatedValue * 100) / 100;
-                propToUpdate = 'thresholdAbsolute';
-            } else if (valueToCalculate == 'relative') {
-                calculatedValue = context.getters.displayValue('nonInfThresholdRelative', context.getters.calculateRelativeFromAbsolute(currentValue));
-                propToUpdate = 'thresholdRelative';
-            }
-
-            context.commit('change:noninferiority', {
-                prop: propToUpdate,
-                value: calculatedValue
-            });
-        },
-        'update:proptocalculate' (context) {
-            let calculatedObj = context.getters.calculatedValues;
-            context.commit('update:proptocalculate', calculatedObj);
-
-            if (calculatedObj.prop == 'sample') {
-                // apply side effects
-                context.dispatch('sample:sideeffect', calculatedObj);
-            }
-        },
-        'init:calculator' (context) {
-            if (context.state.nonInferiority.enabled) {
+            if (context.state.nonInferiority.enabled === true) {
+              if (context.state.nonInferiority.selected == 'absolutePerDay') {
                 context.dispatch('change:noninferiorityimpact');
+              }
+              context.dispatch('convert:noninferioritythreshold', { prop, value });
             }
 
-            if (context.state.attributes.calculateProp != 'sample') {
-                context.dispatch('field:change', {
-                    prop: 'sample',
-                    value: context.state.attributes.sample
-                });
-            }
+            context.dispatch(
+              'update:proptocalculate',
+              context.getters.calculatedValues
+              );
+            break
 
+          case 'sample':
+          case 'runtime':
+          case 'visitorsPerDay':
+            context.dispatch('sample:sideeffect', { prop, value });
             context.dispatch('update:proptocalculate');
-        },
-        'test:reset' (context, stateObj) {
-            context.commit('test:reset', stateObj);
-            context.dispatch('init:calculator');
+            if (
+              context.state.nonInferiority.enabled === true
+              // && prop == 'visitorsPerDay'
+            ) {
+              context.dispatch('convert:noninferioritythreshold', { prop, value });
+            }
+            break
+
+          case 'thresholdRelative':
+          case 'thresholdAbsolute':
+            context.dispatch('threshold:sideeffect', { prop, value });
+            context.dispatch('change:noninferiorityimpact');
+            context.dispatch('convert:noninferioritythreshold', { prop, value });
+            break
+
+          case 'impactByMetricValue':
+            context.dispatch('convert:absoluteimpact', { prop, value });
+            break
+
+          case 'expectedChange':
+            context.commit('field:change', { prop, value });
+            context.dispatch('change:noninferiorityimpact');
+            break
+
+          case 'visitorsWithGoals':
+            context.dispatch('convert:visitorswithgoals', { prop, value });
+            break
+
+          default:
+            context.commit('field:change', { prop, value });
+
+            if (context.state.nonInferiority.enabled === true) {
+              context.dispatch('convert:noninferioritythreshold', { prop, value });
+            }
+
+            // calculate new value for calculated prop
+            context.dispatch(
+              'update:proptocalculate',
+              context.getters.calculatedValues
+            );
+            break
         }
+      },
+      'change:noninferiority'(context, { prop, value }) {
+        // add validations necessary here
+        context.commit('change:noninferiority', { prop, value });
+        context.dispatch('change:noninferiorityimpact', { value: 'sample' });
+
+        if (prop == 'enabled') {
+          if (value === true) {
+            context.dispatch('field:change', {
+              prop: 'lockedField',
+              value: 'days'
+            });
+            context.dispatch('field:change', {
+              prop: 'onlyTotalVisitors',
+              value: false
+            });
+            context.dispatch('update:calculateprop', { value: 'sample' });
+          }
+        } else {
+          // update values based on nonInferiority.selected
+          context.dispatch(
+            'update:proptocalculate',
+            context.getters.calculatedValues
+          );
+        }
+      },
+      'change:noninferiorityimpact'(context) {
+        let impactValue = context.getters.nonInferiorityImpact;
+
+        if (context.state.nonInferiority.enabled === true) {
+          this.__impactBackup = context.state.attributes.impact;
+          context.dispatch('convert:noninferioritythreshold', {
+            prop: 'impact',
+            value: impactValue
+          });
+        } else {
+          impactValue = this.__impactBackup || 0;
+        }
+
+        context.dispatch('field:change', {
+          prop: 'impact',
+          value: impactValue
+        });
+      },
+      'switch:lockedfield'(context) {
+        let newLockedField =
+          context.state.attributes.lockedField == 'days' ? 'visitorsPerDay' : 'days';
+
+        context.commit('switch:lockedfield', {
+          value: newLockedField
+        });
+      },
+      'sample:sideeffect'(context, { prop, value }) {
+        const isSampleCalculated =
+          context.state.attributes.calculateProp == 'sample';
+        let lockedField = context.state.attributes.lockedField;
+
+        let stateMachine = {
+          calculated: {
+            sample: false,
+            runtime: lockedField == 'days',
+            visitorsPerDay: lockedField != 'days'
+          },
+          notCalculated: {
+            sample: true,
+            runtime: lockedField == 'days' && prop == 'sample',
+            visitorsPerDay: lockedField != 'days' && prop == 'sample'
+          }
+        };
+
+        let input =
+          stateMachine[isSampleCalculated ? 'calculated' : 'notCalculated'];
+
+        let data = {
+          sample: context.state.attributes.sample,
+          visitorsPerDay: context.state.attributes.visitorsPerDay,
+          runtime: context.state.attributes.runtime
+        };
+
+        // override of the prop changed by the action change:fields with the new value
+        data[prop] = value;
+
+        context.commit('sample:sideeffect', {
+          prop: prop,
+          value: data[prop]
+        });
+
+        // looks throught the stat machine list and updates all values based on data
+        Object.keys(input).forEach((key) => {
+          if (input[key] == true) {
+            if (key != prop) {
+              let result = 0;
+              if (key == 'runtime') {
+                result = Math.ceil(window.parseInt(data.sample) / data.visitorsPerDay);
+                result = isNaN(result) ? '-' : result;
+              } else if (key == 'visitorsPerDay') {
+                let isInvalid = false;
+                result = Math.floor(window.parseInt(data.sample) / data.runtime);
+                isInvalid = isNaN(result);
+
+                result = isNaN(result) || isInvalid ? '-' : result;
+              } else if (key == 'sample') {
+                let isInvalid = false;
+                result = Math.ceil(data.runtime * data.visitorsPerDay);
+                isInvalid = isNaN(result);
+
+                result = isInvalid ? '-' : result;
+              }
+
+              context.commit('sample:sideeffect', {
+                prop: key,
+                value: result
+              });
+            }
+          }
+        });
+      },
+      'threshold:sideeffect'(context, { prop, value }) {
+        context.commit('field:change', { prop, value });
+        if (context.state.attributes.calculateProp == 'sample') {
+          context.dispatch('sample:sideeffect', context.getters.calculatedValues);
+        }
+        context.dispatch('update:proptocalculate', context.getters.calculatedValues);
+      },
+      'update:calculateprop'(context, { value }) {
+        context.commit('update:calculateprop', { value });
+      },
+      'convert:absoluteimpact'(context, { prop, value }) {
+        let impactObj = {
+          prop: 'impact',
+          value: context.getters.displayValue(
+            'impact',
+            context.getters.calculateImpactFromAbsoluteImpact(value)
+          )
+        };
+
+        context.dispatch('field:change', impactObj);
+      },
+      'convert:visitorswithgoals'(context, { prop, value }) {
+        let newValue = context.getters.baseFromVisitorsWithGoals(value);
+
+        context.dispatch('field:change', {
+          prop: 'base',
+          value: newValue
+        });
+      },
+      'convert:noninferioritythreshold'(context, { prop, value }) {
+
+        const calculateAbsolute = relative => Math.round(context.getters.displayValue(
+          'nonInfThresholdAbsolute',
+          context.getters.calculateAbsoluteFromRelative(relative)) * 100) / 100;
+
+        const calculateRelative = absolute => context.getters.displayValue(
+          'nonInfThresholdRelative',
+          context.getters.calculateRelativeFromAbsolute(absolute)
+        );
+
+        switch (prop) {
+          case 'thresholdRelative':
+            context.commit('change:noninferiority', {
+              prop: 'thresholdAbsolute',
+              value: calculateAbsolute(value) || 0
+            });
+            break
+
+          case 'thresholdAbsolute':
+            context.commit('change:noninferiority', {
+              prop: 'thresholdRelative',
+              value: calculateRelative(value) || 0
+            });
+            break
+
+          case 'visitorsPerDay':
+            if (context.state.nonInferiority.selected == 'absolutePerDay') {
+              context.commit('change:noninferiority', {
+                prop: 'thresholdRelative',
+                value: calculateRelative(context.state.nonInferiority.threshold)
+              });
+              context.dispatch('field:change', {
+                prop: 'thresholdRelative',
+                value: calculateRelative(context.state.nonInferiority.threshold)
+              });
+
+            } else {
+              context.commit('change:noninferiority', {
+                prop: 'thresholdAbsolute',
+                value: calculateAbsolute(context.state.nonInferiority.threshold)
+              });
+              context.dispatch('field:change', {
+                prop: 'thresholdAbsolute',
+                value: calculateAbsolute(context.state.nonInferiority.threshold)
+              });
+            }
+
+            break
+            // both
+            // ISSUE IS HERE: It needs to calculate one of them.
+          case 'impact':
+          default:
+            if (context.state.nonInferiority.selected == 'absolutePerDay') {
+              context.commit('change:noninferiority', {
+                prop: 'thresholdRelative',
+                value: calculateRelative(context.state.nonInferiority.threshold)
+              });
+            } else {
+              context.commit('change:noninferiority', {
+                prop: 'thresholdAbsolute',
+                value: calculateAbsolute(context.state.nonInferiority.threshold)
+              });
+            }
+            break
+        }
+      },
+      'update:proptocalculate'(context) {
+        const calculatedObj = context.getters.calculatedValues || context.rootGetters.calculatedValue;
+        context.commit('update:proptocalculate', calculatedObj);
+
+        if (calculatedObj.prop == 'sample') {
+          // apply side effects
+          context.dispatch('sample:sideeffect', calculatedObj);
+        }
+      },
+      'init:calculator'(context) {
+        if (context.state.nonInferiority.enabled) {
+          context.dispatch('change:noninferiorityimpact');
+        }
+
+        if (context.state.attributes.calculateProp != 'sample') {
+          context.dispatch('field:change', {
+            prop: 'sample',
+            value: context.state.attributes.sample
+          });
+        }
+
+        context.dispatch('update:proptocalculate');
+      },
+      'test:reset'(context, stateObj) {
+        context.commit('test:reset', stateObj);
+        context.dispatch('init:calculator');
+      }
     };
 
     var mutations = {
@@ -9868,42 +9938,73 @@
         return result || ''
     }
 
+    function calculatedValues(store, getters) {
+      // DIRTY HACK AHEAD: The whole event system is a mess. One event triggers 2 to
+      // 4 different ones. Adding a impact (threshold) calculation for
+      // non-inferiority faced one issue. For some reason, the event triggered is
+      // 'non-inferiority' instead of 'impact'. I have been trying to trace it, but
+      // I cannot find the source of the event. However, it is only trigger in the
+      // concrete combination of non-inferiority + impact. Therefore, we know that
+      // when we are getting a 'non-inferiority' event, it is really an 'impact'
+      // event.
+      //
+      // The right fix would be to find the source of the event and change it, but
+      // my sanity has limits.
+      const property =
+        store.attributes.calculateProp === 'non-inferiority'
+          ? 'impact'
+          : store.attributes.calculateProp;
+      const testType = store.attributes.testType;
+
+      const formula = statFormulas[testType][property];
+
+      const value = formula(convertDisplayedValues(store, getters));
+      return {
+        prop: property,
+        value: getters.displayValue(property, value)
+      }
+    }
+
+    function formulaToSolve(state) {
+      const calculateProp = state.attributes.calculateProp;
+
+      return formulaToSolveProp[calculateProp]
+    }
+
+    function formulaToSolveProp(state) {
+      // used for the graph as we need to pass many different values to dynamic attributes
+      const testType = state.attributes.testType;
+      return statFormulas[testType]
+    }
+
+    function convertDisplayedValues(state, getters) {
+      let { mu, opts, alternative } = getters;
+
+      return {
+        mu,
+        opts,
+        alternative,
+        variants: getters.extractValue('variants'),
+        total_sample_size: getters.extractValue('sample'),
+        base_rate: getters.extractValue('base'),
+        effect_size: getters.extractValue('impact'),
+        alpha:
+          state.attributes.comparisonMode === 'all'
+            ? statFormulas.getCorrectedAlpha(
+                getters.extractValue('falsePosRate'),
+                getters.extractValue('variants')
+              )
+            : getters.extractValue('falsePosRate'),
+        beta: 1 - getters.extractValue('power'), // power of 80%, beta is actually 20%
+        sd_rate: getters.extractValue('sdRate')
+      }
+    }
+
     var math = {
-        calculatedValues (state, getters) {
-            let prop = state.attributes.calculateProp,
-                value = getters.formulaToSolve(getters.convertDisplayedValues);
-            return {
-                prop,
-                value: getters.displayValue(prop, value)
-            };
-        },
-        formulaToSolve (state, getters) {
-            let calculateProp = state.attributes.calculateProp;
-
-            return getters.formulaToSolveProp[calculateProp];
-        },
-        formulaToSolveProp (state, getters) {
-            // used for the graph as we need to pass many different values to dynamic attributes
-            let testType = state.attributes.testType;
-
-            return statFormulas[testType];
-        },
-        convertDisplayedValues (state, getters) {
-            let { mu, opts, alternative } = getters;
-
-            return {
-                mu,
-                opts,
-                alternative,
-                variants: getters.extractValue('variants'),
-                total_sample_size: getters.extractValue('sample'),
-                base_rate: getters.extractValue('base'),
-                effect_size: getters.extractValue('impact'),
-                alpha: state.attributes.comparisonMode === 'all' ? statFormulas.getCorrectedAlpha(getters.extractValue('falsePosRate'), getters.extractValue('variants')) : getters.extractValue('falsePosRate'),
-                beta: 1 - getters.extractValue('power'), // power of 80%, beta is actually 20%
-                sd_rate: getters.extractValue('sdRate')
-            }
-        }
+      calculatedValues,
+      formulaToSolve,
+      formulaToSolveProp,
+      convertDisplayedValues
     };
 
     var store = {
