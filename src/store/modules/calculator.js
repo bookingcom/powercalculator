@@ -241,10 +241,10 @@ export const calculator = {
         state.absoluteThreshold = +props.absoluteThreshold
       } else if (props.absoluteThreshold) {
         state.absoluteThreshold = +props.absoluteThreshold
-        state.relativeThreshold = getRelativeThreshold(props)
+        state.relativeThreshold = getRelativeThreshold({ ...props, baseRate: state.baseRate })
       } else if (props.relativeThreshold) {
         state.relativeThreshold = props.relativeThreshold / 100
-        state.absoluteThreshold = getAbsoluteThreshold(props)
+        state.absoluteThreshold = getAbsoluteThreshold({ ...props, baseRate: state.baseRate })
       }
 
       // comparative
@@ -256,7 +256,7 @@ export const calculator = {
       } else if (props.relativeImpact && props.baseRate) {
         state.relativeImpact = props.relativeImpact / 100
         state.absoluteImpact = getAbsoluteImpact(
-          props.baseRate,
+          state.baseRate,
           props.relativeImpact / 100
         )
         if (props.trafficMode === TRAFFIC_MODE.DAILY) {
@@ -266,7 +266,7 @@ export const calculator = {
       } else if (props.absoluteImpact && props.baseRate) {
         state.absoluteImpact = props.absoluteImpact
         state.realativeImpact = getRelativeImpact(
-          props.baseRate,
+          state.baseRate,
           props.absoluteImpact
         )
       }
@@ -466,7 +466,7 @@ export const calculator = {
         }
 
         if (state.isNonInferiority) {
-          state.absoluteThreshold = getAbsoluteThreshold({
+          state.absoluteThreshold = +getAbsoluteThreshold({
             ...state,
             baseRate: newBaseRate,
           })
