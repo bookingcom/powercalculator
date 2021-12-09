@@ -5935,8 +5935,8 @@
         num *= 100;
         if (!userInput) {
           num = num.toFixed(2);
-          if (num.endsWith('.00')) {
-            num = num.slice(0, -3);
+          if (num.toString().endsWith('.00')) {
+            num = +num.toString().slice(0, -3);
           }
         }
         return alternativeToNaN(num)
@@ -6773,21 +6773,22 @@
 
       // Impact
       relativeImpact: (state) => (userInput = false) => displayValue(state.relativeImpact, { type: 'percentage', userInput }),
-      absoluteImpact: (state) => (userInput = false) => displayValue(state.absoluteImpact, { type: 'percentage', userInput }),
+      absoluteImpact: (state) => (userInput = false) => displayValue(state.absoluteImpact, { type: 'float', userInput }),
 
       minAbsoluteImpact: (state) => {
         const { min } = math.getAbsoluteImpactInMetricHash({
           base_rate: state.baseRate,
           effect_size: state.relativeImpact,
         });
-        return displayValue(min, { type: 'percentage' })
+
+        return displayValue(min, { type: state.testType === TEST_TYPE.BINOMIAL ? 'percentage' : 'float' })
       },
       maxAbsoluteImpact: (state) => {
         const { max } = math.getAbsoluteImpactInMetricHash({
           base_rate: state.baseRate,
           effect_size: state.relativeImpact,
         });
-        return displayValue(max, { type: 'percentage' })
+        return displayValue(max, { type: state.testType === TEST_TYPE.BINOMIAL ? 'percentage' : 'float' })
       },
       absoluteImpactPerVisitor: (state) => {
         const impactPerVisitor = math.getAbsoluteImpactInVisitors({
@@ -7087,7 +7088,7 @@
   var __vue_render__$4 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-block pc-block--impact",class:{
       'pc-block-focused': _vm.isBlockFocused,
       'pc-block-to-calculate': _vm.isBlockFocused,
-    }},[_c('pc-svg-chain',{attrs:{"isBlockFocused":_vm.isBlockFocused}}),_vm._v(" "),_c('label',{staticClass:"pc-calc-radio pc-calc-radio--impact",class:{ 'pc-calc-radio--active': _vm.isBlockFocused },attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.isFocused),expression:"isFocused"}],attrs:{"type":"radio","tabindex":_vm.isBlockFocused ? -1 : 3},domProps:{"value":_vm.blockName,"checked":_vm._q(_vm.isFocused,_vm.blockName)},on:{"change":function($event){_vm.isFocused=_vm.blockName;}}}),_vm._v("\n    "+_vm._s(_vm.isBlockFocused ? 'Calculating' : 'Calculate')+"\n  ")]),_vm._v(" "),_c('div',{staticClass:"pc-header"},[_vm._v("Impact")]),_vm._v(" "),_c('ul',{staticClass:"pc-inputs"},[_c('li',{staticClass:"pc-input-item pc-input-left"},[_c('label',[_c('span',{staticClass:"pc-input-title"},[_vm._v("Relative")]),_vm._v(" "),_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"enableEdit":true,"fieldValue":_vm.relativeImpact,"isBlockFocused":_vm.isBlockFocused,"isReadOnly":_vm.isBlockFocused,"prefix":_vm.isNonInferiority ? '' : '±',"tabindex":_vm.isBlockFocused ? -1 : 10,"fieldProp":"impact","suffix":"%"},on:{"update:fieldValue":function($event){_vm.relativeImpact=$event;},"update:field-value":function($event){_vm.relativeImpact=$event;}}})],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right"},[_c('label',[_c('span',{staticClass:"pc-input-title"},[_vm._v("Absolute")]),_vm._v(" "),_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"enableEdit":true,"fieldValue":_vm.absoluteImpact,"isBlockFocused":_vm.isBlockFocused,"isReadOnly":_vm.isBlockFocused,"suffix":_vm.isBinomial ? '%' : '',"tabindex":_vm.isBlockFocused ? -1 : 11,"aria-label":"visitors with goals","fieldProp":"impactByMetricValue"},on:{"update:fieldValue":function($event){_vm.absoluteImpact=$event;},"update:field-value":function($event){_vm.absoluteImpact=$event;}}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v("\n          going from "+_vm._s(_vm.addPercentToString(_vm.baseRate))+" to either\n          "+_vm._s(_vm.addPercentToString(_vm.minAbsoluteImpact))+" or\n          "+_vm._s(_vm.addPercentToString(_vm.maxAbsoluteImpact))+"\n        ")])],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-bottom-left"},[_c('label',[_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"fieldProp":"impactByVisitors","fieldValue":_vm.absoluteImpactPerVisitor,"isReadOnly":true,"isBlockFocused":_vm.isBlockFocused,"enableEdit":false}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v("\n          "+_vm._s(_vm.isBinomial
+    }},[_c('pc-svg-chain',{attrs:{"isBlockFocused":_vm.isBlockFocused}}),_vm._v(" "),_c('label',{staticClass:"pc-calc-radio pc-calc-radio--impact",class:{ 'pc-calc-radio--active': _vm.isBlockFocused },attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.isFocused),expression:"isFocused"}],attrs:{"type":"radio","tabindex":_vm.isBlockFocused ? -1 : 3},domProps:{"value":_vm.blockName,"checked":_vm._q(_vm.isFocused,_vm.blockName)},on:{"change":function($event){_vm.isFocused=_vm.blockName;}}}),_vm._v("\n    "+_vm._s(_vm.isBlockFocused ? 'Calculating' : 'Calculate')+"\n  ")]),_vm._v(" "),_c('div',{staticClass:"pc-header"},[_vm._v("Impact")]),_vm._v(" "),_c('ul',{staticClass:"pc-inputs"},[_c('li',{staticClass:"pc-input-item pc-input-left"},[_c('label',[_c('span',{staticClass:"pc-input-title"},[_vm._v("Relative")]),_vm._v(" "),_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"enableEdit":true,"fieldValue":_vm.relativeImpact,"isBlockFocused":_vm.isBlockFocused,"isReadOnly":_vm.isBlockFocused,"prefix":_vm.isNonInferiority ? '' : '±',"tabindex":_vm.isBlockFocused ? -1 : 10,"fieldProp":"impact","suffix":"%"},on:{"update:fieldValue":function($event){_vm.relativeImpact=$event;},"update:field-value":function($event){_vm.relativeImpact=$event;}}})],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right"},[_c('label',[_c('span',{staticClass:"pc-input-title"},[_vm._v("Absolute")]),_vm._v(" "),_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"enableEdit":true,"fieldValue":_vm.absoluteImpact,"isBlockFocused":_vm.isBlockFocused,"isReadOnly":_vm.isBlockFocused,"suffix":_vm.isBinomial ? '%' : '',"tabindex":_vm.isBlockFocused ? -1 : 11,"aria-label":"visitors with goals","fieldProp":"impactByMetricValue"},on:{"update:fieldValue":function($event){_vm.absoluteImpact=$event;},"update:field-value":function($event){_vm.absoluteImpact=$event;}}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v("\n          base "+_vm._s(_vm.isBinomial ? "rate" : "average")+" going from "+_vm._s(_vm.addPercentToString(_vm.baseRate))+" to either\n          "+_vm._s(_vm.addPercentToString(_vm.minAbsoluteImpact))+" or\n          "+_vm._s(_vm.addPercentToString(_vm.maxAbsoluteImpact))+"\n        ")])],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-bottom-left"},[_c('label',[_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"fieldProp":"impactByVisitors","fieldValue":_vm.absoluteImpactPerVisitor,"isReadOnly":true,"isBlockFocused":_vm.isBlockFocused,"enableEdit":false}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v("\n          "+_vm._s(_vm.isBinomial
                 ? ' Incremental units'
                 : ' Incremental change in the metric')+"\n        ")])],1)]),_vm._v(" "),(!_vm.onlyTotalVisitors)?_c('li',{staticClass:"pc-input-item pc-input-bottom-right"},[_c('label',[_c('pc-block-field',{attrs:{"fieldProp":"impactByVisitorsPerDay","fieldValue":_vm.absoluteImpactPerVisitorPerDay,"isReadOnly":"true","isBlockFocused":_vm.isBlockFocused,"enableEdit":false}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v("\n          "+_vm._s(_vm.isBinomial
                 ? ' Incremental units per day'
