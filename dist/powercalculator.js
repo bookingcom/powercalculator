@@ -6773,7 +6773,10 @@
 
       // Impact
       relativeImpact: (state) => (userInput = false) => displayValue(state.relativeImpact, { type: 'percentage', userInput }),
-      absoluteImpact: (state) => (userInput = false) => displayValue(state.absoluteImpact, { type: 'float', userInput }),
+      absoluteImpact: (state) => (userInput = false) => displayValue(state.absoluteImpact, {
+        type: state.testType === TEST_TYPE.BINOMIAL ? 'percentage' : 'float',
+        userInput
+      }),
 
       minAbsoluteImpact: (state) => {
         const { min } = math.getAbsoluteImpactInMetricHash({
