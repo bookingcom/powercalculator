@@ -19,7 +19,10 @@
     "url": "git+https://github.com/bookingcom/powercalculator.git"
   },
   "author": "Marcelo Oliveira",
-  "contributors": ["Sebastian Sastoque", "Alberto Martinez de Murga"],
+  "contributors": [
+    "Sebastian Sastoque",
+    "Alberto Martinez de Murga"
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/bookingcom/powercalculator/issues"

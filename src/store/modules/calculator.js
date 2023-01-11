@@ -688,6 +688,7 @@ export const calculator = {
           state.relativeThreshold = newImpact
           state.absoluteThreshold = getAbsoluteThreshold({
             ...state,
+            visitorsPerDay: newVisitorsPerDay,
             relativeThreshold: newImpact,
           })
         } else {
