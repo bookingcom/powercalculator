@@ -50,7 +50,7 @@ function displayValue(value, { type = 'int', userInput = false }) {
   switch (type) {
     case 'float':
       if (!userInput) {
-        num = num.toFixed(2)
+        num = num.toFixed(5).replace(/\.?0+$/,'')
       }
       return alternativeToNaN(num)
     case 'percentage':
@@ -717,12 +717,12 @@ export const calculator = {
         return
       }
       const newImpact =
-        (isAbsolute
+        isAbsolute
           ? math.getRelativeImpactFromAbsolute({
               base_rate: state.baseRate,
               absolute_effect_size: impact,
             })
-          : impact) / 100
+          : (impact / 100)
 
       const sampleFormula = getFormula(state, CALCULATING.SAMPLE)
       const alpha =
@@ -879,7 +879,7 @@ export const calculator = {
     // Impact
     relativeImpact: (state) => (userInput = false) => displayValue(state.relativeImpact, { type: 'percentage', userInput }),
     absoluteImpact: (state) => (userInput = false) => displayValue(state.absoluteImpact, {
-      type: state.testType === TEST_TYPE.BINOMIAL ? 'percentage' : 'float',
+      type:  'float',
       userInput
     }),
 
@@ -889,14 +889,14 @@ export const calculator = {
         effect_size: state.relativeImpact,
       })
 
-      return displayValue(min, { type: state.testType === TEST_TYPE.BINOMIAL ? 'percentage' : 'float' })
+      return displayValue(min, { type: 'float' })
     },
     maxAbsoluteImpact: (state) => {
       const { max } = math.getAbsoluteImpactInMetricHash({
         base_rate: state.baseRate,
         effect_size: state.relativeImpact,
       })
-      return displayValue(max, { type: state.testType === TEST_TYPE.BINOMIAL ? 'percentage' : 'float' })
+      return displayValue(max, { type: 'float' })
     },
     absoluteImpactPerVisitor: (state) => {
       const impactPerVisitor = math.getAbsoluteImpactInVisitors({
