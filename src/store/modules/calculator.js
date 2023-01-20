@@ -50,16 +50,13 @@ function displayValue(value, { type = 'int', userInput = false }) {
   switch (type) {
     case 'float':
       if (!userInput) {
-        num = num.toFixed(5).replace(/\.?0+$/,'')
+        num = num.toFixed(2).replace(/\.?0+$/,'')
       }
       return alternativeToNaN(num)
     case 'percentage':
       num *= 100
       if (!userInput) {
-        num = num.toFixed(2)
-        if (num.toString().endsWith('.00')) {
-          num = +num.toString().slice(0, -3)
-        }
+        num = num.toFixed(2).replace(/\.?0+$/,'')
       }
       return alternativeToNaN(num)
     case 'int':
@@ -735,12 +732,12 @@ export const calculator = {
         return
       }
       const newImpact =
-        isAbsolute
+        (isAbsolute
           ? math.getRelativeImpactFromAbsolute({
               base_rate: state.baseRate,
               absolute_effect_size: impact,
             })
-          : (impact / 100)
+          : impact) / 100
 
       const sampleFormula = getFormula(state, CALCULATING.SAMPLE)
       const alpha =
@@ -897,7 +894,7 @@ export const calculator = {
     // Impact
     relativeImpact: (state) => (userInput = false) => displayValue(state.relativeImpact, { type: 'percentage', userInput }),
     absoluteImpact: (state) => (userInput = false) => displayValue(state.absoluteImpact, {
-      type:  'float',
+      type: state.testType === TEST_TYPE.BINOMIAL ? 'percentage' : 'float',
       userInput
     }),
 
@@ -907,14 +904,14 @@ export const calculator = {
         effect_size: state.relativeImpact,
       })
 
-      return displayValue(min, { type: 'float' })
+      return displayValue(min, { type: state.testType === TEST_TYPE.BINOMIAL ? 'percentage' : 'float' })
     },
     maxAbsoluteImpact: (state) => {
       const { max } = math.getAbsoluteImpactInMetricHash({
         base_rate: state.baseRate,
         effect_size: state.relativeImpact,
       })
-      return displayValue(max, { type: 'float' })
+      return displayValue(max, { type: state.testType === TEST_TYPE.BINOMIAL ? 'percentage' : 'float' })
     },
     absoluteImpactPerVisitor: (state) => {
       const impactPerVisitor = math.getAbsoluteImpactInVisitors({
