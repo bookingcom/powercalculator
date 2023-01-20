@@ -153,7 +153,7 @@ export const calculator = {
     runtime: 14,
     visitorsPerDay: 40098,
     sample: 561364,
-    standardDeviation: 1,
+    standardDeviation: 10,
     // It would make sense to store it as variants + 1 but everywhere it uses
     // this format.
     variants: 1, // A/A = 0, A/B = 1...
@@ -213,7 +213,10 @@ export const calculator = {
 
       // Base Rate
       if (props.baseRate) {
-        state.baseRate = +props.baseRate
+        state.baseRate =
+          props.testType === TEST_TYPE.BINOMIAL
+            ? props.baseRate / 100
+            : +props.baseRate
       }
 
       if (props.standardDeviation) {
@@ -307,6 +310,16 @@ export const calculator = {
         return
       }
 
+      // If the new type is a gTest, it means that before it was in 0 -> 100
+      // scale, which means we need to move it ot 0 -> 1 scale. If the new type
+      // is tTest, it means that it was in 0 -> 1 and we need to move it to 0 ->
+      // 100
+      const newBaseRate =
+        testType === TEST_TYPE.BINOMIAL
+          ? state.baseRate / 100
+          : state.baseRate * 100
+
+      state.baseRate = newBaseRate
       state.testType = testType
 
       // We need to recalculate based on the selected fields.
@@ -338,7 +351,7 @@ export const calculator = {
 
       if (focused === FOCUS.SAMPLE) {
         const sample = Math.ceil(formula({
-            base_rate: state.baseRate,
+            base_rate: newBaseRate,
             effect_size: impact,
             sd_rate: getStandardDeviation(state),
             alpha,
@@ -358,13 +371,13 @@ export const calculator = {
         if (state.isNonInferiority) {
           state.absoluteThreshold = getAbsoluteThreshold(state)
         } else {
-          state.absoluteImpact = getAbsoluteImpact(state.baseRate, impact)
+          state.absoluteImpact = getAbsoluteImpact(newBaseRate, impact)
         }
         state.sample = sample
       } else {
         const effect = formula({
           total_sample_size: state.sample,
-          base_rate: state.baseRate,
+          base_rate: newBaseRate,
           sd_rate: getStandardDeviation(state),
           alpha,
           beta: 1 - state.targetPower,
@@ -382,7 +395,7 @@ export const calculator = {
           })
         } else {
           state.relativeImpact = effect
-          state.absoluteImpact = getAbsoluteImpact(state.baseRate, effect)
+          state.absoluteImpact = getAbsoluteImpact(newBaseRate, effect)
         }
       }
     },
@@ -401,6 +414,11 @@ export const calculator = {
         return
       }
 
+      // If it is binomial, it is a percentage. If it is continuos, it is a
+      // float. Therefore, we need to divide by 100 if it is a gTest.
+      const newBaseRate =
+        state.testType === TEST_TYPE.BINOMIAL ? baseRate / 100 : baseRate
+
       // We use relative threshold = 0 when we are calculating the impact.
       const relativeThreshold =
         focusedBlock === FOCUS.SAMPLE ? state.relativeThreshold : 0
@@ -414,7 +432,7 @@ export const calculator = {
             days: state.runtime,
             threshold: -relativeThreshold,
             visitors_per_day: state.visitorsPerDay,
-            base_rate: baseRate,
+            base_rate: newBaseRate,
           }
         : {}
 
@@ -430,7 +448,7 @@ export const calculator = {
 
       if (focusedBlock === FOCUS.SAMPLE) {
         const sample = Math.ceil(formula({
-            base_rate: baseRate,
+            base_rate: newBaseRate,
             effect_size: impact,
             sd_rate: getStandardDeviation(state),
             alpha,
@@ -450,11 +468,11 @@ export const calculator = {
         if (state.isNonInferiority) {
           state.absoluteThreshold = +getAbsoluteThreshold({
             ...state,
-            baseRate,
+            baseRate: newBaseRate,
           })
         } else {
           state.absoluteImpact = getAbsoluteImpact(
-            baseRate,
+            newBaseRate,
             state.relativeImpact
           )
         }
@@ -463,7 +481,7 @@ export const calculator = {
       } else {
         const effect = formula({
           total_sample_size: state.sample,
-          base_rate: baseRate, // It uses the displayed value
+          base_rate: newBaseRate, // It uses the displayed value
           sd_rate: getStandardDeviation(state),
           alpha,
           beta: 1 - state.targetPower,
@@ -477,16 +495,16 @@ export const calculator = {
           state.relativeThreshold = effect
           state.absoluteThreshold = getAbsoluteThreshold({
             ...state,
-            baseRate: baseRate,
+            baseRate: newBaseRate,
             relativeThreshold: effect,
           })
         } else {
           state.relativeImpact = effect
-          state.absoluteImpact = getAbsoluteImpact(baseRate, effect)
+          state.absoluteImpact = getAbsoluteImpact(newBaseRate, effect)
         }
       }
 
-      state.baseRate = baseRate
+      state.baseRate = newBaseRate
     },
 
     SET_STANDARD_DEVIATION(state, stddev) {
@@ -847,7 +865,7 @@ export const calculator = {
 
     // Base rate
     baseRate: (state) => displayValue(state.baseRate, {
-        type: 'float',
+        type: state.testType === TEST_TYPE.BINOMIAL ? 'percentage' : 'float',
         userInput: true,
       }),
     standardDeviation: (state) => displayValue(state.standardDeviation, { type: 'float', userInput: true }),

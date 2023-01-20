@@ -5,13 +5,14 @@
   >
     <pc-svg-chain :isBlockFocused="isBlockFocused"></pc-svg-chain>
 
-    <div class="pc-header">Base Average</div>
+    <div class="pc-header" v-if="isBinomial">Base Rate</div>
+    <div class="pc-header" v-else>Base Average</div>
 
     <ul class="pc-inputs">
       <li class="pc-input-item pc-input-left">
         <label>
-          <span class="pc-input-title">
-            Base Average
+          <span class="pc-input-title"
+            >{{ isBinomial ? 'Base Rate' : 'Base Average' }}
             <small class="pc-input-sub-title">conversion</small></span
           >
 
@@ -20,6 +21,7 @@
             :fieldValue.sync="base"
             :isBlockFocused="isBlockFocused"
             :isReadOnly="isReadOnly"
+            :suffix="isBinomial ? '%' : ''"
             fieldProp="base"
             tabindex="5"
           ></pc-block-field>

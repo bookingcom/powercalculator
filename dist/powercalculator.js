@@ -6031,7 +6031,7 @@
       runtime: 14,
       visitorsPerDay: 40098,
       sample: 561364,
-      standardDeviation: 1,
+      standardDeviation: 10,
       // It would make sense to store it as variants + 1 but everywhere it uses
       // this format.
       variants: 1, // A/A = 0, A/B = 1...
@@ -6091,7 +6091,10 @@
 
         // Base Rate
         if (props.baseRate) {
-          state.baseRate = +props.baseRate;
+          state.baseRate =
+            props.testType === TEST_TYPE.BINOMIAL
+              ? props.baseRate / 100
+              : +props.baseRate;
         }
 
         if (props.standardDeviation) {
@@ -6185,6 +6188,16 @@
           return
         }
 
+        // If the new type is a gTest, it means that before it was in 0 -> 100
+        // scale, which means we need to move it ot 0 -> 1 scale. If the new type
+        // is tTest, it means that it was in 0 -> 1 and we need to move it to 0 ->
+        // 100
+        const newBaseRate =
+          testType === TEST_TYPE.BINOMIAL
+            ? state.baseRate / 100
+            : state.baseRate * 100;
+
+        state.baseRate = newBaseRate;
         state.testType = testType;
 
         // We need to recalculate based on the selected fields.
@@ -6216,7 +6229,7 @@
 
         if (focused === FOCUS.SAMPLE) {
           const sample = Math.ceil(formula({
-              base_rate: state.baseRate,
+              base_rate: newBaseRate,
               effect_size: impact,
               sd_rate: getStandardDeviation(state),
               alpha,
@@ -6236,13 +6249,13 @@
           if (state.isNonInferiority) {
             state.absoluteThreshold = getAbsoluteThreshold(state);
           } else {
-            state.absoluteImpact = getAbsoluteImpact(state.baseRate, impact);
+            state.absoluteImpact = getAbsoluteImpact(newBaseRate, impact);
           }
           state.sample = sample;
         } else {
           const effect = formula({
             total_sample_size: state.sample,
-            base_rate: state.baseRate,
+            base_rate: newBaseRate,
             sd_rate: getStandardDeviation(state),
             alpha,
             beta: 1 - state.targetPower,
@@ -6260,7 +6273,7 @@
             });
           } else {
             state.relativeImpact = effect;
-            state.absoluteImpact = getAbsoluteImpact(state.baseRate, effect);
+            state.absoluteImpact = getAbsoluteImpact(newBaseRate, effect);
           }
         }
       },
@@ -6279,6 +6292,11 @@
           return
         }
 
+        // If it is binomial, it is a percentage. If it is continuos, it is a
+        // float. Therefore, we need to divide by 100 if it is a gTest.
+        const newBaseRate =
+          state.testType === TEST_TYPE.BINOMIAL ? baseRate / 100 : baseRate;
+
         // We use relative threshold = 0 when we are calculating the impact.
         const relativeThreshold =
           focusedBlock === FOCUS.SAMPLE ? state.relativeThreshold : 0;
@@ -6292,7 +6310,7 @@
               days: state.runtime,
               threshold: -relativeThreshold,
               visitors_per_day: state.visitorsPerDay,
-              base_rate: baseRate,
+              base_rate: newBaseRate,
             }
           : {};
 
@@ -6308,7 +6326,7 @@
 
         if (focusedBlock === FOCUS.SAMPLE) {
           const sample = Math.ceil(formula({
-              base_rate: baseRate,
+              base_rate: newBaseRate,
               effect_size: impact,
               sd_rate: getStandardDeviation(state),
               alpha,
@@ -6328,11 +6346,11 @@
           if (state.isNonInferiority) {
             state.absoluteThreshold = +getAbsoluteThreshold({
               ...state,
-              baseRate,
+              baseRate: newBaseRate,
             });
           } else {
             state.absoluteImpact = getAbsoluteImpact(
-              baseRate,
+              newBaseRate,
               state.relativeImpact
             );
           }
@@ -6341,7 +6359,7 @@
         } else {
           const effect = formula({
             total_sample_size: state.sample,
-            base_rate: baseRate, // It uses the displayed value
+            base_rate: newBaseRate, // It uses the displayed value
             sd_rate: getStandardDeviation(state),
             alpha,
             beta: 1 - state.targetPower,
@@ -6355,16 +6373,16 @@
             state.relativeThreshold = effect;
             state.absoluteThreshold = getAbsoluteThreshold({
               ...state,
-              baseRate: baseRate,
+              baseRate: newBaseRate,
               relativeThreshold: effect,
             });
           } else {
             state.relativeImpact = effect;
-            state.absoluteImpact = getAbsoluteImpact(baseRate, effect);
+            state.absoluteImpact = getAbsoluteImpact(newBaseRate, effect);
           }
         }
 
-        state.baseRate = baseRate;
+        state.baseRate = newBaseRate;
       },
 
       SET_STANDARD_DEVIATION(state, stddev) {
@@ -6725,7 +6743,7 @@
 
       // Base rate
       baseRate: (state) => displayValue(state.baseRate, {
-          type: 'float',
+          type: state.testType === TEST_TYPE.BINOMIAL ? 'percentage' : 'float',
           userInput: true,
         }),
       standardDeviation: (state) => displayValue(state.standardDeviation, { type: 'float', userInput: true }),
@@ -6934,18 +6952,18 @@
   const __vue_script__$5 = script$5;
 
   /* template */
-  var __vue_render__$5 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-block pc-block--base",class:{ 'pc-block-focused': _vm.isBlockFocused }},[_c('pc-svg-chain',{attrs:{"isBlockFocused":_vm.isBlockFocused}}),_vm._v(" "),_c('div',{staticClass:"pc-header"},[_vm._v("Base Average")]),_vm._v(" "),_c('ul',{staticClass:"pc-inputs"},[_c('li',{staticClass:"pc-input-item pc-input-left"},[_c('label',[_vm._m(0),_vm._v(" "),_c('pc-block-field',{attrs:{"enableEdit":true,"fieldValue":_vm.base,"isBlockFocused":_vm.isBlockFocused,"isReadOnly":_vm.isReadOnly,"fieldProp":"base","tabindex":"5"},on:{"update:fieldValue":function($event){_vm.base=$event;},"update:field-value":function($event){_vm.base=$event;}}})],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right"},[_c('label',[_vm._m(1),_vm._v(" "),_c('pc-block-field',{attrs:{"enableEdit":false,"fieldValue":_vm.visitorsWithGoals,"isBlockFocused":_vm.isBlockFocused,"isReadOnly":true,"fieldProp":"visitorsWithGoals"}})],1)]),_vm._v(" "),(!_vm.isBinomial)?_c('li',{staticClass:"pc-input-item pc-input-sd-rate"},[_c('label',[_c('pc-block-field',{attrs:{"enableEdit":true,"fieldValue":_vm.sdRate,"isBlockFocused":_vm.isBlockFocused,"isReadOnly":_vm.isReadOnly,"fieldProp":"sdRate","prefix":"±","tabindex":"6"},on:{"update:fieldValue":function($event){_vm.sdRate=$event;},"update:field-value":function($event){_vm.sdRate=$event;}}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v("Base Standard deviation")])],1)]):_vm._e()])],1)};
-  var __vue_staticRenderFns__$5 = [function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('span',{staticClass:"pc-input-title"},[_vm._v("\n          Base Average\n          "),_c('small',{staticClass:"pc-input-sub-title"},[_vm._v("conversion")])])},function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('span',{staticClass:"pc-input-title"},[_vm._v("Metric Totals"),_c('small',{staticClass:"pc-input-sub-title"},[_vm._v("visitors reached goal")])])}];
+  var __vue_render__$5 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-block pc-block--base",class:{ 'pc-block-focused': _vm.isBlockFocused }},[_c('pc-svg-chain',{attrs:{"isBlockFocused":_vm.isBlockFocused}}),_vm._v(" "),(_vm.isBinomial)?_c('div',{staticClass:"pc-header"},[_vm._v("Base Rate")]):_c('div',{staticClass:"pc-header"},[_vm._v("Base Average")]),_vm._v(" "),_c('ul',{staticClass:"pc-inputs"},[_c('li',{staticClass:"pc-input-item pc-input-left"},[_c('label',[_c('span',{staticClass:"pc-input-title"},[_vm._v(_vm._s(_vm.isBinomial ? 'Base Rate' : 'Base Average')+"\n          "),_c('small',{staticClass:"pc-input-sub-title"},[_vm._v("conversion")])]),_vm._v(" "),_c('pc-block-field',{attrs:{"enableEdit":true,"fieldValue":_vm.base,"isBlockFocused":_vm.isBlockFocused,"isReadOnly":_vm.isReadOnly,"suffix":_vm.isBinomial ? '%' : '',"fieldProp":"base","tabindex":"5"},on:{"update:fieldValue":function($event){_vm.base=$event;},"update:field-value":function($event){_vm.base=$event;}}})],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right"},[_c('label',[_vm._m(0),_vm._v(" "),_c('pc-block-field',{attrs:{"enableEdit":false,"fieldValue":_vm.visitorsWithGoals,"isBlockFocused":_vm.isBlockFocused,"isReadOnly":true,"fieldProp":"visitorsWithGoals"}})],1)]),_vm._v(" "),(!_vm.isBinomial)?_c('li',{staticClass:"pc-input-item pc-input-sd-rate"},[_c('label',[_c('pc-block-field',{attrs:{"enableEdit":true,"fieldValue":_vm.sdRate,"isBlockFocused":_vm.isBlockFocused,"isReadOnly":_vm.isReadOnly,"fieldProp":"sdRate","prefix":"±","tabindex":"6"},on:{"update:fieldValue":function($event){_vm.sdRate=$event;},"update:field-value":function($event){_vm.sdRate=$event;}}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v("Base Standard deviation")])],1)]):_vm._e()])],1)};
+  var __vue_staticRenderFns__$5 = [function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('span',{staticClass:"pc-input-title"},[_vm._v("Metric Totals"),_c('small',{staticClass:"pc-input-sub-title"},[_vm._v("visitors reached goal")])])}];
 
     /* style */
     const __vue_inject_styles__$5 = function (inject) {
       if (!inject) return
-      inject("data-v-ddf0f95c_0", { source: ".pc-input-sd-rate{margin-top:-10px;z-index:1;position:relative;text-align:center}.pc-field-sdRate{width:90%;display:inline-block}", map: undefined, media: undefined })
-  ,inject("data-v-ddf0f95c_1", { source: ".pc-input-left[data-v-ddf0f95c]{position:relative;z-index:2}", map: undefined, media: undefined });
+      inject("data-v-8a96b108_0", { source: ".pc-input-sd-rate{margin-top:-10px;z-index:1;position:relative;text-align:center}.pc-field-sdRate{width:90%;display:inline-block}", map: undefined, media: undefined })
+  ,inject("data-v-8a96b108_1", { source: ".pc-input-left[data-v-8a96b108]{position:relative;z-index:2}", map: undefined, media: undefined });
 
     };
     /* scoped */
-    const __vue_scope_id__$5 = "data-v-ddf0f95c";
+    const __vue_scope_id__$5 = "data-v-8a96b108";
     /* module identifier */
     const __vue_module_identifier__$5 = undefined;
     /* functional template */
