@@ -51,15 +51,16 @@
             :fieldValue.sync="absoluteImpact"
             :isBlockFocused="isBlockFocused"
             :isReadOnly="isBlockFocused"
+            :suffix="isBinomial ? '%' : ''"
             :tabindex="isBlockFocused ? -1 : 11"
             aria-label="visitors with goals"
             class="pc-input-field"
             fieldProp="impactByMetricValue"
           ></pc-block-field>
           <span class="pc-input-details">
-            base average going from
-            {{ baseRate }} to either {{ minAbsoluteImpact }} or
-            {{ maxAbsoluteImpact }}
+            base {{ isBinomial ? "rate" : "average" }} going from {{ addPercentToString(baseRate) }} to either
+            {{ addPercentToString(minAbsoluteImpact) }} or
+            {{ addPercentToString(maxAbsoluteImpact) }}
           </span>
         </label>
       </li>
