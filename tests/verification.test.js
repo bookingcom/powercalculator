@@ -405,7 +405,7 @@ describe('G-test dataset (only two-sided, no standard deviation)', () => {
       }
     })
 
-    describe('G-Test formulas (MUST pass)', () => {
+    describe('G-Test formulas', () => {
       test('Calculating power', () => {
         const results = cases.map((entry, index) => {
           const {

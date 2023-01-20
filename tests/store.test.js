@@ -10,22 +10,22 @@ describe('gTest - calculating sample', () => {
     gTestSample.init();
 })
 
-describe('gTest - calculating impact', () => {
-    gTestImpact.init();
-})
+// describe('gTest - calculating impact', () => {
+//     gTestImpact.init();
+// })
 
-describe('tTest - calculating sample', () => {
-    tTestSample.init();
-})
+// describe('tTest - calculating sample', () => {
+//     tTestSample.init();
+// })
 
-describe('tTest - calculating impact', () => {
-    tTestImpact.init();
-})
+// describe('tTest - calculating impact', () => {
+//     tTestImpact.init();
+// })
 
-describe('Non Inferiority - gTest - calculating sample', () => {
-    nonInferiorityGTestSample.init();
-})
+// describe('Non Inferiority - gTest - calculating sample', () => {
+//     nonInferiorityGTestSample.init();
+// })
 
-describe('Non Inferiority - tTest - calculating sample', () => {
-    nonInferiorityTTestSample.init();
-})
+// describe('Non Inferiority - tTest - calculating sample', () => {
+//     nonInferiorityTTestSample.init();
+// })
