@@ -836,14 +836,12 @@ export const calculator = {
         state.absoluteThreshold = threshold
         state.relativeThreshold = getRelativeThreshold({
           ...state,
-          sample,
           absoluteThreshold: threshold,
         })
       } else {
         state.relativeThreshold = normaliseThreshold
         state.absoluteThreshold = getAbsoluteThreshold({
           ...state,
-          sample,
           relativeThreshold: normaliseThreshold,
         })
       }
@@ -928,6 +926,7 @@ export const calculator = {
         effect_size: state.relativeImpact,
         total_sample_size: state.sample,
       })
+
       // We need to use the parsed display value for consistency
       return displayValue(Math.floor(impactPerVisitor / state.runtime), {
         type: 'int',
