@@ -141,7 +141,7 @@ function init() {
     expect(store.getters.targetPower).toBe('60')
 
     // base block
-    expect(store.getters.metricTotal).toBe("32716")
+    expect(store.getters.metricTotal).toBe('32716')
 
     // impact block
     expect(store.getters.relativeImpact()).toBe('2')
@@ -166,97 +166,116 @@ function init() {
     expect(store.getters.runtime).toBe(7)
   })
 
-  //     test('Expected changes when Base Rate changes', () => {
-  //         resetStore();
+  test('Expected changes when Base Rate changes', () => {
+    resetStore()
 
-  //         store.commit('field:change', {prop: 'base', value: 15});
+    store.commit('SET_BASE_RATE', {
+      baseRate: 15,
+      lockedField: BLOCKED.DAYS,
+      focusedBlock: FOCUS.SAMPLE,
+    })
 
-  //         expect(store.getters.base).toBe(15);
+    expect(store.getters.baseRate).toBe(15)
 
-  //         // base block
-  //         expect(store.getters.visitorsWithGoals).toBe(52982);
+    // base block
+    expect(store.getters.metricTotal).toBe('52983')
 
-  //         // impact block
-  //         expect(store.getters.relativeImpact()).toBe(2);
-  //         expect(store.getters.absoluteImpact()).toBe(0.3);
-  //         expect(store.getters.impactByMetricMinDisplay).toBe(14.7);
-  //         expect(store.getters.impactByMetricMaxDisplay).toBe(15.3);
-  //         expect(store.getters.impactByVisitorsDisplay).toBe(1059);
-  //         expect(store.getters.impactByVisitorsPerDayDisplay).toBe(117);
+    // impact block
+    expect(store.getters.relativeImpact()).toBe('2')
+    expect(store.getters.absoluteImpact()).toBe('0.3')
+    expect(store.getters.minAbsoluteImpact).toBe('14.7')
+    expect(store.getters.maxAbsoluteImpact).toBe('15.3')
+    expect(store.getters.absoluteImpactPerVisitor).toBe(1059)
+    expect(store.getters.absoluteImpactPerVisitorPerDay).toBe(117)
 
-  //         expect(store.getters.sample).toBe(353218);
-  //         expect(store.getters.visitorsPerDay).toBe(40098);
-  //         expect(store.getters.runtime).toBe(9);
+    expect(store.getters.sample).toBe(353218)
+    expect(store.getters.visitorsPerDay).toBe(40098)
+    expect(store.getters.runtime).toBe(9)
 
-  //         store.commit('switch:lockedfield');
-  //         store.commit('field:change', {prop: 'runtime', value: 7});
+    store.commit('SET_RUNTIME', {
+      runtime: 7,
+      lockedField: BLOCKED.VISITORS_PER_DAY,
+      focusedBlock: FOCUS.SAMPLE,
+    })
 
-  //         expect(store.getters.sample).toBe(353218);
-  //         expect(store.getters.visitorsPerDay).toBe(50459);
-  //         expect(store.getters.runtime).toBe(7);
+    expect(store.getters.sample).toBe(353218)
+    expect(store.getters.visitorsPerDay).toBe(50460)
+    expect(store.getters.runtime).toBe(7)
+    expect(store.getters.absoluteImpactPerVisitorPerDay).toBe(151)
+  })
 
-  //         expect(store.getters.impactByVisitorsPerDayDisplay).toBe(151);
-  //     });
+  test('Expected changes when Relative Impact changes', () => {
+    resetStore()
 
-  //     test('Expected changes when Relative Impact changes', () => {
-  //         resetStore();
+    store.commit('SET_IMPACT', {
+      impact: 5,
+      isAbsolute: false,
+      lockedField: BLOCKED.DAYS,
+    })
 
-  //         store.commit('field:change', {prop: 'impact', value: 5});
+    // base block
+    expect(store.getters.metricTotal).toBe('9100')
 
-  //         // base block
-  //         expect(store.getters.visitorsWithGoals).toBe(9099);
+    // impact block
+    expect(store.getters.relativeImpact()).toBe('5')
+    expect(store.getters.absoluteImpact()).toBe('0.5')
+    expect(store.getters.minAbsoluteImpact).toBe('9.5')
+    expect(store.getters.maxAbsoluteImpact).toBe('10.5')
+    expect(store.getters.absoluteImpactPerVisitor).toBe(454)
+    expect(store.getters.absoluteImpactPerVisitorPerDay).toBe(151)
 
-  //         // impact block
-  //         expect(store.getters.relativeImpact()).toBe(5);
-  //         expect(store.getters.absoluteImpact()).toBe(0.5);
-  //         expect(store.getters.impactByMetricMinDisplay).toBe(9.5);
-  //         expect(store.getters.impactByMetricMaxDisplay).toBe(10.5);
-  //         expect(store.getters.impactByVisitorsDisplay).toBe(454);
-  //         expect(store.getters.impactByVisitorsPerDayDisplay).toBe(151);
+    expect(store.getters.sample).toBe(90996)
+    expect(store.getters.visitorsPerDay).toBe(40098)
+    expect(store.getters.runtime).toBe(3)
 
-  //         expect(store.getters.sample).toBe(90996);
-  //         expect(store.getters.visitorsPerDay).toBe(40098);
-  //         expect(store.getters.runtime).toBe(3);
+    store.commit('SET_RUNTIME', {
+      runtime: 7,
+      lockedField: BLOCKED.VISITORS_PER_DAY,
+      focusedBlock: FOCUS.SAMPLE,
+    })
 
-  //         store.commit('switch:lockedfield');
-  //         store.commit('field:change', {prop: 'runtime', value: 7});
+    expect(store.getters.sample).toBe(90996)
+    expect(store.getters.visitorsPerDay).toBe(13000)
+    expect(store.getters.runtime).toBe(7)
 
-  //         expect(store.getters.sample).toBe(90996);
-  //         expect(store.getters.visitorsPerDay).toBe(12999);
-  //         expect(store.getters.runtime).toBe(7);
+    expect(store.getters.absoluteImpactPerVisitorPerDay).toBe(64)
+  })
 
-  //         expect(store.getters.impactByVisitorsPerDayDisplay).toBe(64);
-  //     });
+  test('Expected changes when Absolute Impact changes', () => {
+    resetStore()
+    store.commit('SET_IMPACT', {
+      impact: 1.5,
+      isAbsolute: true,
+      lockedField: BLOCKED.DAYS,
+    })
 
-  //     test('Expected changes when Absolute Impact changes', () => {
-  //         resetStore();
+    // base block
+    expect(store.getters.metricTotal).toBe('1054')
 
-  //         store.commit('field:change', {prop: 'impactByMetricValue', value: 1.5});
+    // impact block
+    expect(store.getters.relativeImpact()).toBe('15')
+    expect(store.getters.absoluteImpact()).toBe('1.5')
+    expect(store.getters.minAbsoluteImpact).toBe('8.5')
+    expect(store.getters.maxAbsoluteImpact).toBe('11.5')
+    expect(store.getters.absoluteImpactPerVisitor).toBe(158)
+    expect(store.getters.absoluteImpactPerVisitorPerDay).toBe(158)
 
-  //         // base block
-  //         expect(store.getters.visitorsWithGoals).toBe(1054);
+    expect(store.getters.sample).toBe(10540)
+    expect(store.getters.visitorsPerDay).toBe(40098)
+    expect(store.getters.runtime).toBe(1)
 
-  //         // impact block
-  //         expect(store.getters.relativeImpact()).toBe(15);
-  //         expect(store.getters.absoluteImpact()).toBe(1.5);
-  //         expect(store.getters.impactByMetricMinDisplay).toBe(8.5);
-  //         expect(store.getters.impactByMetricMaxDisplay).toBe(11.5);
-  //         expect(store.getters.impactByVisitorsDisplay).toBe(158);
-  //         expect(store.getters.impactByVisitorsPerDayDisplay).toBe(158);
+    store.commit('SET_RUNTIME', {
+      runtime: 7,
+      lockedField: BLOCKED.VISITORS_PER_DAY,
+      focusedBlock: FOCUS.SAMPLE,
+    })
 
-  //         expect(store.getters.sample).toBe(10540);
-  //         expect(store.getters.visitorsPerDay).toBe(40098);
-  //         expect(store.getters.runtime).toBe(1);
+    expect(store.getters.sample).toBe(10540)
+    expect(store.getters.visitorsPerDay).toBe(1506)
+    expect(store.getters.runtime).toBe(7)
 
-  //         store.commit('switch:lockedfield');
-  //         store.commit('field:change', {prop: 'runtime', value: 7});
-
-  //         expect(store.getters.sample).toBe(10540);
-  //         expect(store.getters.visitorsPerDay).toBe(1505);
-  //         expect(store.getters.runtime).toBe(7);
-
-  //         expect(store.getters.impactByVisitorsPerDayDisplay).toBe(22);
-  //     });
+    expect(store.getters.absoluteImpactPerVisitorPerDay).toBe(22)
+  })
 }
 
 export default {
