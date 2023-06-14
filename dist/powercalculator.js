@@ -5928,13 +5928,13 @@
     switch (type) {
       case 'float':
         if (!userInput) {
-          num = num.toFixed(2).replace(/\.?0+$/,'');
+          num = num.toFixed(2).replace(/\.?0+$/, '');
         }
         return alternativeToNaN(num)
       case 'percentage':
         num *= 100;
         if (!userInput) {
-          num = num.toFixed(2).replace(/\.?0+$/,'');
+          num = num.toFixed(2).replace(/\.?0+$/, '');
         }
         return alternativeToNaN(num)
       case 'int':
@@ -6022,7 +6022,6 @@
     state: () => ({
       // Metrics
       baseRate: 0.1, // [0..1]
-      confidenceLevel: 0.9, // [0..1]
       falsePositiveRate: 0.1, // [0..1]
       targetPower: 0.8, // [0..1]
       runtime: 14,
@@ -6116,10 +6115,16 @@
           state.absoluteThreshold = +props.absoluteThreshold;
         } else if (props.absoluteThreshold) {
           state.absoluteThreshold = +props.absoluteThreshold;
-          state.relativeThreshold = getRelativeThreshold({ ...props, baseRate: state.baseRate });
+          state.relativeThreshold = getRelativeThreshold({
+            ...props,
+            baseRate: state.baseRate,
+          });
         } else if (props.relativeThreshold) {
           state.relativeThreshold = props.relativeThreshold / 100;
-          state.absoluteThreshold = getAbsoluteThreshold({ ...props, baseRate: state.baseRate });
+          state.absoluteThreshold = getAbsoluteThreshold({
+            ...props,
+            baseRate: state.baseRate,
+          });
         }
 
         // comparative
@@ -6177,6 +6182,9 @@
       },
 
       SET_IS_NON_INFERIORITY(state, flag) {
+        state.falsePositiveRate = flag
+          ? state.falsePositiveRate / 2
+          : state.falsePositiveRate * 2;
         state.isNonInferiority = !!flag;
       },
 
@@ -6714,14 +6722,12 @@
           state.absoluteThreshold = threshold;
           state.relativeThreshold = getRelativeThreshold({
             ...state,
-            sample,
             absoluteThreshold: threshold,
           });
         } else {
           state.relativeThreshold = normaliseThreshold;
           state.absoluteThreshold = getAbsoluteThreshold({
             ...state,
-            sample,
             relativeThreshold: normaliseThreshold,
           });
         }
@@ -6770,11 +6776,13 @@
       },
 
       // Impact
-      relativeImpact: (state) => (userInput = false) => displayValue(state.relativeImpact, { type: 'percentage', userInput }),
-      absoluteImpact: (state) => (userInput = false) => displayValue(state.absoluteImpact, {
-        type: state.testType === TEST_TYPE.BINOMIAL ? 'percentage' : 'float',
-        userInput
-      }),
+      relativeImpact:
+        (state) => (userInput = false) => displayValue(state.relativeImpact, { type: 'percentage', userInput }),
+      absoluteImpact:
+        (state) => (userInput = false) => displayValue(state.absoluteImpact, {
+            type: state.testType === TEST_TYPE.BINOMIAL ? 'percentage' : 'float',
+            userInput,
+          }),
 
       minAbsoluteImpact: (state) => {
         const { min } = math.getAbsoluteImpactInMetricHash({
@@ -6782,14 +6790,18 @@
           effect_size: state.relativeImpact,
         });
 
-        return displayValue(min, { type: state.testType === TEST_TYPE.BINOMIAL ? 'percentage' : 'float' })
+        return displayValue(min, {
+          type: state.testType === TEST_TYPE.BINOMIAL ? 'percentage' : 'float',
+        })
       },
       maxAbsoluteImpact: (state) => {
         const { max } = math.getAbsoluteImpactInMetricHash({
           base_rate: state.baseRate,
           effect_size: state.relativeImpact,
         });
-        return displayValue(max, { type: state.testType === TEST_TYPE.BINOMIAL ? 'percentage' : 'float' })
+        return displayValue(max, {
+          type: state.testType === TEST_TYPE.BINOMIAL ? 'percentage' : 'float',
+        })
       },
       absoluteImpactPerVisitor: (state) => {
         const impactPerVisitor = math.getAbsoluteImpactInVisitors({
@@ -6806,6 +6818,7 @@
           effect_size: state.relativeImpact,
           total_sample_size: state.sample,
         });
+
         // We need to use the parsed display value for consistency
         return displayValue(Math.floor(impactPerVisitor / state.runtime), {
           type: 'int',
@@ -7656,13 +7669,13 @@
   const __vue_script__ = script;
 
   /* template */
-  var __vue_render__ = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"power-calculator"},[_c('form',{staticClass:"pc-form",attrs:{"action":"."}},[_c('div',{staticClass:"pc-main-header"},[_c('div',{staticClass:"pc-controls-left"},[_c('div',{staticClass:"pc-test-type"},[_c('pc-tooltip',{staticClass:"pc-test-type-tooltip-wrapper"},[_c('label',{staticClass:"pc-test-type-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.testType),expression:"testType"}],attrs:{"name":"test-mode","tabindex":"-1","type":"radio"},domProps:{"value":_vm.TEST_TYPE.BINOMIAL,"checked":_vm._q(_vm.testType,_vm.TEST_TYPE.BINOMIAL)},on:{"change":function($event){_vm.testType=_vm.TEST_TYPE.BINOMIAL;}}}),_vm._v("\n              Binomial Metric\n            ")]),_vm._v(" "),_c('span',{attrs:{"slot":"tooltip"},slot:"tooltip"},[_vm._v("\n              A binomial metric is one that can be only two values like 0 or\n              1, yes or no, converted or not converted\n            ")])]),_vm._v(" "),_c('pc-tooltip',{staticClass:"pc-test-type-tooltip-wrapper"},[_c('label',{staticClass:"pc-test-type-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.testType),expression:"testType"}],attrs:{"name":"test-mode","tabindex":"-1","type":"radio"},domProps:{"value":_vm.TEST_TYPE.CONTINUOUS,"checked":_vm._q(_vm.testType,_vm.TEST_TYPE.CONTINUOUS)},on:{"change":function($event){_vm.testType=_vm.TEST_TYPE.CONTINUOUS;}}}),_vm._v("\n              Continuous Metric\n            ")]),_vm._v(" "),_c('span',{attrs:{"slot":"tooltip"},slot:"tooltip"},[_vm._v("\n              A continuous metric is one that can be any number like time on\n              site or the number of rooms sold\n            ")])])],1),_vm._v(" "),_c('div',{staticClass:"pc-traffic-mode"},[_c('label',{staticClass:"pc-traffic-mode-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.trafficMode),expression:"trafficMode"}],attrs:{"checked":"","name":"traffic-mode","tabindex":"-1","type":"radio"},domProps:{"value":_vm.TRAFFIC_MODE.DAILY,"checked":_vm._q(_vm.trafficMode,_vm.TRAFFIC_MODE.DAILY)},on:{"change":function($event){_vm.trafficMode=_vm.TRAFFIC_MODE.DAILY;}}}),_vm._v("\n            Daily traffic\n          ")]),_vm._v(" "),_c('label',{staticClass:"pc-traffic-mode-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.trafficMode),expression:"trafficMode"}],attrs:{"name":"traffic-mode","tabindex":"-1","type":"radio"},domProps:{"value":_vm.TRAFFIC_MODE.TOTAL,"checked":_vm._q(_vm.trafficMode,_vm.TRAFFIC_MODE.TOTAL)},on:{"change":function($event){_vm.trafficMode=_vm.TRAFFIC_MODE.TOTAL;}}}),_vm._v("\n            Total traffic\n          ")])]),_vm._v(" "),_c('div',{staticClass:"pc-non-inferiority"},[_c('label',{staticClass:"pc-non-inf-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.isNonInferiority),expression:"isNonInferiority"}],attrs:{"type":"checkbox","tabindex":"-1"},domProps:{"checked":Array.isArray(_vm.isNonInferiority)?_vm._i(_vm.isNonInferiority,null)>-1:(_vm.isNonInferiority)},on:{"change":function($event){var $$a=_vm.isNonInferiority,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.isNonInferiority=$$a.concat([$$v]));}else {$$i>-1&&(_vm.isNonInferiority=$$a.slice(0,$$i).concat($$a.slice($$i+1)));}}else {_vm.isNonInferiority=$$c;}}}}),_vm._v("\n            Use non inferiority test\n          ")])]),_vm._v(" "),_c('div',{staticClass:"pc-comparison-mode"},[_c('label',{staticClass:"pc-comparison-mode-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.comparisonMode),expression:"comparisonMode"}],attrs:{"name":"comparison-mode","tabindex":"-1","type":"radio"},domProps:{"value":_vm.COMPARISON_MODE.ALL,"checked":_vm._q(_vm.comparisonMode,_vm.COMPARISON_MODE.ALL)},on:{"change":function($event){_vm.comparisonMode=_vm.COMPARISON_MODE.ALL;}}}),_vm._v("\n            Base vs All variants\n          ")]),_vm._v(" "),_c('label',{staticClass:"pc-traffic-mode-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.comparisonMode),expression:"comparisonMode"}],attrs:{"name":"comparison-mode","tabindex":"-1","type":"radio"},domProps:{"value":_vm.COMPARISON_MODE.ONE,"checked":_vm._q(_vm.comparisonMode,_vm.COMPARISON_MODE.ONE)},on:{"change":function($event){_vm.comparisonMode=_vm.COMPARISON_MODE.ONE;}}}),_vm._v("\n            Base vs One variant\n          ")])])]),_vm._v(" "),_vm._m(0),_vm._v(" "),_c('div',{staticClass:"pc-controls-right"},[_c('label',{staticClass:"pc-variants"},[_c('pc-block-field',{staticClass:"pc-variants-input",attrs:{"enableEdit":true,"fieldValue":_vm.variants,"fieldProp":"variants","prefix":"base + ","tabindex":"-1"},on:{"update:fieldValue":function($event){_vm.variants=$event;},"update:field-value":function($event){_vm.variants=$event;}}}),_vm._v("\n          variant"+_vm._s(_vm.variants > 1 ? 's' : '')+"\n        ")],1),_vm._v(" "),_c('label',{staticClass:"pc-false-positive"},[_c('pc-block-field',{staticClass:"pc-false-positive-input",class:{ 'pc-top-fields-error': _vm.falsePositiveRate > 10 },attrs:{"enableEdit":true,"fieldValue":_vm.falsePositiveRate,"fieldProp":"falsePositiveRate","suffix":"%","tabindex":"-1"},on:{"update:fieldValue":function($event){_vm.falsePositiveRate=$event;},"update:field-value":function($event){_vm.falsePositiveRate=$event;}}}),_vm._v("\n          false positive rate\n        ")],1),_vm._v(" "),_c('label',{staticClass:"pc-power"},[_c('pc-block-field',{staticClass:"pc-power-input",class:{ 'pc-top-fields-error': _vm.power < 80 },attrs:{"enableEdit":true,"fieldValue":_vm.power,"fieldProp":"power","suffix":"%","tabindex":"-1"},on:{"update:fieldValue":function($event){_vm.power=$event;},"update:field-value":function($event){_vm.power=$event;}}}),_vm._v("\n          power\n        ")],1)])]),_vm._v(" "),_c('div',{staticClass:"pc-blocks-wrapper",class:{ 'pc-blocks-wrapper-ttest': _vm.testType === 'tTest' }},[_c('base-comp',{attrs:{"blockName":_vm.FOCUS.BASE,"focusedBlock":_vm.focusedBlock,"lockedField":_vm.lockedField}}),_vm._v(" "),_c('sample-comp',{attrs:{"blockName":_vm.FOCUS.SAMPLE,"focusedBlock":_vm.focusedBlock,"lockedField":_vm.lockedField},on:{"update:focusedBlock":function($event){_vm.focusedBlock=$event;},"update:focused-block":function($event){_vm.focusedBlock=$event;},"update:lockedField":function($event){_vm.lockedField=$event;},"update:locked-field":function($event){_vm.lockedField=$event;}}}),_vm._v(" "),(!_vm.isNonInferiority)?_c('impact-comp',{attrs:{"blockName":_vm.FOCUS.IMPACT,"focusedBlock":_vm.focusedBlock,"lockedField":_vm.lockedField},on:{"update:focusedBlock":function($event){_vm.focusedBlock=$event;},"update:focused-block":function($event){_vm.focusedBlock=$event;},"update:selected":function($event){_vm.selected = $event;}}}):_vm._e(),_vm._v(" "),(_vm.isNonInferiority)?_c('non-inferiority-comp',{attrs:{"blockName":_vm.FOCUS.IMPACT,"focusedBlock":_vm.focusedBlock,"lockedField":_vm.lockedField},on:{"update:focusedBlock":function($event){_vm.focusedBlock=$event;},"update:focused-block":function($event){_vm.focusedBlock=$event;},"update:selected":function($event){_vm.selected = $event;}}}):_vm._e()],1)])])};
+  var __vue_render__ = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"power-calculator"},[_c('form',{staticClass:"pc-form",attrs:{"action":"."}},[_c('div',{staticClass:"pc-main-header"},[_c('div',{staticClass:"pc-controls-left"},[_c('div',{staticClass:"pc-test-type"},[_c('pc-tooltip',{staticClass:"pc-test-type-tooltip-wrapper"},[_c('label',{staticClass:"pc-test-type-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.testType),expression:"testType"}],attrs:{"name":"test-mode","tabindex":"-1","type":"radio"},domProps:{"value":_vm.TEST_TYPE.BINOMIAL,"checked":_vm._q(_vm.testType,_vm.TEST_TYPE.BINOMIAL)},on:{"change":function($event){_vm.testType=_vm.TEST_TYPE.BINOMIAL;}}}),_vm._v("\n              Binomial Metric\n            ")]),_vm._v(" "),_c('span',{attrs:{"slot":"tooltip"},slot:"tooltip"},[_vm._v("\n              A binomial metric is one that can be only two values like 0 or\n              1, yes or no, converted or not converted\n            ")])]),_vm._v(" "),_c('pc-tooltip',{staticClass:"pc-test-type-tooltip-wrapper"},[_c('label',{staticClass:"pc-test-type-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.testType),expression:"testType"}],attrs:{"name":"test-mode","tabindex":"-1","type":"radio"},domProps:{"value":_vm.TEST_TYPE.CONTINUOUS,"checked":_vm._q(_vm.testType,_vm.TEST_TYPE.CONTINUOUS)},on:{"change":function($event){_vm.testType=_vm.TEST_TYPE.CONTINUOUS;}}}),_vm._v("\n              Continuous Metric\n            ")]),_vm._v(" "),_c('span',{attrs:{"slot":"tooltip"},slot:"tooltip"},[_vm._v("\n              A continuous metric is one that can be any number like time on\n              site or the number of rooms sold\n            ")])])],1),_vm._v(" "),_c('div',{staticClass:"pc-traffic-mode"},[_c('label',{staticClass:"pc-traffic-mode-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.trafficMode),expression:"trafficMode"}],attrs:{"checked":"","name":"traffic-mode","tabindex":"-1","type":"radio"},domProps:{"value":_vm.TRAFFIC_MODE.DAILY,"checked":_vm._q(_vm.trafficMode,_vm.TRAFFIC_MODE.DAILY)},on:{"change":function($event){_vm.trafficMode=_vm.TRAFFIC_MODE.DAILY;}}}),_vm._v("\n            Daily traffic\n          ")]),_vm._v(" "),_c('label',{staticClass:"pc-traffic-mode-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.trafficMode),expression:"trafficMode"}],attrs:{"name":"traffic-mode","tabindex":"-1","type":"radio"},domProps:{"value":_vm.TRAFFIC_MODE.TOTAL,"checked":_vm._q(_vm.trafficMode,_vm.TRAFFIC_MODE.TOTAL)},on:{"change":function($event){_vm.trafficMode=_vm.TRAFFIC_MODE.TOTAL;}}}),_vm._v("\n            Total traffic\n          ")])]),_vm._v(" "),_c('div',{staticClass:"pc-non-inferiority"},[_c('label',{staticClass:"pc-non-inf-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.isNonInferiority),expression:"isNonInferiority"}],attrs:{"type":"checkbox","tabindex":"-1"},domProps:{"checked":Array.isArray(_vm.isNonInferiority)?_vm._i(_vm.isNonInferiority,null)>-1:(_vm.isNonInferiority)},on:{"change":function($event){var $$a=_vm.isNonInferiority,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.isNonInferiority=$$a.concat([$$v]));}else {$$i>-1&&(_vm.isNonInferiority=$$a.slice(0,$$i).concat($$a.slice($$i+1)));}}else {_vm.isNonInferiority=$$c;}}}}),_vm._v("\n            Use non inferiority test\n          ")])]),_vm._v(" "),_c('div',{staticClass:"pc-comparison-mode"},[_c('label',{staticClass:"pc-comparison-mode-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.comparisonMode),expression:"comparisonMode"}],attrs:{"name":"comparison-mode","tabindex":"-1","type":"radio"},domProps:{"value":_vm.COMPARISON_MODE.ALL,"checked":_vm._q(_vm.comparisonMode,_vm.COMPARISON_MODE.ALL)},on:{"change":function($event){_vm.comparisonMode=_vm.COMPARISON_MODE.ALL;}}}),_vm._v("\n            Base vs All variants\n          ")]),_vm._v(" "),_c('label',{staticClass:"pc-traffic-mode-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.comparisonMode),expression:"comparisonMode"}],attrs:{"name":"comparison-mode","tabindex":"-1","type":"radio"},domProps:{"value":_vm.COMPARISON_MODE.ONE,"checked":_vm._q(_vm.comparisonMode,_vm.COMPARISON_MODE.ONE)},on:{"change":function($event){_vm.comparisonMode=_vm.COMPARISON_MODE.ONE;}}}),_vm._v("\n            Base vs One variant\n          ")])])]),_vm._v(" "),_vm._m(0),_vm._v(" "),_c('div',{staticClass:"pc-controls-right"},[_c('label',{staticClass:"pc-variants"},[_c('pc-block-field',{staticClass:"pc-variants-input",attrs:{"enableEdit":true,"fieldValue":_vm.variants,"fieldProp":"variants","prefix":"base + ","tabindex":"-1"},on:{"update:fieldValue":function($event){_vm.variants=$event;},"update:field-value":function($event){_vm.variants=$event;}}}),_vm._v("\n          variant"+_vm._s(_vm.variants > 1 ? 's' : '')+"\n        ")],1),_vm._v(" "),_c('label',{staticClass:"pc-false-positive"},[_c('pc-block-field',{staticClass:"pc-false-positive-input",class:{ 'pc-top-fields-error': _vm.falsePositiveRate > 10 },attrs:{"enableEdit":true,"fieldValue":_vm.falsePositiveRate,"fieldProp":"falsePositiveRate","suffix":"%","tabindex":"-1"},on:{"update:fieldValue":function($event){_vm.falsePositiveRate=$event;},"update:field-value":function($event){_vm.falsePositiveRate=$event;}}}),_vm._v(" "),_c('div',{staticClass:"double-row"},[_c('span',[_vm._v("false positive rate")]),_vm._v(" "),_c('small',[_vm._v("("+_vm._s(_vm.isNonInferiority ? "one" : "two")+"-sided)")])])],1),_vm._v(" "),_c('label',{staticClass:"pc-power"},[_c('pc-block-field',{staticClass:"pc-power-input",class:{ 'pc-top-fields-error': _vm.power < 80 },attrs:{"enableEdit":true,"fieldValue":_vm.power,"fieldProp":"power","suffix":"%","tabindex":"-1"},on:{"update:fieldValue":function($event){_vm.power=$event;},"update:field-value":function($event){_vm.power=$event;}}}),_vm._v("\n          power\n        ")],1)])]),_vm._v(" "),_c('div',{staticClass:"pc-blocks-wrapper",class:{ 'pc-blocks-wrapper-ttest': _vm.testType === 'tTest' }},[_c('base-comp',{attrs:{"blockName":_vm.FOCUS.BASE,"focusedBlock":_vm.focusedBlock,"lockedField":_vm.lockedField}}),_vm._v(" "),_c('sample-comp',{attrs:{"blockName":_vm.FOCUS.SAMPLE,"focusedBlock":_vm.focusedBlock,"lockedField":_vm.lockedField},on:{"update:focusedBlock":function($event){_vm.focusedBlock=$event;},"update:focused-block":function($event){_vm.focusedBlock=$event;},"update:lockedField":function($event){_vm.lockedField=$event;},"update:locked-field":function($event){_vm.lockedField=$event;}}}),_vm._v(" "),(!_vm.isNonInferiority)?_c('impact-comp',{attrs:{"blockName":_vm.FOCUS.IMPACT,"focusedBlock":_vm.focusedBlock,"lockedField":_vm.lockedField},on:{"update:focusedBlock":function($event){_vm.focusedBlock=$event;},"update:focused-block":function($event){_vm.focusedBlock=$event;},"update:selected":function($event){_vm.selected = $event;}}}):_vm._e(),_vm._v(" "),(_vm.isNonInferiority)?_c('non-inferiority-comp',{attrs:{"blockName":_vm.FOCUS.IMPACT,"focusedBlock":_vm.focusedBlock,"lockedField":_vm.lockedField},on:{"update:focusedBlock":function($event){_vm.focusedBlock=$event;},"update:focused-block":function($event){_vm.focusedBlock=$event;},"update:selected":function($event){_vm.selected = $event;}}}):_vm._e()],1)])])};
   var __vue_staticRenderFns__ = [function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-title"},[_vm._v("\n        Power Calculator "),_c('sup',{staticStyle:{"color":"#f00","font-size":"11px"}},[_vm._v("β")])])}];
 
     /* style */
     const __vue_inject_styles__ = function (inject) {
       if (!inject) return
-      inject("data-v-6ae05cb6_0", { source: ".power-calculator{--white:#fff;--black:#000;--gray:#b5b5b5;--light-gray:#f0f0f0;--dark-gray:#525252;--light-blue:#c1cfd8;--pale-blue:#7898ae;--blue:#155eab;--dark-blue:#3d78df;--light-yellow:#fef1cb;--dark-yellow:#e2b634;--fade-black:rgba(0, 0, 0, 0.3);--red:#f00}.pc-main-header{display:grid;grid-template-columns:33.33% 33.33% 33.33%;grid-template-rows:auto;grid-template-areas:'controls-left title controls-right';align-items:center;margin:25px 10px}.pc-controls-left{grid-area:controls-left;display:grid;grid-template-columns:min-content min-content min-content;grid-template-rows:2;grid-template-areas:'calc-options calc-options calc-options' 'test-type traffic comparison';align-items:center}.pc-controls-right{grid-area:controls-right;display:grid;grid-template-columns:auto min-content min-content;grid-template-rows:auto;grid-template-areas:'variants false-positive power';align-items:center;justify-items:end}.pc-title{grid-area:title;font-size:30px;text-align:center}.pc-traffic-mode{grid-area:traffic}.pc-comparison-mode,.pc-false-positive,.pc-non-inf-label,.pc-power,.pc-test-type,.pc-traffic-mode,.pc-variants{font-size:.8em}.pc-test-type{grid-area:test-type}.pc-non-inferiority{grid-area:calc-options;margin-bottom:8px}.pc-comparison-mode{grid-area:comparison}.pc-comparison-mode-label,.pc-non-inf-label,.pc-test-type-labels,.pc-traffic-mode-labels{white-space:nowrap}.pc-comparison-mode,.pc-non-inferiority,.pc-test-type,.pc-traffic-mode{margin-left:15px}.pc-test-type-tooltip-wrapper{display:inline-block}.pc-non-inf-label{white-space:nowrap}.pc-non-inf-treshold{display:flex;align-items:center}.pc-non-inf-treshold-input{margin-left:5px}.pc-variants{grid-area:variants;white-space:nowrap;align-self:end}.pc-false-positive{grid-area:false-positive;margin-left:15px;white-space:nowrap;align-self:end}.pc-power{grid-area:power;margin-left:15px;margin-right:15px;white-space:nowrap;align-self:end}.pc-blocks-wrapper{grid-area:pc-blocks-wrapper;display:grid;grid-template-columns:33% 33% 33%;grid-template-rows:auto;grid-template-areas:'block-base block-sample block-impact' 'block-graph block-graph block-graph';grid-template-rows:auto;grid-column-gap:8px;grid-row-gap:8px}.pc-block--base{grid-area:block-base}.pc-block--sample{grid-area:block-sample}.pc-block--impact{grid-area:block-impact}.pc-block--graph{grid-area:block-graph}.pc-block{background:var(--light-gray)}.pc-header{color:var(--white);text-align:center;font-size:28px;line-height:80px;height:80px;text-shadow:0 1px 1px rgba(0,0,0,.29);background:var(--pale-blue);margin-bottom:25px}.pc-calculate{display:inline-block;margin-bottom:25px;font-weight:700;font-size:.8em}.pc-value{display:block;margin-bottom:25px}.pc-block-to-calculate{background:var(--light-yellow)}.pc-block-to-calculate .pc-header{background:var(--dark-yellow)}.pc-hidden{display:none!important}", map: undefined, media: undefined });
+      inject("data-v-da1c7278_0", { source: ".power-calculator{--white:#fff;--black:#000;--gray:#b5b5b5;--light-gray:#f0f0f0;--dark-gray:#525252;--light-blue:#c1cfd8;--pale-blue:#7898ae;--blue:#155eab;--dark-blue:#3d78df;--light-yellow:#fef1cb;--dark-yellow:#e2b634;--fade-black:rgba(0, 0, 0, 0.3);--red:#f00}.pc-main-header{display:grid;grid-template-columns:33.33% 33.33% 33.33%;grid-template-rows:auto;grid-template-areas:'controls-left title controls-right';align-items:center;margin:25px 10px}.pc-controls-left{grid-area:controls-left;display:grid;grid-template-columns:min-content min-content min-content;grid-template-rows:2;grid-template-areas:'calc-options calc-options calc-options' 'test-type traffic comparison';align-items:center}.pc-controls-right{grid-area:controls-right;display:grid;grid-template-columns:auto min-content min-content;grid-template-rows:auto;grid-template-areas:'variants false-positive power';align-items:center;justify-items:end}.pc-title{grid-area:title;font-size:30px;text-align:center}.pc-traffic-mode{grid-area:traffic}.pc-comparison-mode,.pc-false-positive,.pc-non-inf-label,.pc-power,.pc-test-type,.pc-traffic-mode,.pc-variants{font-size:.8em}.pc-false-positive{display:flex;gap:5px}.pc-false-positive .double-row{display:flex;flex-flow:column}.pc-test-type{grid-area:test-type}.pc-non-inferiority{grid-area:calc-options;margin-bottom:8px}.pc-comparison-mode{grid-area:comparison}.pc-comparison-mode-label,.pc-non-inf-label,.pc-test-type-labels,.pc-traffic-mode-labels{white-space:nowrap}.pc-comparison-mode,.pc-non-inferiority,.pc-test-type,.pc-traffic-mode{margin-left:15px}.pc-test-type-tooltip-wrapper{display:inline-block}.pc-non-inf-label{white-space:nowrap}.pc-non-inf-treshold{display:flex;align-items:center}.pc-non-inf-treshold-input{margin-left:5px}.pc-variants{grid-area:variants;white-space:nowrap;align-self:end}.pc-false-positive{grid-area:false-positive;margin-left:15px;white-space:nowrap;align-self:end}.pc-power{grid-area:power;margin-left:15px;margin-right:15px;white-space:nowrap;align-self:end}.pc-blocks-wrapper{grid-area:pc-blocks-wrapper;display:grid;grid-template-columns:33% 33% 33%;grid-template-rows:auto;grid-template-areas:'block-base block-sample block-impact' 'block-graph block-graph block-graph';grid-template-rows:auto;grid-column-gap:8px;grid-row-gap:8px}.pc-block--base{grid-area:block-base}.pc-block--sample{grid-area:block-sample}.pc-block--impact{grid-area:block-impact}.pc-block--graph{grid-area:block-graph}.pc-block{background:var(--light-gray)}.pc-header{color:var(--white);text-align:center;font-size:28px;line-height:80px;height:80px;text-shadow:0 1px 1px rgba(0,0,0,.29);background:var(--pale-blue);margin-bottom:25px}.pc-calculate{display:inline-block;margin-bottom:25px;font-weight:700;font-size:.8em}.pc-value{display:block;margin-bottom:25px}.pc-block-to-calculate{background:var(--light-yellow)}.pc-block-to-calculate .pc-header{background:var(--dark-yellow)}.pc-hidden{display:none!important}", map: undefined, media: undefined });
 
     };
     /* scoped */

@@ -121,7 +121,9 @@
               suffix="%"
               tabindex="-1"
             ></pc-block-field>
-            false positive rate
+            <div class="double-row">
+              <span>false positive rate</span>
+              <small>({{ isNonInferiority ? "one" : "two" }}-sided)</small></div>
           </label>
 
           <label class="pc-power">
@@ -455,6 +457,16 @@ export default {
 .pc-variants,
 .pc-comparison-mode {
   font-size: 0.8em;
+}
+
+.pc-false-positive {
+  display: flex;
+  gap: 5px;
+}
+
+.pc-false-positive .double-row {
+  display: flex;
+  flex-flow: column;
 }
 
 .pc-test-type {

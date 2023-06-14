@@ -58,7 +58,8 @@
             fieldProp="impactByMetricValue"
           ></pc-block-field>
           <span class="pc-input-details">
-            base {{ isBinomial ? "rate" : "average" }} going from {{ addPercentToString(baseRate) }} to either
+            base {{ isBinomial ? 'rate' : 'average' }} going from
+            {{ addPercentToString(baseRate) }} to either
             {{ addPercentToString(minAbsoluteImpact) }} or
             {{ addPercentToString(maxAbsoluteImpact) }}
           </span>

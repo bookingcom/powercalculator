@@ -50,13 +50,13 @@ function displayValue(value, { type = 'int', userInput = false }) {
   switch (type) {
     case 'float':
       if (!userInput) {
-        num = num.toFixed(2).replace(/\.?0+$/,'')
+        num = num.toFixed(2).replace(/\.?0+$/, '')
       }
       return alternativeToNaN(num)
     case 'percentage':
       num *= 100
       if (!userInput) {
-        num = num.toFixed(2).replace(/\.?0+$/,'')
+        num = num.toFixed(2).replace(/\.?0+$/, '')
       }
       return alternativeToNaN(num)
     case 'int':
@@ -144,7 +144,6 @@ export const calculator = {
   state: () => ({
     // Metrics
     baseRate: 0.1, // [0..1]
-    confidenceLevel: 0.9, // [0..1]
     falsePositiveRate: 0.1, // [0..1]
     targetPower: 0.8, // [0..1]
     runtime: 14,
@@ -238,10 +237,16 @@ export const calculator = {
         state.absoluteThreshold = +props.absoluteThreshold
       } else if (props.absoluteThreshold) {
         state.absoluteThreshold = +props.absoluteThreshold
-        state.relativeThreshold = getRelativeThreshold({ ...props, baseRate: state.baseRate })
+        state.relativeThreshold = getRelativeThreshold({
+          ...props,
+          baseRate: state.baseRate,
+        })
       } else if (props.relativeThreshold) {
         state.relativeThreshold = props.relativeThreshold / 100
-        state.absoluteThreshold = getAbsoluteThreshold({ ...props, baseRate: state.baseRate })
+        state.absoluteThreshold = getAbsoluteThreshold({
+          ...props,
+          baseRate: state.baseRate,
+        })
       }
 
       // comparative
@@ -299,6 +304,9 @@ export const calculator = {
     },
 
     SET_IS_NON_INFERIORITY(state, flag) {
+      state.falsePositiveRate = flag
+        ? state.falsePositiveRate / 2
+        : state.falsePositiveRate * 2
       state.isNonInferiority = !!flag
     },
 
@@ -890,11 +898,13 @@ export const calculator = {
     },
 
     // Impact
-    relativeImpact: (state) => (userInput = false) => displayValue(state.relativeImpact, { type: 'percentage', userInput }),
-    absoluteImpact: (state) => (userInput = false) => displayValue(state.absoluteImpact, {
-      type: state.testType === TEST_TYPE.BINOMIAL ? 'percentage' : 'float',
-      userInput
-    }),
+    relativeImpact:
+      (state) => (userInput = false) => displayValue(state.relativeImpact, { type: 'percentage', userInput }),
+    absoluteImpact:
+      (state) => (userInput = false) => displayValue(state.absoluteImpact, {
+          type: state.testType === TEST_TYPE.BINOMIAL ? 'percentage' : 'float',
+          userInput,
+        }),
 
     minAbsoluteImpact: (state) => {
       const { min } = math.getAbsoluteImpactInMetricHash({
@@ -902,14 +912,18 @@ export const calculator = {
         effect_size: state.relativeImpact,
       })
 
-      return displayValue(min, { type: state.testType === TEST_TYPE.BINOMIAL ? 'percentage' : 'float' })
+      return displayValue(min, {
+        type: state.testType === TEST_TYPE.BINOMIAL ? 'percentage' : 'float',
+      })
     },
     maxAbsoluteImpact: (state) => {
       const { max } = math.getAbsoluteImpactInMetricHash({
         base_rate: state.baseRate,
         effect_size: state.relativeImpact,
       })
-      return displayValue(max, { type: state.testType === TEST_TYPE.BINOMIAL ? 'percentage' : 'float' })
+      return displayValue(max, {
+        type: state.testType === TEST_TYPE.BINOMIAL ? 'percentage' : 'float',
+      })
     },
     absoluteImpactPerVisitor: (state) => {
       const impactPerVisitor = math.getAbsoluteImpactInVisitors({
