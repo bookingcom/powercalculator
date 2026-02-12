@@ -6,7 +6,7 @@
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
   typeof define === 'function' && define.amd ? define('powercalculator', factory) :
   (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.powercalculator = factory());
-}(this, (function () { 'use strict';
+})(this, (function () { 'use strict';
 
   //
   //
@@ -1288,7 +1288,9 @@
 
   // geometric mean of an array
   jStat.geomean = function geomean(arr) {
-    return Math.pow(jStat.product(arr), 1 / arr.length);
+    var logs = arr.map(Math.log);
+    var meanOfLogs = jStat.mean(logs);
+    return Math.exp(meanOfLogs)
   };
 
 
@@ -4028,40 +4030,31 @@
 
     // calculate the determinant of a matrix
     det: function det(a) {
-      var alen = a.length,
-      alend = alen * 2,
-      vals = new Array(alend),
-      rowshift = alen - 1,
-      colshift = alend - 1,
-      mrow = rowshift - alen + 1,
-      mcol = colshift,
-      i = 0,
-      result = 0,
-      j;
-      // check for special 2x2 case
-      if (alen === 2) {
+      if (a.length === 2) {
         return a[0][0] * a[1][1] - a[0][1] * a[1][0];
       }
-      for (; i < alend; i++) {
-        vals[i] = 1;
-      }
-      for (i = 0; i < alen; i++) {
-        for (j = 0; j < alen; j++) {
-          vals[(mrow < 0) ? mrow + alen : mrow ] *= a[i][j];
-          vals[(mcol < alen) ? mcol + alen : mcol ] *= a[i][j];
-          mrow++;
-          mcol--;
+
+      var determinant = 0;
+      for (var i = 0; i < a.length; i++) {
+        // build a sub matrix without column `i`
+        var submatrix = [];
+        for (var row = 1; row < a.length; row++) {
+          submatrix[row - 1] = [];
+          for (var col = 0; col < a.length; col++) {
+            if (col < i) {
+              submatrix[row - 1][col] = a[row][col];
+            } else if (col > i) {
+              submatrix[row - 1][col - 1] = a[row][col];
+            }
+          }
         }
-        mrow = --rowshift - alen + 1;
-        mcol = --colshift;
+
+        // alternate between + and - between determinants
+        var sign = i % 2 ? -1 : 1;
+        determinant += det(submatrix) * a[0][i] * sign;
       }
-      for (i = 0; i < alen; i++) {
-        result += vals[i];
-      }
-      for (; i < alend; i++) {
-        result -= vals[i];
-      }
-      return result;
+
+      return determinant
     },
 
     gauss_elimination: function gauss_elimination(a, b) {
@@ -7102,7 +7095,7 @@
   var __vue_render__$4 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-block pc-block--impact",class:{
       'pc-block-focused': _vm.isBlockFocused,
       'pc-block-to-calculate': _vm.isBlockFocused,
-    }},[_c('pc-svg-chain',{attrs:{"isBlockFocused":_vm.isBlockFocused}}),_vm._v(" "),_c('label',{staticClass:"pc-calc-radio pc-calc-radio--impact",class:{ 'pc-calc-radio--active': _vm.isBlockFocused },attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.isFocused),expression:"isFocused"}],attrs:{"type":"radio","tabindex":_vm.isBlockFocused ? -1 : 3},domProps:{"value":_vm.blockName,"checked":_vm._q(_vm.isFocused,_vm.blockName)},on:{"change":function($event){_vm.isFocused=_vm.blockName;}}}),_vm._v("\n    "+_vm._s(_vm.isBlockFocused ? 'Calculating' : 'Calculate')+"\n  ")]),_vm._v(" "),_c('div',{staticClass:"pc-header"},[_vm._v("Impact")]),_vm._v(" "),_c('ul',{staticClass:"pc-inputs"},[_c('li',{staticClass:"pc-input-item pc-input-left"},[_c('label',[_c('span',{staticClass:"pc-input-title"},[_vm._v("Relative")]),_vm._v(" "),_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"enableEdit":true,"fieldValue":_vm.relativeImpact,"isBlockFocused":_vm.isBlockFocused,"isReadOnly":_vm.isBlockFocused,"prefix":_vm.isNonInferiority ? '' : '±',"tabindex":_vm.isBlockFocused ? -1 : 10,"fieldProp":"impact","suffix":"%"},on:{"update:fieldValue":function($event){_vm.relativeImpact=$event;},"update:field-value":function($event){_vm.relativeImpact=$event;}}})],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right"},[_c('label',[_c('span',{staticClass:"pc-input-title"},[_vm._v("Absolute")]),_vm._v(" "),_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"enableEdit":true,"fieldValue":_vm.absoluteImpact,"isBlockFocused":_vm.isBlockFocused,"isReadOnly":_vm.isBlockFocused,"suffix":_vm.isBinomial ? '%' : '',"tabindex":_vm.isBlockFocused ? -1 : 11,"aria-label":"visitors with goals","fieldProp":"impactByMetricValue"},on:{"update:fieldValue":function($event){_vm.absoluteImpact=$event;},"update:field-value":function($event){_vm.absoluteImpact=$event;}}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v("\n          base "+_vm._s(_vm.isBinomial ? "rate" : "average")+" going from "+_vm._s(_vm.addPercentToString(_vm.baseRate))+" to either\n          "+_vm._s(_vm.addPercentToString(_vm.minAbsoluteImpact))+" or\n          "+_vm._s(_vm.addPercentToString(_vm.maxAbsoluteImpact))+"\n        ")])],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-bottom-left"},[_c('label',[_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"fieldProp":"impactByVisitors","fieldValue":_vm.absoluteImpactPerVisitor,"isReadOnly":true,"isBlockFocused":_vm.isBlockFocused,"enableEdit":false}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v("\n          "+_vm._s(_vm.isBinomial
+    }},[_c('pc-svg-chain',{attrs:{"isBlockFocused":_vm.isBlockFocused}}),_vm._v(" "),_c('label',{staticClass:"pc-calc-radio pc-calc-radio--impact",class:{ 'pc-calc-radio--active': _vm.isBlockFocused },attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.isFocused),expression:"isFocused"}],attrs:{"type":"radio","tabindex":_vm.isBlockFocused ? -1 : 3},domProps:{"value":_vm.blockName,"checked":_vm._q(_vm.isFocused,_vm.blockName)},on:{"change":function($event){_vm.isFocused=_vm.blockName;}}}),_vm._v("\n    "+_vm._s(_vm.isBlockFocused ? 'Calculating' : 'Calculate')+"\n  ")]),_vm._v(" "),_c('div',{staticClass:"pc-header"},[_vm._v("Impact")]),_vm._v(" "),_c('ul',{staticClass:"pc-inputs"},[_c('li',{staticClass:"pc-input-item pc-input-left"},[_c('label',[_c('span',{staticClass:"pc-input-title"},[_vm._v("Relative")]),_vm._v(" "),_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"enableEdit":true,"fieldValue":_vm.relativeImpact,"isBlockFocused":_vm.isBlockFocused,"isReadOnly":_vm.isBlockFocused,"prefix":_vm.isNonInferiority ? '' : '±',"tabindex":_vm.isBlockFocused ? -1 : 10,"fieldProp":"impact","suffix":"%"},on:{"update:fieldValue":function($event){_vm.relativeImpact=$event;},"update:field-value":function($event){_vm.relativeImpact=$event;}}})],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-right"},[_c('label',[_c('span',{staticClass:"pc-input-title"},[_vm._v("Absolute")]),_vm._v(" "),_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"enableEdit":true,"fieldValue":_vm.absoluteImpact,"isBlockFocused":_vm.isBlockFocused,"isReadOnly":_vm.isBlockFocused,"suffix":_vm.isBinomial ? '%' : '',"tabindex":_vm.isBlockFocused ? -1 : 11,"aria-label":"visitors with goals","fieldProp":"impactByMetricValue"},on:{"update:fieldValue":function($event){_vm.absoluteImpact=$event;},"update:field-value":function($event){_vm.absoluteImpact=$event;}}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v("\n          base "+_vm._s(_vm.isBinomial ? 'rate' : 'average')+" going from\n          "+_vm._s(_vm.addPercentToString(_vm.baseRate))+" to either\n          "+_vm._s(_vm.addPercentToString(_vm.minAbsoluteImpact))+" or\n          "+_vm._s(_vm.addPercentToString(_vm.maxAbsoluteImpact))+"\n        ")])],1)]),_vm._v(" "),_c('li',{staticClass:"pc-input-item pc-input-bottom-left"},[_c('label',[_c('pc-block-field',{staticClass:"pc-input-field",attrs:{"fieldProp":"impactByVisitors","fieldValue":_vm.absoluteImpactPerVisitor,"isReadOnly":true,"isBlockFocused":_vm.isBlockFocused,"enableEdit":false}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v("\n          "+_vm._s(_vm.isBinomial
                 ? ' Incremental units'
                 : ' Incremental change in the metric')+"\n        ")])],1)]),_vm._v(" "),(!_vm.onlyTotalVisitors)?_c('li',{staticClass:"pc-input-item pc-input-bottom-right"},[_c('label',[_c('pc-block-field',{attrs:{"fieldProp":"impactByVisitorsPerDay","fieldValue":_vm.absoluteImpactPerVisitorPerDay,"isReadOnly":"true","isBlockFocused":_vm.isBlockFocused,"enableEdit":false}}),_vm._v(" "),_c('span',{staticClass:"pc-input-details"},[_vm._v("\n          "+_vm._s(_vm.isBinomial
                 ? ' Incremental units per day'
@@ -7714,4 +7707,4 @@
 
   return index;
 
-})));
+}));
