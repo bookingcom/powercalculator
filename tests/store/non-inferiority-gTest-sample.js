@@ -1,361 +1,225 @@
-import Vue from 'vue';
-import Vuex from 'vuex';
-import Store from '../../src/store/index.js';
+import Vue from 'vue'
+import Vuex from 'vuex'
+import Store, {
+  COMPARISON_MODE,
+  TRAFFIC_MODE,
+  TEST_TYPE,
+  FOCUS,
+  BLOCKED,
+} from '../../src/store/modules/calculator'
 
-Vue.config.productionTip = false;
+Vue.config.productionTip = false
 
-Vue.use(Vuex);
+Vue.use(Vuex)
 
-let store = new Vuex.Store(Store)
+const store = new Vuex.Store(Store)
 
 function resetStore(obj = {}) {
-    let resetObj = Object.assign({
-        testType: 'gTest',
-        calculateProp: 'sample',
-
-        sample: 561364,
-        base: 10,
-        impact: 2,
-        power: 80,
-        falsePosRate: 10,
-        sdRate: 10,
-        variants: 1,
-
-        runtime: 14,
-
-        visitorsPerDay: Math.ceil(561364 / 14),
-        lockedField: 'days',
-
-        // non inferiority
-        threshold: 0,
-        selected: 'relative',
-        enabled: true,
-        expectedChange: 'nochange',
-        comparisonMode: 'all'
-    }, obj);
-
-    store.dispatch('test:reset', resetObj)
+  const resetObj = {
+    baseRate: 10,
+    relativeImpact: 2,
+    targetPower: 80,
+    falsePositiveRate: 10,
+    standardDeviation: 10,
+    variants: 1,
+    runtime: 14,
+    visitorsPerDay: 40098,
+    sample: 561364,
+    isNonInferiority: true,
+    comparisonMode: COMPARISON_MODE.ALL,
+    trafficMode: TRAFFIC_MODE.DAILY,
+    testType: TEST_TYPE.BINOMIAL,
+    ...obj,
+  }
+  store.commit('SET_IMPORTED_METRICS', resetObj)
+  // Reset thresholds to zero since SET_IMPORTED_METRICS
+  // doesn't handle zero thresholds (falsy check skips assignment)
+  store.state.relativeThreshold = 0
+  store.state.absoluteThreshold = 0
 }
 
+function init() {
+  test('Expected sample to be indeterminate when threshold is zero', () => {
+    resetStore()
 
-function init () {
-    test('Expected initial calculated value of sample when using checkbox', () => {
-        resetStore({
-            impact: 2,
-            enabled: false
-        });
-
-        store.dispatch('change:noninferiority', {prop: 'enabled', value: true});
-
-        // non inferiority
-        expect(store.state.nonInferiority.threshold).toBe(0);
-        expect(store.state.nonInferiority.enabled).toBe(true);
-        expect(store.state.nonInferiority.selected).toBe('relative');
-        expect(store.getters.thresholdCorrectedValue).toBe(0);
-
-        // base block
-        expect(store.getters.visitorsWithGoals).toBe('-');
-
-        // sample
-        expect(store.state.attributes.sample).toBe('-');
-        expect(store.state.attributes.visitorsPerDay).toBe(40098);
-        expect(store.state.attributes.runtime).toBe('-');
-
-        // impact block
-        expect(store.state.attributes.impact).toBe(0);
-        expect(store.getters.impactByMetricDisplay).toBe(0);
-        expect(store.getters.impactByMetricMinDisplay).toBe(10);
-        expect(store.getters.impactByMetricMaxDisplay).toBe(10);
-        expect(store.getters.impactByVisitorsDisplay).toBe('-');
-        expect(store.getters.impactByVisitorsPerDayDisplay).toBe('-');
-    });
-
-    test('Expected changes when threshold changes', () => {
-        resetStore();
-
-        store.dispatch('field:change', {prop: 'threshold', value: 10});
-
-        // non inferiority
-        expect(store.state.nonInferiority.threshold).toBe(10);
-        expect(store.state.nonInferiority.enabled).toBe(true);
-        expect(store.state.nonInferiority.selected).toBe('relative');
-        expect(store.getters.thresholdCorrectedValue).toBe(0.1);
-
-        // base block
-        expect(store.getters.visitorsWithGoals).toBe(1623);
-
-        // sample
-        expect(store.state.attributes.sample).toBe(16230);
-        expect(store.state.attributes.visitorsPerDay).toBe(40098);
-        expect(store.state.attributes.runtime).toBe(1);
-
-        // impact block
-        expect(store.state.attributes.impact).toBe(0);
-        expect(store.getters.impactByMetricDisplay).toBe(0);
-        expect(store.getters.impactByMetricMinDisplay).toBe(10);
-        expect(store.getters.impactByMetricMaxDisplay).toBe(10);
-        expect(store.getters.impactByVisitorsDisplay).toBe(0);
-        expect(store.getters.impactByVisitorsPerDayDisplay).toBe(0);
-
-    });
-
-    test('Expected changes when Selected Non inferiority changes', () => {
-        resetStore();
-
-        store.dispatch('field:change', {prop: 'threshold', value: 100});
-        store.dispatch('change:noninferiority', {prop: 'selected', value: 'absolutePerDay'});
-
-        // non inferiority
-        expect(store.state.nonInferiority.threshold).toBe(100);
-        expect(store.state.nonInferiority.enabled).toBe(true);
-        expect(store.state.nonInferiority.selected).toBe('absolutePerDay');
-        expect(store.getters.thresholdCorrectedValue).toBe(100);
-
-        // base block
-        expect(store.getters.visitorsWithGoals).toBe(26092);
-
-        // sample
-        expect(store.state.attributes.sample).toBe(260928);
-        expect(store.state.attributes.visitorsPerDay).toBe(40098);
-        expect(store.state.attributes.runtime).toBe(7);
-
-        // impact block
-        expect(store.state.attributes.impact).toBe(0);
-        expect(store.getters.impactByMetricDisplay).toBe(0);
-        expect(store.getters.impactByMetricMinDisplay).toBe(10);
-        expect(store.getters.impactByMetricMaxDisplay).toBe(10);
-        expect(store.getters.impactByVisitorsDisplay).toBe(0);
-        expect(store.getters.impactByVisitorsPerDayDisplay).toBe(0);
-
-
-        store.dispatch('change:noninferiority', {prop: 'selected', value: 'relative'});
-        store.dispatch('field:change', {prop: 'expectedChange', value: 'improvement'});
-        store.dispatch('change:noninferiority', {prop: 'selected', value: 'absolutePerDay'});
-
-        // extra tests to be sure this is updating impact correcly
-
-        // sample
-        expect(store.state.attributes.sample).toBe(65954);
-
-    });
-
-    test('Expected changes (none) for Relative Threshold when Runtime changes', () => {
-        resetStore();
-
-        store.dispatch('field:change', {prop: 'threshold', value: 10});
-        store.dispatch('switch:lockedfield');
-        store.dispatch('field:change', {prop: 'runtime', value: 15});
-
-        // non inferiority
-        expect(store.state.nonInferiority.threshold).toBe(10);
-        expect(store.state.nonInferiority.enabled).toBe(true);
-        expect(store.state.nonInferiority.selected).toBe('relative');
-        expect(store.getters.thresholdCorrectedValue).toBe(0.10);
-
-        // base block
-        expect(store.getters.visitorsWithGoals).toBe(1623);
-
-        // sample
-        expect(store.state.attributes.sample).toBe(16230);
-        expect(store.state.attributes.visitorsPerDay).toBe(40098);
-        expect(store.state.attributes.runtime).toBe(1);
-
-        // impact block
-        expect(store.state.attributes.impact).toBe(0);
-        expect(store.getters.impactByMetricDisplay).toBe(0);
-        expect(store.getters.impactByMetricMinDisplay).toBe(10);
-        expect(store.getters.impactByMetricMaxDisplay).toBe(10);
-        expect(store.getters.impactByVisitorsDisplay).toBe(0);
-        expect(store.getters.impactByVisitorsPerDayDisplay).toBe(0);
-    });
-
-    test('Expected changes for Relative Threshold when Expected Change degradation', () => {
-        resetStore();
-
-        store.dispatch('field:change', {prop: 'threshold', value: 10});
-        store.dispatch('field:change', {prop: 'expectedChange', value: 'degradation'});
-
-        // non inferiority
-        expect(store.state.nonInferiority.threshold).toBe(10);
-        expect(store.state.nonInferiority.enabled).toBe(true);
-        expect(store.state.nonInferiority.selected).toBe('relative');
-        expect(store.state.nonInferiority.expectedChange).toBe('degradation');
-        expect(store.getters.thresholdCorrectedValue).toBe(0.10);
-
-        // base block
-        expect(store.getters.visitorsWithGoals).toBe(6346);
-
-        // sample
-        expect(store.state.attributes.sample).toBe(63462);
-        expect(store.state.attributes.visitorsPerDay).toBe(40098);
-        expect(store.state.attributes.runtime).toBe(2);
-
-        // impact block
-        expect(store.state.attributes.impact).toBe(-5);
-        expect(store.getters.impactByMetricDisplay).toBe(-0.5);
-        expect(store.getters.impactByMetricMinDisplay).toBe(10.5);
-        expect(store.getters.impactByMetricMaxDisplay).toBe(9.5);
-        expect(store.getters.impactByVisitorsDisplay).toBe(-317);
-        expect(store.getters.impactByVisitorsPerDayDisplay).toBe(-159);
-    });
-
-    test('Expected changes for Relative Threshold when Expected Change improvement', () => {
-        resetStore();
-
-        store.dispatch('field:change', {prop: 'threshold', value: 10});
-        store.dispatch('field:change', {prop: 'expectedChange', value: 'improvement'});
-
-        // non inferiority
-        expect(store.state.nonInferiority.threshold).toBe(10);
-        expect(store.state.nonInferiority.enabled).toBe(true);
-        expect(store.state.nonInferiority.selected).toBe('relative');
-        expect(store.state.nonInferiority.expectedChange).toBe('improvement');
-        expect(store.getters.thresholdCorrectedValue).toBe(0.10);
-
-        // base block
-        expect(store.getters.visitorsWithGoals).toBe(423);
-
-        // sample
-        expect(store.state.attributes.sample).toBe(4236);
-        expect(store.state.attributes.visitorsPerDay).toBe(40098);
-        expect(store.state.attributes.runtime).toBe(1);
-
-        // impact block
-        expect(store.state.attributes.impact).toBe(10);
-        expect(store.getters.impactByMetricDisplay).toBe(1);
-        expect(store.getters.impactByMetricMinDisplay).toBe(9);
-        expect(store.getters.impactByMetricMaxDisplay).toBe(11);
-        expect(store.getters.impactByVisitorsDisplay).toBe(42);
-        expect(store.getters.impactByVisitorsPerDayDisplay).toBe(42);
-    });
-
-    test('Expected changes (sample) for Absolute Threshold per Day when Runtime changes', () => {
-        resetStore();
-
-        store.dispatch('field:change', {prop: 'threshold', value: 100});
-        store.dispatch('change:noninferiority', {prop: 'selected', value: 'absolutePerDay'});
-        store.dispatch('switch:lockedfield');
-        store.dispatch('field:change', {prop: 'runtime', value: 15});
-
-        // non inferiority
-        expect(store.state.nonInferiority.threshold).toBe(100);
-        expect(store.state.nonInferiority.enabled).toBe(true);
-        expect(store.state.nonInferiority.selected).toBe('absolutePerDay');
-        expect(store.getters.thresholdCorrectedValue).toBe(100);
-
-        // base block
-        expect(store.getters.visitorsWithGoals).toBe(26092);
-
-        // sample
-        expect(store.state.attributes.sample).toBe(260928);
-        expect(store.state.attributes.visitorsPerDay).toBe(40098);
-        expect(store.state.attributes.runtime).toBe(7);
-
-        // impact block
-        expect(store.state.attributes.impact).toBe(0);
-        expect(store.getters.impactByMetricDisplay).toBe(0);
-        expect(store.getters.impactByMetricMinDisplay).toBe(10);
-        expect(store.getters.impactByMetricMaxDisplay).toBe(10);
-        expect(store.getters.impactByVisitorsDisplay).toBe(0);
-        expect(store.getters.impactByVisitorsPerDayDisplay).toBe(0);
-    });
-
-    test('Expected changes (sample) for Absolute Threshold per Day when switch the lock...', () => {
-        // Expected changes (sample) for Absolute Threshold per Day when switch the lock from runtime to Visitors per Day changes (bug from previous version)
-        resetStore();
-
-        store.dispatch('field:change', {prop: 'threshold', value: 100});
-        store.dispatch('change:noninferiority', {prop: 'selected', value: 'absolutePerDay'});
-        store.dispatch('switch:lockedfield');
-        store.dispatch('field:change', {prop: 'runtime', value: 15});
-        store.dispatch('switch:lockedfield');
-
-        // expect to be the same as previous test
-
-        // non inferiority
-        expect(store.state.nonInferiority.threshold).toBe(100);
-        expect(store.state.nonInferiority.enabled).toBe(true);
-        expect(store.state.nonInferiority.selected).toBe('absolutePerDay');
-        expect(store.getters.thresholdCorrectedValue).toBe(100);
-
-        // base block
-        expect(store.getters.visitorsWithGoals).toBe(26092);
-
-        // sample
-        expect(store.state.attributes.sample).toBe(260928);
-        expect(store.state.attributes.visitorsPerDay).toBe(40098);
-        expect(store.state.attributes.runtime).toBe(7);
-
-        // impact block
-        expect(store.state.attributes.impact).toBe(0);
-        expect(store.getters.impactByMetricDisplay).toBe(0);
-        expect(store.getters.impactByMetricMinDisplay).toBe(10);
-        expect(store.getters.impactByMetricMaxDisplay).toBe(10);
-        expect(store.getters.impactByVisitorsDisplay).toBe(0);
-        expect(store.getters.impactByVisitorsPerDayDisplay).toBe(0);
-    });
-
-    test('Expected changes (sample) for Absolute Threshold per Day when Expected Change degradation', () => {
-        resetStore();
-
-        store.dispatch('field:change', {prop: 'threshold', value: 100});
-        store.dispatch('change:noninferiority', {prop: 'selected', value: 'absolutePerDay'});
-        store.dispatch('field:change', {prop: 'expectedChange', value: 'degradation'});
-
-        // non inferiority
-        expect(store.state.nonInferiority.threshold).toBe(100);
-        expect(store.state.nonInferiority.enabled).toBe(true);
-        expect(store.state.nonInferiority.selected).toBe('absolutePerDay');
-        expect(store.getters.thresholdCorrectedValue).toBe(100);
-
-        // base block
-        expect(store.getters.visitorsWithGoals).toBe(103791);
-
-        // sample
-        expect(store.state.attributes.sample).toBe(1037914);
-        expect(store.state.attributes.visitorsPerDay).toBe(40098);
-        expect(store.state.attributes.runtime).toBe(26);
-
-        // impact block
-        expect(store.state.attributes.impact).toBe(-1.2469449847872711);
-        expect(store.getters.impactByMetricDisplay).toBe(-0.12);
-        expect(store.getters.impactByMetricMinDisplay).toBe(10.12);
-        expect(store.getters.impactByMetricMaxDisplay).toBe(9.88);
-        expect(store.getters.impactByVisitorsDisplay).toBe(-1294);
-        expect(store.getters.impactByVisitorsPerDayDisplay).toBe(-50);
-    });
-
-    test('Expected changes (sample) for Absolute Threshold per Day when Expected Change improvement', () => {
-        resetStore();
-
-        store.dispatch('field:change', {prop: 'threshold', value: 100});
-        store.dispatch('change:noninferiority', {prop: 'selected', value: 'absolutePerDay'});
-        store.dispatch('field:change', {prop: 'expectedChange', value: 'improvement'});
-
-        // non inferiority
-        expect(store.state.nonInferiority.threshold).toBe(100);
-        expect(store.state.nonInferiority.enabled).toBe(true);
-        expect(store.state.nonInferiority.selected).toBe('absolutePerDay');
-        expect(store.getters.thresholdCorrectedValue).toBe(100);
-
-        // base block
-        expect(store.getters.visitorsWithGoals).toBe(6595);
-
-        // sample
-        expect(store.state.attributes.sample).toBe(65954);
-        expect(store.state.attributes.visitorsPerDay).toBe(40098);
-        expect(store.state.attributes.runtime).toBe(2);
-
-        // impact block
-        expect(store.state.attributes.impact).toBe(2.4938899695745422);
-        expect(store.getters.impactByMetricDisplay).toBe(0.25);
-        expect(store.getters.impactByMetricMinDisplay).toBe(9.75);
-        expect(store.getters.impactByMetricMaxDisplay).toBe(10.25);
-        expect(store.getters.impactByVisitorsDisplay).toBe(164);
-        expect(store.getters.impactByVisitorsPerDayDisplay).toBe(82);
-    });
+    expect(store.state.isNonInferiority).toBe(true)
+    expect(store.getters.sample).toBe('-')
+    expect(store.getters.runtime).toBe('-')
+    expect(store.getters.visitorsPerDay).toBe(40098)
+  })
+
+  test('Expected SET_IS_NON_INFERIORITY to halve false positive rate', () => {
+    resetStore()
+    store.state.isNonInferiority = false
+
+    expect(store.state.falsePositiveRate).toBe(0.1)
+
+    store.commit('SET_IS_NON_INFERIORITY', true)
+
+    expect(store.state.isNonInferiority).toBe(true)
+    expect(store.state.falsePositiveRate).toBe(0.05)
+
+    store.commit('SET_IS_NON_INFERIORITY', false)
+
+    expect(store.state.isNonInferiority).toBe(false)
+    expect(store.state.falsePositiveRate).toBe(0.1)
+  })
+
+  test('Expected sample when relative threshold is set', () => {
+    resetStore()
+
+    store.commit('SET_THRESHOLD', {
+      threshold: 10,
+      isAbsolute: false,
+      lockedField: BLOCKED.DAYS,
+    })
+
+    // threshold
+    expect(store.getters.relativeThreshold()).toBe('10')
+
+    // sample
+    expect(store.getters.sample).toBe(16230)
+    expect(store.getters.visitorsPerDay).toBe(40098)
+    expect(store.getters.runtime).toBe(1)
+
+    // base
+    expect(store.getters.metricTotal).toBe('1623')
+  })
+
+  test('Expected sample when absolute threshold is set', () => {
+    resetStore()
+
+    store.commit('SET_THRESHOLD', {
+      threshold: 100,
+      isAbsolute: true,
+      lockedField: BLOCKED.DAYS,
+    })
+
+    // threshold
+    expect(store.getters.absoluteThreshold()).toBe('100')
+
+    // sample
+    expect(store.getters.sample).toBe(260928)
+    expect(store.getters.visitorsPerDay).toBe(40098)
+    expect(store.getters.runtime).toBe(7)
+
+    // base
+    expect(store.getters.metricTotal).toBe('26093')
+  })
+
+  test('Expected runtime change recalculates visitors per day with relative threshold', () => {
+    resetStore()
+
+    store.commit('SET_THRESHOLD', {
+      threshold: 10,
+      isAbsolute: false,
+      lockedField: BLOCKED.DAYS,
+    })
+
+    const sampleAfterThreshold = store.getters.sample
+
+    store.commit('SET_RUNTIME', {
+      runtime: 7,
+      focusedBlock: FOCUS.SAMPLE,
+      lockedField: BLOCKED.VISITORS_PER_DAY,
+    })
+
+    // sample should stay the same, visitors per day recalculated
+    expect(store.getters.sample).toBe(sampleAfterThreshold)
+    expect(store.getters.runtime).toBe(7)
+    expect(store.getters.visitorsPerDay).toBe(2319)
+  })
+
+  test('Expected runtime change recalculates visitors per day with absolute threshold', () => {
+    resetStore()
+
+    store.commit('SET_THRESHOLD', {
+      threshold: 100,
+      isAbsolute: true,
+      lockedField: BLOCKED.DAYS,
+    })
+
+    const sampleAfterThreshold = store.getters.sample
+
+    store.commit('SET_RUNTIME', {
+      runtime: 7,
+      focusedBlock: FOCUS.SAMPLE,
+      lockedField: BLOCKED.VISITORS_PER_DAY,
+    })
+
+    expect(store.getters.sample).toBe(sampleAfterThreshold)
+    expect(store.getters.runtime).toBe(7)
+    expect(store.getters.visitorsPerDay).toBe(37276)
+  })
+
+  test('Expected sample when false positive rate changes with relative threshold', () => {
+    resetStore()
+
+    store.commit('SET_FALSE_POSITIVE_RATE', 5)
+    store.commit('SET_THRESHOLD', {
+      threshold: 10,
+      isAbsolute: false,
+      lockedField: BLOCKED.DAYS,
+    })
+
+    expect(store.getters.falsePositiveRate).toBe('5')
+    expect(store.getters.sample).toBe(22258)
+    expect(store.getters.visitorsPerDay).toBe(40098)
+    expect(store.getters.runtime).toBe(1)
+  })
+
+  test('Expected sample when power changes with relative threshold', () => {
+    resetStore()
+
+    store.commit('SET_TARGET_POWER', 60)
+    store.commit('SET_THRESHOLD', {
+      threshold: 10,
+      isAbsolute: false,
+      lockedField: BLOCKED.DAYS,
+    })
+
+    expect(store.getters.targetPower).toBe('60')
+    expect(store.getters.sample).toBe(8482)
+    expect(store.getters.visitorsPerDay).toBe(40098)
+    expect(store.getters.runtime).toBe(1)
+  })
+
+  test('Expected sample when base rate changes with relative threshold', () => {
+    resetStore()
+
+    store.commit('SET_THRESHOLD', {
+      threshold: 10,
+      isAbsolute: false,
+      lockedField: BLOCKED.DAYS,
+    })
+
+    store.commit('SET_BASE_RATE', {
+      baseRate: 15,
+      focusedBlock: FOCUS.SAMPLE,
+      lockedField: BLOCKED.DAYS,
+    })
+
+    expect(store.getters.baseRate).toBe(15)
+    expect(store.getters.sample).toBe(7214)
+    expect(store.getters.visitorsPerDay).toBe(40098)
+    expect(store.getters.runtime).toBe(1)
+  })
+
+  test('Expected sample with relative threshold and 2 variants', () => {
+    resetStore({ variants: 2 })
+
+    store.commit('SET_THRESHOLD', {
+      threshold: 10,
+      isAbsolute: false,
+      lockedField: BLOCKED.DAYS,
+    })
+
+    expect(store.getters.sample).toBe(33048)
+    expect(store.getters.visitorsPerDay).toBe(40098)
+    expect(store.getters.runtime).toBe(1)
+  })
 }
 
 export default {
-    init
+  init,
 }

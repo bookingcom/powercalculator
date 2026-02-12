@@ -1,140 +1,152 @@
 <template id="base-comp">
-    <div class="pc-block pc-block--base" :class="{'pc-block-focused': focusedBlock == 'base'}">
+  <div
+    class="pc-block pc-block--base"
+    :class="{ 'pc-block-focused': isBlockFocused }"
+  >
+    <pc-svg-chain :isBlockFocused="isBlockFocused"></pc-svg-chain>
 
-        <pc-svg-chain v-bind:fieldFromBlock="fieldFromBlock"></pc-svg-chain>
+    <div class="pc-header" v-if="isBinomial">Base Rate</div>
+    <div class="pc-header" v-else>Base Average</div>
 
-        <div class="pc-header" v-if="testType == 'gTest'">
-            Base Rate
-        </div>
-        <div class="pc-header" v-else>
-            Base Average
-        </div>
+    <ul class="pc-inputs">
+      <li class="pc-input-item pc-input-left">
+        <label>
+          <span class="pc-input-title"
+            >{{ isBinomial ? 'Base Rate' : 'Base Average' }}
+            <small class="pc-input-sub-title">conversion</small></span
+          >
 
-        <ul class="pc-inputs">
-            <li class="pc-input-item pc-input-left">
-                <label>
-                    <span class="pc-input-title">{{testType == 'gTest' ? 'Base Rate' : 'Base Average'}} <small class="pc-input-sub-title">conversion</small></span>
+          <pc-block-field
+            :enableEdit="true"
+            :fieldValue.sync="base"
+            :isBlockFocused="isBlockFocused"
+            :isReadOnly="isReadOnly"
+            :suffix="isBinomial ? '%' : ''"
+            fieldProp="base"
+            tabindex="5"
+          ></pc-block-field>
+        </label>
+      </li>
 
-                    <pc-block-field
-                        fieldProp="base"
-                        :suffix="testType == 'gTest' ? '%' : ''"
+      <li class="pc-input-item pc-input-right">
+        <label>
+          <span class="pc-input-title"
+            >Metric Totals<small class="pc-input-sub-title"
+              >visitors reached goal</small
+            ></span
+          >
 
-                        v-bind:fieldValue="base"
-                        v-bind:isReadOnly="isReadOnly"
-                        v-bind:isBlockFocused="isBlockFocused"
-                        v-bind:enableEdit="enableEdit"
+          <pc-block-field
+            :enableEdit="false"
+            :fieldValue="visitorsWithGoals"
+            :isBlockFocused="isBlockFocused"
+            :isReadOnly="true"
+            fieldProp="visitorsWithGoals"
+          ></pc-block-field>
+        </label>
+      </li>
 
-                        v-on:update:focus="updateFocus"></pc-block-field>
-                </label>
-            </li>
-
-            <li class="pc-input-item pc-input-right">
-                <label>
-                    <span class="pc-input-title">Metric Totals<small class="pc-input-sub-title">visitors reached goal</small></span>
-
-                    <pc-block-field
-                        fieldProp="visitorsWithGoals"
-                        v-bind:fieldValue="visitorsWithGoals"
-                        v-bind:fieldFromBlock="fieldFromBlock"
-                        v-bind:isBlockFocused="isBlockFocused"
-                        v-bind:isReadOnly="isReadOnly"
-                        v-bind:enableEdit="enableEdit && this.calculateProp != 'sample'"
-
-                        v-on:update:focus="updateFocus"></pc-block-field>
-                </label>
-            </li>
-
-            <li class="pc-input-item pc-input-sd-rate" v-if="testType == 'tTest'">
-                <label>
-                    <pc-block-field
-                        prefix="±"
-                        fieldProp="sdRate"
-                        fieldFromBlock="base"
-
-                        v-bind:fieldValue="sdRate"
-                        v-bind:isReadOnly="isReadOnly"
-                        v-bind:isBlockFocused="isBlockFocused"
-                        v-bind:enableEdit="enableEdit"
-
-                        v-on:update:focus="updateFocus"></pc-block-field>
-                    <span class="pc-input-details">Base Standard deviation</span>
-                </label>
-            </li>
-        </ul>
-    </div>
+      <li class="pc-input-item pc-input-sd-rate" v-if="!isBinomial">
+        <label>
+          <pc-block-field
+            :enableEdit="true"
+            :fieldValue.sync="sdRate"
+            :isBlockFocused="isBlockFocused"
+            :isReadOnly="isReadOnly"
+            fieldProp="sdRate"
+            prefix="±"
+            tabindex="6"
+          ></pc-block-field>
+          <span class="pc-input-details">Base Standard deviation</span>
+        </label>
+      </li>
+    </ul>
+  </div>
 </template>
 
 <script>
 import pcBlock from './pc-block.vue'
+import { TEST_TYPE } from '../store/modules/calculator'
+
+const DEBOUNCE = 500
 
 export default {
-    props: ['enableEdit', 'fieldFromBlock', 'isBlockFocused'],
-    extends: pcBlock,
-    template: '#base-comp',
-    data () {
-        return {
-            focusedBlock: '',
+  extends: pcBlock,
+  template: '#base-comp',
+  data: () => ({
+    baseDebouncer: null,
+    sdRateDebouncer: null,
+  }),
+  computed: {
+    TEST_TYPE: () => TEST_TYPE,
+    base: {
+      get() {
+        return this.$store.getters.baseRate
+      },
+      set(val) {
+        if (this.baseDebouncer != null) {
+          clearTimeout(this.baseDebouncer)
         }
-    },
-    computed: {
-        isReadOnly () {
-            return this.calculateProp == 'base'
-        },
-        base () {
-            return this.$store.state.attributes.base
-        },
-        sdRate () {
-            return this.$store.state.attributes.sdRate
-        },
-        sample () {
-            return this.$store.state.attributes.sample
-        },
-        testType () {
-            return this.$store.state.attributes.testType
-        },
-        visitorsWithGoals () {
-            return this.$store.getters.visitorsWithGoals
-        }
-    },
-    methods: {
-        enableInput () {
-            this.$emit('edit:update', {prop: 'base'})
-        },
-        updateFocus ({fieldProp, value}) {
-            if (this.focusedBlock == fieldProp && value === false) {
-                this.focusedBlock = ''
-            } else if (value === true) {
-                this.focusedBlock = fieldProp
-            }
-
-            this.$emit('update:focus', {
-                fieldProp: this.fieldFromBlock,
-                value: value
+        this.baseDebouncer = setTimeout(() => {
+          if (this.$store.getters.baseRate !== val) {
+            this.$store.commit('SET_BASE_RATE', {
+              baseRate: val,
+              lockedField: this.lockedField,
+              focusedBlock: this.focusedBlock,
             })
+          }
+        }, DEBOUNCE)
+      },
+    },
+    sdRate: {
+      get() {
+        return this.$store.getters.standardDeviation
+      },
+      set(val) {
+        if (this.sdRateDebouncer != null) {
+          clearTimeout(this.sdRateDebouncer)
         }
-
-    }
+        this.sdRateDebouncer = setTimeout(() => {
+          this.$store.commit('SET_STANDARD_DEVIATION', val)
+          // Little hack to not rewrite everything again.
+          this.$store.commit('SET_BASE_RATE', {
+            baseRate: this.base,
+            lockedField: this.lockedField,
+            focusedBlock: this.focusedBlock,
+          })
+        }, DEBOUNCE)
+      },
+    },
+    visitorsWithGoals() {
+      return this.$store.getters.metricTotal
+    },
+    sample() {
+      return this.$store.getters.sample
+    },
+    testType() {
+      return this.$store.getters.testType
+    },
+  },
 }
 </script>
 
-
 <style>
 .pc-input-sd-rate {
-    margin-top: -10px;
-    z-index: 1;
-    position: relative;
-    text-align: center;
+  margin-top: -10px;
+  z-index: 1;
+  position: relative;
+  text-align: center;
 }
 
 .pc-field-sdRate {
-    width: 90%;
-    display: inline-block;
+  width: 90%;
+  display: inline-block;
 }
 </style>
 
 <style scoped>
-    .pc-input-left {
-        position: relative;
-        z-index: 2;
-    }
+.pc-input-left {
+  position: relative;
+  z-index: 2;
+}
 </style>
